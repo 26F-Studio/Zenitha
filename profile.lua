@@ -2,12 +2,12 @@ local clock=os.clock
 
 local profile={}
 
-local _labeled={} -- function labels
-local _defined={} -- function definitions
-local _tcalled={} -- time of last call
-local _telapsed={}-- total execution time
-local _ncalls={}  -- number of calls
-local _internal={}-- list of internal profiler functions
+local _labeled={}  -- function labels
+local _defined={}  -- function definitions
+local _tcalled={}  -- time of last call
+local _telapsed={} -- total execution time
+local _ncalls={}   -- number of calls
+local _internal={} -- list of internal profiler functions
 
 local getInfo=debug.getinfo
 function profile.hooker(event,line,info)
@@ -15,6 +15,7 @@ function profile.hooker(event,line,info)
     local f=info.func
     if _internal[f] then return end-- ignore the profiler itself
     if info.name then _labeled[f]=info.name end-- get the function name if available
+
     -- find the line definition
     if not _defined[f] then
         _defined[f]=info.short_src..":"..info.linedefined

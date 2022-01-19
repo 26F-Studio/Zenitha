@@ -1,6 +1,5 @@
 local gc=love.graphics
-local gc_push,gc_pop=gc.push,gc.pop
-local gc_translate,gc_setColor,gc_draw=gc.translate,gc.setColor,gc.draw
+local gc_setColor,gc_draw=gc.setColor,gc.draw
 
 local ins,rem=table.insert,table.remove
 local max=math.max

@@ -2,6 +2,30 @@ local gc=love.graphics
 
 local scenes={}
 
+local eventNames={
+    "sceneInit",
+    "sceneBack",
+    "mouseDown",
+    "mouseMove",
+    "mouseUp",
+    "mouseClick",
+    "wheelMoved",
+    "touchDown",
+    "touchUp",
+    "touchMove",
+    "touchClick",
+    "keyDown",
+    "keyUp",
+    "gamepadDown",
+    "gamepadUp",
+    "fileDropped",
+    "directoryDropped",
+    "resize",
+    "socketRead",
+    "update",
+    "draw",
+}
+
 local SCN={
     mainTouchID=nil,     -- First touching ID(userdata)
     cur='NULL',          -- Current scene name
@@ -61,35 +85,19 @@ function SCN.swapUpdate(dt)
         SCN.swapping=false
     end
 end
+
 function SCN.init(s)
     love.keyboard.setTextInput(false)
 
-    local S=scenes[s]
     SCN.cur=s
 
+    local S=scenes[s]
     WIDGET.setScrollHeight(S.widgetScrollHeight)
     WIDGET.setWidgetList(S.widgetList)
-    SCN.sceneInit=S.sceneInit
-    SCN.sceneBack=S.sceneBack
-    SCN.mouseDown=S.mouseDown
-    SCN.mouseMove=S.mouseMove
-    SCN.mouseUp=S.mouseUp
-    SCN.mouseClick=S.mouseClick
-    SCN.wheelMoved=S.wheelMoved
-    SCN.touchDown=S.touchDown
-    SCN.touchUp=S.touchUp
-    SCN.touchMove=S.touchMove
-    SCN.touchClick=S.touchClick
-    SCN.keyDown=S.keyDown
-    SCN.keyUp=S.keyUp
-    SCN.gamepadDown=S.gamepadDown
-    SCN.gamepadUp=S.gamepadUp
-    SCN.fileDropped=S.fileDropped
-    SCN.directoryDropped=S.directoryDropped
-    SCN.resize=S.resize
-    SCN.socketRead=S.socketRead
-    SCN.update=S.update
-    SCN.draw=S.draw
+    for i=1,#eventNames do
+        SCN[eventNames[i]]=S[eventNames[i]]
+    end
+
     if S.sceneInit then S.sceneInit() end
 end
 function SCN.push(tar,style)
@@ -201,6 +209,8 @@ function SCN.back(...)
         SCN.swapTo(SCN.stack[m-1],SCN.stack[m],...)
         table.remove(SCN.stack)
         table.remove(SCN.stack)
+    else
+        MES.new('warn',"No Scene to back")
     end
 end
 return SCN

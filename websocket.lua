@@ -40,15 +40,18 @@ function Sock:onopen() end
 
 --- receive a message
 ---@param message string
+---@diagnostic disable-next-line: unused-local
 function Sock:onmessage(message) end
 
 --- closed
 ---@param code number
 ---@param reason string
+---@diagnostic disable-next-line: unused-local
 function Sock:onclose(code,reason) end
 
 --- error
 ---@param error string
+---@diagnostic disable-next-line: unused-local
 function Sock:onerror(error) end
 
 --- read a message
