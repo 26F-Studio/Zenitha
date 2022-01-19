@@ -1,10 +1,6 @@
-local host=
-    'game.techmino.org'
-    -- '192.168.223.2'
-    -- '192.168.114.102'
-    -- '127.0.0.1'
-local port='10026'
-local path='/tech/socket/v1'
+local host='127.0.0.1'
+local port='80'
+local path=''
 local seckey="osT3F7mvlojIvf3/8uIsJQ=="
 
 --[[
@@ -236,19 +232,27 @@ end
 function WS.read(name) return socks[name]:read() end
 function WS.close(name) socks[name]:close() end
 function WS.alert(name) socks[name].alertTimer=2.6 end
+function WS.closeAll()
+    for _,s in next,socks do
+        s:close()
+    end
+end
 
 function WS.setPingInterval(name,interval) socks[name].pingInterval=interval end
 function WS.setOnMessage(name,func) socks[name].onmessage=func end
 function WS.setOnClose(name,func) socks[name].onclose=func end
 function WS.setOnError(name,func) socks[name].onerror=func end
+function WS.switchHost(_host,_port,_path)
+    WS.closeAll()
+    host,port,path=_host,_port or port,_path or path
+end
+
 function WS.status(name) return socks[name].status end
 function WS.getTimers(name)
     local self=socks[name]
     return self.pongTimer,self.sendTimer,self.alertTimer
 end
 
-function WS.switchHost(_1,_2,_3) WS.closeAll()host,port,path=_1,_2 or port,_3 or path end
-function WS.closeAll() for _,s in next,socks do s:close() end end
 function WS.update(dt)
     local t=timer()
     for name,self in next,socks do
