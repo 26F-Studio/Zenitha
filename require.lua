@@ -18,8 +18,8 @@ return function(libName)
                 end
             end)()
             love.filesystem.write(
-                'lib/libCCloader.so',
-                love.filesystem.read('data','libAndroid/'..platform..'/libCCloader.so')
+                'lib/lib'..libName..'.so',
+                love.filesystem.read('data','libAndroid/'..platform..'/lib'..libName..'.so')
             )
             loaded[libName]=true
         end
