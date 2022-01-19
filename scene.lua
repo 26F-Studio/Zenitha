@@ -111,7 +111,7 @@ local swap={
     },
     flash={
         duration=.16,changeTime=.08,
-        draw=function()gc.clear(1,1,1) end
+        draw=function() gc.clear(1,1,1) end
     },
     fade={
         duration=.5,changeTime=.25,

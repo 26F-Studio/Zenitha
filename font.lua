@@ -6,9 +6,9 @@ local curFont=false-- Current using font object
 
 local FONT={}
 
-function FONT.setDefaultFont(name)defaultFont=name end
-function FONT.setDefaultFallback(name)defaultFallBack=name end
-function FONT.setFallback(font,fallback)fallbackMap[font]=fallback end
+function FONT.setDefaultFont(name) defaultFont=name end
+function FONT.setDefaultFallback(name) defaultFallBack=name end
+function FONT.setFallback(font,fallback) fallbackMap[font]=fallback end
 
 function FONT.rawget(s)
     if not fontCache[s] then

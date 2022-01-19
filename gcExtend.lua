@@ -2,12 +2,12 @@ local gc=love.graphics
 local setColor,printf,draw=gc.setColor,gc.printf,gc.draw
 local sin,cos=math.sin,math.cos
 local GC={}
-function GC.mStr(obj,x,y)printf(obj,x-626,y,1252,'center') end-- Printf a string with 'center'
-function GC.simpX(obj,x,y)draw(obj,x-obj:getWidth()*.5,y) end-- Simply draw an obj with x=obj:getWidth()/2
-function GC.simpY(obj,x,y)draw(obj,x,y-obj:getHeight()*.5) end-- Simply draw an obj with y=obj:getWidth()/2
-function GC.X(obj,x,y,a,k)draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end-- Draw an obj with x=obj:getWidth()/2
-function GC.Y(obj,x,y,a,k)draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end-- Draw an obj with y=obj:getWidth()/2
-function GC.draw(obj,x,y,a,k)draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end-- Draw an obj with both middle X & Y
+function GC.mStr(obj,x,y) printf(obj,x-626,y,1252,'center') end-- Printf a string with 'center'
+function GC.simpX(obj,x,y) draw(obj,x-obj:getWidth()*.5,y) end-- Simply draw an obj with x=obj:getWidth()/2
+function GC.simpY(obj,x,y) draw(obj,x,y-obj:getHeight()*.5) end-- Simply draw an obj with y=obj:getWidth()/2
+function GC.X(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end-- Draw an obj with x=obj:getWidth()/2
+function GC.Y(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end-- Draw an obj with y=obj:getWidth()/2
+function GC.draw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end-- Draw an obj with both middle X & Y
 function GC.outDraw(obj,div,x,y,a,k)
     local w,h=obj:getWidth()*.5,obj:getHeight()*.5
     draw(obj,x-div,y-div,a,k,nil,w,h)
@@ -107,8 +107,8 @@ do-- function GC.DO(L)
         setLJ=gc.setLineJoin,
 
         print=gc.print,
-        rawFT=function(...)FONT.rawset(...) end,
-        setFT=function(...)FONT.set(...) end,
+        rawFT=function(...) FONT.rawset(...) end,
+        setFT=function(...) FONT.set(...) end,
         mText=GC.mStr,
         mDraw=GC.draw,
         mDrawX=GC.X,
@@ -117,26 +117,26 @@ do-- function GC.DO(L)
 
         draw=gc.draw,
         line=gc.line,
-        fRect=function(...)gc.rectangle('fill',...) end,
-        dRect=function(...)gc.rectangle('line',...) end,
-        fCirc=function(...)gc.circle('fill',...) end,
-        dCirc=function(...)gc.circle('line',...) end,
-        fElps=function(...)gc.ellipse('fill',...) end,
-        dElps=function(...)gc.ellipse('line',...) end,
-        fPoly=function(...)gc.polygon('fill',...) end,
-        dPoly=function(...)gc.polygon('line',...) end,
+        fRect=function(...) gc.rectangle('fill',...) end,
+        dRect=function(...) gc.rectangle('line',...) end,
+        fCirc=function(...) gc.circle('fill',...) end,
+        dCirc=function(...) gc.circle('line',...) end,
+        fElps=function(...) gc.ellipse('fill',...) end,
+        dElps=function(...) gc.ellipse('line',...) end,
+        fPoly=function(...) gc.polygon('fill',...) end,
+        dPoly=function(...) gc.polygon('line',...) end,
 
-        dPie=function(...)gc.arc('line',...) end,
-        dArc=function(...)gc.arc('line','open',...) end,
-        dBow=function(...)gc.arc('line','closed',...) end,
-        fPie=function(...)gc.arc('fill',...) end,
-        fArc=function(...)gc.arc('fill','open',...) end,
-        fBow=function(...)gc.arc('fill','closed',...) end,
+        dPie=function(...) gc.arc('line',...) end,
+        dArc=function(...) gc.arc('line','open',...) end,
+        dBow=function(...) gc.arc('line','closed',...) end,
+        fPie=function(...) gc.arc('fill',...) end,
+        fArc=function(...) gc.arc('fill','open',...) end,
+        fBow=function(...) gc.arc('fill','closed',...) end,
 
-        fRPol=function(...)GC.regPolygon('fill',...) end,
-        dRPol=function(...)GC.regPolygon('line',...) end,
-        fRRPol=function(...)GC.regRoundPolygon('fill',...) end,
-        dRRPol=function(...)GC.regRoundPolygon('line',...) end,
+        fRPol=function(...) GC.regPolygon('fill',...) end,
+        dRPol=function(...) GC.regPolygon('line',...) end,
+        fRRPol=function(...) GC.regRoundPolygon('fill',...) end,
+        dRRPol=function(...) GC.regRoundPolygon('line',...) end,
     }
     local sizeLimit=gc.getSystemLimits().texturesize
     function GC.DO(L)

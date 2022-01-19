@@ -50,7 +50,7 @@ local onChange=NULL
 
 local WIDGET={}
 
-function WIDGET.setOnChange(func)onChange=assert(type(func)=='function' and func,"WIDGET.setOnChange(func): func must be a function") end
+function WIDGET.setOnChange(func) onChange=assert(type(func)=='function' and func,"WIDGET.setOnChange(func): func must be a function") end
 
 local widgetMetatable={
     __tostring=function(self)

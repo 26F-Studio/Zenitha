@@ -33,8 +33,8 @@ local function _addFile(name,path)
     end
 end
 
-function BGM.getList()return nameList end
-function BGM.getCount()return #nameList end
+function BGM.getList() return nameList end
+function BGM.getCount() return #nameList end
 function BGM.load(name,path)
     if type(name)=='table' then
         for k,v in next,name do

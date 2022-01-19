@@ -29,7 +29,7 @@ local onQuit=NULL
 Zenitha={}
 
 -- Useful global values
-NONE={}setmetatable(NONE,{__newindex=function()error('Attempt to modify a constant table') end})
+NONE={}setmetatable(NONE,{__newindex=function() error('Attempt to modify a constant table') end})
 NULL=function(...) end
 PAPER=love.graphics.newCanvas(1,1)
 
@@ -167,13 +167,13 @@ function Zenitha.setAppName(name)
     assert(type(name)=='string','Z.appName must be a string')
     appName=name
 end
-function Zenitha.getAppName()return appName end
+function Zenitha.getAppName() return appName end
 
 function Zenitha.setVersionText(text)
     assert(type(text)=='string','Z.versionText must be a string')
     versionText=text
 end
-function Zenitha.getVersionText()return versionText end
+function Zenitha.getVersionText() return versionText end
 
 --------------------------------------------------------------
 
@@ -534,7 +534,7 @@ function love.resize(w,h)
     onResize(w,h)
 end
 
-function love.focus(f)onFocus(f) end
+function love.focus(f) onFocus(f) end
 
 local function secondLoopThread()
     local mainLoop=love.run()
@@ -580,7 +580,7 @@ function love.errorhandler(msg)
         )
 
         -- Get screencapture
-        gc.captureScreenshot(function(_)errData[#errData].shot=gc.newImage(_) end)
+        gc.captureScreenshot(function(_) errData[#errData].shot=gc.newImage(_) end)
         gc.present()
 
         -- Create a new mainLoop thread to keep game alive
@@ -865,7 +865,7 @@ function love.run()
     end
 end
 
-function Zenitha.getJsState()return jsState end
+function Zenitha.getJsState() return jsState end
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]
@@ -876,14 +876,14 @@ function Zenitha.getErr(i)
     end
 end
 
-function Zenitha.setPowerInfo(bool)showPowerInfo=bool end
-function Zenitha.setCleanCanvas(bool)discardCanvas=bool end
-function Zenitha.setFrameMul(n)frameMul=n end
-function Zenitha.setMaxFPS(fps)sleepInterval=1/fps end
-function Zenitha.setClickFX(bool)showClickFX=bool end
+function Zenitha.setPowerInfo(bool) showPowerInfo=bool end
+function Zenitha.setCleanCanvas(bool) discardCanvas=bool end
+function Zenitha.setFrameMul(n) frameMul=n end
+function Zenitha.setMaxFPS(fps) sleepInterval=1/fps end
+function Zenitha.setClickFX(bool) showClickFX=bool end
 
 -- [Warning] Color and line width is uncertain value, set it in the function.
-function Zenitha.setCursor(func)drawCursor=func end
+function Zenitha.setCursor(func) drawCursor=func end
 
 -- Change first-level global key events
 function Zenitha.setGlobalKey(key,func)

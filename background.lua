@@ -1,6 +1,6 @@
 local gc_clear=love.graphics.clear
 local BGs={
-    none={draw=function()gc_clear(.08,.08,.084) end}
+    none={draw=function() gc_clear(.08,.08,.084) end}
 }
 local BGlist={'none'}
 local BG={
@@ -15,8 +15,8 @@ local BG={
     discard=NULL,
 }
 
-function BG.lock()BG.locked=true end
-function BG.unlock()BG.locked=false end
+function BG.lock() BG.locked=true end
+function BG.unlock() BG.locked=false end
 function BG.add(name,bg)
     BGs[name]=bg
     BGlist[#BGlist+1]=name

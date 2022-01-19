@@ -2,9 +2,9 @@ local rnd=math.random
 local volume=1
 local diversion=0
 local VOC={
-    getCount=function()return 0 end,
-    getQueueCount=function()return 0 end,
-    load=function()error("Cannot load before init!") end,
+    getCount=function() return 0 end,
+    getQueueCount=function() return 0 end,
+    load=function() error("Cannot load before init!") end,
     getFreeChannel=NULL,
     play=NULL,
     update=NULL,
@@ -24,7 +24,7 @@ function VOC.init(list)
     local bank={}-- {vocName1={SRC1s},vocName2={SRC2s},...}
     local Source={}
 
-    local count=#list function VOC.getCount()return count end
+    local count=#list function VOC.getCount() return count end
     local function _loadVoiceFile(path,N,vocName)
         local fullPath=path..vocName..'.ogg'
         if love.filesystem.getInfo(fullPath) then

@@ -12,9 +12,9 @@ local seckey="osT3F7mvlojIvf3/8uIsJQ=="
     by flaribbit, editted by MrZ
     usage:
         local client=require("websocket").new("127.0.0.1",5000)
-        function client:onmessage(s)print(s) end
-        function client:onopen()self:send("hello from love2d") end
-        function client:onclose()print("closed") end
+        function client:onmessage(s) print(s) end
+        function client:onopen() self:send("hello from love2d") end
+        function client:onclose() print("closed") end
         function love.update()
             client:update()
         end
@@ -111,7 +111,7 @@ function Sock:read()
 end
 
 local mask_key={1,14,5,14}
-local function send(sock,opcode,message)print(sock)
+local function send(sock,opcode,message) print(sock)
     -- message type
     sock:send(char(bor(0x80,opcode)))
 
@@ -190,7 +190,7 @@ end
 
 
 local WS={}
-local socks={}setmetatable(socks,{__index=function(_,name)WS.new(name)return socks[name] end})
+local socks={}setmetatable(socks,{__index=function(_,name) WS.new(name)return socks[name] end})
 
 ---@return Socket
 function WS.new(name,_subpath,_body,_timeout)
@@ -233,21 +233,21 @@ function WS.send(name,message)
         socks[name]:send(message)
     end
 end
-function WS.read(name)return socks[name]:read() end
-function WS.close(name)socks[name]:close() end
-function WS.alert(name)socks[name].alertTimer=2.6 end
+function WS.read(name) return socks[name]:read() end
+function WS.close(name) socks[name]:close() end
+function WS.alert(name) socks[name].alertTimer=2.6 end
 
-function WS.setPingInterval(name,interval)socks[name].pingInterval=interval end
-function WS.setOnMessage(name,func)socks[name].onmessage=func end
-function WS.setOnClose(name,func)socks[name].onclose=func end
-function WS.setOnError(name,func)socks[name].onerror=func end
-function WS.status(name)return socks[name].status end
+function WS.setPingInterval(name,interval) socks[name].pingInterval=interval end
+function WS.setOnMessage(name,func) socks[name].onmessage=func end
+function WS.setOnClose(name,func) socks[name].onclose=func end
+function WS.setOnError(name,func) socks[name].onerror=func end
+function WS.status(name) return socks[name].status end
 function WS.getTimers(name)
     local self=socks[name]
     return self.pongTimer,self.sendTimer,self.alertTimer
 end
 
-function WS.switchHost(_1,_2,_3)WS.closeAll()host,port,path=_1,_2 or port,_3 or path end
+function WS.switchHost(_1,_2,_3) WS.closeAll()host,port,path=_1,_2 or port,_3 or path end
 function WS.closeAll() for _,s in next,socks do s:close() end end
 function WS.update(dt)
     local t=timer()
