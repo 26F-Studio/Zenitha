@@ -279,134 +279,6 @@ function WIDGET.newButton(D)-- name,x,y,w[,h][,fText][,color][,font=30][,fType][
     return _
 end
 
-local key={
-    type='key',
-    mustHaveText=true,
-    ATV=0,-- Activating time(0~4)
-}
-function key:reset()
-    self.ATV=0
-end
-function key:setObject(obj)
-    if type(obj)=='string' or type(obj)=='number' then
-        self.obj=gc.newText(FONT.get(self.font,self.fType),obj)
-    elseif obj then
-        self.obj=obj
-    end
-end
-function key:isAbove(x,y)
-    return
-        x>self.x and
-        y>self.y and
-        x<self.x+self.w and
-        y<self.y+self.h
-end
-function key:getCenter()
-    return self.x+self.w*.5,self.y+self.h*.5
-end
-function key:update(dt)
-    local ATV=self.ATV
-    if WIDGET.sel==self then
-        if ATV<4 then self.ATV=min(ATV+dt*60,4) end
-    else
-        if ATV>0 then self.ATV=max(ATV-dt*30,0) end
-    end
-end
-function key:draw()
-    local x,y,w,h=self.x,self.y,self.w,self.h
-    local ATV=self.ATV
-    local c=self.color
-    local align=self.align
-    local r,g,b=c[1],c[2],c[3]
-
-    -- Fill
-    if self.fShade then
-        gc_setColor(r,g,b,ATV*.25)
-        if align=='M' then
-            gc_draw(self.fShade,x+w*.5-self.fShade:getWidth()*.5,y+h*.5-self.fShade:getHeight()*.5)
-        elseif align=='L' then
-            gc_draw(self.fShade,x+self.edge,y+h*.5-self.fShade:getHeight()*.5)
-        elseif align=='R' then
-            gc_draw(self.fShade,x+w-self.edge-self.fShade:getWidth(),y+h*.5-self.fShade:getHeight()*.5)
-        end
-    else
-        -- Background
-        gc_setColor(0,0,0,.3)
-        gc_rectangle('fill',x,y,w,h,4)
-
-        -- Frame
-        gc_setColor(.2+r*.8,.2+g*.8,.2+b*.8,.7)
-        gc_setLineWidth(2)
-        gc_rectangle('line',x,y,w,h,3)
-
-        -- Shade
-        gc_setColor(1,1,1,ATV*.05)
-        gc_rectangle('fill',x,y,w,h,3)
-    end
-
-    -- Drawable
-    local obj=self.obj
-    local ox,oy=obj:getWidth()*.5,obj:getHeight()*.5
-    gc_setColor(r,g,b)
-    if align=='M' then
-        local kx=obj:type()=='Text' and min(w/ox/2,1) or 1
-        gc_draw(obj,x+w*.5,y+h*.5,nil,kx,1,ox,oy)
-    elseif align=='L' then
-        gc_draw(obj,x+self.edge,y-oy+h*.5)
-    elseif align=='R' then
-        gc_draw(obj,x+w-self.edge-ox*2,y-oy+h*.5)
-    end
-end
-function key:getInfo()
-    return ("x=%d,y=%d,w=%d,h=%d,font=%d"):format(self.x+self.w*.5,self.y+self.h*.5,self.w,self.h,self.font,self.fType)
-end
-function key:press(_,_,k)
-    self.code(k)
-    if self.sound then
-        SFX.play(self.sound)
-    end
-end
-function WIDGET.newKey(D)-- name,x,y,w[,h][,fText][,fShade][,color][,font=30][,fType][,sound][,align='M'][,edge=0][,code][,hideF][,hide]
-    if not D.h then D.h=D.w end
-    local _={
-        name=   D.name or "_",
-
-        x=      D.x-D.w*.5,
-        y=      D.y-D.h*.5,
-        w=      D.w,
-        h=      D.h,
-
-        resCtr={
-            D.x,D.y,
-            D.x-D.w*.35,D.y-D.h*.35,
-            D.x-D.w*.35,D.y+D.h*.35,
-            D.x+D.w*.35,D.y-D.h*.35,
-            D.x+D.w*.35,D.y+D.h*.35,
-        },
-
-        fText=  D.fText,
-        fShade= D.fShade,
-        color=  D.color and (COLOR[D.color] or D.color) or COLOR.Z,
-        font=   D.font or 30,
-        fType=  D.fType,
-        align=  D.align or 'M',
-        edge=   D.edge or 0,
-        code=   D.code or NULL,
-        hideF=  D.hideF,
-        hide=   D.hide,
-    }
-    if D.sound==false then
-        _.sound=false
-    elseif type(D.sound)=='string' then
-        _.sound=D.sound
-    else
-        _.sound='key'
-    end
-    for k,v in next,key do _[k]=v end
-    setmetatable(_,widgetMetatable)
-    return _
-end
-
 local switch={
     type='switch',
     mustHaveText=true,
@@ -1469,6 +1341,7 @@ end
 local scr_w,scr_h
 function WIDGET.resize(w,h)
     scr_w,scr_h=w,h
+    if widgetCanvas then widgetCanvas:release() end
     widgetCanvas=gc.newCanvas(w,h)
 end
 function WIDGET.draw()
