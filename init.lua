@@ -165,7 +165,24 @@ local function updatePowerInfo()
     gc.setCanvas()
 end
 
-SCN.add('_zenitha',{})
+SCN.add('_zenitha',{
+    draw=function()
+        gc.setColor(.97,.97,.97,.626)
+        FONT.set(150)
+        GC.mStr("Zenitha",400,100)
+        FONT.set(60)
+        GC.mStr("Demo Scene",400,300)
+
+        gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
+        STENCIL.start('equal',1)
+        STENCIL.circle(400+100*math.cos(love.timer.getTime()*1.26),300+100*math.sin(love.timer.getTime()*1.26),160)
+        FONT.set(150)
+        GC.mStr("Zenitha",400,100)
+        FONT.set(60)
+        GC.mStr("Demo Scene",400,300)
+        STENCIL.stop()
+    end,
+})
 
 -- Zenitha methods
 function Zenitha.setAppName(name)
