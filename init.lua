@@ -18,7 +18,8 @@ local versionText='V0.1'
 local showPowerInfo=true
 local showClickFX=true
 local discardCanvas=false
-local frameMul=100
+local updateFreq=100
+local drawFreq=100
 local sleepInterval=1/60
 local globalKey={
     f8=function()
@@ -644,40 +645,13 @@ local devColor={
     COLOR.lG,
     COLOR.lB,
 }
-local WS=WS
-local WSnames={'app','user','play','stream','chat','manage'}
-local wsImg={} do
-    local L={78,18,
-        {'clear',1,1,1,0},
-        {'setCL',1,1,1,.3},
-        {'fRect',60,0,18,18},
-    }
-    for i=0,59 do
-        table.insert(L,{'setCL',1,1,1,i*.005})
-        table.insert(L,{'fRect',i,0,1,18})
-    end
-    wsImg.bottom=GC.DO(L)
-    wsImg.dead=GC.DO{20,20,
-        {'rawFT',20},
-        {'setCL',1,.3,.3},
-        {'mText',"X",11,-1},
-    }
-    wsImg.connecting=GC.DO{20,20,
-        {'rawFT',20},
-        {'setLW',3},
-        {'mText',"C",11,-1},
-    }
-    wsImg.running=GC.DO{20,20,
-        {'rawFT',20},
-        {'setCL',.5,1,0},
-        {'mText',"R",11,-1},
-    }
-end
 
 local debugInfos={
     {"Cache",gcinfo},
 }
 function love.run()
+    mainLoopStarted=true
+
     local love=love
 
     local BG=BG
@@ -694,21 +668,26 @@ function love.run()
     local timer=love.timer.getTime
 
     local frameTimeList={}
-    local lastFrame=timer()
-    local lastFreshPow=0
-    local FCT=0-- Framedraw counter, from 0~99
+    local lastLoopTime=timer()
+    local lastUpdateTime=timer()
+    local lastDrawTime=timer()
+    local lastPowFreshingTime=timer()
+
+    -- counters range from 0 to 99, trigger at 100
+    local updateCounter=0
+    local drawCounter=0
 
     updatePowerInfo()
     love.resize(gc.getWidth(),gc.getHeight())
     SCN.init('_zenitha')
 
     return function()
-        mainLoopStarted=true
         local _
-
         local time=timer()
-        local dt=time-lastFrame
-        lastFrame=time
+        STEP()
+
+        local loopDT=time-lastLoopTime
+        lastLoopTime=time
 
         -- EVENT
         PUMP()
@@ -721,26 +700,37 @@ function love.run()
             end
         end
 
+
         -- UPDATE
-        STEP()
-        if mouseShow then mouse_update(dt) end
-        if next(jsState) then gp_update(jsState[1],dt) end
-        VOC.update()
-        BG.update(dt)
-        TEXT_update(dt)
-        MES_update(dt)
-        WS_update(dt)
-        TASK_update(dt)
-        SYSFX_update(dt)
-        if SCN.update then SCN.update(dt) end
-        if SCN.swapping then SCN.swapUpdate(dt) end
-        WIDGET_update(dt)
+        updateCounter=updateCounter+updateFreq
+        if updateCounter>=100 then
+            updateCounter=updateCounter-100
+
+            local updateDT=time-lastUpdateTime
+            lastUpdateTime=time
+
+            if mouseShow then mouse_update(updateDT) end
+            if next(jsState) then gp_update(jsState[1],updateDT) end
+            VOC.update()
+            BG.update(updateDT)
+            TEXT_update(updateDT)
+            MES_update(updateDT)
+            WS_update(updateDT)
+            TASK_update(updateDT)
+            SYSFX_update(updateDT)
+            if SCN.update then SCN.update(updateDT) end
+            if SCN.swapping then SCN.swapUpdate(updateDT) end
+            WIDGET_update(updateDT)
+        end
 
         -- DRAW
         if not MINI() then
-            FCT=FCT+frameMul
-            if FCT>=100 then
-                FCT=FCT-100
+            drawCounter=drawCounter+drawFreq
+            if drawCounter>=100 then
+                drawCounter=drawCounter-100
+
+                local drawDT=time-lastDrawTime
+                lastDrawTime=time
 
                 gc_replaceTransform(SCR.origin)
                     gc_setColor(1,1,1)
@@ -793,7 +783,7 @@ function love.run()
                         end
 
                         -- Update & draw frame time
-                        table.insert(frameTimeList,1,dt)table.remove(frameTimeList,126)
+                        table.insert(frameTimeList,1,drawDT)table.remove(frameTimeList,126)
                         gc_setColor(1,1,1,.3)
                         for i=1,#frameTimeList do
                             gc.rectangle('fill',150+2*i,-20,2,-frameTimeList[i]*4000)
@@ -812,26 +802,6 @@ function love.run()
                             gc_print(t,x+2,y-1)
                             gc_setColor(COLOR.Z)
                             gc_print(t,x+2,y)
-
-                        gc_replaceTransform(SCR.xOy_dr)
-                            -- Websocket status
-                            for i=1,6 do
-                                local status=WS.status(WSnames[i])
-                                gc_setColor(1,1,1)
-                                gc.draw(wsImg.bottom,-79,20*i-139)
-                                if status=='dead' then
-                                    gc_draw(wsImg.dead,-20,20*i-140)
-                                elseif status=='connecting' then
-                                    gc_setColor(1,1,1,.5+.3*math.sin(time*6.26))
-                                    gc_draw(wsImg.connecting,-20,20*i-140)
-                                elseif status=='running' then
-                                    gc_draw(wsImg.running,-20,20*i-140)
-                                end
-                                local t1,t2,t3=WS.getTimers(WSnames[i])
-                                gc_setColor(.9,.9,.9,t1)gc.rectangle('fill',-60,20*i-122,-16,-16)
-                                gc_setColor(.3,1,.3,t2)gc.rectangle('fill',-42,20*i-122,-16,-16)
-                                gc_setColor(1,.2,.2,t3)gc.rectangle('fill',-24,20*i-122,-16,-16)
-                            end
                     end
                 gc_present()
 
@@ -841,10 +811,10 @@ function love.run()
         end
 
         -- Fresh power info.
-        if time-lastFreshPow>2.6 then
+        if time-lastPowFreshingTime>2.6 then
             if showPowerInfo then
                 updatePowerInfo()
-                lastFreshPow=time
+                lastPowFreshingTime=time
             end
             if gc.getWidth()~=SCR.w or gc.getHeight()~=SCR.h then
                 love.resize(gc.getWidth(),gc.getHeight())
@@ -860,9 +830,9 @@ function love.run()
             end
         end
 
-        _=timer()-lastFrame
+        _=timer()-lastLoopTime
         if _<sleepInterval*.9626 then WAIT(sleepInterval*.9626-_) end
-        while timer()-lastFrame<sleepInterval do end
+        while timer()-lastLoopTime<sleepInterval do end
     end
 end
 
@@ -879,7 +849,8 @@ end
 
 function Zenitha.setPowerInfo(bool) showPowerInfo=bool end
 function Zenitha.setCleanCanvas(bool) discardCanvas=bool end
-function Zenitha.setFrameMul(n) frameMul=n end
+function Zenitha.setUpdateFreq(n) updateFreq=n end
+function Zenitha.setDrawFreq(n) drawFreq=n end
 function Zenitha.setMaxFPS(fps) sleepInterval=1/fps end
 function Zenitha.setClickFX(bool) showClickFX=bool end
 
