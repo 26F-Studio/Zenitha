@@ -164,6 +164,8 @@ local function updatePowerInfo()
     gc.setCanvas()
 end
 
+SCN.add('_zenitha',{})
+
 -- Zenitha methods
 function Zenitha.setAppName(name)
     assert(type(name)=='string','Z.appName must be a string')
@@ -697,11 +699,7 @@ function love.run()
     local FCT=0-- Framedraw counter, from 0~99
 
     love.resize(gc.getWidth(),gc.getHeight())
-
-    -- Scene Launch
-    while #SCN.stack>0 do SCN.pop() end
-    SCN.push('quit','slowFade')
-    SCN.init(#errData==0 and 'load' or 'error')
+    SCN.init('_zenitha')
 
     return function()
         mainLoopStarted=true
