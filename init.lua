@@ -42,6 +42,7 @@ math.randomseed(os.time()*2600)
 MATH=       require'zenitha.mathExtend'
 STRING=     require'zenitha.stringExtend'
 TABLE=      require'zenitha.tableExtend'
+CLASS=      require'zenitha.class'
 
 -- Pure lua modules (simple)
 COLOR=      require'zenitha.color'
