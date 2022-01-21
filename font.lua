@@ -29,7 +29,11 @@ function FONT.load(fonts)
 end
 function FONT.get(size,name)
     if not name then name=defaultFont end
-    local f=fontCache[name][size]
+
+    local f=fontCache[name]
+    if not f then return FONT.rawget(size) end
+    f=f[size]
+
     if not f then
         f=love.graphics.setNewFont(fontFiles[name],size,'light',love.graphics.getDPIScale()*SCR.k*2)
         local fallbackName=fallbackMap[name] or defaultFallBack and name~=defaultFallBack and defaultFallBack
@@ -43,7 +47,10 @@ end
 function FONT.set(size,name)
     if not name then name=defaultFont end
 
-    local f=fontCache[name][size]
+    local f=fontCache[name]
+    if not f then return FONT.rawset(size) end
+    f=f[size]
+
     if f~=curFont then
         curFont=f or FONT.get(size,name)
         set(curFont)
