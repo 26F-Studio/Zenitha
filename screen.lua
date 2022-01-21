@@ -1,5 +1,5 @@
 local SCR={
-    w0=1280,h0=720, -- Default Screen Size
+    w0=800,h0=600, -- Default Screen Size
     x=0,y=0,        -- Up-left Coord on screen
     cx=0,cy=0,      -- Center Coord on screen (Center X/Y)
     ex=0,ey=0,      -- Down-right Coord on screen (End X/Y)
