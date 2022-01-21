@@ -5,8 +5,8 @@ local SCR={
     ex=0,ey=0,      -- Down-right Coord on screen (End X/Y)
     w=0,h=0,        -- Fullscreen w/h for graphic functions
     W=0,H=0,        -- Fullscreen w/h for shader
-    safeX=0,safeY=0,-- Safe area
-    safeW=0,safeH=0,-- Safe area
+    safeX=0,safeY=0,-- Safe area position
+    safeW=0,safeH=0,-- Safe area size
     rad=0,          -- Radius
     k=1,            -- Scale size
     dpi=1,          -- DPI from gc.getDPIScale()

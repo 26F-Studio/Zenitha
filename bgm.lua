@@ -3,9 +3,10 @@ local maxLoadedCount=3
 local nameList={}
 local SourceObjList={}
 local volume=1
+local defaultBGM=false
+local onChange=NULL
 
 local BGM={
-    default=false,
     onChange=NULL,
     -- nowPlay=[str:playing ID]
     -- playing=[src:playing SRC]
@@ -48,14 +49,15 @@ function BGM.load(name,path)
 end
 
 function BGM.setDefault(bgm)
-    BGM.default=bgm
+    defaultBGM=bgm
 end
 function BGM.setMaxSources(count)
     maxLoadedCount=count
     _tryReleaseSources()
 end
 function BGM.setChange(func)
-    BGM.onChange=func
+    assert(type(func)=='function','BGM.setChange(func) func must be a function')
+    onChange=func
 end
 function BGM.setVol(v)
     assert(type(v)=='number' and v>=0 and v<=1,'Wrong volume')
@@ -113,7 +115,7 @@ local function _tryLoad(name)
     end
 end
 function BGM.play(name,args)
-    name=name or BGM.default
+    name=name or defaultBGM
     args=args or ''
     if not _tryLoad(name) or args:sArg('-preLoad') then return end
     if volume==0 then
@@ -145,7 +147,7 @@ function BGM.play(name,args)
             SourceObjList[name].source:setLooping(not args:sArg('-noloop'))
             BGM.lastPlayed=BGM.nowPlay
             BGM.playing:play()
-            BGM.onChange(name)
+            onChange(name)
         end
         return true
     end
