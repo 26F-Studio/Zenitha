@@ -1,7 +1,6 @@
 local gc=love.graphics
 local gc_origin=gc.origin
 local gc_translate,gc_replaceTransform=gc.translate,gc.replaceTransform
-local gc_stencil,gc_setStencilTest=gc.stencil,gc.setStencilTest
 local gc_push,gc_pop=gc.push,gc.pop
 local gc_setCanvas,gc_setBlendMode=gc.setCanvas,gc.setBlendMode
 local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
@@ -16,8 +15,10 @@ local next=next
 local int,ceil=math.floor,math.ceil
 local max,min=math.max,math.min
 local sub,ins,rem=string.sub,table.insert,table.remove
+
+local STENCIL=STENCIL
 local xOy=SCR.xOy
-local FONT=FONT
+local setFont,getFont=FONT.set,FONT.get
 local mStr=GC.mStr
 local approach=MATH.expApproach
 
@@ -41,16 +42,20 @@ local largerThen=GC.DO{20,20,
     {'line',2,2,19,10,2,18},
 }
 
-local STW,STH-- stencil-wid/hei
-local function _rectangleStencil()
-    gc.rectangle('fill',1,1,STW-2,STH-2)
-end
-
 local onChange=NULL
+local widgetCanvas
+local widgetCover do
+    local L={1,360,{'fRect',0,30,1,300}}
+    for i=0,30 do
+        ins(L,{'setCL',1,1,1,i/30})
+        ins(L,{'fRect',0,i,1,2})
+        ins(L,{'fRect',0,360-i,1,2})
+    end
+    widgetCover=GC.DO(L)
+end
+local scr_w,scr_h
 
 local WIDGET={}
-
-function WIDGET.setOnChange(func) onChange=assert(type(func)=='function' and func,"WIDGET.setOnChange(func): func must be a function") end
 
 local widgetMetatable={
     __tostring=function(self)
@@ -148,7 +153,7 @@ function button:reset()
 end
 function button:setObject(obj)
     if type(obj)=='string' or type(obj)=='number' then
-        self.obj=gc.newText(FONT.get(self.font,self.fType),obj)
+        self.obj=gc.newText(getFont(self.font,self.fType),obj)
     elseif obj then
         self.obj=obj
     end
@@ -453,7 +458,7 @@ function slider:draw()
 
     -- Float text
     if self.TAT>0 and self.show then
-        FONT.set(25)
+        setFont(25)
         gc_setColor(.97,.97,.97,self.TAT/180)
         mStr(self:show(),cx,by-30)
     end
@@ -640,7 +645,7 @@ function selector:draw()
     gc_setColor(self.color)
     gc_draw(self.obj,x+w*.5,y-4,nil,min((w-20)/self.obj:getWidth(),1),1,self.obj:getWidth()*.5,0)
     gc_setColor(1,1,1)
-    FONT.set(30)
+    setFont(30)
     mStr(self.selText,x+w*.5,y+22)
 end
 function selector:getInfo()
@@ -790,7 +795,7 @@ function inputBox:draw()
 
     -- Drawable
     local f=self.font
-    FONT.set(f,self.fType)
+    setFont(f,self.fType)
     if self.obj then
         gc_draw(self.obj,x-12-self.obj:getWidth(),y+h*.5-self.obj:getHeight()*.5)
     end
@@ -801,7 +806,7 @@ function inputBox:draw()
         end
     else
         gc_printf(self.value,x+10,y,self.w)
-        FONT.set(f-10)
+        setFont(f-10)
         if WIDGET.sel==self then
             gc_print(EDITING,x+10,y+12-f*1.4)
         end
@@ -950,7 +955,7 @@ function textBox:draw()
     gc_rectangle('line',x,y,w,h,3)
 
     -- Texts
-    FONT.set(self.font,self.fType)
+    setFont(self.font,self.fType)
     gc_push('transform')
         gc_translate(x,y)
 
@@ -966,17 +971,15 @@ function textBox:draw()
             gc_rectangle('line',w-40,0,40,40,3)
             gc_draw(self.sure==0 and clearIcon or sureIcon,w-40,0)
         end
-
-        gc_setStencilTest('equal',1)
-        STW,STH=w,h
-        gc_stencil(_rectangleStencil)
+        STENCIL.start('equal',1)
+        STENCIL.rectangle(0,0,w,h)
         gc_translate(0,-(scrollPos%lineH))
         local pos=int(scrollPos/lineH)
         for i=pos+1,min(pos+cap+1,#texts) do
             gc_printf(texts[i],10,4,w-16)
             gc_translate(0,lineH)
         end
-        gc_setStencilTest()
+        STENCIL.stop()
     gc_pop()
 end
 function textBox:getInfo()
@@ -1140,16 +1143,15 @@ function listBox:draw()
         end
 
         -- List
-        gc_setStencilTest('equal',1)
-            STW,STH=w,h
-            gc_stencil(_rectangleStencil)
-            local pos=int(scrollPos/lineH)
-            gc_translate(0,-(scrollPos%lineH))
-            for i=pos+1,min(pos+cap+1,#list) do
-                self.drawF(list[i],i,i==self.selected)
-                gc_translate(0,lineH)
-            end
-        gc_setStencilTest()
+        STENCIL.start('equal',1)
+        STENCIL.rectangle(w,h)
+        local pos=int(scrollPos/lineH)
+        gc_translate(0,-(scrollPos%lineH))
+        for i=pos+1,min(pos+cap+1,#list) do
+            self.drawF(list[i],i,i==self.selected)
+            gc_translate(0,lineH)
+        end
+        STENCIL.stop()
     gc_pop()
 end
 function listBox:getInfo()
@@ -1229,7 +1231,7 @@ function WIDGET.setLang(widgetText)
                     W.color=COLOR.dV
                 end
                 if type(t)=='string' and W.font then
-                    t=gc.newText(FONT.get(W.font),t)
+                    t=gc.newText(getFont(W.font),t)
                 end
                 W.obj=t
             end
@@ -1328,17 +1330,6 @@ function WIDGET.update(dt)
         if W.update then W:update(dt) end
     end
 end
-local widgetCanvas
-local widgetCover do
-    local L={1,360,{'fRect',0,30,1,300}}
-    for i=0,30 do
-        ins(L,{'setCL',1,1,1,i/30})
-        ins(L,{'fRect',0,i,1,2})
-        ins(L,{'fRect',0,360-i,1,2})
-    end
-    widgetCover=GC.DO(L)
-end
-local scr_w,scr_h
 function WIDGET.resize(w,h)
     scr_w,scr_h=w,h
     if widgetCanvas then widgetCanvas:release() end
@@ -1368,5 +1359,7 @@ function WIDGET.draw()
     gc_setBlendMode('alpha')
     gc_replaceTransform(SCR.xOy)
 end
+
+function WIDGET.setOnChange(func) onChange=assert(type(func)=='function' and func,"WIDGET.setOnChange(func): func must be a function") end
 
 return WIDGET

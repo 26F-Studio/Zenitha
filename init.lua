@@ -86,6 +86,7 @@ SCN=        require'zenitha.scene'
 
 -- Love-based modules (media)
 GC=         require'zenitha.gcExtend'
+STENCIL=    require'zenitha.stencil'
 FONT=       require'zenitha.font'
 TEXT=       require'zenitha.text'
 SYSFX=      require'zenitha.sysFX'
