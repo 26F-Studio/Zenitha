@@ -232,7 +232,7 @@ end
 function button:press(_,_,k)
     self.code(k)
     local ATV=self.ATV
-    SYSFX.newRectRipple(
+    SYSFX.rectRipple(
         6,
         self.x-ATV,
         self.y-WIDGET.scrollPos,
@@ -657,12 +657,12 @@ function selector:press(x)
         if x<self.x+self.w*.5 then
             if s>1 then
                 s=s-1
-                SYSFX.newShade(3,self.x,self.y-WIDGET.scrollPos,self.w*.5,60)
+                SYSFX.rectangle(3,self.x,self.y-WIDGET.scrollPos,self.w*.5,60)
             end
         else
             if s<#self.list then
                 s=s+1
-                SYSFX.newShade(3,self.x+self.w*.5,self.y-WIDGET.scrollPos,self.w*.5,60)
+                SYSFX.rectangle(3,self.x+self.w*.5,self.y-WIDGET.scrollPos,self.w*.5,60)
             end
         end
         if self.select~=s then
@@ -680,11 +680,11 @@ function selector:scroll(n)
     if n==-1 then
         if s==1 then return end
         s=s-1
-        SYSFX.newShade(3,self.x,self.y-WIDGET.scrollPos,self.w*.5,60)
+        SYSFX.rectangle(3,self.x,self.y-WIDGET.scrollPos,self.w*.5,60)
     else
         if s==#self.list then return end
         s=s+1
-        SYSFX.newShade(3,self.x+self.w*.5,self.y-WIDGET.scrollPos,self.w*.5,60)
+        SYSFX.rectangle(3,self.x+self.w*.5,self.y-WIDGET.scrollPos,self.w*.5,60)
     end
     self.code(self.list[s])
     self.select=s

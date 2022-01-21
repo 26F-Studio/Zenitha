@@ -19,7 +19,7 @@ FXupdate.attack=_normUpdate
 FXupdate.tap=_normUpdate
 FXupdate.ripple=_normUpdate
 FXupdate.rectRipple=_normUpdate
-FXupdate.shade=_normUpdate
+FXupdate.rectangle=_normUpdate
 function FXupdate.particle(S,dt)
     if S.vx then
         S.x=S.x+S.vx*S.rate
@@ -72,7 +72,7 @@ function FXdraw.rectRipple(S)
     local r=(10*S.t)^1.2
     gc_rectangle('line',S.x-r,S.y-r,S.w+2*r,S.h+2*r)
 end
-function FXdraw.shade(S)
+function FXdraw.rectangle(S)
     gc_setColor(S.r,S.g,S.b,1-S.t)
     gc_rectangle('fill',S.x,S.y,S.w,S.h,2)
 end
@@ -140,10 +140,10 @@ function SYSFX.rectripple(rate,x,y,w,h)
         x=x,y=y,w=w,h=h,
     })
 end
-function SYSFX.shade(rate,x,y,w,h,r,g,b)
+function SYSFX.rectangle(rate,x,y,w,h,r,g,b)
     ins(fx,{
-        update=FXupdate.shade,
-        draw=FXdraw.shade,
+        update=FXupdate.rectangle,
+        draw=FXdraw.rectangle,
         t=0,
         rate=rate,
         x=x,y=y,w=w,h=h,
