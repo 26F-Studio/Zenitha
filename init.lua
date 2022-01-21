@@ -1,3 +1,8 @@
+-- Useful global values
+NONE={}setmetatable(NONE,{__newindex=function() error('Attempt to modify a constant table') end})
+NULL=function(...) end
+PAPER=love.graphics.newCanvas(1,1)
+
 -- Inside values
 local mainLoopStarted=false
 local autoGCcount=0
@@ -27,11 +32,6 @@ local onFocus=NULL
 local onQuit=NULL
 
 Zenitha={}
-
--- Useful global values
-NONE={}setmetatable(NONE,{__newindex=function() error('Attempt to modify a constant table') end})
-NULL=function(...) end
-PAPER=love.graphics.newCanvas(1,1)
 
 SYSTEM=love.system.getOS() if SYSTEM=='OS X' then SYSTEM='macOS' end
 MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
