@@ -695,9 +695,10 @@ function love.run()
 
     local frameTimeList={}
     local lastFrame=timer()
-    local lastFreshPow=lastFrame
+    local lastFreshPow=0
     local FCT=0-- Framedraw counter, from 0~99
 
+    updatePowerInfo()
     love.resize(gc.getWidth(),gc.getHeight())
     SCN.init('_zenitha')
 
