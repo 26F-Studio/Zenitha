@@ -1,11 +1,11 @@
 local CLASS={}
 
-function CLASS.simple(class)
-    return setmetatable({},{__index=class})
+function CLASS.inherit(o,class)
+    o.__parent=class
+    setmetatable(o,{__index=class})
 end
-
-function CLASS.deep(class)
-    return setmetatable(TABLE.copy(class),getmetatable(class))
+function CLASS.instance(class)
+    return setmetatable({__class=class},{__index=class})
 end
 
 return CLASS
