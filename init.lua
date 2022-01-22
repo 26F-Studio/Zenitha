@@ -182,6 +182,9 @@ SCN.add('_zenitha',{
         GC.mStr("Demo Scene",400,300)
         STENCIL.stop()
     end,
+    widgetList={
+        WIDGET.new{type='button',rawText='Quit',x=400,y=500,w=200,h=120,code=function() love.event.quit() end},
+    }
 })
 
 -- Zenitha methods

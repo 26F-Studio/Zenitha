@@ -14,6 +14,7 @@ local timer=love.timer.getTime
 local next=next
 local int,ceil=math.floor,math.ceil
 local max,min=math.max,math.min
+local abs=math.abs
 local sub,ins,rem=string.sub,table.insert,table.remove
 
 local STENCIL=STENCIL
@@ -42,6 +43,7 @@ local largerThen=GC.DO{20,20,
     {'line',2,2,19,10,2,18},
 }
 
+local currentLanguage=false
 local onChange=NULL
 local widgetCanvas
 local widgetCover do
@@ -55,330 +57,244 @@ local widgetCover do
 end
 local scr_w,scr_h
 
+local function alignDraw(self,drawable,x,y)
+    local w=drawable:getWidth()
+    local h=drawable:getHeight()
+    local k=min(self.widthLimit/w,1)
+    local ox=self.alignX=='left' and 0 or self.alignX=='right' and w or w*.5
+    local oy=self.alignY=='up' and 0 or self.alignY=='down' and h or h*.5
+    gc_draw(drawable,x,y,nil,k,1,ox,oy)
+end
+
 local WIDGET={}
+local Widgets={}
 
-local widgetMetatable={
-    __tostring=function(self)
-        return self:getInfo()
-    end,
+-- Base widget (not used by user)
+local baseWidget={
+    type='base',
+    name=false,
+
+    x=0,y=0,
+    w=0,h=0,
+
+    color=COLOR.Z,
+    text=false,
+    image=false,
+    rawText=false,
+    font=30,fontType=false,
+    alignX='center',alignY='center',
+    posX='raw',posY='raw',
+    widthLimit=1e99,
+    sound=false,
+
+    visibleFunc=false,-- function return a boolean
+
+    _text=nil,
+    _image=nil,
+    _activeTime=0,
+    _activeTimeMax=.1,
+    _visible=nil,
+
+    buildArgs={
+        'name',
+        'x','y',
+        'alignX','alignY',
+        'posX','posY',
+        'visibleFunc',
+    },
 }
-
-local text={
-    type='text',
-    mustHaveText=true,
-    alpha=0,
-}
-
-function text:reset() end
-function text:update(dt)
-    if self.hideF and self.hideF() then
-        if self.alpha>0 then
-            self.alpha=max(self.alpha-dt*7.5,0)
+function baseWidget:getInfo()
+    local str=""
+    for k in next,self.buildArgs do
+        str=str..STRING.repD("$1=$2,",k..self[k])
+    end
+    return str
+end
+function baseWidget:reset()
+    self._text=nil
+    if self.text then
+        if type(self.text)=='function'then
+            self._text=self.text()
+            assert(type(self._text)=='string','function text must return a string')
+        else
+            assert(type(self.text)=='string',"[widget].text must be a string or function return a string")
+            self._text=LANG.get(currentLanguage)[self.text]
         end
-    elseif self.alpha<1 then
-        self.alpha=min(self.alpha+dt*7.5,1)
+    elseif self.rawText then
+        assert(type(self.rawText)=='string',"[widget].rawText must be a string")
+        self._text=self.rawText
     end
-end
-function text:draw()
-    if self.alpha>0 then
-        local c=self.color
-        gc_setColor(c[1],c[2],c[3],self.alpha)
-        local w=self.obj:getWidth()
-        local k=min(self.lim/self.obj:getWidth(),1)
-        if self.align=='M' then
-            gc_draw(self.obj,self.x,self.y,nil,k,1,w*.5,0)
-        elseif self.align=='L' then
-            gc_draw(self.obj,self.x,self.y,nil,k,1)
-        elseif self.align=='R' then
-            gc_draw(self.obj,self.x,self.y,nil,k,1,w,0)
+    self._text=gc.newText(getFont(self.font,self.fType),self._text)
+
+    self._image=nil
+    if self.image then
+        if type(self.image)=='string' then
+            self._image=IMG[self.image]or PAPER
+        else
+            self._image=self.image
         end
     end
-end
-function WIDGET.newText(D)-- name,x,y[,lim][,fText][,color][,font=30][,fType][,align='M'][,hideF][,hide]
-    local _={
-        name= D.name or "_",
-        x=    D.x,
-        y=    D.y,
-        lim=  D.lim or 1e99,
 
-        fText=D.fText,
-        color=D.color and (COLOR[D.color] or D.color) or COLOR.Z,
-        font= D.font or 30,
-        fType=D.fType,
-        align=D.align or 'M',
-        hideF=D.hideF,
-    }
-    for k,v in next,text do _[k]=v end
-    if not _.hideF then _.alpha=1 end
-    setmetatable(_,widgetMetatable)
-    return _
-end
+    self._activeTime=0
 
-local image={
-    type='image',
-}
-function image:reset()
-    if type(self.img)=='string' then
-        self.img=IMG[self.img]
+    self._visible=true
+    if self.visibleFunc then
+        self._visible=self.visibleFunc()
     end
 end
-function image:draw()
-    gc_setColor(1,1,1,self.alpha)
-    gc_draw(self.img,self.x,self.y,self.ang,self.k)
-end
-function WIDGET.newImage(D)-- name[,img(name)],x,y[,ang][,k][,hideF][,hide]
-    local _={
-        name= D.name or "_",
-        img=  D.img or D.name or "_",
-        alpha=D.alpha,
-        x=    D.x,
-        y=    D.y,
-        ang=  D.ang,
-        k=    D.k,
-        hideF=D.hideF,
-        hide= D.hide,
-    }
-    for k,v in next,image do _[k]=v end
-    setmetatable(_,widgetMetatable)
-    return _
-end
-
-local button={
-    type='button',
-    mustHaveText=true,
-    ATV=0,-- Activating time(0~8)
-}
-function button:reset()
-    self.ATV=0
-end
-function button:setObject(obj)
-    if type(obj)=='string' or type(obj)=='number' then
-        self.obj=gc.newText(getFont(self.font,self.fType),obj)
-    elseif obj then
-        self.obj=obj
-    end
-end
-function button:isAbove(x,y)
-    local ATV=self.ATV
-    return
-        x>self.x-ATV and
-        y>self.y and
-        x<self.x+self.w+2*ATV and
-        y<self.y+self.h
-end
-function button:getCenter()
-    return self.x+self.w*.5,self.y+self.h*.5
-end
-function button:update(dt)
-    local ATV=self.ATV
-    if WIDGET.sel==self then
-        if ATV<8 then self.ATV=min(ATV+dt*60,8) end
+function baseWidget:setVisible(bool)
+    if bool then
+        self._visible=true
     else
-        if ATV>0 then self.ATV=max(ATV-dt*30,0) end
+        self._visible=false
     end
 end
-function button:draw()
-    local x,y,w,h=self.x,self.y,self.w,self.h
-    local ATV=self.ATV
-    local c=self.color
-    local r,g,b=c[1],c[2],c[3]
+function baseWidget:update(dt)
+    if WIDGET.sel==self then
+        self._activeTime=min(self._activeTime+dt,self._activeTimeMax)
+    else
+        self._activeTime=max(self._activeTime-dt,0)
+    end
+end
 
-    -- Button
-    gc_setColor(.15+r*.7,.15+g*.7,.15+b*.7,.9)
-    gc_rectangle('fill',x-ATV,y,w+2*ATV,h,4)
-    gc_setLineWidth(2)
-    gc_setColor(.3+r*.7,.3+g*.7,.3+b*.7)
-    gc_rectangle('line',x-ATV,y,w+2*ATV,h,5)
-    if ATV>0 then
-        gc_setColor(.97,.97,.97,ATV*.125)
-        gc_rectangle('line',x-ATV,y,w+2*ATV,h,3)
-    end
 
-    -- Drawable
-    local obj=self.obj
-    local ox,oy=obj:getWidth()*.5,obj:getHeight()*.5
-    local y0=y+h*.5
-    gc_setColor(1,1,1,.2+ATV*.05)
-    if self.align=='M' then
-        local x0=x+w*.5
-        local kx=obj:type()=='Text' and min(w/ox/2,1) or 1
-        gc_draw(obj,x0-1,y0-1,nil,kx,1,ox,oy)
-        gc_draw(obj,x0-1,y0+1,nil,kx,1,ox,oy)
-        gc_draw(obj,x0+1,y0-1,nil,kx,1,ox,oy)
-        gc_draw(obj,x0+1,y0+1,nil,kx,1,ox,oy)
-        gc_setColor(r*.55,g*.55,b*.55)
-        gc_draw(obj,x0,y0,nil,kx,1,ox,oy)
-    elseif self.align=='L' then
-        local edge=self.edge
-        gc_draw(obj,x+edge-1,y0-1-oy)
-        gc_draw(obj,x+edge-1,y0+1-oy)
-        gc_draw(obj,x+edge+1,y0-1-oy)
-        gc_draw(obj,x+edge+1,y0+1-oy)
-        gc_setColor(r*.55,g*.55,b*.55)
-        gc_draw(obj,x+edge,y0-oy)
-    elseif self.align=='R' then
-        local x0=x+w-self.edge-ox*2
-        gc_draw(obj,x0-1,y0-1-oy)
-        gc_draw(obj,x0-1,y0+1-oy)
-        gc_draw(obj,x0+1,y0-1-oy)
-        gc_draw(obj,x0+1,y0+1-oy)
-        gc_setColor(r*.55,g*.55,b*.55)
-        gc_draw(obj,x0,y0-oy)
+-- Text
+Widgets.text={
+    type='text',
+
+    buildArgs=TABLE.combine(baseWidget.buildArgs,{
+        'text','rawText',
+        'font','fontType',
+        'widthLimit',
+    })
+} CLASS.inherit(Widgets.text,baseWidget)
+function Widgets.text:draw()
+    if self._text then
+        gc_setColor(self.color)
+        alignDraw(self,self._text,self.x,self.y)
     end
 end
-function button:getInfo()
-    return ("x=%d,y=%d,w=%d,h=%d,font=%d"):format(self.x+self.w*.5,self.y+self.h*.5,self.w,self.h,self.font,self.fType)
+
+
+-- Image
+Widgets.image={
+    type='image',
+
+    buildArgs=TABLE.combine(baseWidget.buildArgs,{
+        'image',
+    }),
+} CLASS.inherit(Widgets.image,baseWidget)
+function Widgets.image:draw()
+    if self._image then
+        gc_setColor(1,1,1)
+        alignDraw(self,self._image,self.x,self.y)
+    end
 end
-function button:press(_,_,k)
+
+
+-- Button
+Widgets.button={
+    type='button',
+
+    buildArgs=TABLE.combine(baseWidget.buildArgs,{
+        'w','h',
+        'text','image','rawText',
+        'font','fontType',
+        'widthLimit',
+        'sound',
+        'code',
+    }),
+} CLASS.inherit(Widgets.button,baseWidget)
+function Widgets.button:reset()
+    self.__parent.reset(self)
+    self.widthLimit=self.w
+end
+function Widgets.button:isAbove(x,y)
+    return
+        abs(x-self.x)<self.w*.5 and
+        abs(y-self.y)<self.h*.5
+end
+function Widgets.button:press(_,_,k)
     self.code(k)
-    local ATV=self.ATV
-    SYSFX.rectRipple(
-        6,
-        self.x-ATV,
-        self.y-WIDGET.scrollPos,
-        self.w+2*ATV,
-        self.h
-    )
     if self.sound then
         SFX.play(self.sound)
     end
 end
-function WIDGET.newButton(D)-- name,x,y,w[,h][,fText][,color][,font=30][,fType][,sound][,align='M'][,edge=0][,code][,hideF][,hide]
-    if not D.h then D.h=D.w end
-    local _={
-        name= D.name or "_",
+function Widgets.button:draw()
+    local x,y,w,h=self.x,self.y,self.w,self.h
+    x,y=x-w*.5,y-h*.5
 
-        x=    D.x-D.w*.5,
-        y=    D.y-D.h*.5,
-        w=    D.w,
-        h=    D.h,
-
-        resCtr={
-            D.x,D.y,
-            D.x-D.w*.35,D.y-D.h*.35,
-            D.x-D.w*.35,D.y+D.h*.35,
-            D.x+D.w*.35,D.y-D.h*.35,
-            D.x+D.w*.35,D.y+D.h*.35,
-        },
-
-        fText=D.fText,
-        color=D.color and (COLOR[D.color] or D.color) or COLOR.Z,
-        font= D.font or 30,
-        fType=D.fType,
-        align=D.align or 'M',
-        edge= D.edge or 0,
-        code= D.code or NULL,
-        hideF=D.hideF,
-        hide= D.hide,
-    }
-    if D.sound==false then
-        _.sound=false
-    elseif type(D.sound)=='string' then
-        _.sound=D.sound
-    else
-        _.sound='button'
-    end
-
-    for k,v in next,button do _[k]=v end
-    setmetatable(_,widgetMetatable)
-    return _
-end
-
-local switch={
-    type='switch',
-    mustHaveText=true,
-    ATV=0,-- Activating time(0~8)
-    CHK=0,-- Check alpha(0~6)
-}
-function switch:reset()
-    self.ATV=0
-    self.CHK=0
-end
-function switch:isAbove(x,y)
-    return x>self.x and x<self.x+50 and y>self.y-25 and y<self.y+25
-end
-function switch:getCenter()
-    return self.x,self.y
-end
-function switch:update(dt)
-    local ATV=self.ATV
-    if WIDGET.sel==self then
-        if ATV<8 then self.ATV=min(ATV+dt*60,8) end
-    else
-        if ATV>0 then self.ATV=max(ATV-dt*30,0) end
-    end
-    local chk=self.CHK
-    if self:disp() then
-        if chk<6 then self.CHK=min(chk+dt*60,6) end
-    else
-        if chk>0 then self.CHK=max(chk-dt*60,0) end
-    end
-end
-function switch:draw()
-    local x,y=self.x,self.y
-    local ATV=self.ATV
+    local c=self.color
 
     -- Background
-    gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y-25,50,50,4)
+    gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.1+.2*self._activeTime/self._activeTimeMax))
+    gc_rectangle('fill',x,y,w,h,4)
 
     -- Frame
     gc_setLineWidth(2)
-    gc_setColor(1,1,1,.6+ATV*.1)
-    gc_rectangle('line',x,y-25,50,50,3)
-
-    -- Checked
-    if ATV>0 then
-        gc_setColor(1,1,1,ATV*.06)
-        gc_rectangle('fill',x,y-25,50,50,3)
-    end
-    if self.CHK>0 then
-        gc_setColor(.9,1,.9,self.CHK/6)
-        gc_setLineWidth(5)
-        gc_line(x+5,y,x+18,y+13,x+45,y-14)
-    end
+    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
+    gc_rectangle('line',x,y,w,h,3)
 
     -- Drawable
-    local obj=self.obj
-    gc_setColor(self.color)
-    gc_draw(obj,x-12-ATV,y,nil,min(self.lim/obj:getWidth(),1),1,obj:getWidth(),obj:getHeight()*.5)
-end
-function switch:getInfo()
-    return ("x=%d,y=%d,font=%d"):format(self.x,self.y,self.font,self.fType)
-end
-function switch:press()
-    self.code()
-    if self.sound then
-        SFX.play(self.disp() and 'check' or 'uncheck')
+    if self._image then
+        gc_setColor(1,1,1)
+        alignDraw(self,self._image,x+w*.5,y+h*.5)
+    end
+    if self._text then
+        gc_setColor(self.color)
+        alignDraw(self,self._text,x+w*.5,y+h*.5)
     end
 end
-function WIDGET.newSwitch(D)-- name,x,y[,lim][,fText][,color][,font=30][,fType][,sound=true][,disp][,code][,hideF][,hide]
-    local _={
-        name= D.name or "_",
 
-        x=    D.x,
-        y=    D.y,
-        lim=  D.lim or 1e99,
+--[[
+-- Switch
+Widgets.switch={
+    type='switch',
 
-        resCtr={
-            D.x+25,D.y,
-        },
+    buildArgs=TABLE.combine(baseWidget.buildArgs,{
+        'w',
+        'text','rawText',
+        'font','fontType',
+        'widthLimit',
+        'sound',
+        'show','code',
+    }),
+} CLASS.inherit(Widgets.switch,baseWidget)
+function Widgets.switch:isAbove(x,y)
+    return
+        abs(x-self.x)<self.w*.5 and
+        abs(y-self.y)<self.w*.5
+end
+function Widgets.switch:press(_,_,k)
+    self.code(k)
+    if self.sound then
+        SFX.play(self.sound)
+    end
+end
+function Widgets.switch:draw()
+    local x,y,w=self.x,self.y,self.w
+    x,y=x-w*.5,y-w*.5
 
-        fText=D.fText,
-        color=D.color and (COLOR[D.color] or D.color) or COLOR.Z,
-        font= D.font or 30,
-        fType=D.fType,
-        sound=D.sound~=false,
-        disp= D.disp,
-        code= D.code or NULL,
-        hideF=D.hideF,
-        hide= D.hide,
-    }
-    for k,v in next,switch do _[k]=v end
-    setmetatable(_,widgetMetatable)
-    return _
+    local c=self.color
+
+    -- Background
+    gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.1+.2*self._activeTimeMax/.26))
+    gc_rectangle('fill',x,y,w,w,4)
+
+    -- Frame
+    gc_setLineWidth(2)
+    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
+    gc_rectangle('line',x,y,w,w,3)
+
+    -- Drawable
+    if self._text then
+        gc_setColor(self.color)
+        alignDraw(self,self._text,x+w*.5,y+w*.5)
+    end
 end
 
+
+-- Slider
 local slider={
     type='slider',
     ATV=0,-- Activating time(0~8)
@@ -397,16 +313,8 @@ local sliderShowFunc={
         return int(S.disp()*100+.5).."%"
     end,
 }
-function slider:reset()
-    self.ATV=0
-    self.TAT=180
-    self.pos=0
-end
 function slider:isAbove(x,y)
     return x>self.x-10 and x<self.x+self.w+10 and y>self.y-25 and y<self.y+25
-end
-function slider:getCenter()
-    return self.x+self.w*((self.pos-self.rangeL)/(self.rangeR-self.rangeL)),self.y
 end
 function slider:update(dt)
     local ATV=self.ATV
@@ -469,9 +377,6 @@ function slider:draw()
         gc_setColor(self.color)
         gc_draw(obj,x-12-ATV,y,nil,min(self.lim/obj:getWidth(),1),1,obj:getWidth(),obj:getHeight()*.5)
     end
-end
-function slider:getInfo()
-    return ("x=%d,y=%d,w=%d"):format(self.x,self.y,self.w)
 end
 function slider:press(x)
     self:drag(x)
@@ -565,7 +470,6 @@ function WIDGET.newSlider(D)-- name,x,y,w[,lim][,fText][,color][,axis][,smooth][
         end
     end
     for k,v in next,slider do _[k]=v end
-    setmetatable(_,widgetMetatable)
     return _
 end
 
@@ -596,9 +500,6 @@ function selector:isAbove(x,y)
         x<self.x+self.w+2 and
         y>self.y and
         y<self.y+60
-end
-function selector:getCenter()
-    return self.x+self.w*.5,self.y+30
 end
 function selector:update(dt)
     local ATV=self.ATV
@@ -647,9 +548,6 @@ function selector:draw()
     gc_setColor(1,1,1)
     setFont(30)
     mStr(self.selText,x+w*.5,y+22)
-end
-function selector:getInfo()
-    return ("x=%d,y=%d,w=%d"):format(self.x+self.w*.5,self.y+30,self.w)
 end
 function selector:press(x)
     if x then
@@ -724,7 +622,6 @@ function WIDGET.newSelector(D)-- name,x,y,w[,fText][,color][,sound=true],list,di
         hide= D.hide,
     }
     for k,v in next,selector do _[k]=v end
-    setmetatable(_,widgetMetatable)
     return _
 end
 
@@ -734,9 +631,6 @@ local inputBox={
     ATV=0,-- Activating time(0~4)
     value="",-- Text contained
 }
-function inputBox:reset()
-    self.ATV=0
-end
 function inputBox:hasText()
     return #self.value>0
 end
@@ -764,9 +658,6 @@ function inputBox:isAbove(x,y)
         y>self.y and
         x<self.x+self.w and
         y<self.y+self.h
-end
-function inputBox:getCenter()
-    return self.x+self.w*.5,self.y
 end
 function inputBox:update(dt)
     local ATV=self.ATV
@@ -811,9 +702,6 @@ function inputBox:draw()
             gc_print(EDITING,x+10,y+12-f*1.4)
         end
     end
-end
-function inputBox:getInfo()
-    return ("x=%d,y=%d,w=%d,h=%d"):format(self.x+self.w*.5,self.y+self.h*.5,self.w,self.h)
 end
 function inputBox:press()
     if MOBILE then
@@ -862,7 +750,6 @@ function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fType][,secret][,rege
         hide=  D.hide,
     }
     for k,v in next,inputBox do _[k]=v end
-    setmetatable(_,widgetMetatable)
     return _
 end
 
@@ -889,9 +776,6 @@ function textBox:isAbove(x,y)
         y>self.y and
         x<self.x+self.w and
         y<self.y+self.h
-end
-function textBox:getCenter()
-    return self.x+self.w*.5,self.y+self.w
 end
 function textBox:update(dt)
     if self.sure>0 then
@@ -982,9 +866,6 @@ function textBox:draw()
         STENCIL.stop()
     gc_pop()
 end
-function textBox:getInfo()
-    return ("x=%d,y=%d,w=%d,h=%d"):format(self.x+self.w*.5,self.y+self.h*.5,self.w,self.h)
-end
 function WIDGET.newTextBox(D)-- name,x,y,w,h[,font=30][,fType][,lineH][,fix],hide
     local _={
         name= D.name or "_",
@@ -1017,7 +898,6 @@ function WIDGET.newTextBox(D)-- name,x,y,w,h[,font=30][,fType][,lineH][,fix],hid
     _.capacity=ceil((D.h-10)/_.lineH)
 
     for k,v in next,textBox do _[k]=v end
-    setmetatable(_,widgetMetatable)
     return _
 end
 
@@ -1054,9 +934,6 @@ function listBox:isAbove(x,y)
         y>self.y and
         x<self.x+self.w and
         y<self.y+self.h
-end
-function listBox:getCenter()
-    return self.x+self.w*.5,self.y+self.h*.5
 end
 function listBox:push(t)
     ins(self.list,t)
@@ -1154,9 +1031,6 @@ function listBox:draw()
         STENCIL.stop()
     gc_pop()
 end
-function listBox:getInfo()
-    return ("x=%d,y=%d,w=%d,h=%d"):format(self.x+self.w*.5,self.y+self.h*.5,self.w,self.h)
-end
 function WIDGET.newListBox(D)-- name,x,y,w,h,lineH,drawF[,hideF][,hide]
     local _={
         name=    D.name or "_",
@@ -1187,9 +1061,9 @@ function WIDGET.newListBox(D)-- name,x,y,w,h,lineH,drawF[,hideF][,hide]
     }
 
     for k,v in next,listBox do _[k]=v end
-    setmetatable(_,widgetMetatable)
     return _
 end
+]]
 
 WIDGET.active={}-- Table contains all active widgets
 WIDGET.scrollHeight=0-- Max drag height, not actual container height!
@@ -1231,7 +1105,7 @@ function WIDGET.setLang(widgetText)
                     W.color=COLOR.dV
                 end
                 if type(t)=='string' and W.font then
-                    t=gc.newText(getFont(W.font),t)
+                    t=gc.newText(getFont(W.font,W.fType),t)
                 end
                 W.obj=t
             end
@@ -1273,7 +1147,7 @@ end
 
 function WIDGET.cursorMove(x,y)
     for _,W in next,WIDGET.active do
-        if not W.hide and W.resCtr and W:isAbove(x,y+WIDGET.scrollPos) then
+        if W._visible and W:isAbove(x,y+WIDGET.scrollPos) then
             WIDGET.focus(W)
             return
         end
@@ -1339,7 +1213,7 @@ function WIDGET.draw()
     gc_setCanvas({stencil=true},widgetCanvas)
         gc_translate(0,-WIDGET.scrollPos)
         for _,W in next,WIDGET.active do
-            if not W.hide then W:draw() end
+            if W._visible then W:draw() end
         end
         gc_origin()
         gc_setColor(1,1,1)
@@ -1358,6 +1232,22 @@ function WIDGET.draw()
     gc_draw(widgetCanvas)
     gc_setBlendMode('alpha')
     gc_replaceTransform(SCR.xOy)
+end
+
+function WIDGET.new(args)
+    assert(args.type,'Widget type not specified')
+    local W=Widgets[args.type]
+    assert(W,'Widget type '..args.type..' does not exist')
+    args.type=nil
+    local w=CLASS.instance(W)
+    for k,v in next,args do
+        if TABLE.find(W.buildArgs,k) then
+            w[k]=v
+        else
+            error('Illegal argument '..k..' for widget '..args.type)
+        end
+    end
+    return w
 end
 
 function WIDGET.setOnChange(func) onChange=assert(type(func)=='function' and func,"WIDGET.setOnChange(func): func must be a function") end
