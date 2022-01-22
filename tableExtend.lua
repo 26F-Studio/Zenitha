@@ -27,6 +27,26 @@ function TABLE.shift(org,depth)
     return L
 end
 
+-- Connect [1~#] elements of new to the end of org
+function TABLE.connect(org,new)
+    local l0=#org
+    for i=1,#new do
+        org[l0+i]=new[i]
+    end
+    return org
+end
+
+-- Connect two lists
+function TABLE.combine(L1,L2)
+    local l={}
+    local l0=#L1
+    for i=1,l0 do l[i]=L1[i] end
+    for i=1,#L2 do l[l0+i]=L2[i] end
+    return l
+end
+
+--------------------------
+
 -- Get a full copy of a table, depth = how many layers will be recreate, default to inf
 function TABLE.copy(org,depth)
     if not depth then depth=1e99 end
