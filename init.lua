@@ -113,6 +113,7 @@ local gc_print,gc_printf=gc.print,gc.printf
 local max,min=math.max,math.min
 
 local WIDGET,SCR,SCN=WIDGET,SCR,SCN
+local setFont=FONT.set
 local xOy=SCR.xOy
 local ITP=xOy.inverseTransformPoint
 
@@ -144,7 +145,7 @@ local function updatePowerInfo()
             end
             gc.rectangle('fill',76,6,pow*.22,14)
             if pow<100 then
-                FONT.set(15)
+                setFont(15)
                 gc.setColor(COLOR.D)
                 gc_print(pow,77,1)
                 gc_print(pow,77,3)
@@ -159,7 +160,7 @@ local function updatePowerInfo()
         gc_rectangle('fill',99,4,2,18)
         gc_rectangle('fill',102,3,2,14)
     end
-    FONT.set(25)
+    setFont(25)
     gc_print(os.date("%H:%M"),3,-5)
     gc_pop()
     gc.setCanvas()
@@ -168,17 +169,17 @@ end
 SCN.add('_zenitha',{
     draw=function()
         gc.setColor(.97,.97,.97,.626)
-        FONT.set(150)
+        setFont(150)
         GC.mStr("Zenitha",400,100)
-        FONT.set(60)
+        setFont(60)
         GC.mStr("Demo Scene",400,300)
 
         gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
         STENCIL.start('equal',1)
         STENCIL.circle(400+100*math.cos(love.timer.getTime()*1.26),300+100*math.sin(love.timer.getTime()*1.26),160)
-        FONT.set(150)
+        setFont(150)
         GC.mStr("Zenitha",400,100)
-        FONT.set(60)
+        setFont(60)
         GC.mStr("Demo Scene",400,300)
         STENCIL.stop()
     end,
@@ -638,9 +639,9 @@ function love.errorhandler(msg)
             gc_clear(.3,.5,.9)
             gc_push('transform')
             gc_replaceTransform(SCR.xOy)
-            FONT.set(100)gc_print(":(",100,0,0,1.2)
-            FONT.set(40)gc.printf(errorMsg,100,160,SCR.w0-100)
-            FONT.set(20)
+            setFont(100)gc_print(":(",100,0,0,1.2)
+            setFont(40)gc.printf(errorMsg,100,160,SCR.w0-100)
+            setFont(20)
             gc_print(love.system.getOS().."-"..versionText.."                          scene:"..(SCN and SCN.cur or "NULL"),100,660)
             gc.printf(err[1],100,360,1260-100)
             gc_print("TRACEBACK",100,450)
@@ -781,13 +782,13 @@ function love.run()
                 gc_replaceTransform(SCR.xOy_d)
                     -- Draw Version string
                     gc_setColor(.9,.9,.9,.42)
-                    FONT.set(20)
+                    setFont(20)
                     gc_printf(versionText,-2600,-30,5200,'center')
                 gc_replaceTransform(SCR.xOy_dl)
                     local safeX=SCR.safeX/SCR.k
 
                     -- Draw FPS
-                    FONT.set(15)
+                    setFont(15)
                     gc_setColor(1,1,1)
                     gc_print(FPS(),safeX+5,-20)
 
