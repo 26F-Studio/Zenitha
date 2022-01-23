@@ -1,57 +1,49 @@
+local defaultLang=false
+local maxLangLoaded=3
+local langLoaded={}
+local langPaths={}
+local langLib={
+    [false]={},
+}
+setmetatable(langLib,{
+    __index=function(self,k)
+        local lang=FILE.read(langPaths[k],'-luaon')
+        setmetatable(lang,{__index=langLib[k~=defaultLang and defaultLang]})
+        self[k]=lang
+        table.insert(langLoaded,k)
+        if #langLoaded>maxLangLoaded then
+            langLib[table.remove(langLoaded,1)]=nil
+        end
+        return self[k]
+    end
+})
+setmetatable(langLib[false],{
+    __index=function(self,k)
+        self[k]='['..k..']'
+        return self[k]
+    end
+})
+
 local LANG={}
--- ONLY FIRST CALL MAKE SENSE
--- Create LANG.get() and LANG.addScene()
-function LANG.init(defaultLang,langList,publicText,pretreatFunc)
-    local function _langFallback(T0,T)
-        for k,v in next,T0 do
-            if type(v)=='table' and not v.refuseCopy then-- refuseCopy: just copy pointer, not contents
-                if not T[k] then T[k]={} end
-                if type(T[k])=='table' then
-                    _langFallback(v,T[k])
-                end
-            elseif not T[k] then
-                T[k]=v
-            end
-        end
+function LANG.setDefault(name)
+    assert(type(name)=='string','Invalid language name')
+    defaultLang=name
+    for k,v in next,langLib do
+        setmetatable(v,{__index=langLib[k~=defaultLang and defaultLang]})
     end
-
-    -- Set public text
-    if publicText then
-        for _,L in next,langList do
-            for key,list in next,publicText do L[key]=list end
-        end
+end
+function LANG.setMaxLoaded(n)
+    assert(type(n)=='number' and n>=1 and n%1==0,'Invalid number')
+    maxLangLoaded=n
+end
+function LANG.add(data)
+    for k,v in next,data do
+        assert(type(k)=='string','Invalid language name (need string)')
+        assert(type(v)=='string','Invalid language file path (need string)')
+        langPaths[k]=v
     end
-
-    -- Fallback to default language
-    for name,L in next,langList do
-        if name~=defaultLang then
-            _langFallback(langList[L.fallback or defaultLang],L)
-        end
-    end
-
-    -- Custom pretreatment for each language
-    if pretreatFunc then
-        for _,L in next,langList do
-            pretreatFunc(L)
-        end
-    end
-
-    function LANG.get(l)
-        if not langList[l] then
-            LOG("Wrong language: "..tostring(l))
-            l=defaultLang
-        end
-        return langList[l]
-    end
-
-    function LANG.addScene(name)
-        for _,L in next,langList do
-            if L.WidgetText and not L.WidgetText[name] then
-                L.WidgetText[name]={}
-            end
-        end
-    end
-
-    function LANG.init() end
+end
+function LANG.get(name)
+    return langLib[name]
 end
 return LANG

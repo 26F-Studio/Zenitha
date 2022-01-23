@@ -43,7 +43,21 @@ local largerThen=GC.DO{20,20,
     {'line',2,2,19,10,2,18},
 }
 
-local currentLanguage=false
+local langMap=setmetatable({},{
+    __index=function(self,k)
+        self[k]='['..k..']'
+        return self[k]
+    end
+})
+local indexMeta={
+    __index=function(L,k)
+        for i=1,#L do
+            if L[i].name==k then
+                return L[i]
+            end
+        end
+    end
+}
 local onChange=NULL
 local widgetCanvas
 local widgetCover do
@@ -1069,47 +1083,35 @@ WIDGET.active={}-- Table contains all active widgets
 WIDGET.scrollHeight=0-- Max drag height, not actual container height!
 WIDGET.scrollPos=0-- Current scroll position
 WIDGET.sel=false-- Selected widget
-WIDGET.indexMeta={
-    __index=function(L,k)
-        for i=1,#L do
-            if L[i].name==k then
-                return L[i]
-            end
-        end
-    end
-}
 function WIDGET.setWidgetList(list)
     WIDGET.unFocus(true)
     WIDGET.active=list or NONE
-    WIDGET.cursorMove(SCR.xOy:inverseTransformPoint(love.mouse.getPosition()))
 
-    -- Reset all widgets
     if list then
-        for i=1,#list do
-            list[i]:reset()
+        WIDGET.cursorMove(SCR.xOy:inverseTransformPoint(love.mouse.getPosition()))
+
+        -- Set metatable for new widget lists
+        if getmetatable(list)~=indexMeta then
+            setmetatable(list,indexMeta)
         end
-        onChange()
+
+        -- Reset all widgets
+        for i=1,#WIDGET.active do
+            WIDGET.active[i]:reset()
+        end
     end
+    onChange()
 end
 function WIDGET.setScrollHeight(height)
     WIDGET.scrollHeight=height and height or 0
     WIDGET.scrollPos=0
 end
-function WIDGET.setLang(widgetText)
-    for S,L in next,SCN.scenes do
-        if L.widgetList then
-            for _,W in next,L.widgetList do
-                local t=W.fText or widgetText[S][W.name]
-                if not t and W.mustHaveText then
-                    t=W.name or "##"
-                    W.color=COLOR.dV
-                end
-                if type(t)=='string' and W.font then
-                    t=gc.newText(getFont(W.font,W.fType),t)
-                end
-                W.obj=t
-            end
-        end
+function WIDGET.setLang(newLangMap)
+    langMap=newLangMap
+
+    -- Reset all widgets texts
+    for i=1,#WIDGET.active do
+        WIDGET.active[i]:reset()
     end
 end
 function WIDGET.getSelected()
