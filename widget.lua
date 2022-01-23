@@ -85,37 +85,18 @@ local Widgets={}
 
 -- Base widget (not used by user)
 local baseWidget={
-    type='base',
+    type='null',
     name=false,
-
     x=0,y=0,
-    w=0,h=0,
 
     color=COLOR.Z,
-    text=false,
-    image=false,
-    rawText=false,
-    font=30,fontType=false,
-    alignX='center',alignY='center',
     posX='raw',posY='raw',
-    widthLimit=1e99,
-    sound=false,
 
     visibleFunc=false,-- function return a boolean
 
-    _text=nil,
-    _image=nil,
     _activeTime=0,
     _activeTimeMax=.1,
     _visible=nil,
-
-    buildArgs={
-        'name',
-        'x','y',
-        'alignX','alignY',
-        'posX','posY',
-        'visibleFunc',
-    },
 }
 function baseWidget:getInfo()
     local str=""
@@ -132,7 +113,7 @@ function baseWidget:reset()
             assert(type(self._text)=='string','function text must return a string')
         else
             assert(type(self.text)=='string',"[widget].text must be a string or function return a string")
-            self._text=LANG.get(currentLanguage)[self.text]
+            self._text=langMap[self.text]
         end
     elseif self.rawText then
         assert(type(self.rawText)=='string',"[widget].rawText must be a string")
@@ -176,11 +157,26 @@ end
 Widgets.text={
     type='text',
 
-    buildArgs=TABLE.combine(baseWidget.buildArgs,{
+    text=false,
+    rawText=false,
+    font=30,fontType=false,
+    alignX='center',alignY='center',
+    widthLimit=1e99,
+
+    _text=nil,
+
+    buildArgs={
+        'name',
+        'x','y',
+        'color',
         'text','rawText',
         'font','fontType',
+
+        'alignX','alignY',
+        'posX','posY',
+        'visibleFunc',
         'widthLimit',
-    })
+    }
 } CLASS.inherit(Widgets.text,baseWidget)
 function Widgets.text:draw()
     if self._text then
@@ -193,10 +189,22 @@ end
 -- Image
 Widgets.image={
     type='image',
+    ang=0,k=1,
 
-    buildArgs=TABLE.combine(baseWidget.buildArgs,{
+    image=false,
+    alignX='center',alignY='center',
+
+    _image=nil,
+
+    buildArgs={
+        'name',
+        'x','y',
+        'ang','k',
+        'alignX','alignY',
+        'posX','posY',
+        'visibleFunc',
         'image',
-    }),
+    },
 } CLASS.inherit(Widgets.image,baseWidget)
 function Widgets.image:draw()
     if self._image then
@@ -209,15 +217,35 @@ end
 -- Button
 Widgets.button={
     type='button',
+    w=10,h=10,
 
-    buildArgs=TABLE.combine(baseWidget.buildArgs,{
+    text=false,
+    image=false,
+    rawText=false,
+    font=30,fontType=false,
+    alignX='center',alignY='center',
+    widthLimit=1e99,
+    sound=false,
+
+    code=NULL,
+
+    _text=nil,
+    _image=nil,
+
+    buildArgs={
+        'name',
+        'x','y',
         'w','h',
+        'alignX','alignY',
+        'posX','posY',
         'text','image','rawText',
         'font','fontType',
         'widthLimit',
         'sound',
+
+        'visibleFunc',
         'code',
-    }),
+    },
 } CLASS.inherit(Widgets.button,baseWidget)
 function Widgets.button:reset()
     self.__parent.reset(self)
@@ -260,54 +288,107 @@ function Widgets.button:draw()
     end
 end
 
---[[
--- Switch
-Widgets.switch={
-    type='switch',
 
-    buildArgs=TABLE.combine(baseWidget.buildArgs,{
-        'w',
+-- checkBox
+Widgets.checkBox={
+    type='checkBox',
+    w=10,
+
+    text=false,
+    image=false,
+    rawText=false,
+    font=30,fontType=false,
+    labelPos='left',
+    widthLimit=1e99,
+    sound=false,
+
+    show=false,-- function return a boolean
+    code=NULL,
+
+    _text=nil,
+    _image=nil,
+
+    buildArgs={
+        'name',
+        'x','y','w',
+        'labelPos',
+        'posX','posY',
+        'visibleFunc',
         'text','rawText',
         'font','fontType',
         'widthLimit',
         'sound',
         'show','code',
-    }),
-} CLASS.inherit(Widgets.switch,baseWidget)
-function Widgets.switch:isAbove(x,y)
+    },
+} CLASS.inherit(Widgets.checkBox,baseWidget)
+function Widgets.checkBox:reset()
+    self.__parent.reset(self)
+    if self.labelPos=='left' then
+        self.alignX,self.alignY='right','center'
+    elseif self.labelPos=='right' then
+        self.alignX,self.alignY='left','center'
+    elseif self.labelPos=='up' then
+        self.alignX,self.alignY='center','down'
+    elseif self.labelPos=='down' then
+        self.alignX,self.alignY='center','up'
+    else
+        error('[checkBox].labelPos must be left,right,up,down')
+    end
+end
+function Widgets.checkBox:isAbove(x,y)
     return
+        self.show and
         abs(x-self.x)<self.w*.5 and
         abs(y-self.y)<self.w*.5
 end
-function Widgets.switch:press(_,_,k)
+function Widgets.checkBox:press(_,_,k)
     self.code(k)
     if self.sound then
         SFX.play(self.sound)
     end
 end
-function Widgets.switch:draw()
+function Widgets.checkBox:draw()
     local x,y,w=self.x,self.y,self.w
-    x,y=x-w*.5,y-w*.5
 
     local c=self.color
 
-    -- Background
-    gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.1+.2*self._activeTimeMax/.26))
-    gc_rectangle('fill',x,y,w,w,4)
+    if self.show then
+        -- Background
+        gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.3*self._activeTime/self._activeTimeMax))
+        gc_rectangle('fill',x-w*.5,y-w*.5,w,w,4)
 
-    -- Frame
-    gc_setLineWidth(2)
-    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
-    gc_rectangle('line',x,y,w,w,3)
+        -- Frame
+        gc_setLineWidth(2)
+        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
+        gc_rectangle('line',x-w*.5,y-w*.5,w,w,3)
+        if self.show() then
+            gc_rectangle('fill',x-w*.3,y-w*.3,w*.6,w*.6,3)
+        end
+    end
 
     -- Drawable
+    local x2,y2
+    if self.labelPos=='left' then
+        x2,y2=x-w*.5-10,y
+    elseif self.labelPos=='right' then
+        x2,y2=x+w*.5+10,y
+    elseif self.labelPos=='up' then
+        x2,y2=x+w*.5,y-w*.5-10
+    elseif self.labelPos=='down' then
+        x2,y2=x+w*.5,y+w*.5+10
+    end
+    if self._image then
+        gc_setColor(1,1,1)
+        alignDraw(self,self._image,x2,y2)
+    end
     if self._text then
         gc_setColor(self.color)
-        alignDraw(self,self._text,x+w*.5,y+w*.5)
+        alignDraw(self,self._text,x2,y2)
     end
 end
 
 
+--[[
 -- Slider
 local slider={
     type='slider',
@@ -1237,16 +1318,17 @@ function WIDGET.draw()
 end
 
 function WIDGET.new(args)
-    assert(args.type,'Widget type not specified')
-    local W=Widgets[args.type]
-    assert(W,'Widget type '..args.type..' does not exist')
+    local t=args.type
     args.type=nil
+    assert(t,'Widget type not specified')
+    local W=Widgets[t]
+    assert(W,'Widget type '..t..' does not exist')
     local w=CLASS.instance(W)
     for k,v in next,args do
         if TABLE.find(W.buildArgs,k) then
             w[k]=v
         else
-            error('Illegal argument '..k..' for widget '..args.type)
+            error('Illegal argument '..k..' for widget '..t)
         end
     end
     return w

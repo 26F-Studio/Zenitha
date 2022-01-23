@@ -184,6 +184,7 @@ SCN.add('_zenitha',{
         STENCIL.stop()
     end,
     widgetList={
+        WIDGET.new{type='checkBox',rawText='text',x=400,y=400,w=30,show=function()return true end},
         WIDGET.new{type='button',rawText='Quit',x=400,y=500,w=200,h=120,code=function() love.event.quit() end},
     }
 })
