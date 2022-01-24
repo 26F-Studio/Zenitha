@@ -11,7 +11,7 @@ local gc_print,gc_printf=gc.print,gc.printf
 local kb=love.keyboard
 local timer=love.timer.getTime
 
-local next=next
+local assert,next=assert,next
 local int,ceil=math.floor,math.ceil
 local max,min=math.max,math.min
 local abs=math.abs
@@ -91,6 +91,7 @@ local baseWidget={
 
     color=COLOR.Z,
     posX='raw',posY='raw',
+    fontSize=30,fontType=false,
     widthLimit=1e99,
 
     visibleFunc=false,-- function return a boolean
@@ -107,6 +108,12 @@ function baseWidget:getInfo()
     return str
 end
 function baseWidget:reset()
+    assert(not self.name or type(self.name)=='string','[widget].name can only be a string')
+
+    assert(type(self.x)=='number','[widget].x must be a number')
+    assert(type(self.y)=='number','[widget].y must be a number')
+    assert(type(self.color)=='table','[widget].color must be a table')
+
     if self.posX=='raw' then
         self._x=self.x
     elseif self.posX=='left' then
@@ -116,6 +123,7 @@ function baseWidget:reset()
     else
         error("[widget].posX must be 'raw', 'left' or 'right'")
     end
+
     if self.posY=='raw' then
         self._y=self.y
     elseif self.posY=='up' then
@@ -126,9 +134,14 @@ function baseWidget:reset()
         error("[widget].posY must be 'raw', 'up' or 'down'")
     end
 
+    assert(type(self.fontSize)=='number','[widget].fontSize must be a number')
+    assert(type(self.fontType)=='string' or self.fontType==false,'[widget].fontType must be a string')
+    assert(type(self.widthLimit)=='number','[widget].widthLimit must be a number')
+    assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc can only be a function')
+
     self._text=nil
     if self.text then
-        if type(self.text)=='function'then
+        if type(self.text)=='function' then
             self._text=self.text()
             assert(type(self._text)=='string','function text must return a string')
         else
@@ -184,7 +197,6 @@ Widgets.text={
 
     text=false,
     rawText=false,
-    font=30,fontType=false,
     alignX='center',alignY='center',
 
     _text=nil,
@@ -194,7 +206,7 @@ Widgets.text={
         'x','y',
         'color',
         'text','rawText',
-        'font','fontType',
+        'fontSize','fontType',
 
         'alignX','alignY',
         'posX','posY',
@@ -203,6 +215,9 @@ Widgets.text={
         'visibleFunc',
     }
 } CLASS.inherit(Widgets.text,baseWidget)
+function Widgets.text:reset()
+    baseWidget.reset(self)
+end
 function Widgets.text:draw()
     if self._text then
         gc_setColor(self.color)
@@ -248,7 +263,6 @@ Widgets.button={
     text=false,
     image=false,
     rawText=false,
-    font=30,fontType=false,
     alignX='center',alignY='center',
     sound=false,
 
@@ -264,7 +278,7 @@ Widgets.button={
         'alignX','alignY',
         'posX','posY',
         'text','image','rawText',
-        'font','fontType',
+        'fontSize','fontType',
         'sound',
 
         'code',
@@ -320,7 +334,6 @@ Widgets.checkBox={
     text=false,
     image=false,
     rawText=false,
-    font=30,fontType=false,
     labelPos='left',
     widthLimit=1e99,
     sound=false,
@@ -338,7 +351,7 @@ Widgets.checkBox={
         'labelPos',
         'posX','posY',
         'text','rawText',
-        'font','fontType',
+        'fontSize','fontType',
         'widthLimit',
         'sound',
 
@@ -373,12 +386,13 @@ end
 function Widgets.checkBox:draw()
     local x,y=self._x,self._y
     local w=self.w
+    local ATV=self._activeTime/self._activeTimeMax
 
     local c=self.color
 
     if self.disp then
         -- Background
-        gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.3*self._activeTime/self._activeTimeMax))
+        gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.3*ATV))
         gc_rectangle('fill',x-w*.5,y-w*.5,w,w,4)
 
         -- Frame
@@ -403,11 +417,11 @@ function Widgets.checkBox:draw()
     end
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,x2,y2)
+        alignDraw(self,self._image,x2-ATV*6,y2)
     end
     if self._text then
         gc_setColor(self.color)
-        alignDraw(self,self._text,x2,y2)
+        alignDraw(self,self._text,x2-ATV*6,y2)
     end
 end
 
@@ -422,13 +436,12 @@ Widgets.slider={
     text=false,
     image=false,
     rawText=false,
-    font=30,fontType=false,
     labelPos='left',
     widthLimit=1e99,
     sound=false,
     show=false,
 
-    disp=false,-- function return the displaying value
+    disp=false,-- function return the displaying _value
     code=NULL,
 
     _text=nil,
@@ -449,7 +462,7 @@ Widgets.slider={
         'labelPos',
         'posX','posY',
         'text','rawText',
-        'font','fontType',
+        'fontSize','fontType',
         'widthLimit',
 
         'show',
@@ -471,7 +484,7 @@ local sliderShowFunc={
 function Widgets.slider:reset()
     baseWidget.reset(self)
 
-    assert(type(self.disp)=='function','[slider].disp must be set to a function')
+    assert(type(self.disp)=='function','[slider].disp must be a function')
 
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -498,6 +511,14 @@ function Widgets.slider:reset()
         else
             self._showFunc=sliderShowFunc.percent
         end
+    end
+
+    if self.labelPos=='left' then
+        self.alignX='right'
+    elseif self.labelPos=='right' then
+        self.alignX='left'
+    elseif self.labelPos=='down' then
+        self.alignY='up'
     end
 end
 function Widgets.slider:isAbove(x,y)
@@ -558,10 +579,15 @@ function Widgets.slider:draw()
     end
 
     -- Drawable
-    local obj=self.obj
-    if obj then
-        gc_setColor(self.color)
-        gc_draw(obj,x-10-ATV*6,y,nil,min(self.lim/obj:getWidth(),1),1,obj:getWidth(),obj:getHeight()*.5)
+    if self._text then
+        gc_setColor(.97,.97,.97)
+        if self.labelPos=='left' then
+            alignDraw(self,self._text,x-5-ATV*6,y)
+        elseif self.labelPos=='right' then
+            alignDraw(self,self._text,x+self.w+5+ATV*6,y)
+        elseif self.labelPos=='down' then
+            alignDraw(self,self._text,x+self.w*.5,y+20)
+        end
     end
 end
 function Widgets.slider:press(x)
@@ -626,12 +652,12 @@ Widgets.selector={
         'list',
         'disp','code',
         'visibleFunc',
-    },-- name,x,y,w[,fText][,color][,sound=true],list,disp[,code],hide
+    },
 } CLASS.inherit(Widgets.selector,baseWidget)
 function Widgets.selector:reset()
     baseWidget.reset(self)
 
-    assert(type(self.disp)=='function','[selector].disp must be set to a function')
+    assert(type(self.disp)=='function','[selector].disp must be a function')
 
     self.widthLimit=self.w
 
@@ -656,33 +682,33 @@ function Widgets.selector:draw()
     local x,y=self._x,self._y
     local w,h=self.w,self.h
     x,y=x-w*.5,y-h*.5
-    local ATV=4*self._activeTime/self._activeTimeMax
+    local ATV=self._activeTime/self._activeTimeMax
 
     -- Background
     gc_setColor(0,0,0,.3)
     gc_rectangle('fill',x,y,w,h,4)
 
     -- Frame
-    gc_setColor(1,1,1,.6+ATV*.1)
+    gc_setColor(1,1,1,.6+ATV*.4)
     gc_setLineWidth(2)
     gc_rectangle('line',x,y,w,h,3)
 
     -- Arrow
     if self._select then
-        gc_setColor(1,1,1,.2+ATV*.1)
+        gc_setColor(1,1,1,.2+ATV*.4)
         local t=(timer()%.5)^.5
         if self._select>1 then
             gc_draw(smallerThen,x+6,y+40)
             if ATV>0 then
-                gc_setColor(1,1,1,ATV*.4*(.5-t))
+                gc_setColor(1,1,1,ATV*1.5*(.5-t))
                 gc_draw(smallerThen,x+6-t*40,y+40)
-                gc_setColor(1,1,1,.2+ATV*.1)
+                gc_setColor(1,1,1,.2+ATV*.4)
             end
         end
         if self._select<#self.list then
             gc_draw(largerThen,x+w-26,y+40)
             if ATV>0 then
-                gc_setColor(1,1,1,ATV*.4*(.5-t))
+                gc_setColor(1,1,1,ATV*1.5*(.5-t))
                 gc_draw(largerThen,x+w-26+t*40,y+40)
             end
         end
@@ -742,59 +768,83 @@ function Widgets.selector:arrowKey(k)
 end
 
 
---[[
-local inputBox={
+Widgets.inputBox={
     type='inputBox',
     keepFocus=true,
-    ATV=0,-- Activating time(0~4)
-    value="",-- Text contained
-}
-function inputBox:hasText()
-    return #self.value>0
+
+    h=40,
+
+    secret=false,
+    inputSound=false,
+    delSound=false,
+    clearSound=false,
+    regex=false,
+    maxInputLength=1e99,
+
+    _value="",-- Text contained
+
+    buildArgs={
+        'name',
+        'x','y','w','h',
+
+        'fontSize','fontType',
+        'posX','posY',
+        'secret',
+        'inputSound',
+        'delSound',
+        'clearSound',
+
+        'list',
+        'disp','code',
+        'visibleFunc',
+    },
+} CLASS.inherit(Widgets.inputBox,baseWidget)
+function Widgets.inputBox:reset()
+    baseWidget.reset(self)
+    assert(self.w and type(self.w)=='number','[inputBox].w must be a number')
+    assert(self.h and type(self.h)=='number','[inputBox].h must be a number')
+    assert(not self.inputSound or type(self.inputSound)=='string','[inputBox].inputSound can only be a string')
+    assert(not self.delSound or type(self.delSound)=='string','[inputBox].delSound can only be a string')
+    assert(not self.clearSound or type(self.clearSound)=='string','[inputBox].clearSound can only be a string')
 end
-function inputBox:getText()
-    return self.value
+function Widgets.inputBox:hasText()
+    return #self._value>0
 end
-function inputBox:setText(str)
+function Widgets.inputBox:getText()
+    return self._value
+end
+function Widgets.inputBox:setText(str)
     if type(str)=='string' then
-        self.value=str
+        self._value=str
     end
 end
-function inputBox:addText(str)
+function Widgets.inputBox:addText(str)
     if type(str)=='string' then
-        self.value=self.value..str
+        self._value=self._value..str
     else
         MES.new('error',"inputBox "..self.name.." dead, addText("..type(str)..")")
     end
 end
-function inputBox:clear()
-    self.value=""
+function Widgets.inputBox:clear()
+    self._value=""
 end
-function inputBox:isAbove(x,y)
+function Widgets.inputBox:isAbove(x,y)
     return
         x>self.x and
         y>self.y and
         x<self.x+self.w and
         y<self.y+self.h
 end
-function inputBox:update(dt)
-    local ATV=self.ATV
-    if WIDGET.sel==self then
-        if ATV<3 then self.ATV=min(ATV+dt*60,3) end
-    else
-        if ATV>0 then self.ATV=max(ATV-dt*15,0) end
-    end
-end
-function inputBox:draw()
+function Widgets.inputBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
-    local ATV=self.ATV
+    local ATV=self._activeTime/self._activeTimeMax
 
     -- Background
-    gc_setColor(0,0,0,.4)
+    gc_setColor(0,0,0,.3)
     gc_rectangle('fill',x,y,w,h,4)
 
     -- Highlight
-    gc_setColor(1,1,1,ATV*.08*(math.sin(timer()*4.2)*.2+.8))
+    gc_setColor(1,1,1,ATV*.1*(math.sin(timer()*6.26)*.3+.7))
     gc_rectangle('fill',x,y,w,h,4)
 
     -- Frame
@@ -810,25 +860,25 @@ function inputBox:draw()
     end
     if self.secret then
         y=y+h*.5-f*.2
-        for i=1,#self.value do
+        for i=1,#self._value do
             gc_rectangle("fill",x+f*.6*i,y,f*.4,f*.4)
         end
     else
-        gc_printf(self.value,x+10,y,self.w)
+        gc_printf(self._value,x+10,y,self.w)
         setFont(f-10)
         if WIDGET.sel==self then
             gc_print(EDITING,x+10,y+12-f*1.4)
         end
     end
 end
-function inputBox:press()
+function Widgets.inputBox:press()
     if MOBILE then
         local _,y1=xOy:transformPoint(0,self.y+self.h)
         kb.setTextInput(true,0,y1,1,1)
     end
 end
-function inputBox:keypress(k)
-    local t=self.value
+function Widgets.inputBox:keypress(k)
+    local t=self._value
     if #t>0 and EDITING=="" then
         if k=='backspace' then
             local p=#t
@@ -841,7 +891,7 @@ function inputBox:keypress(k)
             t=""
             SFX.play('hold')
         end
-        self.value=t
+        self._value=t
     end
 end
 function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fontType][,secret][,regex][,limit],hide
@@ -861,10 +911,11 @@ function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fontType][,secret][,r
         hideF= D.hideF,
         hide=  D.hide,
     }
-    for k,v in next,inputBox do _[k]=v end
     return _
 end
 
+
+--[[
 local textBox={
     type='textBox',
     scrollPos=0,-- Scroll-down-distance
@@ -1258,8 +1309,8 @@ end
 function WIDGET.textinput(texts)
     local W=WIDGET.sel
     if W and W.type=='inputBox' then
-        if (not W.regex or texts:match(W.regex)) and (not W.limit or #(WIDGET.sel.value..texts)<=W.limit) then
-            WIDGET.sel.value=WIDGET.sel.value..texts
+        if (not W.regex or texts:match(W.regex)) and (not W.limit or #(WIDGET.sel._value..texts)<=W.limit) then
+            WIDGET.sel._value=WIDGET.sel._value..texts
             SFX.play('touch')
         else
             SFX.play('drop_cancel')

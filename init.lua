@@ -2,6 +2,7 @@
 NONE={}setmetatable(NONE,{__newindex=function() error('Attempt to modify a constant table') end})
 NULL=function(...) end
 PAPER=love.graphics.newCanvas(1,1)
+EDITING=""
 
 -- Inside values
 local mainLoopStarted=false
@@ -167,7 +168,7 @@ local function updatePowerInfo()
 end
 
 local testVal_1=false
-local testVal_2=6
+local testVal_2=18
 local testVal_3='opt2'
 SCN.add('_zenitha',{
     draw=function()
@@ -188,9 +189,10 @@ SCN.add('_zenitha',{
     end,
     widgetList={
         WIDGET.new{type='checkBox',rawText='test1',x=200,y=390,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
-        WIDGET.new{type='slider',  rawText='test2',x=300,y=390,w=200,axis={0,26,2},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
+        WIDGET.new{type='slider',  rawText='test2',x=340,y=390,w=180,axis={10,26,4},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
         WIDGET.new{type='selector',rawText='test3',x=650,y=390,w=200,list={'opt1','opt2','opt3'},disp=function()return testVal_3 end,code=function(v)testVal_3=v end},
-        WIDGET.new{type='button',  rawText='Quit',x=400,y=500,w=200,h=120,code=function() love.event.quit() end},
+        WIDGET.new{type='inputBox',x=100,y=450,w=300,h=100,fontSize=40},
+        WIDGET.new{type='button',  rawText='Quit',x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
     }
 })
 
@@ -562,7 +564,6 @@ function love.resize(w,h)
     if BG.resize then BG.resize(w,h) end
     if SCN.resize then SCN.resize(w,h) end
     WIDGET.resize(w,h)
-    FONT.reset()
     onResize(w,h)
 end
 
