@@ -166,6 +166,8 @@ local function updatePowerInfo()
     gc.setCanvas()
 end
 
+local testVal_1=false
+local testVal_2=6
 SCN.add('_zenitha',{
     draw=function()
         gc.setColor(.97,.97,.97,.626)
@@ -184,8 +186,9 @@ SCN.add('_zenitha',{
         STENCIL.stop()
     end,
     widgetList={
-        WIDGET.new{type='checkBox',rawText='text',x=400,y=400,w=30,show=function()return true end},
-        WIDGET.new{type='button',rawText='Quit',x=400,y=500,w=200,h=120,code=function() love.event.quit() end},
+        WIDGET.new{type='checkBox',rawText='test1',x=250,y=400,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
+        WIDGET.new{type='slider',  rawText='test2',x=500,y=400,w=200,axis={0,26,2},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
+        WIDGET.new{type='button',  rawText='Quit',x=400,y=500,w=200,h=120,code=function() love.event.quit() end},
     }
 })
 

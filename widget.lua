@@ -71,13 +71,13 @@ local widgetCover do
 end
 local scr_w,scr_h
 
-local function alignDraw(self,drawable,x,y)
+local function alignDraw(self,drawable,x,y,ang,image_k)
     local w=drawable:getWidth()
     local h=drawable:getHeight()
-    local k=min(self.widthLimit/w,1)
+    local k=image_k or min(self.widthLimit/w,1)
     local ox=self.alignX=='left' and 0 or self.alignX=='right' and w or w*.5
     local oy=self.alignY=='up' and 0 or self.alignY=='down' and h or h*.5
-    gc_draw(drawable,x,y,nil,k,1,ox,oy)
+    gc_draw(drawable,x,y,ang,k,1,ox,oy)
 end
 
 local WIDGET={}
@@ -91,6 +91,7 @@ local baseWidget={
 
     color=COLOR.Z,
     posX='raw',posY='raw',
+    widthLimit=1e99,
 
     visibleFunc=false,-- function return a boolean
 
@@ -106,6 +107,25 @@ function baseWidget:getInfo()
     return str
 end
 function baseWidget:reset()
+    if self.posX=='raw' then
+        self._x=self.x
+    elseif self.posX=='left' then
+        self._x=self.x-SCR.x/SCR.k
+    elseif self.posX=='right' then
+        self._x=SCR.w0-self.x+SCR.x/SCR.k
+    else
+        error("[widget].posX must be 'raw', 'left' or 'right'")
+    end
+    if self.posY=='raw' then
+        self._y=self.y
+    elseif self.posY=='up' then
+        self._y=self.y-SCR.y/SCR.k
+    elseif self.posY=='down' then
+        self._y=SCR.h0-self.y+SCR.y/SCR.k
+    else
+        error("[widget].posY must be 'raw', 'up' or 'down'")
+    end
+
     self._text=nil
     if self.text then
         if type(self.text)=='function'then
@@ -161,7 +181,6 @@ Widgets.text={
     rawText=false,
     font=30,fontType=false,
     alignX='center',alignY='center',
-    widthLimit=1e99,
 
     _text=nil,
 
@@ -174,14 +193,15 @@ Widgets.text={
 
         'alignX','alignY',
         'posX','posY',
-        'visibleFunc',
         'widthLimit',
+
+        'visibleFunc',
     }
 } CLASS.inherit(Widgets.text,baseWidget)
 function Widgets.text:draw()
     if self._text then
         gc_setColor(self.color)
-        alignDraw(self,self._text,self.x,self.y)
+        alignDraw(self,self._text,self._x,self._y,self.widthLimit)
     end
 end
 
@@ -200,16 +220,17 @@ Widgets.image={
         'name',
         'x','y',
         'ang','k',
+        'image',
         'alignX','alignY',
         'posX','posY',
+
         'visibleFunc',
-        'image',
     },
 } CLASS.inherit(Widgets.image,baseWidget)
 function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,self.x,self.y)
+        alignDraw(self,self._text,self._x,self._y,self.ang,self.k)
     end
 end
 
@@ -224,7 +245,6 @@ Widgets.button={
     rawText=false,
     font=30,fontType=false,
     alignX='center',alignY='center',
-    widthLimit=1e99,
     sound=false,
 
     code=NULL,
@@ -240,21 +260,20 @@ Widgets.button={
         'posX','posY',
         'text','image','rawText',
         'font','fontType',
-        'widthLimit',
         'sound',
 
-        'visibleFunc',
         'code',
+        'visibleFunc',
     },
 } CLASS.inherit(Widgets.button,baseWidget)
 function Widgets.button:reset()
-    self.__parent.reset(self)
+    baseWidget.reset(self)
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
     return
-        abs(x-self.x)<self.w*.5 and
-        abs(y-self.y)<self.h*.5
+        abs(x-self._x)<self.w*.5 and
+        abs(y-self._y)<self.h*.5
 end
 function Widgets.button:press(_,_,k)
     self.code(k)
@@ -263,7 +282,8 @@ function Widgets.button:press(_,_,k)
     end
 end
 function Widgets.button:draw()
-    local x,y,w,h=self.x,self.y,self.w,self.h
+    local x,y=self._x,self._y
+    local w,h=self.w,self.h
     x,y=x-w*.5,y-h*.5
 
     local c=self.color
@@ -302,7 +322,7 @@ Widgets.checkBox={
     widthLimit=1e99,
     sound=false,
 
-    show=false,-- function return a boolean
+    disp=false,-- function return a boolean
     code=NULL,
 
     _text=nil,
@@ -311,18 +331,20 @@ Widgets.checkBox={
     buildArgs={
         'name',
         'x','y','w',
+
         'labelPos',
         'posX','posY',
-        'visibleFunc',
         'text','rawText',
         'font','fontType',
         'widthLimit',
         'sound',
-        'show','code',
+
+        'disp','code',
+        'visibleFunc',
     },
 } CLASS.inherit(Widgets.checkBox,baseWidget)
 function Widgets.checkBox:reset()
-    self.__parent.reset(self)
+    baseWidget.reset(self)
     if self.labelPos=='left' then
         self.alignX,self.alignY='right','center'
     elseif self.labelPos=='right' then
@@ -332,14 +354,14 @@ function Widgets.checkBox:reset()
     elseif self.labelPos=='down' then
         self.alignX,self.alignY='center','up'
     else
-        error('[checkBox].labelPos must be left,right,up,down')
+        error("[checkBox].labelPos must be 'left', 'right', 'up', or 'down'")
     end
 end
 function Widgets.checkBox:isAbove(x,y)
     return
-        self.show and
-        abs(x-self.x)<self.w*.5 and
-        abs(y-self.y)<self.w*.5
+        self.disp and
+        abs(x-self._x)<self.w*.5 and
+        abs(y-self._y)<self.w*.5
 end
 function Widgets.checkBox:press(_,_,k)
     self.code(k)
@@ -348,11 +370,12 @@ function Widgets.checkBox:press(_,_,k)
     end
 end
 function Widgets.checkBox:draw()
-    local x,y,w=self.x,self.y,self.w
+    local x,y=self._x,self._y
+    local w=self.w
 
     local c=self.color
 
-    if self.show then
+    if self.disp then
         -- Background
         gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.3*self._activeTime/self._activeTimeMax))
         gc_rectangle('fill',x-w*.5,y-w*.5,w,w,4)
@@ -361,7 +384,7 @@ function Widgets.checkBox:draw()
         gc_setLineWidth(2)
         gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
         gc_rectangle('line',x-w*.5,y-w*.5,w,w,3)
-        if self.show() then
+        if self.disp() then
             gc_rectangle('fill',x-w*.3,y-w*.3,w*.6,w*.6,3)
         end
     end
@@ -388,15 +411,51 @@ function Widgets.checkBox:draw()
 end
 
 
---[[
 -- Slider
-local slider={
+Widgets.slider={
     type='slider',
-    ATV=0,-- Activating time(0~8)
-    TAT=0,-- Text activating time(0~180)
-    pos=0,-- Position shown
-    lastTime=0,-- Last value changing time
-}
+    w=10,
+    axis={0,1},
+    smooth=nil,
+
+    text=false,
+    image=false,
+    rawText=false,
+    font=30,fontType=false,
+    labelPos='left',
+    widthLimit=1e99,
+    sound=false,
+    show=false,
+
+    disp=false,-- function return the displaying value
+    code=NULL,
+
+    _text=nil,
+    _image=nil,
+    _showFunc=nil,
+    _pos=nil,
+    _rangeL=nil,
+    _rangeR=nil,
+    _unit=nil,
+    _smooth=nil,
+    _textShowTime=nil,
+
+    buildArgs={
+        'name',
+        'x','y','w',
+        'axis','smooth',
+
+        'labelPos',
+        'posX','posY',
+        'text','rawText',
+        'font','fontType',
+        'widthLimit',
+
+        'show',
+        'disp','code',
+        'visibleFunc',
+    },
+} CLASS.inherit(Widgets.slider,baseWidget)
 local sliderShowFunc={
     int=function(S)
         return S.disp()
@@ -408,36 +467,66 @@ local sliderShowFunc={
         return int(S.disp()*100+.5).."%"
     end,
 }
-function slider:isAbove(x,y)
-    return x>self.x-10 and x<self.x+self.w+10 and y>self.y-25 and y<self.y+25
+function Widgets.slider:reset()
+    baseWidget.reset(self)
+
+    assert(type(self.disp)=='function','[slider].disp must be set to a function')
+
+    self._rangeL=self.axis[1]
+    self._rangeR=self.axis[2]
+    self._unit=self.axis[3]
+    if self.smooth~=nil then
+        self._smooth=self.smooth
+    else
+        self._smooth=not self.axis[3]
+    end
+    self._pos=self._rangeL
+    self._textShowTime=3
+
+    if self.show then
+        if type(self.show)=='function' then
+            self._showFunc=self.show
+        else
+            self._showFunc=sliderShowFunc[self.show]
+        end
+    elseif self.show~=false then-- Use default if nil
+        if self._unit and self._unit%1==0 then
+            self._showFunc=sliderShowFunc.int
+        else
+            self._showFunc=sliderShowFunc.percent
+        end
+    else
+        self._showFunc=NULL
+    end
 end
-function slider:update(dt)
-    local ATV=self.ATV
-    if self.TAT>0 then
-        self.TAT=max(self.TAT-dt*60,0)
+function Widgets.slider:isAbove(x,y)
+    return
+        x>self._x-10 and
+        x<self._x+self.w+10 and
+        abs(y-self._y)<25
+end
+function Widgets.slider:update(dt)
+    baseWidget.update(self,dt)
+    if self._visible then
+        self._pos=approach(self._pos,self.disp(),dt*26)
     end
     if WIDGET.sel==self then
-        if ATV<6 then self.ATV=min(ATV+dt*60,6) end
-        self.TAT=180
-    else
-        if ATV>0 then self.ATV=max(ATV-dt*30,0) end
+        self._textShowTime=2
     end
-    if not self.hide then
-        self.pos=approach(self.pos,self.disp(),dt*26)
-    end
+    self._textShowTime=max(self._textShowTime-dt,0)
 end
-function slider:draw()
-    local x,y=self.x,self.y
-    local ATV=self.ATV
+function Widgets.slider:draw()
+    local x,y=self._x,self._y
+    local ATV=self._activeTime/self._activeTimeMax
     local x2=x+self.w
 
-    gc_setColor(1,1,1,.5+ATV*.06)
+    gc_setColor(1,1,1,.5+ATV*.36)
 
     -- Units
-    if not self.smooth then
+    if not self._smooth then
         gc_setLineWidth(2)
-        for p=self.rangeL,self.rangeR,self.unit do
-            local X=x+(x2-x)*(p-self.rangeL)/(self.rangeR-self.rangeL)
+        for p=self._rangeL,self._rangeR,self._unit do
+            local X=x+(x2-x)*(p-self._rangeL)/(self._rangeR-self._rangeL)
             gc_line(X,y+7,X,y-7)
         end
     end
@@ -447,45 +536,46 @@ function slider:draw()
     gc_line(x,y,x2,y)
 
     -- Block
-    local cx=x+(x2-x)*(self.pos-self.rangeL)/(self.rangeR-self.rangeL)
-    local bx,by,bw,bh=cx-10-ATV*.5,y-16-ATV,20+ATV,32+2*ATV
+    local cx=x+(x2-x)*(self._pos-self._rangeL)/(self._rangeR-self._rangeL)
+    local bx,by=cx-10-ATV*2,y-16-ATV*5
+    local bw,bh=20+ATV*4,32+ATV*10
     gc_setColor(.8,.8,.8)
     gc_rectangle('fill',bx,by,bw,bh,3)
 
     -- Glow
     if ATV>0 then
         gc_setLineWidth(2)
-        gc_setColor(.97,.97,.97,ATV*.16)
+        gc_setColor(.97,.97,.97,ATV)
         gc_rectangle('line',bx+1,by+1,bw-2,bh-2,3)
     end
 
     -- Float text
-    if self.TAT>0 and self.show then
+    if self._textShowTime>0 and self.disp then
         setFont(25)
-        gc_setColor(.97,.97,.97,self.TAT/180)
-        mStr(self:show(),cx,by-30)
+        gc_setColor(.97,.97,.97,min(self._textShowTime/2,1))
+        mStr(self:disp(),cx,by-30)
     end
 
     -- Drawable
     local obj=self.obj
     if obj then
         gc_setColor(self.color)
-        gc_draw(obj,x-12-ATV,y,nil,min(self.lim/obj:getWidth(),1),1,obj:getWidth(),obj:getHeight()*.5)
+        gc_draw(obj,x-10-ATV*6,y,nil,min(self.lim/obj:getWidth(),1),1,obj:getWidth(),obj:getHeight()*.5)
     end
 end
-function slider:press(x)
+function Widgets.slider:press(x)
     self:drag(x)
 end
-function slider:drag(x)
+function Widgets.slider:drag(x)
     if not x then return end
-    x=x-self.x
+    x=x-self._x
     local newPos=MATH.interval(x/self.w,0,1)
     local newVal
-    if not self.unit then
-        newVal=(1-newPos)*self.rangeL+newPos*self.rangeR
+    if not self._unit then
+        newVal=(1-newPos)*self._rangeL+newPos*self._rangeR
     else
-        newVal=newPos*(self.rangeR-self.rangeL)
-        newVal=self.rangeL+int(newVal/self.unit+.5)*self.unit
+        newVal=newPos*(self._rangeR-self._rangeL)
+        newVal=self._rangeL+int(newVal/self._unit+.5)*self._unit
     end
     if newVal~=self.disp() then
         self.code(newVal)
@@ -495,14 +585,14 @@ function slider:drag(x)
         self.change()
     end
 end
-function slider:release(x)
+function Widgets.slider:release(x)
     self:drag(x)
     self.lastTime=0
 end
-function slider:scroll(n)
+function Widgets.slider:scroll(n)
     local p=self.disp()
-    local u=self.unit or .01
-    local P=MATH.interval(p+u*n,self.rangeL,self.rangeR)
+    local u=self._unit or .01
+    local P=MATH.interval(p+u*n,self._rangeL,self._rangeR)
     if p==P or not P then return end
     self.code(P)
     if self.change and timer()-self.lastTime>.18 then
@@ -510,64 +600,12 @@ function slider:scroll(n)
         self.change()
     end
 end
-function slider:arrowKey(k)
+function Widgets.slider:arrowKey(k)
     self:scroll((k=='left' or k=='up') and -1 or 1)
 end
-function WIDGET.newSlider(D)-- name,x,y,w[,lim][,fText][,color][,axis][,smooth][,font=30][,fType][,change],disp[,show][,code],hide
-    if not D.axis then
-        D.axis={0,1,false}
-        D.smooth=true
-    elseif not D.axis[3] then
-        D.smooth=true
-    end
-    local _={
-        name=  D.name or "_",
 
-        x=     D.x,
-        y=     D.y,
-        w=     D.w,
-        lim=   D.lim or 1e99,
 
-        resCtr={
-            D.x,D.y,
-            D.x+D.w*.25,D.y,
-            D.x+D.w*.5,D.y,
-            D.x+D.w*.75,D.y,
-            D.x+D.w,D.y,
-        },
-
-        fText= D.fText,
-        color= D.color and (COLOR[D.color] or D.color) or COLOR.Z,
-        rangeL=D.axis[1],
-        rangeR=D.axis[2],
-        unit=  D.axis[3],
-        smooth=D.smooth,
-        font=  D.font or 30,
-        fType= D.fType,
-        change=D.change,
-        disp=  D.disp,
-        code=  D.code or NULL,
-        hideF= D.hideF,
-        hide=  D.hide,
-        show=  false,
-    }
-    if D.show then
-        if type(D.show)=='function' then
-            _.show=D.show
-        else
-            _.show=sliderShowFunc[D.show]
-        end
-    elseif D.show~=false then-- Use default if nil
-        if _.unit and _.unit%1==0 then
-            _.show=sliderShowFunc.int
-        else
-            _.show=sliderShowFunc.percent
-        end
-    end
-    for k,v in next,slider do _[k]=v end
-    return _
-end
-
+--[[
 local selector={
     type='selector',
     mustHaveText=true,
@@ -605,7 +643,7 @@ function selector:update(dt)
     end
 end
 function selector:draw()
-    local x,y=self.x,self.y
+    local x,y=self._x,self._y
     local w=self.w
     local ATV=self.ATV
 
@@ -650,7 +688,7 @@ function selector:press(x)
         if x<self.x+self.w*.5 then
             if s>1 then
                 s=s-1
-                SYSFX.rectangle(3,self.x,self.y-WIDGET.scrollPos,self.w*.5,60)
+                SYSFX.rectangle(3,self._x,self._y-WIDGET.scrollPos,self.w*.5,60)
             end
         else
             if s<#self.list then
@@ -673,7 +711,7 @@ function selector:scroll(n)
     if n==-1 then
         if s==1 then return end
         s=s-1
-        SYSFX.rectangle(3,self.x,self.y-WIDGET.scrollPos,self.w*.5,60)
+        SYSFX.rectangle(3,self._x,self._y-WIDGET.scrollPos,self.w*.5,60)
     else
         if s==#self.list then return end
         s=s+1
@@ -763,7 +801,7 @@ function inputBox:update(dt)
     end
 end
 function inputBox:draw()
-    local x,y,w,h=self.x,self.y,self.w,self.h
+    local x,y,w,h=self._x,self._y,self.w,self.h
     local ATV=self.ATV
 
     -- Background
@@ -918,7 +956,7 @@ function textBox:arrowKey(k)
     end
 end
 function textBox:draw()
-    local x,y,w,h=self.x,self.y,self.w,self.h
+    local x,y,w,h=self._x,self._y,self.w,self.h
     local texts=self.texts
     local scrollPos=self.scrollPos
     local cap=self.capacity
@@ -1089,7 +1127,7 @@ function listBox:select(i)
     end
 end
 function listBox:draw()
-    local x,y,w,h=self.x,self.y,self.w,self.h
+    local x,y,w,h=self._x,self._y,self.w,self.h
     local list=self.list
     local scrollPos=self.scrollPos
     local cap=self.capacity
@@ -1164,6 +1202,11 @@ WIDGET.active={}-- Table contains all active widgets
 WIDGET.scrollHeight=0-- Max drag height, not actual container height!
 WIDGET.scrollPos=0-- Current scroll position
 WIDGET.sel=false-- Selected widget
+local function _resetAllWidgets()
+    for i=1,#WIDGET.active do
+        WIDGET.active[i]:reset()
+    end
+end
 function WIDGET.setWidgetList(list)
     WIDGET.unFocus(true)
     WIDGET.active=list or NONE
@@ -1176,10 +1219,7 @@ function WIDGET.setWidgetList(list)
             setmetatable(list,indexMeta)
         end
 
-        -- Reset all widgets
-        for i=1,#WIDGET.active do
-            WIDGET.active[i]:reset()
-        end
+        _resetAllWidgets()
     end
     onChange()
 end
@@ -1189,11 +1229,7 @@ function WIDGET.setScrollHeight(height)
 end
 function WIDGET.setLang(newLangMap)
     langMap=newLangMap
-
-    -- Reset all widgets texts
-    for i=1,#WIDGET.active do
-        WIDGET.active[i]:reset()
-    end
+    _resetAllWidgets()
 end
 function WIDGET.getSelected()
     return WIDGET.sel
@@ -1291,6 +1327,7 @@ function WIDGET.resize(w,h)
     scr_w,scr_h=w,h
     if widgetCanvas then widgetCanvas:release() end
     widgetCanvas=gc.newCanvas(w,h)
+    _resetAllWidgets()
 end
 function WIDGET.draw()
     gc_setCanvas({stencil=true},widgetCanvas)
