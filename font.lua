@@ -10,14 +10,15 @@ function FONT.setDefaultFont(name) defaultFont=name end
 function FONT.setDefaultFallback(name) defaultFallBack=name end
 function FONT.setFallback(font,fallback) fallbackMap[font]=fallback end
 
-function FONT.rawget(s)
-    if not fontCache[s] then
-        fontCache[s]=love.graphics.setNewFont(s,'light',love.graphics.getDPIScale()*SCR.k*2)
+function FONT.rawget(size)
+    if not fontCache[size] then
+        assert(type(size)=='number'and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
+        fontCache[size]=love.graphics.setNewFont(size,'light',love.graphics.getDPIScale()*SCR.k*2)
     end
-    return fontCache[s]
+    return fontCache[size]
 end
-function FONT.rawset(s)
-    set(fontCache[s] or FONT.rawget(s))
+function FONT.rawset(size)
+    set(fontCache[size] or FONT.rawget(size))
 end
 function FONT.load(fonts)
     for name,path in next,fonts do
@@ -25,7 +26,6 @@ function FONT.load(fonts)
         fontFiles[name]=love.filesystem.newFile(path)
         fontCache[name]={}
     end
-    FONT.reset()
 end
 function FONT.get(size,name)
     if not name then name=defaultFont end
@@ -35,6 +35,7 @@ function FONT.get(size,name)
     f=f[size]
 
     if not f then
+        assert(type(size)=='number'and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
         f=love.graphics.setNewFont(fontFiles[name],size,'light',love.graphics.getDPIScale()*SCR.k*2)
         local fallbackName=fallbackMap[name] or defaultFallBack and name~=defaultFallBack and defaultFallBack
         if fallbackName then
@@ -54,17 +55,6 @@ function FONT.set(size,name)
     if f~=curFont then
         curFont=f or FONT.get(size,name)
         set(curFont)
-    end
-end
-function FONT.reset()
-    for name,cache in next,fontCache do
-        if type(cache)=='table' then
-            for size in next,cache do
-                cache[size]=FONT.get(size,name)
-            end
-        else
-            fontCache[name]=FONT.rawget(name)
-        end
     end
 end
 
