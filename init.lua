@@ -1,7 +1,27 @@
--- Useful global values
+-- #define (lol)
+local ms,kb=love.mouse,love.keyboard
+local KBisDown=kb.isDown
+
+local gc=love.graphics
+local gc_replaceTransform,gc_present=gc.replaceTransform,gc.present
+local gc_push,gc_pop,gc_clear,gc_discard=gc.push,gc.pop,gc.clear,gc.discard
+local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
+local gc_draw,gc_line,gc_rectangle,gc_circle=gc.draw,gc.line,gc.rectangle,gc.circle
+local gc_print,gc_printf=gc.print,gc.printf
+
+local max,min=math.max,math.min
+math.randomseed(os.time()*2600)
+
+--------------------------------------------------------------
+
+-- Useful global values/variables
 NONE={}setmetatable(NONE,{__newindex=function() error('Attempt to modify a constant table') end})
 NULL=function(...) end
 PAPER=love.graphics.newCanvas(1,1)
+
+SYSTEM=love.system.getOS() if SYSTEM=='OS X' then SYSTEM='macOS' end
+MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
+SAVEDIR=love.filesystem.getSaveDirectory()
 EDITING=""
 
 -- Inside values
@@ -22,6 +42,11 @@ local discardCanvas=false
 local updateFreq=100
 local drawFreq=100
 local sleepInterval=1/60
+local function drawCursor(_,x,y)
+    gc_setColor(1,1,1)
+    gc_setLineWidth(2)
+    gc_circle(ms.isDown(1) and 'fill' or 'line',x,y,6)
+end
 local globalKey={
     f8=function()
         devMode=1
@@ -33,12 +58,7 @@ local onResize=NULL
 local onFocus=NULL
 local onQuit=NULL
 
-Zenitha={}
-
-SYSTEM=love.system.getOS() if SYSTEM=='OS X' then SYSTEM='macOS' end
-MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
-SAVEDIR=love.filesystem.getSaveDirectory()
-math.randomseed(os.time()*2600)
+--------------------------------------------------------------
 
 -- Extended lua basic libraries
 MATH=       require'zenitha.mathExtend'
@@ -101,29 +121,14 @@ IMG=        require'zenitha.image'
 BGM=        require'zenitha.bgm'
 VOC=        require'zenitha.voice'
 
-local ms,kb=love.mouse,love.keyboard
-local KBisDown=kb.isDown
-
-local gc=love.graphics
-local gc_replaceTransform,gc_present=gc.replaceTransform,gc.present
-local gc_push,gc_pop,gc_clear,gc_discard=gc.push,gc.pop,gc.clear,gc.discard
-local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
-local gc_draw,gc_line,gc_rectangle,gc_circle=gc.draw,gc.line,gc.rectangle,gc.circle
-local gc_print,gc_printf=gc.print,gc.printf
-
-local max,min=math.max,math.min
+--------------------------------------------------------------
 
 local WIDGET,SCR,SCN=WIDGET,SCR,SCN
 local setFont=FONT.set
 local xOy=SCR.xOy
 local ITP=xOy.inverseTransformPoint
 
-local function drawCursor(_,x,y)
-    gc_setColor(1,1,1)
-    gc_setLineWidth(2)
-    gc_circle(ms.isDown(1) and 'fill' or 'line',x,y,6)
-end
-
+-- Power info updating function
 local infoCanvas=gc.newCanvas(108,27)
 local function updatePowerInfo()
     local state,pow=love.system.getPowerInfo()
@@ -139,10 +144,10 @@ local function updatePowerInfo()
             gc_line(74,5,100,22)
         elseif pow then
             if state=='charging' then gc_setColor(0,1,0)
-            elseif pow>50 then       gc_setColor(1,1,1)
-            elseif pow>26 then       gc_setColor(1,1,0)
-            elseif pow==26 then      gc_setColor(.5,0,1)
-            else                     gc_setColor(1,0,0)
+            elseif pow>50 then        gc_setColor(1,1,1)
+            elseif pow>26 then        gc_setColor(1,1,0)
+            elseif pow==26 then       gc_setColor(.5,0,1)
+            else                      gc_setColor(1,0,0)
             end
             gc.rectangle('fill',76,6,pow*.22,14)
             if pow<100 then
@@ -167,54 +172,43 @@ local function updatePowerInfo()
     gc.setCanvas()
 end
 
+-- Set default font
 FONT.load({_basic='Zenitha/basic.otf'})
 FONT.setDefaultFont('_basic')
 FONT.setDefaultFallback('_basic')
-local testVal_1=false
-local testVal_2=18
-local testVal_3='opt2'
-SCN.add('_zenitha',{
-    draw=function()
-        gc.setColor(.97,.97,.97,.626)
+
+do-- Define demo scene
+    local testVal_1=false
+    local testVal_2=18
+    local testVal_3='opt2'
+    local function _sceneDraw()
         setFont(150,'_basic')
         GC.mStr("Zenitha",400,60)
         setFont(60,'_basic')
         GC.mStr("Demo Scene",400,220)
         setFont(20,'_basic')
         GC.mStr("Powered by LÖVE",400,300)
+    end
+    SCN.add('_zenitha',{
+        draw=function()
+            gc.setColor(.97,.97,.97,.626)
+            _sceneDraw()
 
-        gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
-        STENCIL.start('equal',1)
-        STENCIL.circle(400+100*math.cos(love.timer.getTime()*1.26),260+100*math.sin(love.timer.getTime()*1.26),126)
-        setFont(150,'_basic')
-        GC.mStr("Zenitha",400,60)
-        setFont(60,'_basic')
-        GC.mStr("Demo Scene",400,220)
-        setFont(20,'_basic')
-        GC.mStr("Powered by LÖVE",400,300)
-        STENCIL.stop()
-    end,
-    widgetList={
-        WIDGET.new{type='checkBox',rawText='1:checkBox',x=210,y=390,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
-        WIDGET.new{type='slider',  rawText='2:slider',  x=370,y=390,w=180,axis={10,26,4},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
-        WIDGET.new{type='selector',rawText='3:selector',x=670,y=390,w=200,list={'opt1','opt2','opt3'},disp=function()return testVal_3 end,code=function(v)testVal_3=v end},
-        WIDGET.new{type='inputBox',rawText='4:inputBox',x=100,y=450,w=300,h=100,labelPos='down'},
-        WIDGET.new{type='button',  rawText='Quit',x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
-    }
-})
-
--- Zenitha methods
-function Zenitha.setAppName(name)
-    assert(type(name)=='string','Z.appName must be a string')
-    appName=name
+            STENCIL.start('equal',1)
+            STENCIL.circle(400+100*math.cos(love.timer.getTime()*1.26),260+100*math.sin(love.timer.getTime()*1.26),126)
+            gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
+            _sceneDraw()
+            STENCIL.stop()
+        end,
+        widgetList={
+            WIDGET.new{type='checkBox',rawText='1:checkBox',x=210,y=390,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
+            WIDGET.new{type='slider',  rawText='2:slider',  x=370,y=390,w=180,axis={10,26,4},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
+            WIDGET.new{type='selector',rawText='3:selector',x=670,y=390,w=200,list={'opt1','opt2','opt3'},disp=function()return testVal_3 end,code=function(v)testVal_3=v end},
+            WIDGET.new{type='inputBox',rawText='4:inputBox',x=100,y=450,w=300,h=100,labelPos='down'},
+            WIDGET.new{type='button',  rawText='Quit',x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
+        }
+    })
 end
-function Zenitha.getAppName() return appName end
-
-function Zenitha.setVersionText(text)
-    assert(type(text)=='string','Z.versionText must be a string')
-    versionText=text
-end
-function Zenitha.getVersionText() return versionText end
 
 --------------------------------------------------------------
 
@@ -870,6 +864,23 @@ function love.run()
         while timer()-lastLoopTime<sleepInterval do end
     end
 end
+
+--------------------------------------------------------------
+
+-- Zenitha framework & methods
+Zenitha={}
+
+function Zenitha.setAppName(name)
+    assert(type(name)=='string','Z.appName must be a string')
+    appName=name
+end
+function Zenitha.getAppName() return appName end
+
+function Zenitha.setVersionText(text)
+    assert(type(text)=='string','Z.versionText must be a string')
+    versionText=text
+end
+function Zenitha.getVersionText() return versionText end
 
 function Zenitha.getJsState() return jsState end
 function Zenitha.getErr(i)
