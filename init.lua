@@ -185,7 +185,7 @@ SCN.add('_zenitha',{
 
         gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
         STENCIL.start('equal',1)
-        STENCIL.circle(400+100*math.cos(love.timer.getTime()*1.26),300+100*math.sin(love.timer.getTime()*1.26),160)
+        STENCIL.circle(400+100*math.cos(love.timer.getTime()*1.26),260+100*math.sin(love.timer.getTime()*1.26),126)
         setFont(150,'_basic')
         GC.mStr("Zenitha",400,60)
         setFont(60,'_basic')
@@ -195,10 +195,10 @@ SCN.add('_zenitha',{
         STENCIL.stop()
     end,
     widgetList={
-        WIDGET.new{type='checkBox',rawText='test1',x=200,y=390,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
-        WIDGET.new{type='slider',  rawText='test2',x=340,y=390,w=180,axis={10,26,4},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
-        WIDGET.new{type='selector',rawText='test3',x=650,y=390,w=200,list={'opt1','opt2','opt3'},disp=function()return testVal_3 end,code=function(v)testVal_3=v end},
-        WIDGET.new{type='inputBox',x=100,y=450,w=300,h=100,fontSize=40},
+        WIDGET.new{type='checkBox',rawText='1:checkBox',x=210,y=390,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
+        WIDGET.new{type='slider',  rawText='2:slider',  x=370,y=390,w=180,axis={10,26,4},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
+        WIDGET.new{type='selector',rawText='3:selector',x=670,y=390,w=200,list={'opt1','opt2','opt3'},disp=function()return testVal_3 end,code=function(v)testVal_3=v end},
+        WIDGET.new{type='inputBox',rawText='4:inputBox',x=100,y=450,w=300,h=100,labelPos='down'},
         WIDGET.new{type='button',  rawText='Quit',x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
     }
 })

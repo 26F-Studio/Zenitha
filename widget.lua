@@ -411,9 +411,9 @@ function Widgets.checkBox:draw()
     elseif self.labelPos=='right' then
         x2,y2=x+w*.5+10,y
     elseif self.labelPos=='up' then
-        x2,y2=x+w*.5,y-w*.5-10
+        x2,y2=x+w*.5,y-w*.5-8
     elseif self.labelPos=='down' then
-        x2,y2=x+w*.5,y+w*.5+10
+        x2,y2=x+w*.5,y+w*.5+8
     end
     if self._image then
         gc_setColor(1,1,1)
@@ -582,9 +582,9 @@ function Widgets.slider:draw()
     if self._text then
         gc_setColor(.97,.97,.97)
         if self.labelPos=='left' then
-            alignDraw(self,self._text,x-5-ATV*6,y)
+            alignDraw(self,self._text,x-8-ATV*6,y)
         elseif self.labelPos=='right' then
-            alignDraw(self,self._text,x+self.w+5+ATV*6,y)
+            alignDraw(self,self._text,x+self.w+8+ATV*6,y)
         elseif self.labelPos=='down' then
             alignDraw(self,self._text,x+self.w*.5,y+20)
         end
@@ -779,6 +779,7 @@ Widgets.inputBox={
     delSound=false,
     clearSound=false,
     regex=false,
+    labelPos='left',
     maxInputLength=1e99,
 
     _value="",-- Text contained
@@ -787,12 +788,16 @@ Widgets.inputBox={
         'name',
         'x','y','w','h',
 
+        'text','rawText',
         'fontSize','fontType',
         'posX','posY',
         'secret',
         'inputSound',
         'delSound',
         'clearSound',
+        'regex',
+        'labelPos',
+        'maxInputLength',
 
         'list',
         'disp','code',
@@ -806,6 +811,17 @@ function Widgets.inputBox:reset()
     assert(not self.inputSound or type(self.inputSound)=='string','[inputBox].inputSound can only be a string')
     assert(not self.delSound or type(self.delSound)=='string','[inputBox].delSound can only be a string')
     assert(not self.clearSound or type(self.clearSound)=='string','[inputBox].clearSound can only be a string')
+    if self.labelPos=='left' then
+        self.alignX,self.alignY='right','center'
+    elseif self.labelPos=='right' then
+        self.alignX,self.alignY='left','center'
+    elseif self.labelPos=='up' then
+        self.alignX,self.alignY='center','down'
+    elseif self.labelPos=='down' then
+        self.alignX,self.alignY='center','up'
+    else
+        error("[inputBox].labelPos must be 'left', 'right', 'up', or 'down'")
+    end
 end
 function Widgets.inputBox:hasText()
     return #self._value>0
@@ -844,7 +860,7 @@ function Widgets.inputBox:draw()
     gc_rectangle('fill',x,y,w,h,4)
 
     -- Highlight
-    gc_setColor(1,1,1,ATV*.1*(math.sin(timer()*6.26)*.3+.7))
+    gc_setColor(1,1,1,ATV*.2*(math.sin(timer()*6.26)*.25+.75))
     gc_rectangle('fill',x,y,w,h,4)
 
     -- Frame
@@ -853,19 +869,28 @@ function Widgets.inputBox:draw()
     gc_rectangle('line',x,y,w,h,3)
 
     -- Drawable
-    local f=self.fontSize
-    setFont(f,self.fontType)
-    if self.obj then
-        gc_draw(self.obj,x-12-self.obj:getWidth(),y+h*.5-self.obj:getHeight()*.5)
+    if self._text then
+        gc_setColor(.97,.97,.97)
+        if self.labelPos=='left' then
+            alignDraw(self,self._text,x-8,y+self.h*.5)
+        elseif self.labelPos=='right' then
+            alignDraw(self,self._text,x+self.w+8,y+self.h*.5)
+        elseif self.labelPos=='up' then
+            alignDraw(self,self._text,x+self.w*.5,y)
+        elseif self.labelPos=='down' then
+            alignDraw(self,self._text,x+self.w*.5,y+self.h)
+        end
     end
+
+    local f=self.fontSize
     if self.secret then
         y=y+h*.5-f*.2
         for i=1,#self._value do
             gc_rectangle("fill",x+f*.6*i,y,f*.4,f*.4)
         end
     else
-        gc_printf(self._value,x+10,y,self.w)
-        setFont(f-10)
+        setFont(f,self.fontType)
+        gc_printf(self._value,x+10,y,self.w-20)
         if WIDGET.sel==self then
             gc_print(EDITING,x+10,y+12-f*1.4)
         end
