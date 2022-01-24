@@ -139,7 +139,7 @@ function baseWidget:reset()
         assert(type(self.rawText)=='string',"[widget].rawText must be a string")
         self._text=self.rawText
     end
-    self._text=gc.newText(getFont(self.font,self.fType),self._text)
+    self._text=gc.newText(getFont(self.fontSize,self.fontType),self._text)
 
     self._image=nil
     if self.image then
@@ -155,6 +155,11 @@ function baseWidget:reset()
     self._visible=true
     if self.visibleFunc then
         self._visible=self.visibleFunc()
+    end
+end
+function baseWidget:playSound()
+    if self.sound then
+        SFX.play(self.sound)
     end
 end
 function baseWidget:setVisible(bool)
@@ -277,9 +282,7 @@ function Widgets.button:isAbove(x,y)
 end
 function Widgets.button:press(_,_,k)
     self.code(k)
-    if self.sound then
-        SFX.play(self.sound)
-    end
+    self:playSound()
 end
 function Widgets.button:draw()
     local x,y=self._x,self._y
@@ -365,9 +368,7 @@ function Widgets.checkBox:isAbove(x,y)
 end
 function Widgets.checkBox:press(_,_,k)
     self.code(k)
-    if self.sound then
-        SFX.play(self.sound)
-    end
+    self:playSound()
 end
 function Widgets.checkBox:draw()
     local x,y=self._x,self._y
@@ -486,17 +487,17 @@ function Widgets.slider:reset()
     if self.show then
         if type(self.show)=='function' then
             self._showFunc=self.show
-        else
-            self._showFunc=sliderShowFunc[self.show]
+        elseif type(self.show)=='string' then
+            self._showFunc=assert(sliderShowFunc[self.show],"[slider].show must be a function, or 'int', 'float', or 'percent'")
         end
-    elseif self.show~=false then-- Use default if nil
+    elseif self.show==false then-- Use default if nil
+        self._showFunc=NULL
+    else
         if self._unit and self._unit%1==0 then
             self._showFunc=sliderShowFunc.int
         else
             self._showFunc=sliderShowFunc.percent
         end
-    else
-        self._showFunc=NULL
     end
 end
 function Widgets.slider:isAbove(x,y)
@@ -605,109 +606,123 @@ function Widgets.slider:arrowKey(k)
 end
 
 
---[[
-local selector={
+Widgets.selector={
     type='selector',
-    mustHaveText=true,
-    ATV=8,-- Activating time(0~4)
-    select=false,-- Selected item ID
-    selText=false,-- Selected item name
-}
-function selector:reset()
-    self.ATV=0
+
+    h=70,-- Attention, fixed height
+
+    _select=false,-- Selected item ID
+    _selText=false,-- Selected item name
+    alignX='center',alignY='down',-- Force text alignment
+
+    buildArgs={
+        'name',
+        'x','y','w',
+
+        'posX','posY',
+        'text','rawText',
+        'sound',
+
+        'list',
+        'disp','code',
+        'visibleFunc',
+    },-- name,x,y,w[,fText][,color][,sound=true],list,disp[,code],hide
+} CLASS.inherit(Widgets.selector,baseWidget)
+function Widgets.selector:reset()
+    baseWidget.reset(self)
+
+    assert(type(self.disp)=='function','[selector].disp must be set to a function')
+
+    self.widthLimit=self.w
+
     local V,L=self.disp(),self.list
     for i=1,#L do
         if L[i]==V then
-            self.select=i
-            self.selText=self.list[i]
+            self._select=i
+            self._selText=self.list[i]
             return
         end
     end
-    self.select=0
-    self.selText=""
+    self._select=false
+    self._selText=false
     MES.new('error',"Selector "..self.name.." dead, disp= "..tostring(V))
 end
-function selector:isAbove(x,y)
+function Widgets.selector:isAbove(x,y)
     return
-        x>self.x and
-        x<self.x+self.w+2 and
-        y>self.y and
-        y<self.y+60
+        abs(x-self._x)<self.w*.5 and
+        abs(y-self._y)<60*.5
 end
-function selector:update(dt)
-    local ATV=self.ATV
-    if WIDGET.sel==self then
-        if ATV<8 then self.ATV=min(ATV+dt*60,8) end
-    else
-        if ATV>0 then self.ATV=max(ATV-dt*30,0) end
-    end
-end
-function selector:draw()
+function Widgets.selector:draw()
     local x,y=self._x,self._y
-    local w=self.w
-    local ATV=self.ATV
+    local w,h=self.w,self.h
+    x,y=x-w*.5,y-h*.5
+    local ATV=4*self._activeTime/self._activeTimeMax
 
     -- Background
     gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y,w,60,4)
+    gc_rectangle('fill',x,y,w,h,4)
 
     -- Frame
     gc_setColor(1,1,1,.6+ATV*.1)
     gc_setLineWidth(2)
-    gc_rectangle('line',x,y,w,60,3)
+    gc_rectangle('line',x,y,w,h,3)
 
     -- Arrow
-    gc_setColor(1,1,1,.2+ATV*.1)
-    local t=(timer()%.5)^.5
-    if self.select>1 then
-        gc_draw(smallerThen,x+6,y+33)
-        if ATV>0 then
-            gc_setColor(1,1,1,ATV*.4*(.5-t))
-            gc_draw(smallerThen,x+6-t*40,y+33)
-            gc_setColor(1,1,1,.2+ATV*.1)
+    if self._select then
+        gc_setColor(1,1,1,.2+ATV*.1)
+        local t=(timer()%.5)^.5
+        if self._select>1 then
+            gc_draw(smallerThen,x+6,y+40)
+            if ATV>0 then
+                gc_setColor(1,1,1,ATV*.4*(.5-t))
+                gc_draw(smallerThen,x+6-t*40,y+40)
+                gc_setColor(1,1,1,.2+ATV*.1)
+            end
         end
-    end
-    if self.select<#self.list then
-        gc_draw(largerThen,x+w-26,y+33)
-        if ATV>0 then
-            gc_setColor(1,1,1,ATV*.4*(.5-t))
-            gc_draw(largerThen,x+w-26+t*40,y+33)
+        if self._select<#self.list then
+            gc_draw(largerThen,x+w-26,y+40)
+            if ATV>0 then
+                gc_setColor(1,1,1,ATV*.4*(.5-t))
+                gc_draw(largerThen,x+w-26+t*40,y+40)
+            end
         end
     end
 
     -- Drawable
-    gc_setColor(self.color)
-    gc_draw(self.obj,x+w*.5,y-4,nil,min((w-20)/self.obj:getWidth(),1),1,self.obj:getWidth()*.5,0)
-    gc_setColor(1,1,1)
-    setFont(30)
-    mStr(self.selText,x+w*.5,y+22)
+    if self._text then
+        gc_setColor(self.color)
+        alignDraw(self,self._text,x+w*.5,y+35)
+    end
+    if self._selText then
+        setFont(30)
+        gc_setColor(COLOR.Z)
+        mStr(self._selText,x+w*.5,y+30)
+    end
 end
-function selector:press(x)
+function Widgets.selector:press(x)
     if x then
-        local s=self.select
-        if x<self.x+self.w*.5 then
+        local s=self._select
+        if x<self.x then
             if s>1 then
                 s=s-1
-                SYSFX.rectangle(3,self._x,self._y-WIDGET.scrollPos,self.w*.5,60)
+                SYSFX.rectangle(3,self._x-self.w*.5,self._y-self.h*.5-WIDGET.scrollPos,self.w*.5,self.h)
             end
         else
             if s<#self.list then
                 s=s+1
-                SYSFX.rectangle(3,self.x+self.w*.5,self.y-WIDGET.scrollPos,self.w*.5,60)
+                SYSFX.rectangle(3,self.x,self.y-self.h*.5-WIDGET.scrollPos,self.w*.5,self.h)
             end
         end
-        if self.select~=s then
+        if self._select~=s then
             self.code(self.list[s])
-            self.select=s
-            self.selText=self.list[s]
-            if self.sound then
-                SFX.play('selector')
-            end
+            self._select=s
+            self._selText=self.list[s]
+            self:playSound()
         end
     end
 end
-function selector:scroll(n)
-    local s=self.select
+function Widgets.selector:scroll(n)
+    local s=self._select
     if n==-1 then
         if s==1 then return end
         s=s-1
@@ -718,46 +733,16 @@ function selector:scroll(n)
         SYSFX.rectangle(3,self.x+self.w*.5,self.y-WIDGET.scrollPos,self.w*.5,60)
     end
     self.code(self.list[s])
-    self.select=s
-    self.selText=self.list[s]
-    if self.sound then
-        SFX.play('selector')
-    end
+    self._select=s
+    self._selText=self.list[s]
+    self:playSound()
 end
-function selector:arrowKey(k)
+function Widgets.selector:arrowKey(k)
     self:scroll((k=='left' or k=='up') and -1 or 1)
 end
 
-function WIDGET.newSelector(D)-- name,x,y,w[,fText][,color][,sound=true],list,disp[,code],hide
-    local _={
-        name= D.name or "_",
 
-        x=    D.x-D.w*.5,
-        y=    D.y-30,
-        w=    D.w,
-
-        resCtr={
-            D.x,D.y,
-            D.x+D.w*.25,D.y,
-            D.x+D.w*.5,D.y,
-            D.x+D.w*.75,D.y,
-            D.x+D.w,D.y,
-        },
-
-        fText=D.fText,
-        color=D.color and (COLOR[D.color] or D.color) or COLOR.Z,
-        sound=D.sound~=false,
-        font= 30,
-        list= D.list,
-        disp= D.disp,
-        code= D.code or NULL,
-        hideF=D.hideF,
-        hide= D.hide,
-    }
-    for k,v in next,selector do _[k]=v end
-    return _
-end
-
+--[[
 local inputBox={
     type='inputBox',
     keepFocus=true,
@@ -818,8 +803,8 @@ function inputBox:draw()
     gc_rectangle('line',x,y,w,h,3)
 
     -- Drawable
-    local f=self.font
-    setFont(f,self.fType)
+    local f=self.fontSize
+    setFont(f,self.fontType)
     if self.obj then
         gc_draw(self.obj,x-12-self.obj:getWidth(),y+h*.5-self.obj:getHeight()*.5)
     end
@@ -859,7 +844,7 @@ function inputBox:keypress(k)
         self.value=t
     end
 end
-function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fType][,secret][,regex][,limit],hide
+function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fontType][,secret][,regex][,limit],hide
     local _={
         name=  D.name or "_",
 
@@ -868,14 +853,8 @@ function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fType][,secret][,rege
         w=     D.w,
         h=     D.h,
 
-        resCtr={
-            D.x+D.w*.2,D.y,
-            D.x+D.w*.5,D.y,
-            D.x+D.w*.8,D.y,
-        },
-
-        font=  D.font or int(D.h/7-1)*5,
-        fType= D.fType,
+        font=  D.fontSize or int(D.h/7-1)*5,
+        fontType= D.fontType,
         secret=D.secret==true,
         regex= D.regex,
         limit= D.limit,
@@ -972,7 +951,7 @@ function textBox:draw()
     gc_rectangle('line',x,y,w,h,3)
 
     -- Texts
-    setFont(self.font,self.fType)
+    setFont(self.fontSize,self.fontType)
     gc_push('transform')
         gc_translate(x,y)
 
@@ -999,35 +978,23 @@ function textBox:draw()
         STENCIL.stop()
     gc_pop()
 end
-function WIDGET.newTextBox(D)-- name,x,y,w,h[,font=30][,fType][,lineH][,fix],hide
+function WIDGET.newTextBox(D)-- name,x,y,w,h[,font=30][,fontType][,lineH][,fix],hide
     local _={
         name= D.name or "_",
-
-        resCtr={
-            D.x+D.w*.5,D.y+D.h*.5,
-            D.x+D.w*.5,D.y,
-            D.x-D.w*.5,D.y,
-            D.x,D.y+D.h*.5,
-            D.x,D.y-D.h*.5,
-            D.x,D.y,
-            D.x+D.w,D.y,
-            D.x,D.y+D.h,
-            D.x+D.w,D.y+D.h,
-        },
 
         x=    D.x,
         y=    D.y,
         w=    D.w,
         h=    D.h,
 
-        font= D.font or 30,
-        fType=D.fType,
+        font= D.fontSize or 30,
+        fontType=D.fontType,
         fix=  D.fix,
         texts={},
         hideF=D.hideF,
         hide= D.hide,
     }
-    _.lineH=D.lineH or _.font*7/5
+    _.lineH=D.lineH or _.fontSize*7/5
     _.capacity=ceil((D.h-10)/_.lineH)
 
     for k,v in next,textBox do _[k]=v end
@@ -1167,18 +1134,6 @@ end
 function WIDGET.newListBox(D)-- name,x,y,w,h,lineH,drawF[,hideF][,hide]
     local _={
         name=    D.name or "_",
-
-        resCtr={
-            D.x+D.w*.5,D.y+D.h*.5,
-            D.x+D.w*.5,D.y,
-            D.x-D.w*.5,D.y,
-            D.x,D.y+D.h*.5,
-            D.x,D.y-D.h*.5,
-            D.x,D.y,
-            D.x+D.w,D.y,
-            D.x,D.y+D.h,
-            D.x+D.w,D.y+D.h,
-        },
 
         x=       D.x,
         y=       D.y,

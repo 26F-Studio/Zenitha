@@ -168,13 +168,14 @@ end
 
 local testVal_1=false
 local testVal_2=6
+local testVal_3='opt2'
 SCN.add('_zenitha',{
     draw=function()
         gc.setColor(.97,.97,.97,.626)
         setFont(150)
         GC.mStr("Zenitha",400,100)
         setFont(60)
-        GC.mStr("Demo Scene",400,300)
+        GC.mStr("Demo Scene",400,260)
 
         gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
         STENCIL.start('equal',1)
@@ -182,12 +183,13 @@ SCN.add('_zenitha',{
         setFont(150)
         GC.mStr("Zenitha",400,100)
         setFont(60)
-        GC.mStr("Demo Scene",400,300)
+        GC.mStr("Demo Scene",400,260)
         STENCIL.stop()
     end,
     widgetList={
-        WIDGET.new{type='checkBox',rawText='test1',x=250,y=400,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
-        WIDGET.new{type='slider',  rawText='test2',x=500,y=400,w=200,axis={0,26,2},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
+        WIDGET.new{type='checkBox',rawText='test1',x=200,y=390,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
+        WIDGET.new{type='slider',  rawText='test2',x=300,y=390,w=200,axis={0,26,2},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
+        WIDGET.new{type='selector',rawText='test3',x=650,y=390,w=200,list={'opt1','opt2','opt3'},disp=function()return testVal_3 end,code=function(v)testVal_3=v end},
         WIDGET.new{type='button',  rawText='Quit',x=400,y=500,w=200,h=120,code=function() love.event.quit() end},
     }
 })
