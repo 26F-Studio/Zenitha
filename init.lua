@@ -131,15 +131,13 @@ local ITP=xOy.inverseTransformPoint
 local infoCanvas=gc.newCanvas(108,27)
 local function updatePowerInfo()
     local state,pow=love.system.getPowerInfo()
-    gc.setCanvas(infoCanvas)
-    gc_push('transform')
     gc.origin()
+    gc.setCanvas(infoCanvas)
     gc_clear(0,0,0,.25)
     if state~='unknown' then
-        gc.setLineWidth(4)
+        gc.setLineWidth(2)
         if state=='nobattery' then
             gc_setColor(1,1,1)
-            gc.setLineWidth(2)
             gc.line(74,5,100,22)
         elseif pow then
             if state=='charging' then gc_setColor(0,1,0)
@@ -150,24 +148,15 @@ local function updatePowerInfo()
             end
             gc.rectangle('fill',76,6,pow*.22,14)
             if pow<100 then
-                setFont(15,'_basic')
-                gc.setColor(COLOR.D)
-                gc_print(pow,77,1)
-                gc_print(pow,77,3)
-                gc_print(pow,79,1)
-                gc_print(pow,79,3)
-                gc_setColor(COLOR.Z)
-                gc_print(pow,78,2)
+                setFont(10,'_basic')
+                GC.shadedPrint(pow,87,6,'center',1,8)
             end
         end
-        gc.rectangle('fill',74,3,26,2)
-        gc.rectangle('fill',74,21,26,2)
-        gc.rectangle('fill',99,4,2,18)
-        gc.rectangle('fill',102,3,2,14)
+        gc.rectangle('line',74,4,26,18)
+        gc.rectangle('fill',102,6,2,14)
     end
     setFont(25,'_basic')
     gc_print(os.date("%H:%M"),3,-5)
-    gc_pop()
     gc.setCanvas()
 end
 
