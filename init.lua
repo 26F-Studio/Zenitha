@@ -3,7 +3,7 @@ local ms,kb=love.mouse,love.keyboard
 local KBisDown=kb.isDown
 
 local gc=love.graphics
-local gc_replaceTransform,gc_present=gc.replaceTransform,gc.present
+local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
 local gc_push,gc_pop,gc_clear,gc_discard=gc.push,gc.pop,gc.clear,gc.discard
 local gc_setColor,gc_draw,gc_circle=gc.setColor,gc.draw,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
@@ -123,9 +123,9 @@ VOC=        require'Zenitha.voice'
 --------------------------------------------------------------
 
 local WIDGET,SCR,SCN=WIDGET,SCR,SCN
-local setFont=FONT.set
 local xOy=SCR.xOy
 local ITP=xOy.inverseTransformPoint
+local setFont=FONT.set
 
 -- Power info updating function
 local infoCanvas=gc.newCanvas(108,27)
@@ -755,7 +755,10 @@ function love.run()
                     BG.draw()
                 gc_replaceTransform(SCR.xOy)
                     gc_setColor(1,1,1)
-                    if SCN.draw then SCN.draw() end
+                    if SCN.draw then
+                        gc_translate(0,-WIDGET.scrollPos)
+                        SCN.draw()
+                    end
                 gc_replaceTransform(SCR.xOy)
                     WIDGET_draw()
                     SYSFX_draw()
