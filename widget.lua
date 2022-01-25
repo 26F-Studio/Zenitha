@@ -25,15 +25,6 @@ local approach=MATH.expApproach
 
 local downArrowIcon=GC.DO{40,25,{'fPoly',0,0,20,25,40,0}}
 local upArrowIcon=GC.DO{40,25,{'fPoly',0,25,20,0,40,25}}
-local clearIcon=GC.DO{40,40,
-    {'fRect',16,5,8,3},
-    {'fRect',8,8,24,3},
-    {'fRect',11,14,18,21},
-}
-local sureIcon=GC.DO{40,40,
-    {'rawFT',35},
-    {'mText',"?",20,0},
-}
 local smallerThen=GC.DO{20,20,
     {'setLW',5},
     {'line',18,2,1,10,18,18},
@@ -940,58 +931,83 @@ function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fontType][,secret][,r
 end
 
 
---[[
-local textBox={
+Widgets.textBox={
     type='textBox',
-    scrollPos=0,-- Scroll-down-distance
-    sure=0,-- Sure-timer for clear history
-}
-function textBox:reset()
-    -- haha nothing here, techmino is so fun!
+
+    lineHeight=30,
+
+    _scrollPos=0,-- Scroll-down-distance
+    _sure=0,-- Sure-timer for clear history
+
+    buildArgs={
+        'name',
+        'x','y','w','h',
+
+        'fontSize','fontType',
+        'posX','posY',
+        'lineHeight',
+        'fixContent',
+
+        'visibleFunc',
+    },
+} CLASS.inherit(Widgets.textBox,baseWidget)
+function Widgets.textBox:reset()
+    baseWidget.reset(self)
+    assert(self.w and type(self.w)=='number','[inputBox].w must be a number')
+    assert(self.h and type(self.h)=='number','[inputBox].h must be a number')
+
+    if not self.texts then self.texts={} end
+    self._capacity=ceil((self.h-10)/self.lineHeight)
+    self._scrollPos=0
 end
-function textBox:setTexts(t)
-    self.texts=t
-    self.scrollPos=0
+function Widgets.textBox:replaceTexts(newList)
+    self.texts=newList
+    self._scrollPos=0
 end
-function textBox:clear()
+function Widgets.textBox:setTexts(newList)
+    TABLE.clear(self.texts)
+    TABLE.connect(self.texts,newList)
+    self._scrollPos=0
+end
+function Widgets.textBox:push(t)
+    ins(self.texts,t)
+    if self._scrollPos==(#self.texts-1-self._capacity)*self.lineHeight then-- minus 1 for the new message
+        self._scrollPos=min(self._scrollPos+self.lineHeight,(#self.texts-self._capacity)*self.lineHeight)
+    end
+end
+function Widgets.textBox:clear()
     self.texts={}
-    self.scrollPos=0
+    self._scrollPos=0
     SFX.play('fall')
 end
-function textBox:isAbove(x,y)
+function Widgets.textBox:isAbove(x,y)
     return
         x>self.x and
         y>self.y and
         x<self.x+self.w and
         y<self.y+self.h
 end
-function textBox:update(dt)
-    if self.sure>0 then
-        self.sure=max(self.sure-dt,0)
+function Widgets.textBox:update(dt)
+    if self._sure>0 then
+        self._sure=max(self._sure-dt,0)
     end
 end
-function textBox:push(t)
-    ins(self.texts,t)
-    if self.scrollPos==(#self.texts-1-self.capacity)*self.lineH then-- minus 1 for the new message
-        self.scrollPos=min(self.scrollPos+self.lineH,(#self.texts-self.capacity)*self.lineH)
-    end
-end
-function textBox:press(x,y)
+function Widgets.textBox:press(x,y)
     if not (x and y) then return end
     self:drag(0,0,0,0)
     if not self.fix and x>self.x+self.w-40 and y<self.y+40 then
-        if self.sure>0 then
+        if self._sure>0 then
             self:clear()
-            self.sure=0
+            self._sure=0
         else
-            self.sure=1
+            self._sure=1
         end
     end
 end
-function textBox:drag(_,_,_,dy)
-    self.scrollPos=max(0,min(self.scrollPos-dy,(#self.texts-self.capacity)*self.lineH))
+function Widgets.textBox:drag(_,_,_,dy)
+    self._scrollPos=max(0,min(self._scrollPos-dy,(#self.texts-self._capacity)*self.lineHeight))
 end
-function textBox:scroll(dir)
+function Widgets.textBox:scroll(dir)
     if type(dir)=='string' then
         if dir=="up" then
             dir=-1
@@ -1001,21 +1017,19 @@ function textBox:scroll(dir)
             return
         end
     end
-    self:drag(nil,nil,nil,-dir*self.lineH)
+    self:drag(nil,nil,nil,-dir*self.lineHeight)
 end
-function textBox:arrowKey(k)
+function Widgets.textBox:arrowKey(k)
     if k=='up' then
         self:scroll(-1)
     elseif k=='down' then
         self:scroll(-1)
     end
 end
-function textBox:draw()
+function Widgets.textBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
     local texts=self.texts
-    local scrollPos=self.scrollPos
-    local cap=self.capacity
-    local lineH=self.lineH
+    local lineH=self.lineHeight
 
     -- Background
     gc_setColor(0,0,0,.3)
@@ -1027,60 +1041,49 @@ function textBox:draw()
     gc_rectangle('line',x,y,w,h,3)
 
     -- Texts
-    setFont(self.fontSize,self.fontType)
     gc_push('transform')
         gc_translate(x,y)
 
         -- Slider
         gc_setColor(1,1,1)
-        if #texts>cap then
+        if #texts>self._capacity then
             local len=h*h/(#texts*lineH)
-            gc_rectangle('fill',-15,(h-len)*scrollPos/((#texts-cap)*lineH),12,len,3)
+            gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),12,len,3)
         end
 
         -- Clear button
         if not self.fix then
             gc_rectangle('line',w-40,0,40,40,3)
-            gc_draw(self.sure==0 and clearIcon or sureIcon,w-40,0)
+            if self._sure==0 then
+                gc_rectangle('fill',w-40+16,5,8,3)
+                gc_rectangle('fill',w-40+8,8,24,3)
+                gc_rectangle('fill',w-40+11,14,18,21)
+            else
+                setFont(40,'_basic')
+                mStr('?',w-40+21,-8)
+            end
         end
+
+        -- Texts
+        setFont(self.fontSize,self.fontType)
         STENCIL.start('equal',1)
         STENCIL.rectangle(0,0,w,h)
-        gc_translate(0,-(scrollPos%lineH))
-        local pos=int(scrollPos/lineH)
-        for i=pos+1,min(pos+cap+1,#texts) do
+        gc_translate(0,-(self._scrollPos%lineH))
+        local pos=int(self._scrollPos/lineH)
+        for i=pos+1,min(pos+self._capacity+1,#texts) do
             gc_printf(texts[i],10,4,w-16)
             gc_translate(0,lineH)
         end
         STENCIL.stop()
     gc_pop()
 end
-function WIDGET.newTextBox(D)-- name,x,y,w,h[,font=30][,fontType][,lineH][,fix],hide
-    local _={
-        name= D.name or "_",
 
-        x=    D.x,
-        y=    D.y,
-        w=    D.w,
-        h=    D.h,
 
-        font= D.fontSize or 30,
-        fontType=D.fontType,
-        fix=  D.fix,
-        texts={},
-        hideF=D.hideF,
-        hide= D.hide,
-    }
-    _.lineH=D.lineH or _.fontSize*7/5
-    _.capacity=ceil((D.h-10)/_.lineH)
-
-    for k,v in next,textBox do _[k]=v end
-    return _
-end
-
+--[[
 local listBox={
     type='listBox',
     keepFocus=true,
-    scrollPos=0,-- Scroll-down-distance
+    _scrollPos=0,-- Scroll-down-distance
     selected=0,-- Hidden wheel move value
 }
 function listBox:reset()
@@ -1088,12 +1091,12 @@ function listBox:reset()
 end
 function listBox:clear()
     self.list={}
-    self.scrollPos=0
+    self._scrollPos=0
 end
 function listBox:setList(t)
     self.list=t
     self.selected=1
-    self.scrollPos=0
+    self._scrollPos=0
 end
 function listBox:getList()
     return self.list
@@ -1134,7 +1137,7 @@ function listBox:press(x,y)
     x,y=x-self.x,y-self.y
     if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
     self:drag(0,0,0,0)
-    y=int((y+self.scrollPos)/self.lineH)+1
+    y=int((y+self._scrollPos)/self.lineHeight)+1
     if self.list[y] then
         if self.selected~=y then
             self.selected=y
@@ -1143,38 +1146,38 @@ function listBox:press(x,y)
     end
 end
 function listBox:drag(_,_,_,dy)
-    self.scrollPos=max(0,min(self.scrollPos-dy,(#self.list-self.capacity)*self.lineH))
+    self._scrollPos=max(0,min(self._scrollPos-dy,(#self.list-self._capacity)*self.lineHeight))
 end
 function listBox:scroll(n)
-    self:drag(nil,nil,nil,-n*self.lineH)
+    self:drag(nil,nil,nil,-n*self.lineHeight)
 end
 function listBox:arrowKey(dir)
     if dir=="up" then
         self.selected=max(self.selected-1,1)
-        if self.selected<int(self.scrollPos/self.lineH)+2 then
-            self:drag(nil,nil,nil,self.lineH)
+        if self.selected<int(self._scrollPos/self.lineHeight)+2 then
+            self:drag(nil,nil,nil,self.lineHeight)
         end
     elseif dir=="down" then
         self.selected=min(self.selected+1,#self.list)
-        if self.selected>int(self.scrollPos/self.lineH)+self.capacity-1 then
-            self:drag(nil,nil,nil,-self.lineH)
+        if self.selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
+            self:drag(nil,nil,nil,-self.lineHeight)
         end
     end
 end
 function listBox:select(i)
     self.selected=i
-    if self.selected<int(self.scrollPos/self.lineH)+2 then
+    if self.selected<int(self._scrollPos/self.lineHeight)+2 then
         self:drag(nil,nil,nil,1e99)
-    elseif self.selected>int(self.scrollPos/self.lineH)+self.capacity-1 then
+    elseif self.selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
         self:drag(nil,nil,nil,-1e99)
     end
 end
 function listBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
     local list=self.list
-    local scrollPos=self.scrollPos
-    local cap=self.capacity
-    local lineH=self.lineH
+    local _scrollPos=self._scrollPos
+    local cap=self._capacity
+    local lineHeight=self.lineHeight
 
     gc_push('transform')
         gc_translate(x,y)
@@ -1191,23 +1194,23 @@ function listBox:draw()
         -- Slider
         if #list>cap then
             gc_setColor(1,1,1)
-            local len=h*h/(#list*lineH)
-            gc_rectangle('fill',-15,(h-len)*scrollPos/((#list-cap)*lineH),12,len,3)
+            local len=h*h/(#list*lineHeight)
+            gc_rectangle('fill',-15,(h-len)*_scrollPos/((#list-cap)*lineHeight),12,len,3)
         end
 
         -- List
         STENCIL.start('equal',1)
         STENCIL.rectangle(w,h)
-        local pos=int(scrollPos/lineH)
-        gc_translate(0,-(scrollPos%lineH))
+        local pos=int(_scrollPos/lineHeight)
+        gc_translate(0,-(_scrollPos%lineHeight))
         for i=pos+1,min(pos+cap+1,#list) do
             self.drawF(list[i],i,i==self.selected)
-            gc_translate(0,lineH)
+            gc_translate(0,lineHeight)
         end
         STENCIL.stop()
     gc_pop()
 end
-function WIDGET.newListBox(D)-- name,x,y,w,h,lineH,drawF[,hideF][,hide]
+function WIDGET.newListBox(D)-- name,x,y,w,h,lineHeight,drawF[,hideF][,hide]
     local _={
         name=    D.name or "_",
 
@@ -1217,8 +1220,8 @@ function WIDGET.newListBox(D)-- name,x,y,w,h,lineH,drawF[,hideF][,hide]
         h=       D.h,
 
         list=    {},
-        lineH=   D.lineH,
-        capacity=ceil(D.h/D.lineH),
+        lineHeight=   D.lineHeight,
+        capacity=ceil(D.h/D.lineHeight),
         drawF=   D.drawF,
         hideF=   D.hideF,
         hide=    D.hide,
