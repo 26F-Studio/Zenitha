@@ -15,7 +15,7 @@ function GC.outDraw(obj,div,x,y,a,k)
     draw(obj,x+div,y-div,a,k,nil,w,h)
     draw(obj,x+div,y+div,a,k,nil,w,h)
 end
-function GC.shadedPrint(str,x,y,mode,d,clr1,clr2)
+function GC.shadedPrint(str,x,y,mode,d,shadeCount,clr1,clr2)
     local w=1280
     if mode=='center' then
         x=x-w*.5
@@ -24,10 +24,23 @@ function GC.shadedPrint(str,x,y,mode,d,clr1,clr2)
     end
     if not d then d=1 end
     setColor(clr1 or COLOR.D)
-    printf(str,x-d,y-d,w,mode)
-    printf(str,x-d,y+d,w,mode)
-    printf(str,x+d,y-d,w,mode)
-    printf(str,x+d,y+d,w,mode)
+    if shadeCount==4 then
+        printf(str,x-d,y-d,w,mode)
+        printf(str,x-d,y+d,w,mode)
+        printf(str,x+d,y-d,w,mode)
+        printf(str,x+d,y+d,w,mode)
+    elseif shadeCount==8 then
+        printf(str,x-d,y-d,w,mode)
+        printf(str,x-d,y+d,w,mode)
+        printf(str,x+d,y-d,w,mode)
+        printf(str,x+d,y+d,w,mode)
+        printf(str,x-d,y,w,mode)
+        printf(str,x+d,y,w,mode)
+        printf(str,x,y-d,w,mode)
+        printf(str,x,y+d,w,mode)
+    else
+        error('shadeCount(6th arg) must be 4 or 8')
+    end
     setColor(clr2 or COLOR.Z)
     printf(str,x,y,w,mode)
 end
