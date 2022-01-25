@@ -3,27 +3,16 @@ local gc=love.graphics
 local scenes={}
 
 local eventNames={
-    "sceneInit",
-    "sceneBack",
-    "mouseDown",
-    "mouseMove",
-    "mouseUp",
-    "mouseClick",
-    "wheelMoved",
-    "touchDown",
-    "touchUp",
-    "touchMove",
-    "touchClick",
-    "keyDown",
-    "keyUp",
-    "gamepadDown",
-    "gamepadUp",
-    "fileDropped",
-    "directoryDropped",
+    "init",
+    "back",
+
+    "mouseDown","mouseMove","mouseUp","mouseClick","wheelMoved",
+    "touchDown","touchUp","touchMove","touchClick",
+    "keyDown","keyUp",
+    "gamepadDown","gamepadUp",
+    "fileDropped","directoryDropped",
     "resize",
-    "socketRead",
-    "update",
-    "draw",
+    "update","draw",
 }
 
 local SCN={
@@ -42,28 +31,7 @@ local SCN={
     args={},-- Arguments from previous scene
 
     scenes=scenes,
-
-    -- Events
-    update=false,
-    draw=false,
-    mouseClick=false,
-    touchClick=false,
-    mouseDown=false,
-    mouseMove=false,
-    mouseUp=false,
-    wheelMoved=false,
-    touchDown=false,
-    touchUp=false,
-    touchMove=false,
-    keyDown=false,
-    keyUp=false,
-    gamepadDown=false,
-    gamepadUp=false,
-    fileDropped=false,
-    directoryDropped=false,
-    resize=false,
-    socketRead=false,
-}-- Scene datas, returned
+}
 
 function SCN.add(name,scene)
     scenes[name]=scene
@@ -98,7 +66,7 @@ function SCN.init(s)
         SCN[eventNames[i]]=S[eventNames[i]]
     end
 
-    if S.sceneInit then S.sceneInit() end
+    if S.init then S.init() end
 end
 function SCN.push(tar,style)
     if not SCN.swapping then
@@ -203,7 +171,7 @@ function SCN.back(...)
     local m=#SCN.stack
     if m>0 then
         -- Leave scene
-        if SCN.sceneBack then SCN.sceneBack() end
+        if SCN.back then SCN.back() end
 
         -- Poll&Back to previous Scene
         SCN.swapTo(SCN.stack[m-1],SCN.stack[m],...)
