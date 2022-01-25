@@ -14,7 +14,7 @@ math.randomseed(os.time()*2600)
 --------------------------------------------------------------
 
 -- Useful global values/variables
-NONE={}setmetatable(NONE,{__newindex=function() error('Attempt to modify a constant table') end})
+NONE={} setmetatable(NONE,{__newindex=function() error('Attempt to modify a constant table') end})
 NULL=function(...) end
 PAPER=love.graphics.newCanvas(1,1)
 
@@ -189,9 +189,9 @@ do-- Define demo scene
             STENCIL.stop()
         end,
         widgetList={
-            WIDGET.new{type='checkBox',rawText='1:checkBox',x=210,y=390,w=40,disp=function()return testVal_1 end,code=function()testVal_1=not testVal_1 end},
-            WIDGET.new{type='slider',  rawText='2:slider',  x=370,y=390,w=180,axis={10,26,4},disp=function()return testVal_2 end,code=function(v)testVal_2=v end},
-            WIDGET.new{type='selector',rawText='3:selector',x=670,y=390,w=200,list={'opt1','opt2','opt3'},disp=function()return testVal_3 end,code=function(v)testVal_3=v end},
+            WIDGET.new{type='checkBox',rawText='1:checkBox',x=210,y=390,w=40,disp=function() return testVal_1 end,code=function() testVal_1=not testVal_1 end},
+            WIDGET.new{type='slider',  rawText='2:slider',  x=370,y=390,w=180,axis={10,26,4},disp=function() return testVal_2 end,code=function(v) testVal_2=v end},
+            WIDGET.new{type='selector',rawText='3:selector',x=670,y=390,w=200,list={'opt1','opt2','opt3'},disp=function() return testVal_3 end,code=function(v) testVal_3=v end},
             WIDGET.new{type='inputBox',rawText='4:inputBox',x=100,y=450,w=300,h=100,labelPos='down'},
             WIDGET.new{type='textBox', name='textBox',      x=100,y=620,w=600,h=126},
             WIDGET.new{type='button',  rawText='Quit',      x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
@@ -641,8 +641,8 @@ function love.errorhandler(msg)
             gc_clear(.3,.5,.9)
             gc_push('transform')
             gc_replaceTransform(SCR.xOy)
-            setFont(100,'_basic')gc_print(":(",100,0,0,1.2)
-            setFont(40,'_basic')gc.printf(errorMsg,100,160,SCR.w0-200)
+            setFont(100,'_basic') gc_print(":(",100,0,0,1.2)
+            setFont(40,'_basic') gc.printf(errorMsg,100,160,SCR.w0-200)
             setFont(25,'_basic')
             gc.printf(err[1],100,400,SCR.w0-200)
             setFont(20,'_basic')
@@ -809,7 +809,7 @@ function love.run()
                         end
 
                         -- Update & draw frame time
-                        table.insert(frameTimeList,1,drawDT)table.remove(frameTimeList,126)
+                        table.insert(frameTimeList,1,drawDT) table.remove(frameTimeList,126)
                         gc_setColor(1,1,1,.3)
                         for i=1,#frameTimeList do
                             gc.rectangle('fill',150+2*i,-20,2,-frameTimeList[i]*4000)
@@ -868,13 +868,13 @@ end
 Zenitha={}
 
 function Zenitha.setAppName(name)
-    assert(type(name)=='string','Z.appName must be a string')
+    assert(type(name)=='string','Z.appName must be string')
     appName=name
 end
 function Zenitha.getAppName() return appName end
 
 function Zenitha.setVersionText(text)
-    assert(type(text)=='string','Z.versionText must be a string')
+    assert(type(text)=='string','Z.versionText must be string')
     versionText=text
 end
 function Zenitha.getVersionText() return versionText end
@@ -902,38 +902,38 @@ function Zenitha.setCursor(func) drawCursor=func end
 
 -- Change first-level global key events
 function Zenitha.setGlobalKey(key,func)
-    assert(type(key)=='string',"Z.setOnFnKeys(key,func): key must be a string")
+    assert(type(key)=='string',"Z.setOnFnKeys(key,func): key must be string")
     if not func then
         globalKey[key]=nil
     else
-        assert(type(func)=='function',"Z.setOnFnKeys(key,func): func must be a function")
+        assert(type(func)=='function',"Z.setOnFnKeys(key,func): func must be function")
         globalKey[key]=func
     end
 end
 
 -- Change F1~F7 events of devmode (F8 mode)
 function Zenitha.setOnFnKeys(list)
-    assert(type(list)=='table',"Z.setOnFnKeys(list): list must be a table")
+    assert(type(list)=='table',"Z.setOnFnKeys(list): list must be table")
     for i=1,7 do devFnKey[i]=assert(type(list[i])=='function' and list[i]) end
 end
 
 function Zenitha.setDebugInfo(list)
-    assert(type(list)=='table',"Z.setDebugInfo(list): list must be a table")
+    assert(type(list)=='table',"Z.setDebugInfo(list): list must be table")
     for i=1,#list do
-        assert(type(list[i][1])=='string',"Z.setDebugInfo(list): list[i][1] must be a string")
-        assert(type(list[i][2])=='function',"Z.setDebugInfo(list): list[i][2] must be a function")
+        assert(type(list[i][1])=='string',"Z.setDebugInfo(list): list[i][1] must be string")
+        assert(type(list[i][2])=='function',"Z.setDebugInfo(list): list[i][2] must be function")
     end
     debugInfos=list
 end
 
 function Zenitha.setOnFocus(func)
-    onFocus=assert(type(func)=='function' and func,"Z.setOnFocus(func): func must be a function")
+    onFocus=assert(type(func)=='function' and func,"Z.setOnFocus(func): func must be function")
 end
 
 function Zenitha.setOnResize(func)
-    onResize=assert(type(func)=='function' and func,"Z.setOnResize(func): func must be a function")
+    onResize=assert(type(func)=='function' and func,"Z.setOnResize(func): func must be function")
 end
 
 function Zenitha.setOnQuit(func)
-    onQuit=assert(type(func)=='function' and func,"Z.setOnQuit(func): func must be a function")
+    onQuit=assert(type(func)=='function' and func,"Z.setOnQuit(func): func must be function")
 end

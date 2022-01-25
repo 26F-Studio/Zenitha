@@ -101,9 +101,9 @@ end
 function baseWidget:reset()
     assert(not self.name or type(self.name)=='string','[widget].name can only be a string')
 
-    assert(type(self.x)=='number','[widget].x must be a number')
-    assert(type(self.y)=='number','[widget].y must be a number')
-    assert(type(self.color)=='table','[widget].color must be a table')
+    assert(type(self.x)=='number','[widget].x must be number')
+    assert(type(self.y)=='number','[widget].y must be number')
+    assert(type(self.color)=='table','[widget].color must be table')
 
     if self.posX=='raw' then
         self._x=self.x
@@ -125,9 +125,9 @@ function baseWidget:reset()
         error("[widget].posY must be 'raw', 'up' or 'down'")
     end
 
-    assert(type(self.fontSize)=='number','[widget].fontSize must be a number')
-    assert(type(self.fontType)=='string' or self.fontType==false,'[widget].fontType must be a string')
-    assert(type(self.widthLimit)=='number','[widget].widthLimit must be a number')
+    assert(type(self.fontSize)=='number','[widget].fontSize must be number')
+    assert(type(self.fontType)=='string' or self.fontType==false,'[widget].fontType must be string')
+    assert(type(self.widthLimit)=='number','[widget].widthLimit must be number')
     assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc can only be a function')
 
     self._text=nil
@@ -136,11 +136,11 @@ function baseWidget:reset()
             self._text=self.text()
             assert(type(self._text)=='string','function text must return a string')
         else
-            assert(type(self.text)=='string',"[widget].text must be a string or function return a string")
+            assert(type(self.text)=='string',"[widget].text must be string or function return a string")
             self._text=langMap[self.text]
         end
     elseif self.rawText then
-        assert(type(self.rawText)=='string',"[widget].rawText must be a string")
+        assert(type(self.rawText)=='string',"[widget].rawText must be string")
         self._text=self.rawText
     end
     self._text=gc.newText(getFont(self.fontSize,self.fontType),self._text)
@@ -148,7 +148,7 @@ function baseWidget:reset()
     self._image=nil
     if self.image then
         if type(self.image)=='string' then
-            self._image=IMG[self.image]or PAPER
+            self._image=IMG[self.image] or PAPER
         else
             self._image=self.image
         end
@@ -475,7 +475,7 @@ local sliderShowFunc={
 function Widgets.slider:reset()
     baseWidget.reset(self)
 
-    assert(type(self.disp)=='function','[slider].disp must be a function')
+    assert(type(self.disp)=='function','[slider].disp must be function')
 
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -492,7 +492,7 @@ function Widgets.slider:reset()
         if type(self.show)=='function' then
             self._showFunc=self.show
         elseif type(self.show)=='string' then
-            self._showFunc=assert(sliderShowFunc[self.show],"[slider].show must be a function, or 'int', 'float', or 'percent'")
+            self._showFunc=assert(sliderShowFunc[self.show],"[slider].show must be function, or 'int', 'float', or 'percent'")
         end
     elseif self.show==false then-- Use default if nil
         self._showFunc=NULL
@@ -648,7 +648,7 @@ Widgets.selector={
 function Widgets.selector:reset()
     baseWidget.reset(self)
 
-    assert(type(self.disp)=='function','[selector].disp must be a function')
+    assert(type(self.disp)=='function','[selector].disp must be function')
 
     self.widthLimit=self.w
 
@@ -797,8 +797,8 @@ Widgets.inputBox={
 } CLASS.inherit(Widgets.inputBox,baseWidget)
 function Widgets.inputBox:reset()
     baseWidget.reset(self)
-    assert(self.w and type(self.w)=='number','[inputBox].w must be a number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be a number')
+    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
+    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
     assert(not self.inputSound or type(self.inputSound)=='string','[inputBox].inputSound can only be a string')
     assert(not self.delSound or type(self.delSound)=='string','[inputBox].delSound can only be a string')
     assert(not self.clearSound or type(self.clearSound)=='string','[inputBox].clearSound can only be a string')
@@ -953,8 +953,8 @@ Widgets.textBox={
 } CLASS.inherit(Widgets.textBox,baseWidget)
 function Widgets.textBox:reset()
     baseWidget.reset(self)
-    assert(self.w and type(self.w)=='number','[inputBox].w must be a number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be a number')
+    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
+    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
 
     if not self.texts then self.texts={} end
     self._capacity=ceil((self.h-10)/self.lineHeight)
@@ -1399,6 +1399,6 @@ function WIDGET.new(args)
     return w
 end
 
-function WIDGET.setOnChange(func) onChange=assert(type(func)=='function' and func,"WIDGET.setOnChange(func): func must be a function") end
+function WIDGET.setOnChange(func) onChange=assert(type(func)=='function' and func,"WIDGET.setOnChange(func): func must be function") end
 
 return WIDGET

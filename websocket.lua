@@ -189,7 +189,7 @@ end
 
 
 local WS={}
-local socks={}setmetatable(socks,{__index=function(_,name) WS.new(name)return socks[name] end})
+local socks={} setmetatable(socks,{__index=function(_,name) WS.new(name) return socks[name] end})
 
 ---@return Socket
 function WS.new(name,_subpath,_body,_timeout)
@@ -327,7 +327,7 @@ function WS.update(dt)
                     self._continue=self._continue..res
                     if fin then self:onmessage(self._continue) end
                 else
-                    if fin then self:onmessage(res)else self._continue=res end
+                    if fin then self:onmessage(res) else self._continue=res end
                 end
             end
             if self.sendTimer>0 then self.sendTimer=self.sendTimer-dt end

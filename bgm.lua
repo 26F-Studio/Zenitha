@@ -56,7 +56,7 @@ function BGM.setMaxSources(count)
     _tryReleaseSources()
 end
 function BGM.setChange(func)
-    assert(type(func)=='function','BGM.setChange(func) func must be a function')
+    assert(type(func)=='function','BGM.setChange(func) func must be function')
     onChange=func
 end
 function BGM.setVol(v)

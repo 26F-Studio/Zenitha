@@ -5,7 +5,7 @@ function FILE.load(name,args)
     if fs.getInfo(name) then
         local F=fs.newFile(name)
         assert(F:open'r','open error')
-        local s=F:read()F:close()
+        local s=F:read() F:close()
         local mode=
             STRING.sArg(args,'-luaon') and 'luaon' or
             STRING.sArg(args,'-lua') and 'lua' or
@@ -70,7 +70,7 @@ function FILE.save(data,name,args)
 
     local F=fs.newFile(name)
     assert(F:open('w'),'open error')
-    F:write(data)F:flush()F:close()
+    F:write(data) F:flush() F:close()
 end
 function FILE.clear(path)
     if fs.getRealDirectory(path)==SAVEDIR and fs.getInfo(path).type=='directory' then
