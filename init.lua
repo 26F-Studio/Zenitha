@@ -238,9 +238,9 @@ local function mouse_update(dt)
         if KBisDown('down') then  dy=dy+cursorSpd end
         if KBisDown('left') then  dx=dx-cursorSpd end
         if KBisDown('right') then dx=dx+cursorSpd end
-        mx=max(min(mx+dx,1280),0)
-        my=max(min(my+dy,720),0)
-        if my==0 or my==720 then
+        mx=max(min(mx+dx,SCR.w0),0)
+        my=max(min(my+dy,SCR.h0),0)
+        if my==0 or my==SCR.h0 then
             WIDGET.sel=false
             WIDGET.drag(0,0,0,-dy)
         end
@@ -258,9 +258,9 @@ local function gp_update(js,dt)
         if sy>.1 then  dy=dy+2*sy*cursorSpd end
         if sx<-.1 then dx=dx+2*sx*cursorSpd end
         if sx>.1 then  dx=dx+2*sx*cursorSpd end
-        mx=max(min(mx+dx,1280),0)
-        my=max(min(my+dy,720),0)
-        if my==0 or my==720 then
+        mx=max(min(mx+dx,SCR.w0),0)
+        my=max(min(my+dy,SCR.h0),0)
+        if my==0 or my==SCR.h0 then
             WIDGET.sel=false
             WIDGET.drag(0,0,0,-dy)
         end

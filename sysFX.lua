@@ -170,7 +170,7 @@ function SYSFX.line(rate,x1,y1,x2,y2,r,g,b,a)
         t=0,
         rate=rate,
         x1=x1 or 0,y1=y1 or 0,
-        x2=x2 or x1 or 1280,y2=y2 or y1 or 720,
+        x2=x2 or x1 or SCR.w0,y2=y2 or y1 or SCR.h0,
         r=r or 1,g=g or 1,b=b or 1,a=a or 1,
     })
 end
