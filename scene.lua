@@ -37,13 +37,14 @@ local SCN={
 }
 
 function SCN.add(name,scene)
+    assert(not scene.scrollHeight or type(scene.scrollHeight)=='number',"[scene].scrollHeight must be number")
+    assert(not scene.widgetList or type(scene.widgetList)=='table',"[scene].widgetList must be table")
+    for i=1,#eventNames do assert(not scene[eventNames[i]] or type(scene[eventNames[i]])=='function',"[scene]."..eventNames[i].." must be function") end
     scenes[name]=scene
-    if scene.widgetList then
-        setmetatable(scene.widgetList,WIDGET.indexMeta)
-    end
+    if scene.widgetList then setmetatable(scene.widgetList,WIDGET.indexMeta) end
 end
 function SCN.setScroll(height)
-    SCN.maxScroll=height and height or 0
+    SCN.maxScroll=height or 0
     SCN.curScroll=MATH.interval(SCN.curScroll,0,SCN.maxScroll)
 end
 
@@ -67,7 +68,7 @@ function SCN.init(s)
     SCN.cur=s
 
     local S=scenes[s]
-    SCN.setScroll(S.scrollHeight)
+    SCN.maxScroll=S.scrollHeight or 0
     SCN.curScroll=0
     WIDGET.setWidgetList(S.widgetList)
     for i=1,#eventNames do
