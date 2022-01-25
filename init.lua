@@ -754,12 +754,12 @@ function love.run()
                     gc_setColor(1,1,1)
                     BG.draw()
                 gc_replaceTransform(SCR.xOy)
+                    gc_setColor(1,1,1)
                     if SCN.draw then SCN.draw() end
+                gc_replaceTransform(SCR.xOy)
                     WIDGET_draw()
                     SYSFX_draw()
                     TEXT_draw()
-
-                    -- Draw cursor
                     if mouseShow then drawCursor(time,mx,my) end
                 gc_replaceTransform(SCR.xOy_ul)
                     MES_draw()
@@ -772,7 +772,6 @@ function love.run()
 
                     -- Draw scene swapping animation
                     if SCN.swapping then
-                        gc_setColor(1,1,1)
                         _=SCN.stat
                         _.draw(_.time)
                     end
