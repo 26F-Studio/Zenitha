@@ -18,6 +18,9 @@ local eventNames={
 local SCN={
     mainTouchID=nil,     -- First touching ID(userdata)
     cur='NULL',          -- Current scene name
+    maxScroll=0,
+    curScroll=0,
+
     swapping=false,      -- If Swapping
     stat={
         tar=false,       -- Swapping target
@@ -38,6 +41,10 @@ function SCN.add(name,scene)
     if scene.widgetList then
         setmetatable(scene.widgetList,WIDGET.indexMeta)
     end
+end
+function SCN.setScroll(height)
+    SCN.maxScroll=height and height or 0
+    SCN.curScroll=MATH.interval(SCN.curScroll,0,SCN.maxScroll)
 end
 
 function SCN.swapUpdate(dt)
@@ -60,7 +67,8 @@ function SCN.init(s)
     SCN.cur=s
 
     local S=scenes[s]
-    WIDGET.setScrollHeight(S.widgetScrollHeight)
+    SCN.setScroll(S.scrollHeight)
+    SCN.curScroll=0
     WIDGET.setWidgetList(S.widgetList)
     for i=1,#eventNames do
         SCN[eventNames[i]]=S[eventNames[i]]

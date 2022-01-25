@@ -722,12 +722,12 @@ function Widgets.selector:press(x)
         if x<self.x then
             if s>1 then
                 s=s-1
-                SYSFX.rectangle(3,self._x-self.w*.5,self._y-self.h*.5-WIDGET.scrollPos,self.w*.5,self.h)
+                SYSFX.rectangle(3,self._x-self.w*.5,self._y-self.h*.5-SCN.curScroll,self.w*.5,self.h)
             end
         else
             if s<#self.list then
                 s=s+1
-                SYSFX.rectangle(3,self.x,self.y-self.h*.5-WIDGET.scrollPos,self.w*.5,self.h)
+                SYSFX.rectangle(3,self.x,self.y-self.h*.5-SCN.curScroll,self.w*.5,self.h)
             end
         end
         if self._select~=s then
@@ -743,11 +743,11 @@ function Widgets.selector:scroll(n)
     if n==-1 then
         if s==1 then return end
         s=s-1
-        SYSFX.rectangle(3,self._x,self._y-WIDGET.scrollPos,self.w*.5,60)
+        SYSFX.rectangle(3,self._x,self._y-SCN.curScroll,self.w*.5,60)
     else
         if s==#self.list then return end
         s=s+1
-        SYSFX.rectangle(3,self.x+self.w*.5,self.y-WIDGET.scrollPos,self.w*.5,60)
+        SYSFX.rectangle(3,self.x+self.w*.5,self.y-SCN.curScroll,self.w*.5,60)
     end
     self.code(self.list[s])
     self._select=s
@@ -1233,8 +1233,6 @@ end
 ]]
 
 WIDGET.active={}-- Table contains all active widgets
-WIDGET.scrollHeight=0-- Max drag height, not actual container height!
-WIDGET.scrollPos=0-- Current scroll position
 WIDGET.sel=false-- Selected widget
 local function _resetAllWidgets()
     for i=1,#WIDGET.active do
@@ -1256,10 +1254,6 @@ function WIDGET.setWidgetList(list)
         _resetAllWidgets()
     end
     onChange()
-end
-function WIDGET.setScrollHeight(height)
-    WIDGET.scrollHeight=height and height or 0
-    WIDGET.scrollPos=0
 end
 function WIDGET.setLang(newLangMap)
     langMap=newLangMap
@@ -1300,7 +1294,7 @@ end
 
 function WIDGET.cursorMove(x,y)
     for _,W in next,WIDGET.active do
-        if W._visible and W:isAbove(x,y+WIDGET.scrollPos) then
+        if W._visible and W:isAbove(x,y+SCN.curScroll) then
             WIDGET.focus(W)
             return
         end
@@ -1312,7 +1306,7 @@ end
 function WIDGET.press(x,y,k)
     local W=WIDGET.sel
     if W then
-        W:press(x,y and y+WIDGET.scrollPos,k)
+        W:press(x,y and y+SCN.curScroll,k)
         if W.hide then WIDGET.unFocus() end
     end
 end
@@ -1320,18 +1314,18 @@ function WIDGET.drag(x,y,dx,dy)
     if WIDGET.sel then
         local W=WIDGET.sel
         if W.drag then
-            W:drag(x,y+WIDGET.scrollPos,dx,dy)
-        elseif not W:isAbove(x,y+WIDGET.scrollPos) then
+            W:drag(x,y+SCN.curScroll,dx,dy)
+        elseif not W:isAbove(x,y+SCN.curScroll) then
             WIDGET.unFocus(true)
         end
     else
-        WIDGET.scrollPos=max(min(WIDGET.scrollPos-dy,WIDGET.scrollHeight),0)
+        SCN.curScroll=max(min(SCN.curScroll-dy,SCN.maxScroll),0)
     end
 end
 function WIDGET.release(x,y)
     local W=WIDGET.sel
     if W and W.release then
-        W:release(x,y+WIDGET.scrollPos)
+        W:release(x,y+SCN.curScroll)
     end
 end
 function WIDGET.textinput(texts)
@@ -1365,17 +1359,17 @@ function WIDGET.resize(w,h)
 end
 function WIDGET.draw()
     gc_setCanvas({stencil=true},widgetCanvas)
-        gc_translate(0,-WIDGET.scrollPos)
+        gc_translate(0,-SCN.curScroll)
         for _,W in next,WIDGET.active do
             if W._visible then W:draw() end
         end
         gc_origin()
         gc_setColor(1,1,1)
-        if WIDGET.scrollHeight>0 then
-            if WIDGET.scrollPos>0 then
+        if SCN.maxScroll>0 then
+            if SCN.curScroll>0 then
                 gc_draw(upArrowIcon,scr_w*.5,10,0,SCR.k,nil,upArrowIcon:getWidth()*.5,0)
             end
-            if WIDGET.scrollPos<WIDGET.scrollHeight then
+            if SCN.curScroll<SCN.maxScroll then
                 gc_draw(downArrowIcon,scr_w*.5,scr_h-10,0,SCR.k,nil,downArrowIcon:getWidth()*.5,downArrowIcon:getHeight())
             end
             gc_setBlendMode('multiply','premultiplied')

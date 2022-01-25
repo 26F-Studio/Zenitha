@@ -197,7 +197,7 @@ do-- Define demo scene
             WIDGET.new{type='button',  rawText='Quit',      x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
         }
     }
-    demoScene.widgetScrollHeight=200
+    demoScene.scrollHeight=200
     function demoScene.init()
         demoScene.widgetList.textBox:setTexts({"1.","2.","3."},true)
     end
@@ -762,7 +762,7 @@ function love.run()
                 gc_replaceTransform(SCR.xOy)
                     gc_setColor(1,1,1)
                     if SCN.draw then
-                        gc_translate(0,-WIDGET.scrollPos)
+                        gc_translate(0,-SCN.curScroll)
                         SCN.draw()
                     end
                 gc_replaceTransform(SCR.xOy)
