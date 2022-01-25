@@ -199,7 +199,7 @@ do-- Define demo scene
     }
     demoScene.scrollHeight=200
     function demoScene.init()
-        demoScene.widgetList.textBox:setTexts({"1.","2.","3."},true)
+        demoScene.widgetList.textBox:setTexts({"5.textBox","line 2","line 3","4","5","6","7"},true)
     end
     SCN.add('_zenitha',demoScene)
 end
