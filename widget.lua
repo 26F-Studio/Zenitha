@@ -934,7 +934,9 @@ end
 Widgets.textBox={
     type='textBox',
 
+    scrollBarPos='left',
     lineHeight=30,
+    fixContent=true,
 
     _scrollPos=0,-- Scroll-down-distance
     _sure=0,-- Sure-timer for clear history
@@ -945,6 +947,7 @@ Widgets.textBox={
 
         'fontSize','fontType',
         'posX','posY',
+        'scrollBarPos',
         'lineHeight',
         'fixContent',
 
@@ -955,6 +958,7 @@ function Widgets.textBox:reset()
     baseWidget.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
     assert(self.h and type(self.h)=='number','[inputBox].h must be number')
+    assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
 
     if not self.texts then self.texts={} end
     self._capacity=ceil((self.h-10)/self.lineHeight)
@@ -995,7 +999,7 @@ end
 function Widgets.textBox:press(x,y)
     if not (x and y) then return end
     self:drag(0,0,0,0)
-    if not self.fix and x>self.x+self.w-40 and y<self.y+40 then
+    if not self.fixContent and x>self.x+self.w-40 and y<self.y+40 then
         if self._sure>0 then
             self:clear()
             self._sure=0
@@ -1048,11 +1052,15 @@ function Widgets.textBox:draw()
         gc_setColor(1,1,1)
         if #texts>self._capacity then
             local len=h*h/(#texts*lineH)
-            gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),12,len,3)
+            if self.scrollBarPos=='left' then
+                gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,3)
+            elseif self.scrollBarPos=='right' then
+                gc_rectangle('fill',w+5,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,3)
+            end
         end
 
         -- Clear button
-        if not self.fix then
+        if not self.fixContent then
             gc_rectangle('line',w-40,0,40,40,3)
             if self._sure==0 then
                 gc_rectangle('fill',w-40+16,5,8,3)
