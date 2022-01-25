@@ -91,6 +91,14 @@ function GC.regRoundPolygon(mode,x,y,R,segments,r,phase)
         error("Draw mode should be 'line' or 'fill'")
     end
 end
+do-- function GC.getScreenShot()
+    local capturedImage
+    local _captureScreenshotFunc=function(_) capturedImage=gc.newImage(_) end
+    function GC.getScreenShot()
+        gc.getScreenshot(_captureScreenshotFunc)
+        return capturedImage
+    end
+end
 do-- function GC.DO(L)
     local cmds={
         origin= gc.origin,
