@@ -5,8 +5,7 @@ local KBisDown=kb.isDown
 local gc=love.graphics
 local gc_replaceTransform,gc_present=gc.replaceTransform,gc.present
 local gc_push,gc_pop,gc_clear,gc_discard=gc.push,gc.pop,gc.clear,gc.discard
-local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
-local gc_draw,gc_line,gc_rectangle,gc_circle=gc.draw,gc.line,gc.rectangle,gc.circle
+local gc_setColor,gc_draw,gc_circle=gc.setColor,gc.draw,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
 
 local max,min=math.max,math.min
@@ -44,7 +43,7 @@ local drawFreq=100
 local sleepInterval=1/60
 local function drawCursor(_,x,y)
     gc_setColor(1,1,1)
-    gc_setLineWidth(2)
+    gc.setLineWidth(2)
     gc_circle(ms.isDown(1) and 'fill' or 'line',x,y,6)
 end
 local globalKey={
@@ -61,24 +60,24 @@ local onQuit=NULL
 --------------------------------------------------------------
 
 -- Extended lua basic libraries
-MATH=       require'zenitha.mathExtend'
-STRING=     require'zenitha.stringExtend'
-TABLE=      require'zenitha.tableExtend'
-CLASS=      require'zenitha.class'
+MATH=       require'Zenitha.mathExtend'
+STRING=     require'Zenitha.stringExtend'
+TABLE=      require'Zenitha.tableExtend'
+CLASS=      require'Zenitha.class'
 
 -- Pure lua modules (simple)
-COLOR=      require'zenitha.color'
-TEST=       require'zenitha.test'
-LOG=        require'zenitha.log'
-JSON=       require'zenitha.json'
+COLOR=      require'Zenitha.color'
+TEST=       require'Zenitha.test'
+LOG=        require'Zenitha.log'
+JSON=       require'Zenitha.json'
 
 -- Pure lua modules (complex)
-LOG=        require'zenitha.log'
-REQUIRE=    require'zenitha.require'
-TASK=       require'zenitha.task'
-WS=         require'zenitha.websocket'
-LANG=       require'zenitha.languages'
-PROFILE=    require'zenitha.profile'
+LOG=        require'Zenitha.log'
+REQUIRE=    require'Zenitha.require'
+TASK=       require'Zenitha.task'
+WS=         require'Zenitha.websocket'
+LANG=       require'Zenitha.languages'
+PROFILE=    require'Zenitha.profile'
 
 do-- Add pcall & MES for JSON lib
     local encode,decode=JSON.encode,JSON.decode
@@ -101,25 +100,25 @@ do-- Add pcall & MES for JSON lib
 end
 
 -- Love-based modules (data)
-FILE=       require'zenitha.file'
-WHEELMOV=   require'zenitha.wheelToArrow'
-SCR=        require'zenitha.screen'
-SCN=        require'zenitha.scene'
+FILE=       require'Zenitha.file'
+WHEELMOV=   require'Zenitha.wheelToArrow'
+SCR=        require'Zenitha.screen'
+SCN=        require'Zenitha.scene'
 
 -- Love-based modules (media)
-GC=         require'zenitha.gcExtend'
-STENCIL=    require'zenitha.stencil'
-FONT=       require'zenitha.font'
-TEXT=       require'zenitha.text'
-SYSFX=      require'zenitha.sysFX'
-MES=        require'zenitha.message'
-BG=         require'zenitha.background'
-WIDGET=     require'zenitha.widget'
-VIB=        require'zenitha.vibrate'
-SFX=        require'zenitha.sfx'
-IMG=        require'zenitha.image'
-BGM=        require'zenitha.bgm'
-VOC=        require'zenitha.voice'
+GC=         require'Zenitha.gcExtend'
+STENCIL=    require'Zenitha.stencil'
+FONT=       require'Zenitha.font'
+TEXT=       require'Zenitha.text'
+SYSFX=      require'Zenitha.sysFX'
+MES=        require'Zenitha.message'
+BG=         require'Zenitha.background'
+WIDGET=     require'Zenitha.widget'
+VIB=        require'Zenitha.vibrate'
+SFX=        require'Zenitha.sfx'
+IMG=        require'Zenitha.image'
+BGM=        require'Zenitha.bgm'
+VOC=        require'Zenitha.voice'
 
 --------------------------------------------------------------
 
@@ -137,11 +136,11 @@ local function updatePowerInfo()
     gc.origin()
     gc_clear(0,0,0,.25)
     if state~='unknown' then
-        gc_setLineWidth(4)
+        gc.setLineWidth(4)
         if state=='nobattery' then
             gc_setColor(1,1,1)
-            gc_setLineWidth(2)
-            gc_line(74,5,100,22)
+            gc.setLineWidth(2)
+            gc.line(74,5,100,22)
         elseif pow then
             if state=='charging' then gc_setColor(0,1,0)
             elseif pow>50 then        gc_setColor(1,1,1)
@@ -161,10 +160,10 @@ local function updatePowerInfo()
                 gc_print(pow,78,2)
             end
         end
-        gc_rectangle('fill',74,3,26,2)
-        gc_rectangle('fill',74,21,26,2)
-        gc_rectangle('fill',99,4,2,18)
-        gc_rectangle('fill',102,3,2,14)
+        gc.rectangle('fill',74,3,26,2)
+        gc.rectangle('fill',74,21,26,2)
+        gc.rectangle('fill',99,4,2,18)
+        gc.rectangle('fill',102,3,2,14)
     end
     setFont(25,'_basic')
     gc_print(os.date("%H:%M"),3,-5)
@@ -578,7 +577,7 @@ function love.errorhandler(msg)
     if type(msg)~='string' then
         msg="Unknown error"
     elseif msg:find("Invalid UTF-8") then
-        msg="[Invalid UTF-8] If you are on Windows, try downloading Techmino-win32 or Techmino-win64 (different from what you are using now)."
+        msg="[Invalid UTF-8] If you are on Windows, try downloading win32 or win64 (different from what you are using now)."
     end
 
     -- Generate error message
@@ -603,7 +602,7 @@ function love.errorhandler(msg)
 
     if mainLoopStarted and #errData<3 then
         BG.set('none')
-        local scn=SCN and SCN.cur or "NULL"
+        local scn=SCN and SCN.cur or 'NULL'
         table.insert(errData,{mes=err,scene=scn})
 
         -- Write messages to log file
@@ -614,7 +613,7 @@ function love.errorhandler(msg)
         )
 
         -- Get screencapture
-        gc.captureScreenshot(function(_) errData[#errData].shot=gc.newImage(_) end)
+        errData[#errData].shot=GC.getScreenshot()
         gc.present()
 
         -- Create a new mainLoop thread to keep game alive
@@ -648,10 +647,11 @@ function love.errorhandler(msg)
             gc_push('transform')
             gc_replaceTransform(SCR.xOy)
             setFont(100,'_basic')gc_print(":(",100,0,0,1.2)
-            setFont(40,'_basic')gc.printf(errorMsg,100,160,SCR.w0-100)
+            setFont(40,'_basic')gc.printf(errorMsg,100,160,SCR.w0-200)
+            setFont(25,'_basic')
+            gc.printf(err[1],100,400,SCR.w0-200)
             setFont(20,'_basic')
             gc_print(love.system.getOS().."-"..versionText.."                          scene:"..(SCN and SCN.cur or "NULL"),100,660)
-            gc.printf(err[1],100,360,1260-100)
             gc_print("TRACEBACK",100,450)
             for i=4,#err-2 do
                 gc_print(err[i],100,400+20*i)
@@ -821,9 +821,9 @@ function love.run()
                         -- Cursor pos disp
                         gc_replaceTransform(SCR.origin)
                             local x,y=SCR.xOy:transformPoint(mx,my)
-                            gc_setLineWidth(1)
-                            gc_line(x,0,x,SCR.h)
-                            gc_line(0,y,SCR.w,y)
+                            gc.setLineWidth(1)
+                            gc.line(x,0,x,SCR.h)
+                            gc.line(0,y,SCR.w,y)
                             local t=math.floor(mx+.5)..","..math.floor(my+.5)
                             gc.setColor(COLOR.D)
                             gc_print(t,x+1,y)
