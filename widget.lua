@@ -1071,7 +1071,7 @@ function Widgets.textBox:draw()
         gc_translate(0,-(self._scrollPos%lineH))
         local pos=int(self._scrollPos/lineH)
         for i=pos+1,min(pos+self._capacity+1,#texts) do
-            gc_printf(texts[i],10,4,w-16)
+            gc_printf(texts[i],10,-2,w-16)
             gc_translate(0,lineH)
         end
         STENCIL.stop()
@@ -1319,7 +1319,7 @@ function WIDGET.drag(x,y,dx,dy)
             WIDGET.unFocus(true)
         end
     else
-        SCN.curScroll=max(min(SCN.curScroll-dy,SCN.maxScroll),0)
+        SCN.curScroll=MATH.interval(SCN.curScroll-dy,0,SCN.maxScroll)
     end
 end
 function WIDGET.release(x,y)
