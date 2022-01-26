@@ -936,6 +936,7 @@ Widgets.textBox={
 
     scrollBarPos='left',
     lineHeight=30,
+    yOffset=-2,
     fixContent=true,
 
     _scrollPos=0,-- Scroll-down-distance
@@ -949,6 +950,7 @@ Widgets.textBox={
         'posX','posY',
         'scrollBarPos',
         'lineHeight',
+        'yOffset',
         'fixContent',
 
         'visibleFunc',
@@ -959,6 +961,7 @@ function Widgets.textBox:reset()
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
     assert(self.h and type(self.h)=='number','[inputBox].h must be number')
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
+    assert(type(self.yOffset)=='number',"[textBox].yOffset must be number")
 
     if not self.texts then self.texts={} end
     self._capacity=ceil((self.h-10)/self.lineHeight)
@@ -1079,7 +1082,7 @@ function Widgets.textBox:draw()
         gc_translate(0,-(self._scrollPos%lineH))
         local pos=int(self._scrollPos/lineH)
         for i=pos+1,min(pos+self._capacity+1,#texts) do
-            gc_printf(texts[i],10,-2,w-16)
+            gc_printf(texts[i],10,self.yOffset,w-16)
             gc_translate(0,lineH)
         end
         STENCIL.stop()
