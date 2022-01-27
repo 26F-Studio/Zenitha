@@ -174,6 +174,26 @@ function TABLE.find(t,val)
     for i=1,#t do if t[i]==val then return i end end
 end
 
+-- Check if tow list have same elements
+function TABLE.compare(a,b)
+    if #a~=#b then return false end
+    if a==b then return true end
+    for i=1,#a do
+        if a[i]~=b[i] then return false end
+    end
+    return true
+end
+
+-- Check if tow table have same elements
+function TABLE.equal(a,b)
+    if #a~=#b then return false end
+    if a==b then return true end
+    for k,v in next,a do
+        if b[k]~=v then return false end
+    end
+    return true
+end
+
 -- Return next value of [1~#] (by value)
 function TABLE.next(t,val)
     for i=1,#t do if t[i]==val then return t[i%#t+1] end end
