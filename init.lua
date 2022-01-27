@@ -169,6 +169,7 @@ do-- Define demo scene
     local testVal_1=false
     local testVal_2=18
     local testVal_3='opt2'
+    local testVal_4={{name='user1'},{name='user2'},{name='user3'},{name='user4'},{name='user5'}}
     local function _sceneDraw()
         setFont(150,'_basic')
         GC.mStr("Zenitha",400,60)
@@ -194,12 +195,23 @@ do-- Define demo scene
             WIDGET.new{type='selector',rawText='3:selector',x=670,y=390,w=200,list={'opt1','opt2','opt3'},disp=function() return testVal_3 end,code=function(v) testVal_3=v end},
             WIDGET.new{type='inputBox',rawText='4:inputBox',x=100,y=450,w=300,h=100,labelPos='down'},
             WIDGET.new{type='textBox', name='textBox',      x=100,y=620,w=600,h=126},
+            WIDGET.new{type='listBox', name='listBox',      x=100,y=770,w=600,h=120,drawFunc=function(opt,id,sel)
+                setFont(30)
+                gc_setColor(COLOR.Z)
+                gc_print(id,10,-6)
+                gc_print(opt.name,70,-6)
+                if sel then
+                    gc_setColor(1,1,1,.2)
+                    gc.rectangle('fill',0,0,600,30)
+                end
+            end},
             WIDGET.new{type='button',  rawText='Quit',      x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
         }
     }
-    demoScene.scrollHeight=200
+    demoScene.scrollHeight=360
     function demoScene.init()
         demoScene.widgetList.textBox:setTexts({"5.textBox","line 2","line 3","4","5","6","7"},true)
+        demoScene.widgetList.listBox:setList(testVal_4)
     end
     SCN.add('_zenitha',demoScene)
 end

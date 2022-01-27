@@ -195,12 +195,13 @@ Widgets.text={
     buildArgs={
         'name',
         'x','y',
+        'posX','posY',
+
         'color',
         'text','rawText',
         'fontSize','fontType',
 
         'alignX','alignY',
-        'posX','posY',
         'widthLimit',
 
         'visibleFunc',
@@ -230,10 +231,11 @@ Widgets.image={
     buildArgs={
         'name',
         'x','y',
+        'posX','posY',
+
         'ang','k',
         'image',
         'alignX','alignY',
-        'posX','posY',
 
         'visibleFunc',
     },
@@ -338,9 +340,9 @@ Widgets.checkBox={
     buildArgs={
         'name',
         'x','y','w',
+        'posX','posY',
 
         'labelPos',
-        'posX','posY',
         'text','rawText',
         'fontSize','fontType',
         'widthLimit',
@@ -420,7 +422,7 @@ end
 -- Slider
 Widgets.slider={
     type='slider',
-    w=10,
+    w=100,
     axis={0,1},
     smooth=nil,
 
@@ -448,10 +450,10 @@ Widgets.slider={
     buildArgs={
         'name',
         'x','y','w',
-        'axis','smooth',
-
-        'labelPos',
         'posX','posY',
+
+        'axis','smooth',
+        'labelPos',
         'text','rawText',
         'fontSize','fontType',
         'widthLimit',
@@ -635,8 +637,8 @@ Widgets.selector={
     buildArgs={
         'name',
         'x','y','w',
-
         'posX','posY',
+
         'text','rawText',
         'sound',
 
@@ -763,6 +765,7 @@ Widgets.inputBox={
     type='inputBox',
     keepFocus=true,
 
+    w=100,
     h=40,
 
     secret=false,
@@ -778,10 +781,10 @@ Widgets.inputBox={
     buildArgs={
         'name',
         'x','y','w','h',
+        'posX','posY',
 
         'text','rawText',
         'fontSize','fontType',
-        'posX','posY',
         'secret',
         'inputSound',
         'delSound',
@@ -934,20 +937,24 @@ end
 Widgets.textBox={
     type='textBox',
 
+    w=100,
+    h=40,
+
     scrollBarPos='left',
     lineHeight=30,
     yOffset=-2,
     fixContent=true,
 
+    _texts=false,
     _scrollPos=0,-- Scroll-down-distance
     _sure=0,-- Sure-timer for clear history
 
     buildArgs={
         'name',
         'x','y','w','h',
+        'posX','posY',
 
         'fontSize','fontType',
-        'posX','posY',
         'scrollBarPos',
         'lineHeight',
         'yOffset',
@@ -963,27 +970,27 @@ function Widgets.textBox:reset()
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
     assert(type(self.yOffset)=='number',"[textBox].yOffset must be number")
 
-    if not self.texts then self.texts={} end
+    if not self._texts then self._texts={} end
     self._capacity=ceil((self.h-10)/self.lineHeight)
     self._scrollPos=0
 end
 function Widgets.textBox:replaceTexts(newList)
-    self.texts=newList
+    self._texts=newList
     self._scrollPos=0
 end
 function Widgets.textBox:setTexts(newList)
-    TABLE.clear(self.texts)
-    TABLE.connect(self.texts,newList)
+    TABLE.clear(self._texts)
+    TABLE.connect(self._texts,newList)
     self._scrollPos=0
 end
 function Widgets.textBox:push(t)
-    ins(self.texts,t)
-    if self._scrollPos==(#self.texts-1-self._capacity)*self.lineHeight then-- minus 1 for the new message
-        self._scrollPos=min(self._scrollPos+self.lineHeight,(#self.texts-self._capacity)*self.lineHeight)
+    ins(self._texts,t)
+    if self._scrollPos==(#self._texts-1-self._capacity)*self.lineHeight then-- minus 1 for the new message
+        self._scrollPos=min(self._scrollPos+self.lineHeight,(#self._texts-self._capacity)*self.lineHeight)
     end
 end
 function Widgets.textBox:clear()
-    self.texts={}
+    self._texts={}
     self._scrollPos=0
     SFX.play('fall')
 end
@@ -1012,7 +1019,7 @@ function Widgets.textBox:press(x,y)
     end
 end
 function Widgets.textBox:drag(_,_,_,dy)
-    self._scrollPos=max(0,min(self._scrollPos-dy,(#self.texts-self._capacity)*self.lineHeight))
+    self._scrollPos=max(0,min(self._scrollPos-dy,(#self._texts-self._capacity)*self.lineHeight))
 end
 function Widgets.textBox:scroll(dir)
     if type(dir)=='string' then
@@ -1035,7 +1042,7 @@ function Widgets.textBox:arrowKey(k)
 end
 function Widgets.textBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
-    local texts=self.texts
+    local texts=self._texts
     local lineH=self.lineHeight
 
     -- Background
@@ -1090,105 +1097,133 @@ function Widgets.textBox:draw()
 end
 
 
---[[
-local listBox={
+Widgets.listBox={
     type='listBox',
     keepFocus=true,
-    _scrollPos=0,-- Scroll-down-distance
-    selected=0,-- Hidden wheel move value
-}
-function listBox:reset()
-    -- haha nothing here too, techmino is really fun!
-end
-function listBox:clear()
-    self.list={}
+    w=100,
+    h=40,
+
+    scrollBarPos='left',
+    lineHeight=30,
+    drawFunc=false,-- function that draw options. Input: option,id,ifSelected
+
+    _list=false,
+    _capacity=0,
+    _scrollPos=0,
+    _selected=0,
+
+    buildArgs={
+        'name',
+        'x','y','w','h',
+        'posX','posY',
+
+        'scrollBarPos',
+        'lineHeight',
+        'drawFunc',
+
+        'visibleFunc',
+    },
+} CLASS.inherit(Widgets.listBox,baseWidget)
+function Widgets.listBox:reset()
+    baseWidget.reset(self)
+    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
+    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
+    assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
+
+    assert(type(self.drawFunc)=='function',"[textBox].drawFunc must be function")
+    if not self._list then self._list={} end
+    self._capacity=ceil((self.h-10)/self.lineHeight)
     self._scrollPos=0
 end
-function listBox:setList(t)
-    self.list=t
-    self.selected=1
+function Widgets.listBox:clear()
+    self._list={}
     self._scrollPos=0
 end
-function listBox:getList()
-    return self.list
+function Widgets.listBox:setList(t)
+    self._list=t
+    self._selected=1
+    self._scrollPos=0
 end
-function listBox:getLen()
-    return #self.list
+function Widgets.listBox:getList()
+    return self._list
 end
-function listBox:getSel()
-    return self.list[self.selected]
+function Widgets.listBox:getLen()
+    return #self._list
 end
-function listBox:isAbove(x,y)
+function Widgets.listBox:getSel()
+    return self._list[self._selected]
+end
+function Widgets.listBox:isAbove(x,y)
     return
         x>self.x and
         y>self.y and
         x<self.x+self.w and
         y<self.y+self.h
 end
-function listBox:push(t)
-    ins(self.list,t)
+function Widgets.listBox:push(t)
+    ins(self._list,t)
 end
-function listBox:pop()
-    if #self.list>0 then
-        rem(self.list)
-        listBox:drag(0,0,0,0)
+function Widgets.listBox:pop()
+    if #self._list>0 then
+        rem(self._list)
+        Widgets.listBox:drag(0,0,0,0)
     end
 end
-function listBox:remove()
-    if self.selected then
-        rem(self.list,self.selected)
-        if not self.list[self.selected] then
+function Widgets.listBox:remove()
+    if self._selected then
+        rem(self._list,self._selected)
+        if not self._list[self._selected] then
             self:arrowKey('up')
         end
         self:drag(0,0,0,0)
     end
 end
-function listBox:press(x,y)
+function Widgets.listBox:press(x,y)
     if not (x and y) then return end
     x,y=x-self.x,y-self.y
     if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
     self:drag(0,0,0,0)
     y=int((y+self._scrollPos)/self.lineHeight)+1
-    if self.list[y] then
-        if self.selected~=y then
-            self.selected=y
+    if self._list[y] then
+        if self._selected~=y then
+            self._selected=y
             SFX.play('selector',.8,0,12)
         end
     end
 end
-function listBox:drag(_,_,_,dy)
-    self._scrollPos=max(0,min(self._scrollPos-dy,(#self.list-self._capacity)*self.lineHeight))
+function Widgets.listBox:drag(_,_,_,dy)
+    self._scrollPos=max(0,min(self._scrollPos-dy,(#self._list-self._capacity)*self.lineHeight))
 end
-function listBox:scroll(n)
+function Widgets.listBox:scroll(n)
     self:drag(nil,nil,nil,-n*self.lineHeight)
 end
-function listBox:arrowKey(dir)
+function Widgets.listBox:arrowKey(dir)
     if dir=="up" then
-        self.selected=max(self.selected-1,1)
-        if self.selected<int(self._scrollPos/self.lineHeight)+2 then
+        self._selected=max(self._selected-1,1)
+        if self._selected<int(self._scrollPos/self.lineHeight)+2 then
             self:drag(nil,nil,nil,self.lineHeight)
         end
     elseif dir=="down" then
-        self.selected=min(self.selected+1,#self.list)
-        if self.selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
+        self._selected=min(self._selected+1,#self._list)
+        if self._selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
             self:drag(nil,nil,nil,-self.lineHeight)
         end
     end
 end
-function listBox:select(i)
-    self.selected=i
-    if self.selected<int(self._scrollPos/self.lineHeight)+2 then
+function Widgets.listBox:select(i)
+    self._selected=i
+    if self._selected<int(self._scrollPos/self.lineHeight)+2 then
         self:drag(nil,nil,nil,1e99)
-    elseif self.selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
+    elseif self._selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
         self:drag(nil,nil,nil,-1e99)
     end
 end
-function listBox:draw()
+function Widgets.listBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
-    local list=self.list
-    local _scrollPos=self._scrollPos
+    local list=self._list
+    local scroll=self._scrollPos
     local cap=self._capacity
-    local lineHeight=self.lineHeight
+    local lineH=self.lineHeight
 
     gc_push('transform')
         gc_translate(x,y)
@@ -1205,44 +1240,25 @@ function listBox:draw()
         -- Slider
         if #list>cap then
             gc_setColor(1,1,1)
-            local len=h*h/(#list*lineHeight)
-            gc_rectangle('fill',-15,(h-len)*_scrollPos/((#list-cap)*lineHeight),12,len,3)
+            local len=h*h/(#list*lineH)
+            gc_rectangle('fill',-15,(h-len)*scroll/((#list-cap)*lineH),12,len,3)
         end
 
         -- List
         STENCIL.start('equal',1)
-        STENCIL.rectangle(w,h)
-        local pos=int(_scrollPos/lineHeight)
-        gc_translate(0,-(_scrollPos%lineHeight))
+        STENCIL.rectangle(0,0,w,h)
+        local pos=int(scroll/lineH)
+        gc_translate(0,-(scroll%lineH))
         for i=pos+1,min(pos+cap+1,#list) do
-            self.drawF(list[i],i,i==self.selected)
-            gc_translate(0,lineHeight)
+            self.drawFunc(list[i],i,i==self._selected)
+            gc_translate(0,lineH)
         end
         STENCIL.stop()
     gc_pop()
 end
-function WIDGET.newListBox(D)-- name,x,y,w,h,lineHeight,drawF[,hideF][,hide]
-    local _={
-        name=    D.name or "_",
 
-        x=       D.x,
-        y=       D.y,
-        w=       D.w,
-        h=       D.h,
 
-        list=    {},
-        lineHeight=   D.lineHeight,
-        capacity=ceil(D.h/D.lineHeight),
-        drawF=   D.drawF,
-        hideF=   D.hideF,
-        hide=    D.hide,
-    }
-
-    for k,v in next,listBox do _[k]=v end
-    return _
-end
-]]
-
+-- Widget module
 WIDGET.active={}-- Table contains all active widgets
 WIDGET.sel=false-- Selected widget
 local function _resetAllWidgets()
