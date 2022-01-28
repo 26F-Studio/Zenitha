@@ -107,7 +107,6 @@ SCN=        require'Zenitha.scene'
 
 -- Love-based modules (media)
 GC=         require'Zenitha.gcExtend'
-STENCIL=    require'Zenitha.stencil'
 FONT=       require'Zenitha.font'
 TEXT=       require'Zenitha.text'
 SYSFX=      require'Zenitha.sysFX'
@@ -183,11 +182,11 @@ do-- Define demo scene
             gc.setColor(.97,.97,.97,.626)
             _sceneDraw()
 
-            STENCIL.start('equal',1)
-            STENCIL.circle(400+100*math.cos(love.timer.getTime()*1.26),260+100*math.sin(love.timer.getTime()*1.26),126)
+            GC.stc_start('equal',1)
+            GC.stc_circ(400+100*math.cos(love.timer.getTime()*1.26),260+100*math.sin(love.timer.getTime()*1.26),126)
             gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
             _sceneDraw()
-            STENCIL.stop()
+            GC.stc_stop()
         end,
         widgetList={
             WIDGET.new{type='checkBox',rawText='1:checkBox',x=210,y=390,w=40,disp=function() return testVal_1 end,code=function() testVal_1=not testVal_1 end},

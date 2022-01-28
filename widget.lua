@@ -17,10 +17,9 @@ local max,min=math.max,math.min
 local abs=math.abs
 local sub,ins,rem=string.sub,table.insert,table.remove
 
-local STENCIL=STENCIL
 local xOy=SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
-local mStr=GC.mStr
+local mStr,GC_stc_start,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_start,GC.stc_rect,GC.stc_stop
 local approach=MATH.expApproach
 
 local downArrowIcon=GC.DO{40,25,{'fPoly',0,0,20,25,40,0}}
@@ -1085,15 +1084,15 @@ function Widgets.textBox:draw()
 
         -- Texts
         setFont(self.fontSize,self.fontType)
-        STENCIL.start('equal',1)
-        STENCIL.rectangle(0,0,w,h)
+        GC_stc_start('equal',1)
+        GC_stc_rect(0,0,w,h)
         gc_translate(0,-(self._scrollPos%lineH))
         local pos=int(self._scrollPos/lineH)
         for i=pos+1,min(pos+self._capacity+1,#texts) do
             gc_printf(texts[i],10,self.yOffset,w-16)
             gc_translate(0,lineH)
         end
-        STENCIL.stop()
+        GC_stc_stop()
     gc_pop()
 end
 
@@ -1246,15 +1245,15 @@ function Widgets.listBox:draw()
         end
 
         -- List
-        STENCIL.start('equal',1)
-        STENCIL.rectangle(0,0,w,h)
+        GC_stc_start('equal',1)
+        GC_stc_rect(0,0,w,h)
         local pos=int(scroll/lineH)
         gc_translate(0,-(scroll%lineH))
         for i=pos+1,min(pos+cap+1,#list) do
             self.drawFunc(list[i],i,i==self._selected)
             gc_translate(0,lineH)
         end
-        STENCIL.stop()
+        GC_stc_stop()
     gc_pop()
 end
 

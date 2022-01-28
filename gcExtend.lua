@@ -193,4 +193,35 @@ do-- function GC.DO(L)
         return canvas
     end
 end
+
+--------------------------------------------------------------
+
+local gc_stencil,gc_setStencilTest=gc.stencil,gc.setStencilTest
+local gc_rectangle,gc_circle=gc.rectangle,gc.circle
+
+GC.stc_start=gc_setStencilTest
+function GC.stc_stop()
+    gc_setStencilTest()
+end
+
+local rect_x,rect_y,rect_w,rect_h
+local function stencil_rectangle()
+    gc_rectangle('fill',rect_x,rect_y,rect_w,rect_h)
+end
+
+function GC.stc_rect(x,y,w,h)
+    rect_x,rect_y,rect_w,rect_h=x,y,w,h
+    gc_stencil(stencil_rectangle)
+end
+
+local circle_x,circle_y,circle_r,circle_seg
+local function stencil_circle()
+    gc_circle('fill',circle_x,circle_y,circle_r,circle_seg)
+end
+
+function GC.stc_circ(x,y,r,seg)
+    circle_x,circle_y,circle_r,circle_seg=x,y,r,seg
+    gc_stencil(stencil_circle)
+end
+
 return GC
