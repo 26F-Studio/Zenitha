@@ -169,7 +169,7 @@ do-- Define demo scene
     local testVal_1=false
     local testVal_2=18
     local testVal_3='opt2'
-    local testVal_4={{name='user1'},{name='user2'},{name='user3'},{name='user4'},{name='user5'}}
+    local testVal_4={} for i=1,9 do table.insert(testVal_4,{name='user'..i}) end
     local function _sceneDraw()
         setFont(150,'_basic')
         GC.mStr("Zenitha",400,60)

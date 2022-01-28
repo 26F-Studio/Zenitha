@@ -42,10 +42,6 @@ function TASK.removeTask_iterate(func,...)
     end
 end
 function TASK.clear()
-    local i=#tasks
-    while i>0 do
-        tasks[i]=nil
-        i=i-1
-    end
+    TABLE.cut(tasks)
 end
 return TASK

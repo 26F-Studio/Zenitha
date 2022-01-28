@@ -36,7 +36,7 @@ function TABLE.connect(org,new)
     return org
 end
 
--- Connect two lists
+-- Get a table of two lists connected
 function TABLE.combine(L1,L2)
     local l={}
     local l0=#L1
@@ -45,7 +45,7 @@ function TABLE.combine(L1,L2)
     return l
 end
 
---------------------------
+--------------------------------------------------------------
 
 -- Get a full copy of a table, depth = how many layers will be recreate, default to inf
 function TABLE.copy(org,depth)
@@ -104,7 +104,7 @@ function TABLE.complete(new,old)
     end
 end
 
---------------------------
+--------------------------------------------------------------
 
 -- Pop & return random [1~#] of table
 function TABLE.popRandom(t)
@@ -131,7 +131,7 @@ function TABLE.clear(G)
     end
 end
 
---------------------------
+--------------------------------------------------------------
 
 -- Remove duplicated value of [1~#]
 function TABLE.trimDuplicate(org)
@@ -157,7 +157,7 @@ function TABLE.remDuplicate(org)
     end
 end
 
---------------------------
+--------------------------------------------------------------
 
 -- Reverse [1~#]
 function TABLE.reverse(org)
@@ -167,7 +167,7 @@ function TABLE.reverse(org)
     end
 end
 
---------------------------
+--------------------------------------------------------------
 
 -- Find value in [1~#]
 function TABLE.find(t,val)
@@ -199,7 +199,7 @@ function TABLE.next(t,val)
     for i=1,#t do if t[i]==val then return t[i%#t+1] end end
 end
 
---------------------------
+--------------------------------------------------------------
 
 -- Find value in whole table
 function TABLE.search(t,val)
@@ -215,24 +215,24 @@ function TABLE.reIndex(org)
     end
 end
 
---------------------------
+--------------------------------------------------------------
 
 -- Dump a simple lua table
 do-- function TABLE.dump(L,t)
     local tabs={
-        [0]="",
-        "\t",
-        "\t\t",
-        "\t\t\t",
-        "\t\t\t\t",
-        "\t\t\t\t\t",
+        [0]='',
+        '\t',
+        '\t\t',
+        '\t\t\t',
+        '\t\t\t\t',
+        '\t\t\t\t\t',
     }
     local function dump(L,t)
         local s
         if t then
-            s="{\n"
+            s='{\n'
         else
-            s="return{\n"
+            s='return{\n'
             t=1
             if type(L)~='table' then
                 return
@@ -243,30 +243,30 @@ do-- function TABLE.dump(L,t)
             local T=type(k)
             if T=='number' then
                 if k==count then
-                    k=""
+                    k=''
                     count=count+1
                 else
-                    k="["..k.."]="
+                    k='['..k..']='
                 end
             elseif T=='string' then
-                if find(k,"[^0-9a-zA-Z_]") then
-                    k="[\""..k.."\"]="
+                if find(k,'[^0-9a-zA-Z_]') then
+                    k='[\''..k..'\']='
                 else
-                    k=k.."="
+                    k=k..'='
                 end
-            elseif T=='boolean' then k="["..k.."]="
+            elseif T=='boolean' then k='['..k..']='
             else error("Error key type!")
             end
             T=type(v)
             if T=='number' then v=tostring(v)
-            elseif T=='string' then v="\""..v.."\""
+            elseif T=='string' then v='\''..v..'\''
             elseif T=='table' then v=dump(v,t+1)
             elseif T=='boolean' then v=tostring(v)
             else error("Error data type!")
             end
-            s=s..tabs[t]..k..v..",\n"
+            s=s..tabs[t]..k..v..',\n'
         end
-        return s..tabs[t-1].."}"
+        return s..tabs[t-1]..'}'
     end
     TABLE.dump=dump
 end
@@ -274,36 +274,36 @@ end
 -- Dump a simple lua table (no whitespaces)
 do-- function TABLE.dumpDeflate(L,t)
     local function dump(L)
-        local s="return{"
+        local s='return{'
         if type(L)~='table' then return end
         local count=1
         for k,v in next,L do
             local T=type(k)
             if T=='number' then
                 if k==count then
-                    k=""
+                    k=''
                     count=count+1
                 else
-                    k="["..k.."]="
+                    k='['..k..']='
                 end
             elseif T=='string' then
-                if find(k,"[^0-9a-zA-Z_]") then
-                    k="[\""..k.."\"]="
+                if find(k,'[^0-9a-zA-Z_]') then
+                    k='[\''..k..'\']='
                 else
-                    k=k.."="
+                    k=k..'='
                 end
-            elseif T=='boolean' then k="["..k.."]="
+            elseif T=='boolean' then k='['..k..']='
             else error("Error key type!")
             end
             T=type(v)
             if T=='number' then v=tostring(v)
-            elseif T=='string' then v="\""..v.."\""
+            elseif T=='string' then v='\''..v..'\''
             elseif T=='table' then v=dump(v)
             elseif T=='boolean' then v=tostring(v)
             else error("Error data type!")
             end
         end
-        return s.."}"
+        return s..'}'
     end
     TABLE.dumpDeflate=dump
 end
