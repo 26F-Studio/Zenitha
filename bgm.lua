@@ -127,8 +127,8 @@ function BGM.setVol(vol)
 end
 function BGM.load(name,path)
     if type(name)=='table' then
-        for k,v in next,name do
-            _addFile(k,v)
+        for i=1,#name do
+            _addFile(name[i].name,name[i].path)
         end
     else
         _addFile(name,path)
