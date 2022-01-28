@@ -194,8 +194,9 @@ do-- Define demo scene
             WIDGET.new{type='slider',  rawText='2:slider',  x=370,y=390,w=180,axis={10,26,4},disp=function() return testVal_2 end,code=function(v) testVal_2=v end},
             WIDGET.new{type='selector',rawText='3:selector',x=670,y=390,w=200,list={'opt1','opt2','opt3'},disp=function() return testVal_3 end,code=function(v) testVal_3=v end},
             WIDGET.new{type='inputBox',rawText='4:inputBox',x=100,y=450,w=300,h=100,labelPos='down'},
-            WIDGET.new{type='textBox', name='textBox',      x=100,y=620,w=600,h=126},
-            WIDGET.new{type='listBox', name='listBox',      x=100,y=770,w=600,h=120,drawFunc=function(opt,id,sel)
+            WIDGET.new{type='button',  rawText='Quit',      x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
+            WIDGET.new{type='textBox', name='5.textBox',    x=100,y=620,w=600,h=126},
+            WIDGET.new{type='listBox', name='6.listBox',    x=100,y=770,w=600,h=120,drawFunc=function(opt,id,sel)
                 setFont(30)
                 gc_setColor(COLOR.Z)
                 gc_print(id,10,-6)
@@ -205,13 +206,12 @@ do-- Define demo scene
                     gc.rectangle('fill',0,0,600,30)
                 end
             end},
-            WIDGET.new{type='button',  rawText='Quit',      x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
         }
     }
     demoScene.scrollHeight=360
     function demoScene.init()
-        demoScene.widgetList.textBox:setTexts({"5.textBox","line 2","line 3","4","5","6","7"},true)
-        demoScene.widgetList.listBox:setList(testVal_4)
+        demoScene.widgetList['5.textBox']:setTexts({"5.textBox","line 2","line 3","4","5","6","7"},true)
+        demoScene.widgetList['6.listBox']:setList(testVal_4)
     end
     SCN.add('_zenitha',demoScene)
 end
