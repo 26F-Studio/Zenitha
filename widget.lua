@@ -936,6 +936,7 @@ end
 
 Widgets.textBox={
     type='textBox',
+    keepFocus=true,
 
     w=100,
     h=40,
