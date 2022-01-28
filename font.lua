@@ -12,7 +12,7 @@ function FONT.setFallback(font,fallback) fallbackMap[font]=fallback end
 
 function FONT.rawget(size)
     if not fontCache[size] then
-        assert(type(size)=='number'and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
+        assert(type(size)=='number' and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
         fontCache[size]=love.graphics.setNewFont(size,'light',love.graphics.getDPIScale()*SCR.k*2)
     end
     return fontCache[size]
@@ -35,7 +35,7 @@ function FONT.get(size,name)
     f=f[size]
 
     if not f then
-        assert(type(size)=='number'and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
+        assert(type(size)=='number' and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
         f=love.graphics.setNewFont(fontFiles[name],size,'light',love.graphics.getDPIScale()*SCR.k*2)
         local fallbackName=fallbackMap[name] or defaultFallBack and name~=defaultFallBack and defaultFallBack
         if fallbackName then

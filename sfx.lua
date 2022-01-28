@@ -84,13 +84,13 @@ end
 function SFX.getCount()
     return #sfxList
 end
-function SFX.setVol(v)
-    assert(type(v)=='number' and v>=0 and v<=1,'Wrong volume')
-    volume=v
+function SFX.setVol(vol)
+    assert(type(vol)=='number' and vol>=0 and vol<=1,"SFX.setVol(vol): vol must be a number in range 0~1")
+    volume=vol
 end
-function SFX.setStereo(v)
-    assert(type(v)=='number' and v>=0 and v<=1,'Wrong stereo')
-    stereo=v
+function SFX.setStereo(s)
+    assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): s must be a number in range 0~1")
+    stereo=s
 end
 
 function SFX.getNoteName(note)
@@ -125,10 +125,13 @@ function SFX.playSample(pack,...)-- vol-1, sampSet1, vol-2, sampSet2
         end
     end
 end
-local function _play(name,vol,pos,pitch)
-    if volume==0 or vol==0 then return end
+function SFX.play(name,vol,pos,pitch)
+    vol=(vol or 1)*volume
+    if vol==0 then return end
+
     local S=Sources[name]-- Source list
     if not S then return end
+
     local n=1
     while S[n]:isPlaying() do
         n=n+1
@@ -138,6 +141,7 @@ local function _play(name,vol,pos,pitch)
             break
         end
     end
+
     S=S[n]-- AU_SRC
     if S:getChannelCount()==1 then
         if pos then
@@ -150,10 +154,6 @@ local function _play(name,vol,pos,pitch)
     S:setVolume(vol^1.626)
     S:setPitch(pitch and 1.0594630943592953^pitch or 1)
     S:play()
-end
-SFX.fplay=_play-- Play sounds without apply module's volume setting
-function SFX.play(name,vol,pos,pitch)
-    _play(name,(vol or 1)*volume,pos,pitch)
 end
 function SFX.reset()
     for _,L in next,Sources do
