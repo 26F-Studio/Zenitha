@@ -313,8 +313,8 @@ Widgets.checkBox=setmetatable({
     text=false,
     image=false,
     rawText=false,
+    alignX='center',alignY='center',
     labelPos='left',
-    widthLimit=1e99,
     sound=false,
 
     disp=false,-- function return a boolean
@@ -341,13 +341,13 @@ Widgets.checkBox=setmetatable({
 function Widgets.checkBox:reset()
     baseWidget.reset(self)
     if self.labelPos=='left' then
-        self.alignX,self.alignY='right','center'
+        self.alignX='right'
     elseif self.labelPos=='right' then
-        self.alignX,self.alignY='left','center'
+        self.alignX='left'
     elseif self.labelPos=='up' then
-        self.alignX,self.alignY='center','down'
+        self.alignY='down'
     elseif self.labelPos=='down' then
-        self.alignX,self.alignY='center','up'
+        self.alignY='up'
     else
         error("[checkBox].labelPos must be 'left', 'right', 'up', or 'down'")
     end
@@ -416,7 +416,6 @@ Widgets.slider=setmetatable({
     image=false,
     rawText=false,
     labelPos='left',
-    widthLimit=1e99,
     valueShow=nil,
 
     disp=false,-- function return the displaying _value
@@ -507,6 +506,8 @@ function Widgets.slider:reset()
         self.alignX='left'
     elseif self.labelPos=='down' then
         self.alignY='up'
+    else
+        error("[slider].labelPos must be 'left', 'right', or 'down'")
     end
 end
 function Widgets.slider:isAbove(x,y)
@@ -630,7 +631,6 @@ Widgets.slider_fill=setmetatable({
     image=false,
     rawText=false,
     labelPos='left',
-    widthLimit=1e99,
 
     disp=false,-- function return the displaying _value
     code=NULL,
@@ -678,6 +678,8 @@ function Widgets.slider_fill:reset()
         self.alignX='left'
     elseif self.labelPos=='down' then
         self.alignY='up'
+    else
+        error("[slider_fill].labelPos must be 'left','right' or 'down'")
     end
 end
 function Widgets.slider_fill:isAbove(x,y)
@@ -720,14 +722,16 @@ function Widgets.slider_fill:draw()
 
     -- Drawable
     if self._text then
-        gc_setColor(.97,.97,.97)
+        gc_setColor(COLOR.Z)
+        local x2,y2
         if self.labelPos=='left' then
-            alignDraw(self,self._text,x-8-ATV*6,y)
+            x2,y2=x-8-ATV*6,y
         elseif self.labelPos=='right' then
-            alignDraw(self,self._text,x+self.w+8+ATV*6,y)
+            x2,y2=x+self.w+8+ATV*6,y
         elseif self.labelPos=='down' then
-            alignDraw(self,self._text,x+self.w*.5,y+20)
+            x2,y2=x+self.w*.5,y+20
         end
+        alignDraw(self,self._text,x2,y2)
     end
 end
 
@@ -735,11 +739,19 @@ end
 Widgets.selector=setmetatable({
     type='selector',
 
-    h=70,-- Attention, fixed height
+    w=100,
+    labelPos='left',
+    labelDistance=10,
+    sound=false,
 
+    disp=false,-- function return a boolean
+    code=NULL,
+
+    _text=nil,
+    _image=nil,
     _select=false,-- Selected item ID
     _selText=false,-- Selected item name
-    alignX='center',alignY='down',-- Force text alignment
+    alignX='center',alignY='center',-- Force text alignment
 
     buildArgs={
         'name',
@@ -747,6 +759,10 @@ Widgets.selector=setmetatable({
         'posX','posY',
 
         'text','rawText',
+        'widthLimit',
+
+        'labelPos',
+        'labelDistance',
         'sound',
 
         'list',
@@ -757,21 +773,33 @@ Widgets.selector=setmetatable({
 function Widgets.selector:reset()
     baseWidget.reset(self)
 
+    assert(self.w and type(self.w)=='number','[selector].w must be number')
     assert(type(self.disp)=='function','[selector].disp must be function')
 
-    self.widthLimit=self.w
+    if self.labelPos=='left' then
+        self.alignX='right'
+    elseif self.labelPos=='right' then
+        self.alignX='left'
+    elseif self.labelPos=='down' then
+        self.alignY='up'
+    elseif self.labelPos=='up' then
+        self.alignY='down'
+    else
+        error("[selector].labelPos must be 'left','right','down' or 'up'")
+    end
 
     local V,L=self.disp(),self.list
     for i=1,#L do
         if L[i]==V then
             self._select=i
             self._selText=self.list[i]
-            return
+            goto _BREAK_
         end
     end
     self._select=false
     self._selText=false
     MES.new('error',"Selector "..self.name.." dead, disp= "..tostring(V))
+    ::_BREAK_::
 end
 function Widgets.selector:isAbove(x,y)
     return
@@ -780,63 +808,65 @@ function Widgets.selector:isAbove(x,y)
 end
 function Widgets.selector:draw()
     local x,y=self._x,self._y
-    local w,h=self.w,self.h
-    x,y=x-w*.5,y-h*.5
+    local w=self.w
     local ATV=self._activeTime/self._activeTimeMax
-
-    -- Background
-    gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y,w,h,4)
-
-    -- Frame
-    gc_setColor(1,1,1,.6+ATV*.4)
-    gc_setLineWidth(2)
-    gc_rectangle('line',x,y,w,h,3)
 
     -- Arrow
     if self._select then
-        gc_setColor(1,1,1,.2+ATV*.4)
+        gc_setColor(1,1,1,.6+ATV*.26)
         local t=(timer()%.5)^.5
         if self._select>1 then
-            gc_draw(smallerThen,x+6,y+40)
+            gc_draw(smallerThen,x-w*.5,y-10)
             if ATV>0 then
                 gc_setColor(1,1,1,ATV*1.5*(.5-t))
-                gc_draw(smallerThen,x+6-t*40,y+40)
-                gc_setColor(1,1,1,.2+ATV*.4)
+                gc_draw(smallerThen,x-w*.5-t*40,y-10)
+                gc_setColor(1,1,1,.6+ATV*.26)
             end
         end
         if self._select<#self.list then
-            gc_draw(largerThen,x+w-26,y+40)
+            gc_draw(largerThen,x+w*.5-20,y-10)
             if ATV>0 then
                 gc_setColor(1,1,1,ATV*1.5*(.5-t))
-                gc_draw(largerThen,x+w-26+t*40,y+40)
+                gc_draw(largerThen,x+w*.5-20+t*40,y-10)
             end
         end
     end
 
     -- Drawable
+    gc_setColor(COLOR.Z)
+    local x2,y2
+    if self.labelPos=='left' then
+        x2,y2=x-w*.5-self.labelDistance,y
+    elseif self.labelPos=='right' then
+        x2,y2=x+w*.5+self.labelDistance,y
+    elseif self.labelPos=='up' then
+        x2,y2=x,y-self.labelDistance
+    elseif self.labelPos=='down' then
+        x2,y2=x,y+self.labelDistance
+    end
+    if self._image then
+        gc_setColor(1,1,1)
+        alignDraw(self,self._image,x2,y2)
+    end
     if self._text then
         gc_setColor(self.color)
-        alignDraw(self,self._text,x+w*.5,y+35)
+        alignDraw(self,self._text,x2,y2)
     end
     if self._selText then
         setFont(30)
-        gc_setColor(COLOR.Z)
-        mStr(self._selText,x+w*.5,y+30)
+        mStr(self._selText,x,y-21)
     end
 end
 function Widgets.selector:press(x)
     if x then
         local s=self._select
-        if x<self.x then
+        if x<self._x then
             if s>1 then
                 s=s-1
-                SYSFX.new('rect',3,self._x-self.w*.5,self._y-self.h*.5-SCN.curScroll,self.w*.5,self.h)
             end
         else
             if s<#self.list then
                 s=s+1
-                SYSFX.new('rect',3,self.x,self.y-self.h*.5-SCN.curScroll,self.w*.5,self.h)
             end
         end
         if self._select~=s then
@@ -852,11 +882,9 @@ function Widgets.selector:scroll(n)
     if n==-1 then
         if s==1 then return end
         s=s-1
-        SYSFX.new('rect',3,self._x,self._y-SCN.curScroll,self.w*.5,60)
     else
         if s==#self.list then return end
         s=s+1
-        SYSFX.new('rect',3,self.x+self.w*.5,self.y-SCN.curScroll,self.w*.5,60)
     end
     self.code(self.list[s])
     self._select=s
@@ -947,10 +975,10 @@ function Widgets.inputBox:clear()
 end
 function Widgets.inputBox:isAbove(x,y)
     return
-        x>self.x and
-        y>self.y and
-        x<self.x+self.w and
-        y<self.y+self.h
+        x>self._x and
+        y>self._y and
+        x<self._x+self.w and
+        y<self._y+self.h
 end
 function Widgets.inputBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
@@ -971,16 +999,18 @@ function Widgets.inputBox:draw()
 
     -- Drawable
     if self._text then
-        gc_setColor(.97,.97,.97)
+        gc_setColor(COLOR.Z)
+        local x2,y2
         if self.labelPos=='left' then
-            alignDraw(self,self._text,x-8,y+self.h*.5)
+            x2,y2=x-8,y+self.h*.5
         elseif self.labelPos=='right' then
-            alignDraw(self,self._text,x+self.w+8,y+self.h*.5)
+            x2,y2=x+self.w+8,y+self.h*.5
         elseif self.labelPos=='up' then
-            alignDraw(self,self._text,x+self.w*.5,y)
+            x2,y2=x+self.w*.5,y
         elseif self.labelPos=='down' then
-            alignDraw(self,self._text,x+self.w*.5,y+self.h)
+            x2,y2=x+self.w*.5,y+self.h
         end
+        alignDraw(self,self._text,x2,y2)
     end
 
     local f=self.fontSize
@@ -1104,10 +1134,10 @@ function Widgets.textBox:clear()
 end
 function Widgets.textBox:isAbove(x,y)
     return
-        x>self.x and
-        y>self.y and
-        x<self.x+self.w and
-        y<self.y+self.h
+        x>self._x and
+        y>self._y and
+        x<self._x+self.w and
+        y<self._y+self.h
 end
 function Widgets.textBox:update(dt)
     if self._sure>0 then
@@ -1117,7 +1147,7 @@ end
 function Widgets.textBox:press(x,y)
     if not (x and y) then return end
     self:drag(0,0,0,0)
-    if not self.fixContent and x>self.x+self.w-40 and y<self.y+40 then
+    if not self.fixContent and x>self._x+self.w-40 and y<self._y+40 then
         if self._sure>0 then
             self:clear()
             self._sure=0
@@ -1263,10 +1293,10 @@ function Widgets.listBox:getSel()
 end
 function Widgets.listBox:isAbove(x,y)
     return
-        x>self.x and
-        y>self.y and
-        x<self.x+self.w and
-        y<self.y+self.h
+        x>self._x and
+        y>self._y and
+        x<self._x+self.w and
+        y<self._y+self.h
 end
 function Widgets.listBox:push(t)
     ins(self._list,t)
@@ -1288,7 +1318,7 @@ function Widgets.listBox:remove()
 end
 function Widgets.listBox:press(x,y)
     if not (x and y) then return end
-    x,y=x-self.x,y-self.y
+    x,y=x-self._x,y-self._y
     if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
     self:drag(0,0,0,0)
     y=int((y+self._scrollPos)/self.lineHeight)+1
