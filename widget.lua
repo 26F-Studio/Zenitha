@@ -464,6 +464,13 @@ function Widgets.slider:reset()
 
     assert(type(self.disp)=='function','[slider].disp must be function')
 
+    assert(
+        type(self.axis)=='table' and (#self.axis==2 or #self.axis==3) and
+        type(self.axis[1])=='number' and
+        type(self.axis[2])=='number' and
+        (not self.axis[3] or type(self.axis[3])=='number'),
+        "[slider].axis must be {low,high} or {low,high,unit}"
+    )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
     self._unit=self.axis[3]
@@ -607,6 +614,118 @@ function Widgets.slider:scroll(n)
 end
 function Widgets.slider:arrowKey(k)
     self:scroll((k=='left' or k=='up') and -1 or 1)
+end
+
+
+-- Slider_fill
+Widgets.slider_fill=setmetatable({
+    type='slider_fill',
+    w=100,
+    axis={0,1},
+
+    text=false,
+    image=false,
+    rawText=false,
+    labelPos='left',
+    widthLimit=1e99,
+
+    disp=false,-- function return the displaying _value
+    code=NULL,
+
+    _text=nil,
+    _image=nil,
+    _pos=nil,
+    _rangeL=nil,
+    _rangeR=nil,
+
+    buildArgs={
+        'name',
+        'x','y','w',
+        'posX','posY',
+
+        'axis',
+        'labelPos',
+        'text','rawText',
+        'fontSize','fontType',
+        'widthLimit',
+
+        'disp','code',
+        'visibleFunc',
+    },
+},{__index=Widgets.slider})
+function Widgets.slider_fill:reset()
+    baseWidget.reset(self)
+
+    assert(type(self.disp)=='function','[slider].disp must be function')
+
+    assert(
+        type(self.axis)=='table' and #self.axis==2 and
+        type(self.axis[1])=='number' and
+        type(self.axis[2])=='number',
+        "[slider].axis must be {number,number}"
+    )
+    self._rangeL=self.axis[1]
+    self._rangeR=self.axis[2]
+    self._pos=self._rangeL
+    self._textShowTime=3
+
+    if self.labelPos=='left' then
+        self.alignX='right'
+    elseif self.labelPos=='right' then
+        self.alignX='left'
+    elseif self.labelPos=='down' then
+        self.alignY='up'
+    end
+end
+function Widgets.slider_fill:isAbove(x,y)
+    return
+        x>self._x and
+        x<self._x+self.w and
+        abs(y-self._y)<25
+end
+function Widgets.slider_fill:draw()
+    local x,y=self._x,self._y
+    local ATV=self._activeTime/self._activeTimeMax
+    local rate=(self._pos-self._rangeL)/(self._rangeR-self._rangeL)
+    local num=int(rate*100+.5)..'%'
+
+    -- Capsule
+    gc_setColor(1,1,1,.6+ATV*.26)
+    gc_setLineWidth(1+ATV)
+    gc_rectangle('line',x,y-25,self.w,50,25)
+    if ATV>0 then
+        gc_setColor(1,1,1,ATV*.12)
+        gc_rectangle('fill',x,y-25,self.w,50,25)
+    end
+
+    -- Stenciled capsule and text
+    GC.stc_reset()
+    GC.stc_rect(x+25,y-25,self.w-50,50)
+    GC.stc_circ(x+25,y,25)
+    GC.stc_circ(x+self.w-25,y,25)
+
+    setFont(30)
+    gc_setColor(1,1,1,.9)
+    mStr(num,x+self.w*.5,y-22)
+    gc_rectangle('fill',x,y-25,self.w*rate,50)
+
+    GC.stc_reset()
+    GC.stc_rect(x,y-25,self.w*rate,50)
+    gc_setColor(0,0,0,.9)
+    mStr(num,x+self.w*.5,y-22)
+    GC.stc_stop()
+
+    -- Drawable
+    if self._text then
+        gc_setColor(.97,.97,.97)
+        if self.labelPos=='left' then
+            alignDraw(self,self._text,x-8-ATV*6,y)
+        elseif self.labelPos=='right' then
+            alignDraw(self,self._text,x+self.w+8+ATV*6,y)
+        elseif self.labelPos=='down' then
+            alignDraw(self,self._text,x+self.w*.5,y+20)
+        end
+    end
 end
 
 
