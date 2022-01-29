@@ -199,7 +199,19 @@ end
 local gc_stencil,gc_setStencilTest=gc.stencil,gc.setStencilTest
 local gc_rectangle,gc_circle=gc.rectangle,gc.circle
 
-GC.stc_start=gc_setStencilTest
+local stc_action,stc_value='replace',1
+
+function GC.stc_reset()
+    stc_action,stc_value='replace',1
+    gc_setStencilTest('equal',1)
+    gc_stencil(NULL)
+end
+function GC.stc_setComp(compMode,compVal)
+    gc_setStencilTest(compMode or 'equal',compVal or 1)
+end
+function GC.stc_setPen(action,val)
+    stc_action,stc_value=action,val
+end
 function GC.stc_stop()
     gc_setStencilTest()
 end
@@ -211,7 +223,7 @@ end
 
 function GC.stc_rect(x,y,w,h)
     rect_x,rect_y,rect_w,rect_h=x,y,w,h
-    gc_stencil(stencil_rectangle)
+    gc_stencil(stencil_rectangle,stc_action,stc_value,true)
 end
 
 local circle_x,circle_y,circle_r,circle_seg
@@ -221,7 +233,7 @@ end
 
 function GC.stc_circ(x,y,r,seg)
     circle_x,circle_y,circle_r,circle_seg=x,y,r,seg
-    gc_stencil(stencil_circle)
+    gc_stencil(stencil_circle,stc_action,stc_value,true)
 end
 
 return GC

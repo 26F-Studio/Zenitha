@@ -18,7 +18,7 @@ local sub,ins,rem=string.sub,table.insert,table.remove
 
 local xOy=SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
-local mStr,GC_stc_start,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_start,GC.stc_rect,GC.stc_stop
+local mStr,GC_stc_setComp,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_setComp,GC.stc_rect,GC.stc_stop
 local approach=MATH.expApproach
 
 local smallerThen=GC.DO{20,20,
@@ -1071,7 +1071,7 @@ function Widgets.textBox:draw()
 
         -- Texts
         setFont(self.fontSize,self.fontType)
-        GC_stc_start('equal',1)
+        GC_stc_setComp('equal',1)
         GC_stc_rect(0,0,w,h)
         gc_translate(0,-(self._scrollPos%lineH))
         local pos=int(self._scrollPos/lineH)
@@ -1232,7 +1232,7 @@ function Widgets.listBox:draw()
         end
 
         -- List
-        GC_stc_start('equal',1)
+        GC_stc_setComp('equal',1)
         GC_stc_rect(0,0,w,h)
         local pos=int(scroll/lineH)
         gc_translate(0,-(scroll%lineH))

@@ -181,7 +181,7 @@ do-- Define demo scene
             gc.setColor(.97,.97,.97,.626)
             _sceneDraw()
 
-            GC.stc_start('equal',1)
+            GC.stc_reset()
             GC.stc_circ(400+100*math.cos(love.timer.getTime()*1.26),260+100*math.sin(love.timer.getTime()*1.26),126)
             gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
             _sceneDraw()
