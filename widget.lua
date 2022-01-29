@@ -417,8 +417,7 @@ Widgets.slider=setmetatable({
     rawText=false,
     labelPos='left',
     widthLimit=1e99,
-    sound=false,
-    show=false,
+    valueShow=false,
 
     disp=false,-- function return the displaying _value
     code=NULL,
@@ -444,7 +443,7 @@ Widgets.slider=setmetatable({
         'fontSize','fontType',
         'widthLimit',
 
-        'show',
+        'valueShow',
         'disp','code',
         'visibleFunc',
     },
@@ -457,7 +456,7 @@ local sliderShowFunc={
         return int(S.disp()*100+.5)*.01
     end,
     percent=function(S)
-        return int(S.disp()*100+.5).."%"
+        return int(S.disp()*100+.5)..'%'
     end,
 }
 function Widgets.slider:reset()
@@ -476,13 +475,13 @@ function Widgets.slider:reset()
     self._pos=self._rangeL
     self._textShowTime=3
 
-    if self.show then
-        if type(self.show)=='function' then
-            self._showFunc=self.show
-        elseif type(self.show)=='string' then
-            self._showFunc=assert(sliderShowFunc[self.show],"[slider].show must be function, or 'int', 'float', or 'percent'")
+    if self.valueShow then
+        if type(self.valueShow)=='function' then
+            self._showFunc=self.valueShow
+        elseif type(self.valueShow)=='string' then
+            self._showFunc=assert(sliderShowFunc[self.valueShow],"[slider].valueShow must be function, or 'int', 'float', or 'percent'")
         end
-    elseif self.show==false then-- Use default if nil
+    elseif self.valueShow==false then-- Use default if nil
         self._showFunc=NULL
     else
         if self._unit and self._unit%1==0 then
@@ -551,10 +550,10 @@ function Widgets.slider:draw()
     end
 
     -- Float text
-    if self._textShowTime>0 and self.disp then
+    if self._textShowTime>0 then
         setFont(25)
         gc_setColor(.97,.97,.97,min(self._textShowTime/2,1))
-        mStr(self:disp(),cx,by-30)
+        mStr(self:_showFunc(),cx,by-30)
     end
 
     -- Drawable
