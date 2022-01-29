@@ -1,6 +1,9 @@
 local gc=love.graphics
 local setColor,printf,draw=gc.setColor,gc.printf,gc.draw
+local line,arc,polygon=gc.line,gc.arc,gc.polygon
 local sin,cos=math.sin,math.cos
+local NULL=NULL
+
 local GC={}
 function GC.mStr(obj,x,y) printf(obj,x-626,y,1252,'center') end-- Printf a string with 'center'
 function GC.simpX(obj,x,y) draw(obj,x-obj:getWidth()*.5,y) end-- Simply draw an obj with x=obj:getWidth()/2
@@ -53,7 +56,7 @@ function GC.regPolygon(mode,x,y,R,segments,phase)
         l[2*i]=y+R*sin(ang)
         ang=ang+angStep
     end
-    gc.polygon(mode,l)
+    polygon(mode,l)
 end
 function GC.regRoundPolygon(mode,x,y,R,segments,r,phase)
     local X,Y={},{}
@@ -74,13 +77,13 @@ function GC.regRoundPolygon(mode,x,y,R,segments,r,phase)
             -- Line
             local x1,y1,x2,y2=X[i],Y[i],X[i+1],Y[i+1]
             local dir=math.atan2(y2-y1,x2-x1)
-            gc.line(x1+erasedLen*cos(dir),y1+erasedLen*sin(dir),x2-erasedLen*cos(dir),y2-erasedLen*sin(dir))
+            line(x1+erasedLen*cos(dir),y1+erasedLen*sin(dir),x2-erasedLen*cos(dir),y2-erasedLen*sin(dir))
 
             -- Arc
             ang=ang+angStep
             local R2=R-r/cos(halfAng)
             local arcCX,arcCY=x+R2*cos(ang),y+R2*sin(ang)
-            gc.arc('line','open',arcCX,arcCY,r,ang-halfAng,ang+halfAng)
+            arc('line','open',arcCX,arcCY,r,ang-halfAng,ang+halfAng)
         end
     elseif mode=='fill' then
         local L={}
@@ -97,9 +100,9 @@ function GC.regRoundPolygon(mode,x,y,R,segments,r,phase)
             ang=ang+angStep
             local R2=R-r/cos(halfAng)
             local arcCX,arcCY=x+R2*cos(ang),y+R2*sin(ang)
-            gc.arc('fill','open',arcCX,arcCY,r,ang-halfAng,ang+halfAng)
+            arc('fill','open',arcCX,arcCY,r,ang-halfAng,ang+halfAng)
         end
-        gc.polygon('fill',L)
+        polygon('fill',L)
     else
         error("Draw mode should be 'line' or 'fill'")
     end
@@ -110,87 +113,6 @@ do-- function GC.getScreenShot()
     function GC.getScreenShot()
         gc.captureScreenshot(_captureScreenshotFunc)
         return capturedImage
-    end
-end
-do-- function GC.DO(L)
-    local cmds={
-        origin= gc.origin,
-        move=   gc.translate,
-        scale=  gc.scale,
-        rotate= gc.rotate,
-        shear=  gc.shear,
-        clear=  gc.clear,
-
-        setCL=gc.setColor,
-        setCM=gc.setColorMask,
-        setLW=gc.setLineWidth,
-        setLS=gc.setLineStyle,
-        setLJ=gc.setLineJoin,
-
-        print=gc.print,
-        rawFT=function(...) FONT.rawset(...) end,
-        setFT=function(...) FONT.set(...) end,
-        mText=GC.mStr,
-        mDraw=GC.draw,
-        mDrawX=GC.X,
-        mDrawY=GC.Y,
-        mOutDraw=GC.outDraw,
-
-        draw=gc.draw,
-        line=gc.line,
-        fRect=function(...) gc.rectangle('fill',...) end,
-        dRect=function(...) gc.rectangle('line',...) end,
-        fCirc=function(...) gc.circle('fill',...) end,
-        dCirc=function(...) gc.circle('line',...) end,
-        fElps=function(...) gc.ellipse('fill',...) end,
-        dElps=function(...) gc.ellipse('line',...) end,
-        fPoly=function(...) gc.polygon('fill',...) end,
-        dPoly=function(...) gc.polygon('line',...) end,
-
-        dPie=function(...) gc.arc('line',...) end,
-        dArc=function(...) gc.arc('line','open',...) end,
-        dBow=function(...) gc.arc('line','closed',...) end,
-        fPie=function(...) gc.arc('fill',...) end,
-        fArc=function(...) gc.arc('fill','open',...) end,
-        fBow=function(...) gc.arc('fill','closed',...) end,
-
-        fRPol=function(...) GC.regPolygon('fill',...) end,
-        dRPol=function(...) GC.regPolygon('line',...) end,
-        fRRPol=function(...) GC.regRoundPolygon('fill',...) end,
-        dRRPol=function(...) GC.regRoundPolygon('line',...) end,
-    }
-    local sizeLimit=gc.getSystemLimits().texturesize
-    function GC.DO(L)
-        gc.push()
-            ::REPEAT_tryAgain::
-            local success,canvas=pcall(gc.newCanvas,math.min(L[1],sizeLimit),math.min(L[2],sizeLimit))
-            if not success then
-                sizeLimit=math.floor(sizeLimit*.8)
-                assert(sizeLimit>=1,"WTF why can't I create a canvas?")
-                goto REPEAT_tryAgain
-            end
-            gc.setCanvas(canvas)
-                gc.origin()
-                gc.clear(1,1,1,0)
-                gc.setColor(1,1,1)
-                gc.setLineWidth(1)
-                for i=3,#L do
-                    local cmd=L[i][1]
-                    if type(cmd)=='string' then
-                        local func=cmds[cmd]
-                        if type(func)=='string' then
-                            func=gc[func]
-                        end
-                        if func then
-                            func(unpack(L[i],2))
-                        else
-                            error("No gc command: "..cmd)
-                        end
-                    end
-                end
-            gc.setCanvas()
-        gc.pop()
-        return canvas
     end
 end
 
@@ -234,6 +156,90 @@ end
 function GC.stc_circ(x,y,r,seg)
     circle_x,circle_y,circle_r,circle_seg=x,y,r,seg
     gc_stencil(stencil_circle,stc_action,stc_value,true)
+end
+
+--------------------------------------------------------------
+
+do-- function GC.DO(L)
+    local cmds={
+        origin= gc.origin,
+        move=   gc.translate,
+        scale=  gc.scale,
+        rotate= gc.rotate,
+        shear=  gc.shear,
+        clear=  gc.clear,
+
+        setCL=gc.setColor,
+        setCM=gc.setColorMask,
+        setLW=gc.setLineWidth,
+        setLS=gc.setLineStyle,
+        setLJ=gc.setLineJoin,
+
+        print=gc.print,
+        rawFT=function(...) FONT.rawset(...) end,
+        setFT=function(...) FONT.set(...) end,
+        mText=GC.mStr,
+        mDraw=GC.draw,
+        mDrawX=GC.X,
+        mDrawY=GC.Y,
+        mOutDraw=GC.outDraw,
+
+        draw=gc.draw,
+        line=line,
+        fRect=function(...) gc.rectangle('fill',...) end,
+        dRect=function(...) gc.rectangle('line',...) end,
+        fCirc=function(...) gc.circle('fill',...) end,
+        dCirc=function(...) gc.circle('line',...) end,
+        fElps=function(...) gc.ellipse('fill',...) end,
+        dElps=function(...) gc.ellipse('line',...) end,
+        fPoly=function(...) polygon('fill',...) end,
+        dPoly=function(...) polygon('line',...) end,
+
+        dPie=function(...) arc('line',...) end,
+        dArc=function(...) arc('line','open',...) end,
+        dBow=function(...) arc('line','closed',...) end,
+        fPie=function(...) arc('fill',...) end,
+        fArc=function(...) arc('fill','open',...) end,
+        fBow=function(...) arc('fill','closed',...) end,
+
+        fRPol=function(...) GC.regPolygon('fill',...) end,
+        dRPol=function(...) GC.regPolygon('line',...) end,
+        fRRPol=function(...) GC.regRoundPolygon('fill',...) end,
+        dRRPol=function(...) GC.regRoundPolygon('line',...) end,
+    }
+    local sizeLimit=gc.getSystemLimits().texturesize
+    function GC.DO(L)
+        gc.push()
+            ::REPEAT_tryAgain::
+            local success,canvas=pcall(gc.newCanvas,math.min(L[1],sizeLimit),math.min(L[2],sizeLimit))
+            if not success then
+                sizeLimit=math.floor(sizeLimit*.8)
+                assert(sizeLimit>=1,"WTF why can't I create a canvas?")
+                goto REPEAT_tryAgain
+            end
+            gc.setCanvas(canvas)
+                gc.origin()
+                gc.clear(1,1,1,0)
+                gc.setColor(1,1,1)
+                gc.setLineWidth(1)
+                for i=3,#L do
+                    local cmd=L[i][1]
+                    if type(cmd)=='string' then
+                        local func=cmds[cmd]
+                        if type(func)=='string' then
+                            func=gc[func]
+                        end
+                        if func then
+                            func(unpack(L[i],2))
+                        else
+                            error("No gc command: "..cmd)
+                        end
+                    end
+                end
+            gc.setCanvas()
+        gc.pop()
+        return canvas
+    end
 end
 
 return GC

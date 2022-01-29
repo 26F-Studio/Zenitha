@@ -701,27 +701,27 @@ function Widgets.slider_fill:draw()
     -- Capsule
     gc_setColor(1,1,1,.6+ATV*.26)
     gc_setLineWidth(1+ATV)
-    gc_rectangle('line',x,y-r,self.w,h,r)
+    gc_rectangle('line',x,y-r,w,h,r)
     if ATV>0 then
         gc_setColor(1,1,1,ATV*.12)
-        gc_rectangle('fill',x,y-r,self.w,h,r)
+        gc_rectangle('fill',x,y-r,w,h,r)
     end
 
     -- Stenciled capsule and text
     GC.stc_reset()
-    GC.stc_rect(x+r,y-r,self.w-h,h)
+    GC.stc_rect(x+r,y-r,w-h,h)
     GC.stc_circ(x+r,y,r)
-    GC.stc_circ(x+self.w-r,y,r)
+    GC.stc_circ(x+w-r,y,r)
 
     setFont(30)
     gc_setColor(1,1,1,.9)
-    mStr(num,x+self.w*.5,y-21)
-    gc_rectangle('fill',x,y-r,self.w*rate,h)
+    mStr(num,x+w*.5,y-21)
+    gc_rectangle('fill',x,y-r,w*rate,h)
 
     GC.stc_reset()
-    GC.stc_rect(x,y-r,self.w*rate,h)
+    GC.stc_rect(x,y-r,w*rate,h)
     gc_setColor(0,0,0,.9)
-    mStr(num,x+self.w*.5,y-21)
+    mStr(num,x+w*.5,y-21)
     GC.stc_stop()
 
     -- Drawable
@@ -731,9 +731,9 @@ function Widgets.slider_fill:draw()
         if self.labelPos=='left' then
             x2,y2=x-8-ATV*6,y
         elseif self.labelPos=='right' then
-            x2,y2=x+self.w+8+ATV*6,y
+            x2,y2=x+w+8+ATV*6,y
         elseif self.labelPos=='down' then
-            x2,y2=x+self.w*.5,y+20
+            x2,y2=x+w*.5,y+20
         end
         alignDraw(self,self._text,x2,y2)
     end

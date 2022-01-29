@@ -38,6 +38,7 @@ function LANG.setMaxLoaded(n)
 end
 function LANG.add(data)
     for k,v in next,data do
+        assert(type(v)=='table','Invalid language data (need {zh="path1",en="path2",...})')
         assert(type(k)=='string','Invalid language name (need string)')
         assert(type(v)=='string','Invalid language file path (need string)')
         langPaths[k]=v
