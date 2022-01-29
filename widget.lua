@@ -624,7 +624,7 @@ end
 -- Slider_fill
 Widgets.slider_fill=setmetatable({
     type='slider_fill',
-    w=100,
+    w=100,h=40,
     axis={0,1},
 
     text=false,
@@ -643,7 +643,7 @@ Widgets.slider_fill=setmetatable({
 
     buildArgs={
         'name',
-        'x','y','w',
+        'x','y','w','h',
         'posX','posY',
 
         'axis',
@@ -659,6 +659,8 @@ Widgets.slider_fill=setmetatable({
 function Widgets.slider_fill:reset()
     baseWidget.reset(self)
 
+    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
+    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
     assert(type(self.disp)=='function','[slider].disp must be function')
 
     assert(
@@ -690,6 +692,8 @@ function Widgets.slider_fill:isAbove(x,y)
 end
 function Widgets.slider_fill:draw()
     local x,y=self._x,self._y
+    local w,h=self.w,self.h
+    local r=h*.5
     local ATV=self._activeTime/self._activeTimeMax
     local rate=(self._pos-self._rangeL)/(self._rangeR-self._rangeL)
     local num=int(rate*100+.5)..'%'
@@ -697,27 +701,27 @@ function Widgets.slider_fill:draw()
     -- Capsule
     gc_setColor(1,1,1,.6+ATV*.26)
     gc_setLineWidth(1+ATV)
-    gc_rectangle('line',x,y-25,self.w,50,25)
+    gc_rectangle('line',x,y-r,self.w,h,r)
     if ATV>0 then
         gc_setColor(1,1,1,ATV*.12)
-        gc_rectangle('fill',x,y-25,self.w,50,25)
+        gc_rectangle('fill',x,y-r,self.w,h,r)
     end
 
     -- Stenciled capsule and text
     GC.stc_reset()
-    GC.stc_rect(x+25,y-25,self.w-50,50)
-    GC.stc_circ(x+25,y,25)
-    GC.stc_circ(x+self.w-25,y,25)
+    GC.stc_rect(x+r,y-r,self.w-h,h)
+    GC.stc_circ(x+r,y,r)
+    GC.stc_circ(x+self.w-r,y,r)
 
     setFont(30)
     gc_setColor(1,1,1,.9)
-    mStr(num,x+self.w*.5,y-22)
-    gc_rectangle('fill',x,y-25,self.w*rate,50)
+    mStr(num,x+self.w*.5,y-21)
+    gc_rectangle('fill',x,y-r,self.w*rate,h)
 
     GC.stc_reset()
-    GC.stc_rect(x,y-25,self.w*rate,50)
+    GC.stc_rect(x,y-r,self.w*rate,h)
     gc_setColor(0,0,0,.9)
-    mStr(num,x+self.w*.5,y-22)
+    mStr(num,x+self.w*.5,y-21)
     GC.stc_stop()
 
     -- Drawable
