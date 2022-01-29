@@ -313,13 +313,12 @@ function love.mousereleased(x,y,k,touch)
         end
     end
 end
-function love.wheelmoved(x,y)
+function love.wheelmoved(dx,dy)
     if SCN.swapping then return end
     if SCN.wheelMoved then
-        SCN.wheelMoved(x,y)
+        SCN.wheelMoved(dx,dy)
     else
-        local _x,_y=ITP(xOy,ms.getPosition())
-        WIDGET.drag(_x,_y,0,100*y)
+        WIDGET.scroll(dx,dy)
     end
 end
 

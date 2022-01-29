@@ -48,6 +48,14 @@ local indexMeta={
 local onChange=NULL
 local widgetCanvas
 
+local function updateWheel(self,d)
+    self._floatWheel=self._floatWheel+(d or 0)
+    if abs(self._floatWheel)>=1 then
+        local n=MATH.sign(self._floatWheel)*int(abs(self._floatWheel))
+        self._floatWheel=self._floatWheel-n
+        return n
+    end
+end
 local function alignDraw(self,drawable,x,y,ang,image_k)
     local w=drawable:getWidth()
     local h=drawable:getHeight()
@@ -64,6 +72,7 @@ local Widgets={}
 local baseWidget={
     type='null',
     name=false,
+    keepFocus=false,
     x=0,y=0,
 
     color=COLOR.Z,
@@ -421,6 +430,7 @@ Widgets.slider=setmetatable({
     disp=false,-- function return the displaying _value
     code=NULL,
 
+    _floatWheel=0,
     _text=nil,
     _image=nil,
     _showFunc=nil,
@@ -605,15 +615,18 @@ function Widgets.slider:release(x)
     self:drag(x)
     self.lastTime=0
 end
-function Widgets.slider:scroll(n)
-    local p=self.disp()
-    local u=self._unit or .01
-    local P=MATH.interval(p+u*n,self._rangeL,self._rangeR)
-    if p==P or not P then return end
-    self.code(P)
-    if self.change and timer()-self.lastTime>.18 then
-        self.lastTime=timer()
-        self.change()
+function Widgets.slider:scroll(dx,dy)
+    local n=updateWheel(self,(dx+dy)*(self._rangeR-self._rangeL)/(self._unit or .01)/20)
+    if n then
+        local p=self.disp()
+        local u=self._unit or .01
+        local P=MATH.interval(p+u*n,self._rangeL,self._rangeR)
+        if p==P or not P then return end
+        self.code(P)
+        if self.change and timer()-self.lastTime>.18 then
+            self.lastTime=timer()
+            self.change()
+        end
     end
 end
 function Widgets.slider:arrowKey(k)
@@ -751,6 +764,7 @@ Widgets.selector=setmetatable({
     disp=false,-- function return a boolean
     code=NULL,
 
+    _floatWheel=0,
     _text=nil,
     _image=nil,
     _select=false,-- Selected item ID
@@ -881,19 +895,22 @@ function Widgets.selector:press(x)
         end
     end
 end
-function Widgets.selector:scroll(n)
-    local s=self._select
-    if n==-1 then
-        if s==1 then return end
-        s=s-1
-    else
-        if s==#self.list then return end
-        s=s+1
+function Widgets.selector:scroll(dx,dy)
+    local n=updateWheel(self,dx+dy)
+    if n then
+        local s=self._select
+        if n==1 then
+            if s==1 then return end
+            s=s-1
+        elseif n==-1 then
+            if s==#self.list then return end
+            s=s+1
+        end
+        self.code(self.list[s])
+        self._select=s
+        self._selText=self.list[s]
+        self:playSound()
     end
-    self.code(self.list[s])
-    self._select=s
-    self._selText=self.list[s]
-    self:playSound()
 end
 function Widgets.selector:arrowKey(k)
     self:scroll((k=='left' or k=='up') and -1 or 1)
@@ -1164,23 +1181,10 @@ function Widgets.textBox:drag(_,_,_,dy)
     self._scrollPos=max(0,min(self._scrollPos-dy,(#self._texts-self._capacity)*self.lineHeight))
 end
 function Widgets.textBox:scroll(dir)
-    if type(dir)=='string' then
-        if dir=="up" then
-            dir=-1
-        elseif dir=="down" then
-            dir=1
-        else
-            return
-        end
-    end
     self:drag(nil,nil,nil,-dir*self.lineHeight)
 end
 function Widgets.textBox:arrowKey(k)
-    if k=='up' then
-        self:scroll(-1)
-    elseif k=='down' then
-        self:scroll(-1)
-    end
+    self:scroll(k=='up' and -1 or k=='down' and 1 or 0)
 end
 function Widgets.textBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
@@ -1475,23 +1479,29 @@ end
 function WIDGET.press(x,y,k)
     local W=WIDGET.sel
     if W then
-        W:press(x,y and y+SCN.curScroll,k)
-        if W.hide then WIDGET.unFocus() end
+        if not W:isAbove(x,y+SCN.curScroll) then
+            WIDGET.unFocus(true)
+        else
+            W:press(x,y and y+SCN.curScroll,k)
+            if W.hide then WIDGET.unFocus() end
+        end
     end
 end
 function WIDGET.drag(x,y,dx,dy)
     local W=WIDGET.sel
-    if W then
-        if W:isAbove(x,y+SCN.curScroll) then
-            if W.drag then
-                W:drag(x,y+SCN.curScroll,dx,dy)
-                return
-            end
-        else
-            WIDGET.unFocus(true)
-        end
+    if W and W.drag then
+        W:drag(x,y+SCN.curScroll,dx,dy)
+    else
+        SCN.curScroll=MATH.interval(SCN.curScroll-dy,0,SCN.maxScroll)
     end
-    SCN.curScroll=MATH.interval(SCN.curScroll-dy,0,SCN.maxScroll)
+end
+function WIDGET.scroll(dx,dy)
+    local W=WIDGET.sel
+    if W and W.scroll then
+        W:scroll(dx,dy)
+    else
+        SCN.curScroll=MATH.interval(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
+    end
 end
 function WIDGET.release(x,y)
     local W=WIDGET.sel
