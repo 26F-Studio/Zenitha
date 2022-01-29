@@ -1338,13 +1338,9 @@ function WIDGET.press(x,y,k)
     end
 end
 function WIDGET.drag(x,y,dx,dy)
-    if WIDGET.sel then
-        local W=WIDGET.sel
-        if W.drag then
-            W:drag(x,y+SCN.curScroll,dx,dy)
-        elseif not W:isAbove(x,y+SCN.curScroll) then
-            WIDGET.unFocus(true)
-        end
+    local W=WIDGET.sel
+    if W and W.drag then
+        W:drag(x,y+SCN.curScroll,dx,dy)
     else
         SCN.curScroll=MATH.interval(SCN.curScroll-dy,0,SCN.maxScroll)
     end

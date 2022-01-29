@@ -310,8 +310,6 @@ function love.wheelmoved(x,y)
     if SCN.wheelMoved then
         SCN.wheelMoved(x,y)
     else
-        WIDGET.unFocus(true)
-        WIDGET.cursorMove(ITP(xOy,ms.getPosition()))
         WIDGET.drag(0,0,0,100*y)
     end
 end
