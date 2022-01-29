@@ -309,7 +309,8 @@ function love.wheelmoved(x,y)
     if SCN.wheelMoved then
         SCN.wheelMoved(x,y)
     else
-        WIDGET.drag(0,0,0,100*y)
+        local _x,_y=ITP(xOy,ms.getPosition())
+        WIDGET.drag(_x,_y,0,100*y)
     end
 end
 
