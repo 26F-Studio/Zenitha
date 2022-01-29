@@ -63,7 +63,6 @@ local onQuit=NULL
 MATH=       require'Zenitha.mathExtend'
 STRING=     require'Zenitha.stringExtend'
 TABLE=      require'Zenitha.tableExtend'
-CLASS=      require'Zenitha.class'
 
 -- Pure lua modules (simple)
 COLOR=      require'Zenitha.color'

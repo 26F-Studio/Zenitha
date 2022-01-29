@@ -182,7 +182,7 @@ end
 
 
 -- Text
-Widgets.text=CLASS.inherit(baseWidget,{
+Widgets.text=setmetatable({
     type='text',
 
     text=false,
@@ -205,7 +205,7 @@ Widgets.text=CLASS.inherit(baseWidget,{
 
         'visibleFunc',
     }
-})
+},{__index=baseWidget})
 function Widgets.text:reset()
     baseWidget.reset(self)
 end
@@ -218,7 +218,7 @@ end
 
 
 -- Image
-Widgets.image=CLASS.inherit(baseWidget,{
+Widgets.image=setmetatable({
     type='image',
     ang=0,k=1,
 
@@ -238,7 +238,7 @@ Widgets.image=CLASS.inherit(baseWidget,{
 
         'visibleFunc',
     },
-})
+},{__index=baseWidget})
 function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
@@ -248,7 +248,7 @@ end
 
 
 -- Button
-Widgets.button=CLASS.inherit(baseWidget,{
+Widgets.button=setmetatable({
     type='button',
     w=10,h=10,
 
@@ -276,7 +276,7 @@ Widgets.button=CLASS.inherit(baseWidget,{
         'code',
         'visibleFunc',
     },
-})
+},{__index=baseWidget})
 function Widgets.button:reset()
     baseWidget.reset(self)
     self.widthLimit=self.w
@@ -319,7 +319,7 @@ end
 
 
 -- checkBox
-Widgets.checkBox=CLASS.inherit(baseWidget,{
+Widgets.checkBox=setmetatable({
     type='checkBox',
     w=10,
 
@@ -350,7 +350,7 @@ Widgets.checkBox=CLASS.inherit(baseWidget,{
         'disp','code',
         'visibleFunc',
     },
-})
+},{__index=baseWidget})
 function Widgets.checkBox:reset()
     baseWidget.reset(self)
     if self.labelPos=='left' then
@@ -419,7 +419,7 @@ end
 
 
 -- Slider
-Widgets.slider=CLASS.inherit(baseWidget,{
+Widgets.slider=setmetatable({
     type='slider',
     w=100,
     axis={0,1},
@@ -461,7 +461,7 @@ Widgets.slider=CLASS.inherit(baseWidget,{
         'disp','code',
         'visibleFunc',
     },
-})
+},{__index=baseWidget})
 local sliderShowFunc={
     int=function(S)
         return S.disp()
@@ -624,7 +624,7 @@ function Widgets.slider:arrowKey(k)
 end
 
 
-Widgets.selector=CLASS.inherit(baseWidget,{
+Widgets.selector=setmetatable({
     type='selector',
 
     h=70,-- Attention, fixed height
@@ -645,7 +645,7 @@ Widgets.selector=CLASS.inherit(baseWidget,{
         'disp','code',
         'visibleFunc',
     },
-})
+},{__index=baseWidget})
 function Widgets.selector:reset()
     baseWidget.reset(self)
 
@@ -760,7 +760,7 @@ function Widgets.selector:arrowKey(k)
 end
 
 
-Widgets.inputBox=CLASS.inherit(baseWidget,{
+Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
 
@@ -796,7 +796,7 @@ Widgets.inputBox=CLASS.inherit(baseWidget,{
         'disp','code',
         'visibleFunc',
     },
-})
+},{__index=baseWidget})
 function Widgets.inputBox:reset()
     baseWidget.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
@@ -933,7 +933,7 @@ function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fontType][,secret][,r
 end
 
 
-Widgets.textBox=CLASS.inherit(baseWidget,{
+Widgets.textBox=setmetatable({
     type='textBox',
     keepFocus=true,
 
@@ -962,7 +962,7 @@ Widgets.textBox=CLASS.inherit(baseWidget,{
 
         'visibleFunc',
     },
-})
+},{__index=baseWidget})
 function Widgets.textBox:reset()
     baseWidget.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
@@ -1097,7 +1097,7 @@ function Widgets.textBox:draw()
 end
 
 
-Widgets.listBox=CLASS.inherit(baseWidget,{
+Widgets.listBox=setmetatable({
     type='listBox',
     keepFocus=true,
     w=100,
@@ -1123,7 +1123,7 @@ Widgets.listBox=CLASS.inherit(baseWidget,{
 
         'visibleFunc',
     },
-})
+},{__index=baseWidget})
 function Widgets.listBox:reset()
     baseWidget.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
@@ -1411,7 +1411,7 @@ function WIDGET.new(args)
     assert(t,'Widget type not specified')
     local W=Widgets[t]
     assert(W,'Widget type '..t..' does not exist')
-    local w=CLASS.inherit(W,{})
+    local w=setmetatable({},{__index=W})
     for k,v in next,args do
         if TABLE.find(W.buildArgs,k) then
             w[k]=v

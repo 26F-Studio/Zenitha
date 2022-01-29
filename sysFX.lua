@@ -22,10 +22,10 @@ local baseFX={
 
 local FX={}
 
-FX.beam=CLASS.inherit(baseFX,{
+FX.beam=setmetatable({
     type='beam',
     t=0,
-})
+},{__index=baseFX})
 function FX.beam.draw(S)
     gc_setColor(S.r*2,S.g*2,S.b*2,S.a*min(4-S.t*4,1))
 
@@ -48,37 +48,37 @@ function FX.beam.draw(S)
     )
 end
 function FX.beam.new(rate,x1,y1,x2,y2,wid,r,g,b,a)
-    return CLASS.inherit(FX.beam,{
+    return setmetatable({
         rate=rate,
         x1=x1,y1=y1,-- Start pos
         x2=x2,y2=y2,-- End pos
         wid=wid,-- Line width
         r=r,g=g,b=b,a=a,
-    })
+    },{__index=FX})
 end
 
 
-FX.tap=CLASS.inherit(baseFX,{
+FX.tap=setmetatable({
     type='tap',
     t=0,
-})
+},{__index=baseFX})
 function FX.tap.draw(S)
     local t=S.t
     gc_setColor(1,1,1,(1-t)*.4)
     gc_circle('fill',S.x,S.y,30*(1-t)^.5)
 end
 function FX.tap.new(rate,x,y)
-    return CLASS.inherit(FX.tap,{
+    return setmetatable({
         rate=rate,
         x=x,y=y,
-    })
+    },{__index=FX})
 end
 
 
-FX.ripple=CLASS.inherit(baseFX,{
+FX.ripple=setmetatable({
     type='ripple',
     t=0,
-})
+},{__index=baseFX})
 function FX.ripple.draw(S)
     local t=S.t
     gc_setLineWidth(2)
@@ -86,17 +86,17 @@ function FX.ripple.draw(S)
     gc_circle('line',S.x,S.y,t*(2-t)*S.r)
 end
 function FX.ripple.new(rate,x,y,r)
-    return CLASS.inherit(FX.ripple,{
+    return setmetatable({
         rate=rate,
         x=x,y=y,r=r,
-    })
+    },{__index=FX})
 end
 
 
-FX.rectRipple=CLASS.inherit(baseFX,{
+FX.rectRipple=setmetatable({
     type='rectRipple',
     t=0,
-})
+},{__index=baseFX})
 function FX.rectRipple.draw(S)
     gc_setLineWidth(6)
     gc_setColor(1,1,1,1-S.t)
@@ -104,34 +104,34 @@ function FX.rectRipple.draw(S)
     gc_rectangle('line',S.x-r,S.y-r,S.w+2*r,S.h+2*r)
 end
 function FX.rectRipple.new(rate,x,y,w,h)
-    return CLASS.inherit(FX.rectRipple,{
+    return setmetatable({
         rate=rate,
         x=x,y=y,w=w,h=h,
-    })
+    },{__index=FX})
 end
 
 
-FX.rect=CLASS.inherit(baseFX,{
+FX.rect=setmetatable({
     type='rect',
     t=0,
-})
+},{__index=baseFX})
 function FX.rect.draw(S)
     gc_setColor(S.r,S.g,S.b,1-S.t)
     gc_rectangle('fill',S.x,S.y,S.w,S.h,2)
 end
 function FX.rect.new(rate,x,y,w,h,r,g,b)
-    return CLASS.inherit(FX.rect,{
+    return setmetatable({
         rate=rate,
         x=x,y=y,w=w,h=h,
         r=r or 1,g=g or 1,b=b or 1,
-    })
+    },{__index=FX})
 end
 
 
-FX.particle=CLASS.inherit(baseFX,{
+FX.particle=setmetatable({
     type='particle',
     t=0,
-})
+},{__index=baseFX})
 function FX.particle.update(S,dt)
     if S.vx then
         S.x=S.x+S.vx*S.rate
@@ -148,32 +148,32 @@ function FX.particle.draw(S)
     gc_draw(S.image,S.x,S.y,nil,S.size,nil,S.cx,S.cy)
 end
 function FX.particle.new(rate,obj,size,x,y,vx,vy,ax,ay)
-    return CLASS.inherit(FX.particle,{
+    return setmetatable({
         rate=rate*(.9+rnd()*.2),
         image=obj,size=size,
         cx=obj:getWidth()*.5,cy=obj:getHeight()*.5,
         x=x,y=y,
         vx=vx,vy=vy,
         ax=ax,ay=ay,
-    })
+    },{__index=FX})
 end
 
 
-FX.line=CLASS.inherit(baseFX,{
+FX.line=setmetatable({
     type='line',
     t=0,
-})
+},{__index=baseFX})
 function FX.line.draw(S)
     gc_setColor(1,1,1,S.a*(1-S.t))
     gc_line(S.x1,S.y1,S.x2,S.y2)
 end
 function FX.line.new(rate,x1,y1,x2,y2,r,g,b,a)
-    return CLASS.inherit(FX.line,{
+    return setmetatable({
         rate=rate,
         x1=x1 or 0,y1=y1 or 0,
         x2=x2 or x1 or SCR.w0,y2=y2 or y1 or SCR.h0,
         r=r or 1,g=g or 1,b=b or 1,a=a or 1,
-    })
+    },{__index=FX})
 end
 
 
