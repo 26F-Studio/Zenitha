@@ -417,7 +417,7 @@ Widgets.slider=setmetatable({
     rawText=false,
     labelPos='left',
     widthLimit=1e99,
-    valueShow=false,
+    valueShow=nil,
 
     disp=false,-- function return the displaying _value
     code=NULL,
@@ -449,6 +449,9 @@ Widgets.slider=setmetatable({
     },
 },{__index=baseWidget})
 local sliderShowFunc={
+    null=function()
+        return ''
+    end,
     int=function(S)
         return S.disp()
     end,
@@ -489,7 +492,7 @@ function Widgets.slider:reset()
             self._showFunc=assert(sliderShowFunc[self.valueShow],"[slider].valueShow must be function, or 'int', 'float', or 'percent'")
         end
     elseif self.valueShow==false then-- Use default if nil
-        self._showFunc=NULL
+        self._showFunc=sliderShowFunc.null
     else
         if self._unit and self._unit%1==0 then
             self._showFunc=sliderShowFunc.int
