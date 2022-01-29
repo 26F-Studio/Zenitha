@@ -723,12 +723,12 @@ function Widgets.selector:press(x)
         if x<self.x then
             if s>1 then
                 s=s-1
-                SYSFX.rectangle(3,self._x-self.w*.5,self._y-self.h*.5-SCN.curScroll,self.w*.5,self.h)
+                SYSFX.new('rect',3,self._x-self.w*.5,self._y-self.h*.5-SCN.curScroll,self.w*.5,self.h)
             end
         else
             if s<#self.list then
                 s=s+1
-                SYSFX.rectangle(3,self.x,self.y-self.h*.5-SCN.curScroll,self.w*.5,self.h)
+                SYSFX.new('rect',3,self.x,self.y-self.h*.5-SCN.curScroll,self.w*.5,self.h)
             end
         end
         if self._select~=s then
@@ -744,11 +744,11 @@ function Widgets.selector:scroll(n)
     if n==-1 then
         if s==1 then return end
         s=s-1
-        SYSFX.rectangle(3,self._x,self._y-SCN.curScroll,self.w*.5,60)
+        SYSFX.new('rect',3,self._x,self._y-SCN.curScroll,self.w*.5,60)
     else
         if s==#self.list then return end
         s=s+1
-        SYSFX.rectangle(3,self.x+self.w*.5,self.y-SCN.curScroll,self.w*.5,60)
+        SYSFX.new('rect',3,self.x+self.w*.5,self.y-SCN.curScroll,self.w*.5,60)
     end
     self.code(self.list[s])
     self._select=s

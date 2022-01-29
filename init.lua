@@ -240,7 +240,7 @@ local function _triggerMouseDown(x,y,k)
     if SCN.mouseDown then SCN.mouseDown(x,y,k) end
     WIDGET.press(x,y,k)
     lastX,lastY=x,y
-    if showClickFX then SYSFX.tap(3,x,y) end
+    if showClickFX then SYSFX.new('tap',3,x,y) end
 end
 local function mouse_update(dt)
     if not KBisDown('lctrl','rctrl') and KBisDown('up','down','left','right') then
@@ -347,7 +347,7 @@ function love.touchreleased(id,x,y)
     if SCN.touchUp then SCN.touchUp(x,y,id) end
     if (x-lastX)^2+(y-lastY)^2<62 then
         if SCN.touchClick then SCN.touchClick(x,y) end
-        if showClickFX then SYSFX.tap(3,x,y) end
+        if showClickFX then SYSFX.new('tap',3,x,y) end
     end
 end
 
@@ -405,7 +405,7 @@ function love.keypressed(key,_,isRep)
             elseif key=='space' or key=='return' then
                 mouseShow=true
                 if not isRep then
-                    if showClickFX then SYSFX.tap(3,mx,my) end
+                    if showClickFX then SYSFX.new('tap',3,mx,my) end
                     _triggerMouseDown(mx,my,1)
                 end
             else
@@ -533,7 +533,7 @@ function love.gamepadpressed(_,key)
                 if W and W.arrowKey then W:arrowKey(key) end
             elseif key=='return' then
                 mouseShow=true
-                if showClickFX then SYSFX.tap(3,mx,my) end
+                if showClickFX then SYSFX.new('tap',3,mx,my) end
                 _triggerMouseDown(mx,my,1)
             else
                 if W and W.keypress then
