@@ -164,17 +164,17 @@ FONT.setDefaultFont('_basic')
 FONT.setDefaultFallback('_basic')
 
 do-- Define demo scene
-    local testVal_1=false
-    local testVal_2=18
-    local testVal_3='opt2'
+    local testVal_1={false,false,false}
+    local testVal_2={18,260,.26}
+    local testVal_3={'medium','large','ex-large'}
     local testVal_4={} for i=1,9 do table.insert(testVal_4,{name='user'..i}) end
     local function _sceneDraw()
         setFont(150,'_basic')
-        GC.mStr("Zenitha",400,60)
+        GC.mStr("Zenitha",400,40)
         setFont(60,'_basic')
-        GC.mStr("Demo Scene",400,220)
+        GC.mStr("Demo Scene",400,200)
         setFont(20,'_basic')
-        GC.mStr("Powered by LÖVE",400,300)
+        GC.mStr("Powered by LÖVE",400,280)
     end
     local demoScene={
         draw=function()
@@ -182,19 +182,28 @@ do-- Define demo scene
             _sceneDraw()
 
             GC.stc_reset()
-            GC.stc_circ(400+100*math.cos(love.timer.getTime()*1.26),260+100*math.sin(love.timer.getTime()*1.26),126)
+            GC.stc_circ(400+100*math.cos(love.timer.getTime()*1.26),240+100*math.sin(love.timer.getTime()*1.26),126)
             gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
             _sceneDraw()
             GC.stc_stop()
         end,
         widgetList={
-            WIDGET.new{type='checkBox',rawText='1:checkBox',x=210,y=390,w=40,disp=function() return testVal_1 end,code=function() testVal_1=not testVal_1 end},
-            WIDGET.new{type='slider',  rawText='2:slider',  x=370,y=390,w=180,axis={10,26,4},disp=function() return testVal_2 end,code=function(v) testVal_2=v end},
-            WIDGET.new{type='selector',rawText='3:selector',x=670,y=390,w=200,list={'opt1','opt2','opt3'},disp=function() return testVal_3 end,code=function(v) testVal_3=v end},
-            WIDGET.new{type='inputBox',rawText='4:inputBox',x=100,y=450,w=300,h=100,labelPos='down'},
-            WIDGET.new{type='button',  rawText='Quit',      x=600,y=500,w=200,h=100,code=function() love.event.quit() end},
-            WIDGET.new{type='textBox', name='5.textBox',    x=100,y=620,w=600,h=126},
-            WIDGET.new{type='listBox', name='6.listBox',    x=100,y=770,w=600,h=120,drawFunc=function(opt,id,sel)
+            WIDGET.new{type='checkBox',rawText='checkBox1', x=260,y=350,w=40,disp=function() return testVal_1[1] end,code=function() testVal_1[1]=not testVal_1[1] end},
+            WIDGET.new{type='checkBox',rawText='checkBox2', x=260,y=400,w=40,disp=function() return testVal_1[2] end,code=function() testVal_1[2]=not testVal_1[2] end},
+            WIDGET.new{type='checkBox',rawText='checkBox3', x=260,y=450,w=40,disp=function() return testVal_1[3] end,code=function() testVal_1[3]=not testVal_1[3] end},
+
+            WIDGET.new{type='slider',  rawText='slider1',   x=460,y=350,w=260,axis={10,26,4},              disp=function() return testVal_2[1] end,code=function(v) testVal_2[1]=v end},
+            WIDGET.new{type='slider',  rawText='slider2',   x=460,y=400,w=260,axis={0,620,10},smooth=true, disp=function() return testVal_2[2] end,code=function(v) testVal_2[2]=v end},
+            WIDGET.new{type='slider_fill',rawText='slider3',x=460,y=450,w=260,                             disp=function() return testVal_2[3] end,code=function(v) testVal_2[3]=v end},
+
+            WIDGET.new{type='selector',rawText='selector1', x=330,y=510,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[1] end,code=function(v) testVal_3[1]=v end},
+            WIDGET.new{type='selector',rawText='selector2', x=330,y=560,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[2] end,code=function(v) testVal_3[2]=v end},
+            WIDGET.new{type='selector',rawText='selector3', x=330,y=610,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[3] end,code=function(v) testVal_3[3]=v end},
+
+            WIDGET.new{type='button',  rawText='Quit',      x=600,y=540,w=200,h=100,code=function() love.event.quit() end},
+            WIDGET.new{type='inputBox',rawText='inputBox',  x=100,y=650,w=300,h=100,labelPos='down'},
+            WIDGET.new{type='textBox', name='textBox',      x=100,y=820,w=600,h=160},
+            WIDGET.new{type='listBox', name='listBox',      x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
                 setFont(30)
                 gc_setColor(COLOR.Z)
                 gc_print(id,10,-6)
@@ -206,10 +215,10 @@ do-- Define demo scene
             end},
         }
     }
-    demoScene.scrollHeight=360
+    demoScene.scrollHeight=626
     function demoScene.init()
-        demoScene.widgetList['5.textBox']:setTexts({"5.textBox","line 2","line 3","4","5","6","7"},true)
-        demoScene.widgetList['6.listBox']:setList(testVal_4)
+        demoScene.widgetList.textBox:setTexts({"5.textBox","line 2","line 3","line 4","line 5","line 6","line 7"},true)
+        demoScene.widgetList.listBox:setList(testVal_4)
     end
     SCN.add('_zenitha',demoScene)
 end
