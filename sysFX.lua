@@ -54,7 +54,7 @@ function FX.beam.new(rate,x1,y1,x2,y2,wid,r,g,b,a)
         x2=x2,y2=y2,-- End pos
         wid=wid,-- Line width
         r=r,g=g,b=b,a=a,
-    },{__index=FX})
+    },{__index=FX.beam})
 end
 
 
@@ -71,7 +71,7 @@ function FX.tap.new(rate,x,y)
     return setmetatable({
         rate=rate,
         x=x,y=y,
-    },{__index=FX})
+    },{__index=FX.tap})
 end
 
 
@@ -89,7 +89,7 @@ function FX.ripple.new(rate,x,y,r)
     return setmetatable({
         rate=rate,
         x=x,y=y,r=r,
-    },{__index=FX})
+    },{__index=FX.ripple})
 end
 
 
@@ -107,7 +107,7 @@ function FX.rectRipple.new(rate,x,y,w,h)
     return setmetatable({
         rate=rate,
         x=x,y=y,w=w,h=h,
-    },{__index=FX})
+    },{__index=FX.rectRipple})
 end
 
 
@@ -124,7 +124,7 @@ function FX.rect.new(rate,x,y,w,h,r,g,b)
         rate=rate,
         x=x,y=y,w=w,h=h,
         r=r or 1,g=g or 1,b=b or 1,
-    },{__index=FX})
+    },{__index=FX.rect})
 end
 
 
@@ -155,7 +155,7 @@ function FX.particle.new(rate,obj,size,x,y,vx,vy,ax,ay)
         x=x,y=y,
         vx=vx,vy=vy,
         ax=ax,ay=ay,
-    },{__index=FX})
+    },{__index=FX.particle})
 end
 
 
@@ -173,7 +173,7 @@ function FX.line.new(rate,x1,y1,x2,y2,r,g,b,a)
         x1=x1 or 0,y1=y1 or 0,
         x2=x2 or x1 or SCR.w0,y2=y2 or y1 or SCR.h0,
         r=r or 1,g=g or 1,b=b or 1,a=a or 1,
-    },{__index=FX})
+    },{__index=FX.line})
 end
 
 
