@@ -1,8 +1,7 @@
 local gc=love.graphics
-local gc_origin=gc.origin
 local gc_translate,gc_replaceTransform=gc.translate,gc.replaceTransform
 local gc_push,gc_pop=gc.push,gc.pop
-local gc_setCanvas,gc_setBlendMode=gc.setCanvas,gc.setBlendMode
+local gc_setCanvas=gc.setCanvas
 local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
 local gc_draw,gc_line=gc.draw,gc.line
 local gc_rectangle=gc.rectangle
@@ -22,8 +21,6 @@ local setFont,getFont=FONT.set,FONT.get
 local mStr,GC_stc_start,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_start,GC.stc_rect,GC.stc_stop
 local approach=MATH.expApproach
 
-local downArrowIcon=GC.DO{40,25,{'fPoly',0,0,20,25,40,0}}
-local upArrowIcon=GC.DO{40,25,{'fPoly',0,25,20,0,40,25}}
 local smallerThen=GC.DO{20,20,
     {'setLW',5},
     {'line',18,2,1,10,18,18},
@@ -50,16 +47,6 @@ local indexMeta={
 }
 local onChange=NULL
 local widgetCanvas
-local widgetCover do
-    local L={1,360,{'fRect',0,30,1,300}}
-    for i=0,30 do
-        ins(L,{'setCL',1,1,1,i/30})
-        ins(L,{'fRect',0,i,1,2})
-        ins(L,{'fRect',0,360-i,1,2})
-    end
-    widgetCover=GC.DO(L)
-end
-local scr_w,scr_h
 
 local function alignDraw(self,drawable,x,y,ang,image_k)
     local w=drawable:getWidth()
@@ -1339,11 +1326,17 @@ function WIDGET.press(x,y,k)
 end
 function WIDGET.drag(x,y,dx,dy)
     local W=WIDGET.sel
-    if W and W.drag then
-        W:drag(x,y+SCN.curScroll,dx,dy)
-    else
-        SCN.curScroll=MATH.interval(SCN.curScroll-dy,0,SCN.maxScroll)
+    if W then
+        if W:isAbove(x,y+SCN.curScroll) then
+            if W.drag then
+                W:drag(x,y+SCN.curScroll,dx,dy)
+                return
+            end
+        else
+            WIDGET.unFocus(true)
+        end
     end
+    SCN.curScroll=MATH.interval(SCN.curScroll-dy,0,SCN.maxScroll)
 end
 function WIDGET.release(x,y)
     local W=WIDGET.sel
@@ -1375,7 +1368,6 @@ function WIDGET.update(dt)
     end
 end
 function WIDGET.resize(w,h)
-    scr_w,scr_h=w,h
     if widgetCanvas then widgetCanvas:release() end
     widgetCanvas=gc.newCanvas(w,h)
     _resetAllWidgets()
@@ -1386,32 +1378,20 @@ function WIDGET.draw()
         for _,W in next,WIDGET.active do
             if W._visible then W:draw() end
         end
-        gc_origin()
-        gc_setColor(1,1,1)
-        if SCN.maxScroll>0 then
-            if SCN.curScroll>0 then
-                gc_draw(upArrowIcon,scr_w*.5,10,0,SCR.k,nil,upArrowIcon:getWidth()*.5,0)
-            end
-            if SCN.curScroll<SCN.maxScroll then
-                gc_draw(downArrowIcon,scr_w*.5,scr_h-10,0,SCR.k,nil,downArrowIcon:getWidth()*.5,downArrowIcon:getHeight())
-            end
-            gc_setBlendMode('multiply','premultiplied')
-            gc_draw(widgetCover,nil,nil,nil,scr_w,scr_h/360)
-        end
-    gc_setCanvas({stencil=false})
-    gc_setBlendMode('alpha','premultiplied')
+    gc_setCanvas()
+    gc_setColor(1,1,1)
     gc_draw(widgetCanvas)
-    gc_setBlendMode('alpha')
     gc_replaceTransform(SCR.xOy)
 end
 
 function WIDGET.new(args)
     local t=args.type
     args.type=nil
-    assert(t,'Widget type not specified')
+
     local W=Widgets[t]
-    assert(W,'Widget type '..t..' does not exist')
+    assert(W,'Widget type '..tostring(t)..' does not exist')
     local w=setmetatable({},{__index=W})
+
     for k,v in next,args do
         if TABLE.find(W.buildArgs,k) then
             w[k]=v
