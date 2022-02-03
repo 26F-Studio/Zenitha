@@ -1,3 +1,5 @@
+local audio=love.audio
+
 local nameList={}
 local srcLib={}
 local lastLoadNames={}
@@ -33,16 +35,17 @@ local function _addFile(name,path)
 end
 local function _tryLoad(name)
     if srcLib[name] then
-        if srcLib[name].source then
+        local obj=srcLib[name]
+        if obj.source then
             return true
-        elseif love.filesystem.getInfo(srcLib[name].path) then
-            srcLib[name].source=love.audio.newSource(srcLib[name].path,'stream')
-            srcLib[name].source:setLooping(true)
+        elseif love.filesystem.getInfo(obj.path) then
+            obj.source=audio.newSource(obj.path,'stream')
+            obj.source:setLooping(true)
             table.insert(lastLoadNames,1,name)
             _updateSources()
             return true
         else
-            LOG("No BGM: "..srcLib[name],5)
+            LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
         end
     elseif name then
         LOG("No BGM: "..name,5)
