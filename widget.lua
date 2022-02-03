@@ -68,6 +68,9 @@ end
 local WIDGET={}
 local Widgets={}
 
+
+--------------------------------------------------------------
+
 -- Base widget (not used by user)
 local baseWidget={
     type='null',
@@ -753,6 +756,7 @@ function Widgets.slider_fill:draw()
 end
 
 
+-- Selector
 Widgets.selector=setmetatable({
     type='selector',
 
@@ -917,6 +921,7 @@ function Widgets.selector:arrowKey(k)
 end
 
 
+-- Inputbox
 Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
@@ -1070,25 +1075,6 @@ function Widgets.inputBox:keypress(k)
         end
         self._value=t
     end
-end
-function WIDGET.newInputBox(D)-- name,x,y,w[,h][,font=30][,fontType][,secret][,regex][,limit],hide
-    local _={
-        name=  D.name or "_",
-
-        x=     D.x,
-        y=     D.y,
-        w=     D.w,
-        h=     D.h,
-
-        font=  D.fontSize or int(D.h/7-1)*5,
-        fontType= D.fontType,
-        secret=D.secret==true,
-        regex= D.regex,
-        limit= D.limit,
-        hideF= D.hideF,
-        hide=  D.hide,
-    }
-    return _
 end
 
 
@@ -1402,6 +1388,8 @@ function Widgets.listBox:draw()
         GC_stc_stop()
     gc_pop()
 end
+
+--------------------------------------------------------------
 
 
 -- Widget module
