@@ -30,6 +30,8 @@ local function _addFile(name,path)
             name=name,path=path,source=false,
             vol=0,volChanging=false,
             pitch=1,pitchChanging=false,
+            lowgain=1,lowgainChanging=false,
+            highgain=1,highgainChanging=false,
         }
     end
 end
@@ -56,42 +58,67 @@ local function task_setVolume(obj,ve,time,stop)
     local vs=obj.vol
     local t=0
     while true do
-        t=math.min(t+coroutine.yield(),time)
-        local v=MATH.lerp(vs,ve,t/time)
-        obj.source:setVolume(v)
+        t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
+        local v=MATH.lerp(vs,ve,t)
         obj.vol=v
-        if t==time then
-            if v==0 and stop then
-                obj.source:stop()
-            end
-            obj.volChanging=false
-            return true
-        end
+        obj.source:setVolume(v)
     end
+    if t==0 and stop then
+        obj.source:stop()
+    end
+    obj.volChanging=false
+    return true
 end
-local function clearVolumeTask(obj)
-    TASK.removeTask_iterate(function(task)
-        return task.code==task_setVolume and task.args[1]==obj
-    end,obj)
-end
-
-local function task_setPitch(obj,pe)
+local function task_setPitch(obj,pe,time)
     local ps=obj.pitch
     local t=0
     while true do
-        t=math.min(t+coroutine.yield(),1)
+        t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
         local p=MATH.lerp(ps,pe,t)
-        obj.source:setPitch(p)
         obj.pitch=p
+        obj.source:setPitch(p)
         if t==1 then
             obj.pitchChanging=false
             return true
         end
     end
 end
-local function clearPitchTask(obj)
+local function task_setLowgain(obj,pe,time)
+    local ps=obj.lowgain
+    local t=0
+    while true do
+        t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
+        local p=MATH.lerp(ps,pe,t)
+        obj.lowgain=p
+        obj.source:setFilter{type='bandpass',lowgain=obj.lowgain^9.42,highgain=obj.highgain^9.42,volume=1}
+        if t==1 then
+            obj.lowgainChanging=false
+            return true
+        end
+    end
+end
+local function task_setHighgain(obj,pe,time)
+    local ps=obj.highgain
+    local t=0
+    while true do
+        t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
+        local p=MATH.lerp(ps,pe,t)
+        obj.highgain=p
+        obj.source:setFilter{type='bandpass',lowgain=obj.lowgain^9.42,highgain=obj.highgain^9.42,volume=1}
+        if t==1 then
+            obj.highgainChanging=false
+            return true
+        end
+    end
+end
+local function clearTask(obj,mode)
+    local taskFunc=
+        mode=='volume' and task_setVolume or
+        mode=='pitch' and task_setPitch or
+        mode=='lowgain' and task_setLowgain or
+        mode=='highgain' and task_setHighgain
     TASK.removeTask_iterate(function(task)
-        return task.code==task_setPitch and task.args[1]==obj
+        return task.code==taskFunc and task.args[1]==obj
     end,obj)
 end
 
@@ -106,7 +133,7 @@ function BGM.setDefault(bgms)
     elseif type(bgms)=='table' then
         for i=1,#bgms do assert(type(bgms[i])=='string',"BGM list must be list of strings") end
     else
-        error("BGM.play(name,args): name must be string or table")
+        error("BGM.setDefault(bgms): bgms must be string or table")
     end
     defaultBGM=bgms
 end
@@ -160,8 +187,12 @@ function BGM.play(bgms,args)
         local obj=srcLib[bgms[i]]
         obj.vol=1
         obj.pitch=1
+        obj.lowgain=1
+        obj.highgain=1
         obj.volChanging=false
         obj.pitchChanging=false
+        obj.lowgainChanging=false
+        obj.highgainChanging=false
 
         local source=obj.source
         source:seek(0)
@@ -170,7 +201,7 @@ function BGM.play(bgms,args)
         source:play()
 
         table.insert(nowPlay,obj)
-        clearVolumeTask(obj)
+        clearTask(obj,'volume')
 
         ::_CONTINUE_::
     end
@@ -181,7 +212,7 @@ function BGM.stop(args)
     if #nowPlay>0 then
         for i=1,#nowPlay do
             local obj=nowPlay[i]
-            clearVolumeTask(obj)
+            clearTask(obj,'volume')
             if STRING.sArg(args,'-sdout') then
                 obj.source:stop()
                 obj.volChanging=false
@@ -212,7 +243,7 @@ function BGM.set(bgms,mode,...)
         local obj=bgms[i]
         if obj.source then
             if mode=='volume' then
-                clearVolumeTask(obj)
+                clearTask(obj,'volume')
 
                 local vol,time=...
                 if not time then time=1 end
@@ -222,20 +253,48 @@ function BGM.set(bgms,mode,...)
 
                 TASK.new(task_setVolume,obj,vol,time)
             elseif mode=='pitch' then
-                clearPitchTask(obj)
+                clearTask(obj,'pitch')
 
-                local pitch,time=...
+                local pitch,changeTime=...
                 if not pitch then pitch=1 end
-                if not time then time=1 end
+                if not changeTime then changeTime=1 end
 
                 assert(type(pitch)=='number' and pitch>0 and pitch<=32,"BGM.set(...,pitch): pitch must be in range 0~32")
-                assert(type(time)=='number' and time>=0,"BGM.set(...,time): time must be positive number")
+                assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
 
-                TASK.new(task_setPitch,obj,pitch,time)
+                TASK.new(task_setPitch,obj,pitch,changeTime)
             elseif mode=='seek' then
                 local time=...
                 assert(type(time)=='number' and time>=0 and time<=obj.source:getDuration(),"BGM.set(...,time): time must be in range 0~[song length]")
                 obj.source:seek(...)
+            elseif mode=='lowgain' then
+                if audio.isEffectsSupported() then
+                    clearTask(obj,'lowgain')
+                    local lowgain,changeTime=...
+                    if not lowgain then lowgain=1 end
+                    if not changeTime then changeTime=1 end
+
+                    assert(type(lowgain)=='number' and lowgain>=0 and lowgain<=1,"BGM.set(...,lowgain,highgain): lowgain must be in range 0~1")
+                    assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
+
+                    TASK.new(task_setLowgain,obj,lowgain,changeTime)
+                    obj.lowgain=lowgain
+                    obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
+                end
+            elseif mode=='highgain' then
+                if audio.isEffectsSupported() then
+                    clearTask(obj,'highgain')
+                    local highgain,changeTime=...
+                    if not highgain then highgain=1 end
+                    if not changeTime then changeTime=1 end
+
+                    assert(type(highgain)=='number' and highgain>=0 and highgain<=1,"BGM.set(...,lowgain,highgain): highgain must be in range 0~1")
+                    assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
+
+                    TASK.new(task_setHighgain,obj,highgain,changeTime)
+                    obj.highgain=highgain
+                    obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
+                end
             else
                 error("BGM.set(...,mode): mode must be 'volume', 'pitch', or 'seek'")
             end
