@@ -432,6 +432,7 @@ Widgets.slider=setmetatable({
 
     disp=false,-- function return the displaying _value
     code=NULL,
+    change=nil,-- function trigger when value change
 
     _floatWheel=0,
     _text=nil,
@@ -457,6 +458,7 @@ Widgets.slider=setmetatable({
 
         'valueShow',
         'disp','code',
+        'change',
         'visibleFunc',
     },
 },{__index=baseWidget})
@@ -1090,6 +1092,7 @@ Widgets.textBox=setmetatable({
     yOffset=-2,
     fixContent=true,
 
+    _floatWheel=0,
     _texts=false,
     _scrollPos=0,-- Scroll-down-distance
     _sure=0,-- Sure-timer for clear history
@@ -1166,8 +1169,8 @@ end
 function Widgets.textBox:drag(_,_,_,dy)
     self._scrollPos=max(0,min(self._scrollPos-dy,(#self._texts-self._capacity)*self.lineHeight))
 end
-function Widgets.textBox:scroll(dir)
-    self:drag(nil,nil,nil,-dir*self.lineHeight)
+function Widgets.textBox:scroll(dx,dy)
+    self._scrollPos=max(0,min(self._scrollPos-(dx+dy)*self.lineHeight,(#self._texts-self._capacity)*self.lineHeight))
 end
 function Widgets.textBox:arrowKey(k)
     self:scroll(k=='up' and -1 or k=='down' and 1 or 0)
@@ -1239,6 +1242,7 @@ Widgets.listBox=setmetatable({
     lineHeight=30,
     drawFunc=false,-- function that draw options. Input: option,id,ifSelected
 
+    _floatWheel=0,
     _list=false,
     _capacity=0,
     _scrollPos=0,
@@ -1326,8 +1330,8 @@ end
 function Widgets.listBox:drag(_,_,_,dy)
     self._scrollPos=max(0,min(self._scrollPos-dy,(#self._list-self._capacity)*self.lineHeight))
 end
-function Widgets.listBox:scroll(n)
-    self:drag(nil,nil,nil,-n*self.lineHeight)
+function Widgets.listBox:scroll(dx,dy)
+    self._scrollPos=max(0,min(self._scrollPos-(dx+dy)*self.lineHeight,(#self._list-self._capacity)*self.lineHeight))
 end
 function Widgets.listBox:arrowKey(dir)
     if dir=="up" then
