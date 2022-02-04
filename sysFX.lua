@@ -8,6 +8,9 @@ local max,min=math.max,math.min
 local ins,rem=table.insert,table.remove
 
 local FXlist={}
+local FX={}
+
+-------------------------------------------------------------
 
 local baseFX={
     update=function(self,dt)
@@ -20,31 +23,30 @@ local baseFX={
     rate=1,
 }
 
-local FX={}
 
 FX.beam=setmetatable({
     type='beam',
     t=0,
 },{__index=baseFX})
-function FX.beam.draw(S)
-    gc_setColor(S.r*2,S.g*2,S.b*2,S.a*min(4-S.t*4,1))
+function FX.beam:draw()
+    gc_setColor(self.r*2,self.g*2,self.b*2,self.a*min(4-self.t*4,1))
 
-    gc_setLineWidth(S.wid)
-    local t1,t2=max(5*S.t-4,0),min(S.t*4,1)
+    gc_setLineWidth(self.wid)
+    local t1,t2=max(5*self.t-4,0),min(self.t*4,1)
     gc_line(
-        S.x1*(1-t1)+S.x2*t1,
-        S.y1*(1-t1)+S.y2*t1,
-        S.x1*(1-t2)+S.x2*t2,
-        S.y1*(1-t2)+S.y2*t2
+        self.x1*(1-t1)+self.x2*t1,
+        self.y1*(1-t1)+self.y2*t1,
+        self.x1*(1-t2)+self.x2*t2,
+        self.y1*(1-t2)+self.y2*t2
     )
 
-    gc_setLineWidth(S.wid*.6)
-    t1,t2=max(4*S.t-3,0),min(S.t*5,1)
+    gc_setLineWidth(self.wid*.6)
+    t1,t2=max(4*self.t-3,0),min(self.t*5,1)
     gc_line(
-        S.x1*(1-t1)+S.x2*t1,
-        S.y1*(1-t1)+S.y2*t1,
-        S.x1*(1-t2)+S.x2*t2,
-        S.y1*(1-t2)+S.y2*t2
+        self.x1*(1-t1)+self.x2*t1,
+        self.y1*(1-t1)+self.y2*t1,
+        self.x1*(1-t2)+self.x2*t2,
+        self.y1*(1-t2)+self.y2*t2
     )
 end
 function FX.beam.new(rate,x1,y1,x2,y2,wid,r,g,b,a)
@@ -62,10 +64,10 @@ FX.tap=setmetatable({
     type='tap',
     t=0,
 },{__index=baseFX})
-function FX.tap.draw(S)
-    local t=S.t
+function FX.tap:draw()
+    local t=self.t
     gc_setColor(1,1,1,(1-t)*.4)
-    gc_circle('fill',S.x,S.y,30*(1-t)^.5)
+    gc_circle('fill',self.x,self.y,30*(1-t)^.5)
 end
 function FX.tap.new(rate,x,y)
     return setmetatable({
@@ -79,11 +81,11 @@ FX.ripple=setmetatable({
     type='ripple',
     t=0,
 },{__index=baseFX})
-function FX.ripple.draw(S)
-    local t=S.t
+function FX.ripple:draw()
+    local t=self.t
     gc_setLineWidth(2)
     gc_setColor(1,1,1,1-t)
-    gc_circle('line',S.x,S.y,t*(2-t)*S.r)
+    gc_circle('line',self.x,self.y,t*(2-t)*self.r)
 end
 function FX.ripple.new(rate,x,y,r)
     return setmetatable({
@@ -97,11 +99,11 @@ FX.rectRipple=setmetatable({
     type='rectRipple',
     t=0,
 },{__index=baseFX})
-function FX.rectRipple.draw(S)
+function FX.rectRipple:draw()
     gc_setLineWidth(6)
-    gc_setColor(1,1,1,1-S.t)
-    local r=(10*S.t)^1.2
-    gc_rectangle('line',S.x-r,S.y-r,S.w+2*r,S.h+2*r)
+    gc_setColor(1,1,1,1-self.t)
+    local r=(10*self.t)^1.2
+    gc_rectangle('line',self.x-r,self.y-r,self.w+2*r,self.h+2*r)
 end
 function FX.rectRipple.new(rate,x,y,w,h)
     return setmetatable({
@@ -115,9 +117,9 @@ FX.rect=setmetatable({
     type='rect',
     t=0,
 },{__index=baseFX})
-function FX.rect.draw(S)
-    gc_setColor(S.r,S.g,S.b,1-S.t)
-    gc_rectangle('fill',S.x,S.y,S.w,S.h,2)
+function FX.rect:draw()
+    gc_setColor(self.r,self.g,self.b,1-self.t)
+    gc_rectangle('fill',self.x,self.y,self.w,self.h,2)
 end
 function FX.rect.new(rate,x,y,w,h,r,g,b)
     return setmetatable({
@@ -132,20 +134,20 @@ FX.particle=setmetatable({
     type='particle',
     t=0,
 },{__index=baseFX})
-function FX.particle.update(S,dt)
-    if S.vx then
-        S.x=S.x+S.vx*S.rate
-        S.y=S.y+S.vy*S.rate
-        if S.ax then
-            S.vx=S.vx+S.ax*S.rate
-            S.vy=S.vy+S.ay*S.rate
+function FX.particle:update(dt)
+    if self.vx then
+        self.x=self.x+self.vx*self.rate
+        self.y=self.y+self.vy*self.rate
+        if self.ax then
+            self.vx=self.vx+self.ax*self.rate
+            self.vy=self.vy+self.ay*self.rate
         end
     end
-    return baseFX.update(S,dt)
+    return baseFX.update(self,dt)
 end
-function FX.particle.draw(S)
-    gc_setColor(1,1,1,1-S.t)
-    gc_draw(S.image,S.x,S.y,nil,S.size,nil,S.cx,S.cy)
+function FX.particle:draw()
+    gc_setColor(1,1,1,1-self.t)
+    gc_draw(self.image,self.x,self.y,nil,self.size,nil,self.cx,self.cy)
 end
 function FX.particle.new(rate,obj,size,x,y,vx,vy,ax,ay)
     return setmetatable({
@@ -163,9 +165,9 @@ FX.line=setmetatable({
     type='line',
     t=0,
 },{__index=baseFX})
-function FX.line.draw(S)
-    gc_setColor(1,1,1,S.a*(1-S.t))
-    gc_line(S.x1,S.y1,S.x2,S.y2)
+function FX.line:draw()
+    gc_setColor(1,1,1,self.a*(1-self.t))
+    gc_line(self.x1,self.y1,self.x2,self.y2)
 end
 function FX.line.new(rate,x1,y1,x2,y2,r,g,b,a)
     return setmetatable({
@@ -175,6 +177,8 @@ function FX.line.new(rate,x1,y1,x2,y2,r,g,b,a)
         r=r or 1,g=g or 1,b=b or 1,a=a or 1,
     },{__index=FX.line})
 end
+
+-------------------------------------------------------------
 
 
 local SYSFX={}
