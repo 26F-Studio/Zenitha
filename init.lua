@@ -5,7 +5,7 @@ local KBisDown=kb.isDown
 local gc=love.graphics
 local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
 local gc_push,gc_pop,gc_clear,gc_discard=gc.push,gc.pop,gc.clear,gc.discard
-local gc_setColor,gc_draw,gc_circle=gc.setColor,gc.draw,gc.circle
+local gc_setColor,gc_circle=gc.setColor,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
 
 local max,min=math.max,math.min
@@ -35,7 +35,6 @@ local errData={}-- list, each error create {mes={errMes strings},scene=sceneName
 -- User-changeable values
 local appName='Zenitha'
 local versionText='V0.1'
-local showPowerInfo=true
 local showClickFX=true
 local discardCanvas=false
 local updateFreq=100
@@ -56,6 +55,7 @@ local devFnKey={NULL,NULL,NULL,NULL,NULL,NULL,NULL}
 local onResize=NULL
 local onFocus=NULL
 local onQuit=NULL
+local drawSysInfo=NULL
 
 --------------------------------------------------------------
 
@@ -125,45 +125,12 @@ local xOy=SCR.xOy
 local ITP=xOy.inverseTransformPoint
 local setFont=FONT.set
 
--- Power info updating function
-local infoCanvas=gc.newCanvas(108,27)
-local function updatePowerInfo()
-    local state,pow=love.system.getPowerInfo()
-    gc.origin()
-    gc.setCanvas(infoCanvas)
-    gc_clear(0,0,0,.25)
-    if state~='unknown' then
-        gc.setLineWidth(2)
-        if state=='nobattery' then
-            gc_setColor(1,1,1)
-            gc.line(74,5,100,22)
-        elseif pow then
-            if state=='charging' then gc_setColor(0,1,0)
-            elseif pow>50 then        gc_setColor(1,1,1)
-            elseif pow>26 then        gc_setColor(1,1,0)
-            elseif pow==26 then       gc_setColor(.5,0,1)
-            else                      gc_setColor(1,0,0)
-            end
-            gc.rectangle('fill',76,6,pow*.22,14)
-            if pow<100 then
-                setFont(10,'_basic')
-                GC.shadedPrint(pow,87,6,'center',1,8)
-            end
-        end
-        gc.rectangle('line',74,4,26,18)
-        gc.rectangle('fill',102,6,2,14)
-    end
-    setFont(25,'_basic')
-    gc_print(os.date("%H:%M"),3,-5)
-    gc.setCanvas()
-end
-
 -- Set default font
 FONT.load({_basic='Zenitha/basic.otf'})
 FONT.setDefaultFont('_basic')
 FONT.setDefaultFallback('_basic')
 
-do-- Define demo scene
+do-- Create demo scene
     local testVal_1={false,false,false}
     local testVal_2={18,260,.26}
     local testVal_3={'medium','large','ex-large'}
@@ -713,13 +680,12 @@ function love.run()
     local lastLoopTime=timer()
     local lastUpdateTime=timer()
     local lastDrawTime=timer()
-    local lastPowFreshingTime=timer()
+    local lastScreenCheckTime=timer()
 
     -- counters range from 0 to 99, trigger at 100
     local updateCounter=0
     local drawCounter=0
 
-    updatePowerInfo()
     love.resize(gc.getWidth(),gc.getHeight())
     SCN.init('_zenitha')
 
@@ -789,14 +755,9 @@ function love.run()
                     TEXT_draw()
                     if mouseShow then drawCursor(time,mx,my) end
                 gc_replaceTransform(SCR.xOy_ul)
+                    drawSysInfo()
                     MES_draw()
                 gc_replaceTransform(SCR.origin)
-                    -- Draw power info.
-                    if showPowerInfo then
-                        gc_setColor(1,1,1)
-                        gc_draw(infoCanvas,SCR.safeX,0,0,SCR.k)
-                    end
-
                     -- Draw scene swapping animation
                     if SCN.swapping then
                         _=SCN.stat
@@ -854,15 +815,9 @@ function love.run()
             end
         end
 
-        -- Fresh power info.
-        if time-lastPowFreshingTime>2.6 then
-            if showPowerInfo then
-                updatePowerInfo()
-                lastPowFreshingTime=time
-            end
-            if gc.getWidth()~=SCR.w or gc.getHeight()~=SCR.h then
-                love.resize(gc.getWidth(),gc.getHeight())
-            end
+        -- Check screen size
+        if time-lastScreenCheckTime>1.26 and gc.getWidth()~=SCR.w or gc.getHeight()~=SCR.h then
+            love.resize(gc.getWidth(),gc.getHeight())
         end
 
         -- Slow devmode
@@ -908,7 +863,6 @@ function Zenitha.getErr(i)
     end
 end
 
-function Zenitha.setPowerInfo(bool) showPowerInfo=bool end
 function Zenitha.setCleanCanvas(bool) discardCanvas=bool end
 function Zenitha.setUpdateFreq(n) updateFreq=n end
 function Zenitha.setDrawFreq(n) drawFreq=n end
@@ -935,6 +889,7 @@ function Zenitha.setOnFnKeys(list)
     for i=1,7 do devFnKey[i]=assert(type(list[i])=='function' and list[i]) end
 end
 
+-- Change debug info of devmode (F8 mode)
 function Zenitha.setDebugInfo(list)
     assert(type(list)=='table',"Z.setDebugInfo(list): list must be table")
     for i=1,#list do
@@ -944,14 +899,22 @@ function Zenitha.setDebugInfo(list)
     debugInfos=list
 end
 
+-- Change focus event
 function Zenitha.setOnFocus(func)
     onFocus=assert(type(func)=='function' and func,"Z.setOnFocus(func): func must be function")
 end
 
+-- Change resize event
 function Zenitha.setOnResize(func)
     onResize=assert(type(func)=='function' and func,"Z.setOnResize(func): func must be function")
 end
 
+-- Change quit event
 function Zenitha.setOnQuit(func)
     onQuit=assert(type(func)=='function' and func,"Z.setOnQuit(func): func must be function")
+end
+
+-- Change focus event
+function Zenitha.setDrawSysInfo(func)
+    drawSysInfo=assert(type(func)=='function' and func,"Z.setDrawSysInfo(func): func must be function")
 end
