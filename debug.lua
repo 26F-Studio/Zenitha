@@ -1,6 +1,18 @@
 local yield=coroutine.yield
 local DEBUG={}
 
+-- Use DEBUG.checkLoadTime(mes) a few times in main.lua to mark time used for loading
+-- Then use DEBUG.logLoadTime() to log the times
+local loadTimeList,lastTimeStamp={},love.timer.getTime()
+function DEBUG.checkLoadTime(mes)
+    assert(type(mes)=='string',"DEBUG.checkLoadTime(mes): mes must be string")
+    table.insert(loadTimeList,("%-26s \t%.3fs"):format(mes..":",love.timer.getTime()-lastTimeStamp))
+    lastTimeStamp=love.timer.getTime()
+end
+function DEBUG.logLoadTime()
+    for i=1,#loadTimeList do LOG(loadTimeList[i])end
+end
+
 -- Wait for the scene swapping animation to finish
 function DEBUG.yieldUntilNextScene()
     while SCN.swapping do yield() end
