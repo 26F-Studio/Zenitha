@@ -869,13 +869,10 @@ function Zenitha.setDrawFreq(n) drawFreq=n end
 function Zenitha.setMaxFPS(fps) sleepInterval=1/fps end
 function Zenitha.setClickFX(bool) showClickFX=bool end
 
--- [Warning] Will cover the origin metatable of _G, use this carefully
-function Zenitha.switchVarMonitor()
-    setmetatable(_G,{__newindex=function(self,k,v)print('>>'..k)print(debug.traceback():match("\n.-\n\t(.-): "))rawset(self,k,v)end})
+-- [Warning] Color and line width is uncertain, set it in the function.
+function Zenitha.setCursor(func)
+    drawCursor=assert(type(func)=='function' and func,"Z.setCursor(func): func must be function")
 end
-
--- [Warning] Color and line width is uncertain value, set it in the function.
-function Zenitha.setCursor(func) drawCursor=func end
 
 -- Change first-level global key events
 function Zenitha.setGlobalKey(key,func)

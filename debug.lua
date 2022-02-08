@@ -13,6 +13,10 @@ function DEBUG.logLoadTime()
     for i=1,#loadTimeList do LOG(loadTimeList[i])end
 end
 
+function DEBUG.runVarMonitor()
+    setmetatable(_G,{__newindex=function(self,k,v)print('>>'..k)print(debug.traceback():match("\n.-\n\t(.-): "))rawset(self,k,v)end})
+end
+
 -- Wait for the scene swapping animation to finish
 function DEBUG.yieldUntilNextScene()
     while SCN.swapping do yield() end
