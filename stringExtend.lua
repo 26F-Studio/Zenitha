@@ -1,10 +1,18 @@
 local data=love.data
-local STRING={}
 local assert,tostring,tonumber=assert,tostring,tonumber
 local int,format=math.floor,string.format
 local find,sub,gsub=string.find,string.sub,string.gsub
 local rep,upper=string.rep,string.upper
 local char,byte=string.char,string.byte
+
+local STRING={}
+
+function STRING.install()-- Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
+    STRING.install=nil
+    for k,v in next,STRING do
+        string[k]=v
+    end
+end
 
 function STRING.repD(str,...)-- "Replace dollars". Replace all $n with ..., like string.format
     local l={...}
@@ -34,37 +42,37 @@ do-- function STRING.shiftChar(c)
     end
 end
 
-function STRING.trim(s)-- Trim %s at both ends of the string
-    if not s:find('%S') then return'' end
-    s=s:sub((s:find('%S'))):reverse()
-    return s:sub((s:find('%S'))):reverse()
+function STRING.trim(str)-- Trim %s at both ends of the string
+    if not str:find('%S') then return'' end
+    str=str:sub((str:find('%S'))):reverse()
+    return str:sub((str:find('%S'))):reverse()
 end
 
-function STRING.split(s,sep,regex)-- Split a string by sep
+function STRING.split(str,sep,regex)-- Split a string by sep
     local L={}
     local p1=1-- start
     local p2-- target
     if regex then
-        while p1<=#s do
-            p2=find(s,sep,p1) or #s+1
-            L[#L+1]=sub(s,p1,p2-1)
+        while p1<=#str do
+            p2=find(str,sep,p1) or #str+1
+            L[#L+1]=sub(str,p1,p2-1)
             p1=p2+#sep
         end
     else
-        while p1<=#s do
-            p2=find(s,sep,p1,true) or #s+1
-            L[#L+1]=sub(s,p1,p2-1)
+        while p1<=#str do
+            p2=find(str,sep,p1,true) or #str+1
+            L[#L+1]=sub(str,p1,p2-1)
             p1=p2+#sep
         end
     end
     return L
 end
 
-function STRING.simpEmailCheck(e)
-    e=STRING.split(e,'@')
-    if #e~=2 then return false end
-    if e[1]:sub(-1)=='.' or e[2]:sub(-1)=='.' then return false end
-    local e1,e2=STRING.split(e[1],'.'),STRING.split(e[2],'.')
+function STRING.simpEmailCheck(str)
+    str=STRING.split(str,'@')
+    if #str~=2 then return false end
+    if str[1]:sub(-1)=='.' or str[2]:sub(-1)=='.' then return false end
+    local e1,e2=STRING.split(str[1],'.'),STRING.split(str[2],'.')
     if #e1*#e2==0 then return false end
     for _,v in next,e1 do if #v==0 then return false end end
     for _,v in next,e2 do if #v==0 then return false end end
@@ -85,59 +93,59 @@ function STRING.time(t)-- Convert time (second) to SS or MM:SS or HH:MM:SS
     end
 end
 
-function STRING.UTF8(n)-- Simple utf8 coding
-    assert(type(n)=='number','Wrong type ('..type(n)..')')
-    assert(n>=0 and n<2^31,'Out of range ('..n..')')
-    if n<2^7 then return char(n)
-    elseif n<2^11 then return char(192+int(n/2^06),128+n%2^6)
-    elseif n<2^16 then return char(224+int(n/2^12),128+int(n/2^06)%2^6,128+n%2^6)
-    elseif n<2^21 then return char(240+int(n/2^18),128+int(n/2^12)%2^6,128+int(n/2^06)%2^6,128+n%2^6)
-    elseif n<2^26 then return char(248+int(n/2^24),128+int(n/2^18)%2^6,128+int(n/2^12)%2^6,128+int(n/2^06)%2^6,128+n%2^6)
-    elseif n<2^31 then return char(252+int(n/2^30),128+int(n/2^24)%2^6,128+int(n/2^18)%2^6,128+int(n/2^12)%2^6,128+int(n/2^06)%2^6,128+n%2^6)
+function STRING.UTF8(num)-- Simple utf8 coding
+    assert(type(num)=='number','Wrong type ('..type(num)..')')
+    assert(num>=0 and num<2^31,'Out of range ('..num..')')
+    if num<2^7 then return char(num)
+    elseif num<2^11 then return char(192+int(num/2^06),128+num%2^6)
+    elseif num<2^16 then return char(224+int(num/2^12),128+int(num/2^06)%2^6,128+num%2^6)
+    elseif num<2^21 then return char(240+int(num/2^18),128+int(num/2^12)%2^6,128+int(num/2^06)%2^6,128+num%2^6)
+    elseif num<2^26 then return char(248+int(num/2^24),128+int(num/2^18)%2^6,128+int(num/2^12)%2^6,128+int(num/2^06)%2^6,128+num%2^6)
+    elseif num<2^31 then return char(252+int(num/2^30),128+int(num/2^24)%2^6,128+int(num/2^18)%2^6,128+int(num/2^12)%2^6,128+int(num/2^06)%2^6,128+num%2^6)
     end
 end
 
-do-- function STRING.bigInt(t)
+do-- function STRING.bigInt(num)
     local lg=math.log10
     local units={'','K','M','B','T','Qa','Qt','Sx','Sp','Oc','No'}
     local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}
     local secUnits={'Dc','Vg','Tg','Qd','Qi','Se','St','Og','Nn','Ce'}-- Ce is next-level unit, but DcCe is not used so used here
     for _,preU in next,preUnits do for _,secU in next,secUnits do table.insert(units,preU..secU) end end
-    function STRING.bigInt(t)
-        if t<1000 then
-            return tostring(t)
-        elseif t~=1e999 then
-            local e=int(lg(t)/3)
-            return (t/10^(e*3))..units[e+1]
+    function STRING.bigInt(num)
+        if num<1000 then
+            return tostring(num)
+        elseif num~=1e999 then
+            local e=int(lg(num)/3)
+            return (num/10^(e*3))..units[e+1]
         else
             return 'INF'
         end
     end
 end
 
-do-- function STRING.toBin, STRING.toOct, STRING.toHex(n,len)
-    function STRING.toBin(n,len)
+do-- function STRING.toBin, STRING.toOct, STRING.toHex(num,len)
+    function STRING.toBin(num,len)
         local s=''
-        while n>0 do
-            s=(n%2)..s
-            n=int(n/2)
+        while num>0 do
+            s=(num%2)..s
+            num=int(num/2)
         end
         return len and rep('0',len-#s)..s or s
     end
-    function STRING.toOct(n,len)
+    function STRING.toOct(num,len)
         local s=''
-        while n>0 do
-            s=(n%8)..s
-            n=int(n/8)
+        while num>0 do
+            s=(num%8)..s
+            num=int(num/8)
         end
         return len and rep('0',len-#s)..s or s
     end
     local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
-    function STRING.toHex(n,len)
+    function STRING.toHex(num,len)
         local s=''
-        while n>0 do
-            s=b16[n%16]..s
-            n=int(n/16)
+        while num>0 do
+            s=b16[num%16]..s
+            num=int(num/16)
         end
         return len and rep('0',len-#s)..s or s
     end
@@ -154,16 +162,16 @@ function STRING.hexColor(str)-- [LOW PERFORMENCE]
     return r,g,b,a
 end
 
-do-- function STRING.urlEncode(s)
+do-- function STRING.urlEncode(str)
     local rshift=bit.rshift
     local b16={[0]='0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'}
-    function STRING.urlEncode(s)
+    function STRING.urlEncode(str)
         local out=''
-        for i=1,#s do
-            if s:sub(i,i):match('[a-zA-Z0-9]') then
-                out=out..s:sub(i,i)
+        for i=1,#str do
+            if str:sub(i,i):match('[a-zA-Z0-9]') then
+                out=out..str:sub(i,i)
             else
-                local b=s:byte(i)
+                local b=str:byte(i)
                 out=out..'%'..b16[rshift(b,4)]..b16[b%16]
             end
         end
@@ -229,8 +237,8 @@ function STRING.readChars(str,n)-- Return [n characters], [the rest of the strin
     return sub(str,1,n),sub(str,n+1)
 end
 
-function STRING.packBin(s)-- Zlib+Base64
-    return data.encode('string','base64',data.compress('string','zlib',s))
+function STRING.packBin(str)-- Zlib+Base64
+    return data.encode('string','base64',data.compress('string','zlib',str))
 end
 function STRING.unpackBin(str)
     local res
@@ -239,8 +247,8 @@ function STRING.unpackBin(str)
     res,str=pcall(data.decompress,'string','zlib',str)
     if res then return str end
 end
-function STRING.packText(s)-- Gzip+Base64
-    return data.encode('string','base64',data.compress('string','gzip',s))
+function STRING.packText(str)-- Gzip+Base64
+    return data.encode('string','base64',data.compress('string','gzip',str))
 end
 function STRING.unpackText(str)
     local res
