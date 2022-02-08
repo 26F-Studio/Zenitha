@@ -39,6 +39,7 @@ local SCN={
 function SCN.add(name,scene)
     assert(not scene.scrollHeight or type(scene.scrollHeight)=='number',"[scene].scrollHeight must be number")
     assert(not scene.widgetList or type(scene.widgetList)=='table',"[scene].widgetList must be table")
+    assert(not scenes[name],STRING.repD("SCN.add(name,scene): scene '$1' already exists",name))
     for i=1,#eventNames do assert(not scene[eventNames[i]] or type(scene[eventNames[i]])=='function',"[scene]."..eventNames[i].." must be function") end
     scenes[name]=scene
     if scene.widgetList then setmetatable(scene.widgetList,WIDGET.indexMeta) end
