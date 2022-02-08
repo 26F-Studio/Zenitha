@@ -20,7 +20,6 @@ PAPER=love.graphics.newCanvas(1,1)
 
 SYSTEM=love.system.getOS() if SYSTEM=='OS X' then SYSTEM='macOS' end
 MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
-SAVEDIR=love.filesystem.getSaveDirectory()
 EDITING=""
 
 -- Inside values

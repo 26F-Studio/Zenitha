@@ -76,10 +76,10 @@ function FILE.save(data,name,args)
     F:write(data) F:flush() F:close()
 end
 function FILE.clear(path)
-    if fs.getRealDirectory(path)==SAVEDIR and fs.getInfo(path).type=='directory' then
+    if not FILE.isSafe(path) and fs.getInfo(path).type=='directory' then
         for _,name in next,fs.getDirectoryItems(path) do
             name=path..'/'..name
-            if fs.getRealDirectory(name)==SAVEDIR then
+            if not FILE.isSafe(name) then
                 local t=fs.getInfo(name).type
                 if t=='file' then
                     fs.remove(name)
@@ -89,10 +89,10 @@ function FILE.clear(path)
     end
 end
 function FILE.clear_s(path)
-    if path=='' or (fs.getRealDirectory(path)==SAVEDIR and fs.getInfo(path).type=='directory') then
+    if path=='' or (not FILE.isSafe(path) and fs.getInfo(path).type=='directory') then
         for _,name in next,fs.getDirectoryItems(path) do
             name=path..'/'..name
-            if fs.getRealDirectory(name)==SAVEDIR then
+            if not FILE.isSafe(name) then
                 local t=fs.getInfo(name).type
                 if t=='file' then
                     fs.remove(name)
