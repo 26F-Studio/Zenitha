@@ -1,13 +1,13 @@
 local yield=coroutine.yield
-local TEST={}
+local DEBUG={}
 
 -- Wait for the scene swapping animation to finish
-function TEST.yieldUntilNextScene()
+function DEBUG.yieldUntilNextScene()
     while SCN.swapping do yield() end
 end
 
-function TEST.yieldN(frames)
+function DEBUG.yieldN(frames)
     for _=1,frames do yield() end
 end
 
-return TEST
+return DEBUG
