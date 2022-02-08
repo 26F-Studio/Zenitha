@@ -2,7 +2,6 @@ local gc_clear=love.graphics.clear
 local BGs={
     none={draw=function() gc_clear(.08,.08,.084) end}
 }
-local BGlist={'none'}
 local BG={
     default='none',
     locked=false,
@@ -19,13 +18,6 @@ function BG.lock() BG.locked=true end
 function BG.unlock() BG.locked=false end
 function BG.add(name,bg)
     BGs[name]=bg
-    BGlist[#BGlist+1]=name
-end
-function BG.getList()
-    return BGlist
-end
-function BG.remList(name)
-    table.remove(BGlist,TABLE.find(BGlist,name))
 end
 function BG.send(...)
     if BG.event then
