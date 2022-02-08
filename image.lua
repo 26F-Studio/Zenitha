@@ -20,9 +20,8 @@ local function link(A,B)
 end
 local IMG={
     init=function(_list)
-        assert(not initialized,'IMG: Already initialized')
-        initialized=true
-        IMG.init=nil
+        assert(not initialized,"Achievement: attempt to initialize IMG lib twice")
+        initialized,IMG.init=true
         link(IMG,_list)
     end
 }

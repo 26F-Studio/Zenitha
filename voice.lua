@@ -1,4 +1,4 @@
-local rnd=math.random
+local initialized=false
 local volume=1
 local diversion=0
 local VOC={
@@ -18,7 +18,8 @@ function VOC.setVol(v)
     volume=v
 end
 function VOC.init(list)
-    VOC.init=nil
+    assert(not initialized,"Achievement: attempt to initialize VOC lib twice")
+    initialized,VOC.init=true
     local rem=table.remove
     local voiceQueue={free=0}
     local bank={}-- {vocName1={SRC1s},vocName2={SRC2s},...}
@@ -82,11 +83,11 @@ function VOC.init(list)
                 if not _ then return end
                 if chn then
                     local L=voiceQueue[chn]
-                    L[#L+1]=_[rnd(#_)]
+                    L[#L+1]=_[math.random(#_)]
                     L.s=1
                     -- Add to queue[chn]
                 else
-                    voiceQueue[VOC.getFreeChannel()]={s=1,_[rnd(#_)]}
+                    voiceQueue[VOC.getFreeChannel()]={s=1,_[math.random(#_)]}
                     -- Create new channel & play
                 end
             end
@@ -101,14 +102,14 @@ function VOC.init(list)
                 elseif Q.s==1 then-- Waiting load source
                     Q[1]=_getVoice(Q[1])
                     Q[1]:setVolume(volume)
-                    Q[1]:setPitch(1.0594630943592953^(diversion*(rnd()*2-1)))
+                    Q[1]:setPitch(1.0594630943592953^(diversion*(math.random()*2-1)))
                     Q[1]:play()
                     Q.s=Q[2] and 2 or 4
                 elseif Q.s==2 then-- Playing 1,ready 2
                     if Q[1]:getDuration()-Q[1]:tell()<.08 then
                         Q[2]=_getVoice(Q[2])
                         Q[2]:setVolume(volume)
-                        Q[1]:setPitch(1.0594630943592953^(diversion*(rnd()*2-1)))
+                        Q[1]:setPitch(1.0594630943592953^(diversion*(math.random()*2-1)))
                         Q[2]:play()
                         Q.s=3
                     end
