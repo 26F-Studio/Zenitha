@@ -853,6 +853,7 @@ end
 function Zenitha.getVersionText() return versionText end
 
 function Zenitha.getJsState() return jsState end
+
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]
@@ -868,6 +869,11 @@ function Zenitha.setUpdateFreq(n) updateFreq=n end
 function Zenitha.setDrawFreq(n) drawFreq=n end
 function Zenitha.setMaxFPS(fps) sleepInterval=1/fps end
 function Zenitha.setClickFX(bool) showClickFX=bool end
+
+-- [Warning] Will cover the origin metatable of _G, use this carefully
+function Zenitha.switchVarMonitor()
+    setmetatable(_G,{__newindex=function(self,k,v)print('>>'..k)print(debug.traceback():match("\n.-\n\t(.-): "))rawset(self,k,v)end})
+end
 
 -- [Warning] Color and line width is uncertain value, set it in the function.
 function Zenitha.setCursor(func) drawCursor=func end
