@@ -120,11 +120,11 @@ end
 
 function MES.draw()
     if #mesList>0 then
-        local y=70
+        local y=0
         for i=1,#mesList do
             local m=mesList[i]
             gc_setColor(1,1,1,2*(m.endTime-m.startTime))
-            gc_draw(m.canvas,y-80*(m.endTime+m.startTime),SCR.safeX,nil,m.scale)
+            gc_draw(m.canvas,SCR.safeX+40-80*(m.endTime+m.startTime),y,nil,m.scale)
             y=y+m.height*m.scale+2
         end
     end
