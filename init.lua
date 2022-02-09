@@ -688,10 +688,10 @@ function love.run()
 
     love.resize(gc.getWidth(),gc.getHeight())
     if firstScene then
+        SCN.load(firstScene)
         SCN.scenes._zenitha=nil
-        SCN.init(firstScene)
     else
-        SCN.init('_zenitha')
+        SCN.load('_zenitha')
     end
 
     return function()

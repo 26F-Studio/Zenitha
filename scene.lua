@@ -3,8 +3,8 @@ local gc=love.graphics
 local scenes={}
 
 local eventNames={
-    "init",
-    "back",
+    "enter",
+    "leave",
 
     "mouseDown","mouseMove","mouseUp","mouseClick","wheelMoved",
     "touchDown","touchUp","touchMove","touchClick",
@@ -55,7 +55,7 @@ function SCN.swapUpdate(dt)
     if S.time<S.changeTime and S.time+dt>=S.changeTime then
         -- Scene swapped this frame
         SCN.prev=SCN.cur
-        SCN.init(S.tar)
+        SCN.load(S.tar)
         SCN.mainTouchID=nil
     end
     if S.time<0 then
@@ -63,7 +63,7 @@ function SCN.swapUpdate(dt)
     end
 end
 
-function SCN.init(s)
+function SCN.load(s)
     love.keyboard.setTextInput(false)
 
     SCN.cur=s
@@ -76,7 +76,7 @@ function SCN.init(s)
         SCN[eventNames[i]]=S[eventNames[i]]
     end
 
-    if S.init then S.init() end
+    if S.enter then S.enter() end
 end
 function SCN.push(tar,style)
     if not SCN.swapping then
@@ -181,7 +181,7 @@ function SCN.back(...)
     local m=#SCN.stack
     if m>0 then
         -- Leave scene
-        if SCN.back then SCN.back() end
+        if SCN.leave then SCN.leave() end
 
         -- Poll&Back to previous Scene
         SCN.swapTo(SCN.stack[m-1],SCN.stack[m],...)
