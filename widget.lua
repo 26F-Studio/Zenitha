@@ -249,7 +249,7 @@ end
 -- Button
 Widgets.button=setmetatable({
     type='button',
-    w=10,h=10,
+    w=40,h=false,
 
     text=false,
     image=false,
@@ -278,6 +278,9 @@ Widgets.button=setmetatable({
 },{__index=baseWidget})
 function Widgets.button:reset()
     baseWidget.reset(self)
+    if not self.h then self.h=self.w end
+    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
+    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
@@ -320,7 +323,7 @@ end
 -- checkBox
 Widgets.checkBox=setmetatable({
     type='checkBox',
-    w=10,
+    w=30,
 
     text=false,
     image=false,
