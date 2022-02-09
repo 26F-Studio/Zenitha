@@ -101,6 +101,7 @@ function baseWidget:reset()
 
     assert(type(self.x)=='number','[widget].x must be number')
     assert(type(self.y)=='number','[widget].y must be number')
+    if type(self.color)=='string' then self.color=COLOR[self.color] end
     assert(type(self.color)=='table','[widget].color must be table')
 
     if self.posX=='raw' then
@@ -195,8 +196,7 @@ Widgets.text=setmetatable({
         'x','y',
         'posX','posY',
 
-        'color',
-        'text','rawText',
+        'color','text','rawText',
         'fontSize','fontType',
 
         'alignX','alignY',
@@ -268,7 +268,7 @@ Widgets.button=setmetatable({
         'w','h',
         'alignX','alignY',
         'posX','posY',
-        'text','image','rawText',
+        'color','text','rawText','image',
         'fontSize','fontType',
         'sound',
 
@@ -341,7 +341,7 @@ Widgets.checkBox=setmetatable({
         'posX','posY',
 
         'labelPos',
-        'text','rawText',
+        'color','text','rawText',
         'fontSize','fontType',
         'widthLimit',
         'sound',
@@ -452,7 +452,7 @@ Widgets.slider=setmetatable({
 
         'axis','smooth',
         'labelPos',
-        'text','rawText',
+        'color','text','rawText',
         'fontSize','fontType',
         'widthLimit',
 
@@ -505,9 +505,9 @@ function Widgets.slider:reset()
         elseif type(self.valueShow)=='string' then
             self._showFunc=assert(sliderShowFunc[self.valueShow],"[slider].valueShow must be function, or 'int', 'float', or 'percent'")
         end
-    elseif self.valueShow==false then-- Use default if nil
+    elseif self.valueShow==false then-- Show nothing if false
         self._showFunc=sliderShowFunc.null
-    else
+    else-- Use default if nil
         if self._unit and self._unit%1==0 then
             self._showFunc=sliderShowFunc.int
         else
@@ -666,7 +666,7 @@ Widgets.slider_fill=setmetatable({
 
         'axis',
         'labelPos',
-        'text','rawText',
+        'color','text','rawText',
         'fontSize','fontType',
         'widthLimit',
 
@@ -782,7 +782,7 @@ Widgets.selector=setmetatable({
         'x','y','w',
         'posX','posY',
 
-        'text','rawText',
+        'color','text','rawText',
         'widthLimit',
 
         'labelPos',
@@ -946,7 +946,7 @@ Widgets.inputBox=setmetatable({
         'x','y','w','h',
         'posX','posY',
 
-        'text','rawText',
+        'color','text','rawText',
         'fontSize','fontType',
         'secret',
         'inputSound',
@@ -1475,7 +1475,7 @@ function WIDGET.press(x,y,k)
             WIDGET.unFocus(true)
         else
             W:press(x,y and y+SCN.curScroll,k)
-            if W.hide then WIDGET.unFocus() end
+            if W._visible then WIDGET.unFocus() end
         end
     end
 end
@@ -1515,9 +1515,9 @@ end
 
 function WIDGET.update(dt)
     for _,W in next,WIDGET.active do
-        if W.hideF then
-            W.hide=W.hideF()
-            if W.hide and W==WIDGET.sel then
+        if W.visibleFunc then
+            W._visible=W.visibleFunc()
+            if W._visible and W==WIDGET.sel then
                 WIDGET.unFocus(true)
             end
         end
@@ -1556,6 +1556,8 @@ function WIDGET.new(args)
             error('Illegal argument '..k..' for widget '..t)
         end
     end
+    w:reset()
+
     return w
 end
 
