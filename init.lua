@@ -34,6 +34,7 @@ local errData={}-- list, each error create {mes={errMes strings},scene=sceneName
 -- User-changeable values
 local appName='Zenitha'
 local versionText='V0.1'
+local firstScene=false
 local showClickFX=true
 local discardCanvas=false
 local updateFreq=100
@@ -686,7 +687,12 @@ function love.run()
     local drawCounter=0
 
     love.resize(gc.getWidth(),gc.getHeight())
-    SCN.init('_zenitha')
+    if firstScene then
+        SCN.scenes._zenitha=nil
+        SCN.init(firstScene)
+    else
+        SCN.init('_zenitha')
+    end
 
     return function()
         local _
@@ -840,19 +846,18 @@ end
 Zenitha={}
 
 function Zenitha.setAppName(name)
-    assert(type(name)=='string','Z.appName must be string')
+    assert(type(name)=='string','Zenitha.setAppName(name): name must be string')
     appName=name
 end
 function Zenitha.getAppName() return appName end
 
 function Zenitha.setVersionText(text)
-    assert(type(text)=='string','Z.versionText must be string')
+    assert(type(text)=='string','Zenitha.setVersionText(text): text must be string')
     versionText=text
 end
 function Zenitha.getVersionText() return versionText end
 
 function Zenitha.getJsState() return jsState end
-
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]
@@ -862,61 +867,67 @@ function Zenitha.getErr(i)
         return errData
     end
 end
-
-function Zenitha.setCleanCanvas(bool) discardCanvas=bool end
-function Zenitha.setUpdateFreq(n) updateFreq=n end
-function Zenitha.setDrawFreq(n) drawFreq=n end
-function Zenitha.setMaxFPS(fps) sleepInterval=1/fps end
-function Zenitha.setClickFX(bool) showClickFX=bool end
-
--- [Warning] Color and line width is uncertain, set it in the function.
-function Zenitha.setCursor(func)
-    drawCursor=assert(type(func)=='function' and func,"Z.setCursor(func): func must be function")
-end
-
--- Change first-level global key events
-function Zenitha.setGlobalKey(key,func)
-    assert(type(key)=='string',"Z.setOnFnKeys(key,func): key must be string")
-    if not func then
-        globalKey[key]=nil
-    else
-        assert(type(func)=='function',"Z.setOnFnKeys(key,func): func must be function")
-        globalKey[key]=func
-    end
-end
-
--- Change F1~F7 events of devmode (F8 mode)
-function Zenitha.setOnFnKeys(list)
-    assert(type(list)=='table',"Z.setOnFnKeys(list): list must be table")
-    for i=1,7 do devFnKey[i]=assert(type(list[i])=='function' and list[i]) end
-end
-
--- Change debug info of devmode (F8 mode)
 function Zenitha.setDebugInfo(list)
-    assert(type(list)=='table',"Z.setDebugInfo(list): list must be table")
+    assert(type(list)=='table',"Zenitha.setDebugInfo(list): list must be table")
     for i=1,#list do
-        assert(type(list[i][1])=='string',"Z.setDebugInfo(list): list[i][1] must be string")
-        assert(type(list[i][2])=='function',"Z.setDebugInfo(list): list[i][2] must be function")
+        assert(type(list[i][1])=='string',"Zenitha.setDebugInfo(list): list[i][1] must be string")
+        assert(type(list[i][2])=='function',"Zenitha.setDebugInfo(list): list[i][2] must be function")
     end
     debugInfos=list
 end
 
--- Change focus event
+function Zenitha.setFirstScene(name)
+    assert(type(name)=='string',"Zenitha.setFirstScene(name): name must be string")
+    firstScene=name
+end
+function Zenitha.setCleanCanvas(b)
+    assert(type(b)=='boolean',"Zenitha.setCleanCanvas(b): b must be boolean")
+    discardCanvas=b
+end
+function Zenitha.setUpdateFreq(n)
+    assert(type(n)=='number',"Zenitha.setUpdateFreq(n): n must be number")
+    updateFreq=n
+end
+function Zenitha.setDrawFreq(n)
+    assert(type(n)=='number',"Zenitha.setDrawFreq(n): n must be number")
+    drawFreq=n
+end
+function Zenitha.setMaxFPS(fps)
+    assert(type(fps)=='number' and fps>0,"Zenitha.setMaxFPS(fps): fps must be positive number")
+    sleepInterval=1/fps
+end
+function Zenitha.setClickFX(b)
+    assert(type(b)=='boolean',"Zenitha.setClickFX(b): b must be boolean")
+    showClickFX=b
+end
+
+function Zenitha.setOnGlobalKey(key,func)
+    assert(type(key)=='string',"Zenitha.setOnFnKeys(key,func): key must be string")
+    if not func then
+        globalKey[key]=nil
+    else
+        assert(type(func)=='function',"Zenitha.setOnFnKeys(key,func): func must be function")
+        globalKey[key]=func
+    end
+end
+function Zenitha.setOnFnKeys(list)
+    assert(type(list)=='table',"Zenitha.setOnFnKeys(list): list must be table")
+    for i=1,7 do devFnKey[i]=assert(type(list[i])=='function' and list[i]) end
+end
 function Zenitha.setOnFocus(func)
-    onFocus=assert(type(func)=='function' and func,"Z.setOnFocus(func): func must be function")
+    onFocus=assert(type(func)=='function' and func,"Zenitha.setOnFocus(func): func must be function")
 end
-
--- Change resize event
 function Zenitha.setOnResize(func)
-    onResize=assert(type(func)=='function' and func,"Z.setOnResize(func): func must be function")
+    onResize=assert(type(func)=='function' and func,"Zenitha.setOnResize(func): func must be function")
 end
-
--- Change quit event
 function Zenitha.setOnQuit(func)
-    onQuit=assert(type(func)=='function' and func,"Z.setOnQuit(func): func must be function")
+    onQuit=assert(type(func)=='function' and func,"Zenitha.setOnQuit(func): func must be function")
 end
 
--- Change focus event
+-- [Warning] Color and line width is uncertain, set it in the function.
+function Zenitha.setDrawCursor(func)
+    drawCursor=assert(type(func)=='function' and func,"Zenitha.setCursor(func): func must be function")
+end
 function Zenitha.setDrawSysInfo(func)
-    drawSysInfo=assert(type(func)=='function' and func,"Z.setDrawSysInfo(func): func must be function")
+    drawSysInfo=assert(type(func)=='function' and func,"Zenitha.setDrawSysInfo(func): func must be function")
 end
