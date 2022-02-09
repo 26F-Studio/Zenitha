@@ -1559,6 +1559,44 @@ function WIDGET.new(args)
     return w
 end
 
-function WIDGET.setOnChange(func) onChange=assert(type(func)=='function' and func,"WIDGET.setOnChange(func): func must be function") end
+--------------------------------------------------------------
+-- User funcs
+function WIDGET.setOnChange(func)
+    assert(type(func)=='function',"WIDGET.setOnChange(func): func must be function")
+    onChange=func
+end
+
+-- Widget function shortcuts
+function WIDGET.c_backScn()SCN.back()end
+do-- function WIDGET.c_goScn(name,style)
+    local cache={}
+    function WIDGET.c_goScn(name,style)
+        local hash=style and name..style or name
+        if not cache[hash]then
+            cache[hash]=function()SCN.go(name,style)end
+        end
+        return cache[hash]
+    end
+end
+do-- function WIDGET.c_swapScn(name,style)
+    local cache={}
+    function WIDGET.c_swapScn(name,style)
+        local hash=style and name..style or name
+        if not cache[hash]then
+            cache[hash]=function()SCN.swapTo(name,style)end
+        end
+        return cache[hash]
+    end
+end
+do-- function WIDGET.c_pressKey(k)
+    local cache={}
+    function WIDGET.c_pressKey(k)
+        if not cache[k]then
+            cache[k]=function()love.keypressed(k)end
+        end
+        return cache[k]
+    end
+end
+--------------------------------------------------------------
 
 return WIDGET
