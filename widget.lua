@@ -1520,7 +1520,7 @@ function WIDGET.update(dt)
     for _,W in next,WIDGET.active do
         if W.visibleFunc then
             W._visible=W.visibleFunc()
-            if W._visible and W==WIDGET.sel then
+            if not W._visible and W==WIDGET.sel then
                 WIDGET.unFocus(true)
             end
         end
