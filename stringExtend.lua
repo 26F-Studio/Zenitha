@@ -93,6 +93,17 @@ function STRING.time(t)-- Convert time (second) to SS or MM:SS or HH:MM:SS
     end
 end
 
+function STRING.cutUnit(s)-- Warning: don't support number format like .26, must have digits before the dot, like 0.26
+    local _s,_e=s:find('^-?%d+%.?%d*')
+    if _e==#s then--All numbers
+        return tonumber(s),nil
+    elseif not _s then--No numbers
+        return nil,s
+    else
+        return tonumber(s:sub(_s,_e)),s:sub(_e+1)
+    end
+end
+
 function STRING.UTF8(num)-- Simple utf8 coding
     assert(type(num)=='number','Wrong type ('..type(num)..')')
     assert(num>=0 and num<2^31,'Out of range ('..num..')')
