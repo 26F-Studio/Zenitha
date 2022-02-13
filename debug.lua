@@ -14,7 +14,7 @@ function DEBUG.logLoadTime()
 end
 
 function DEBUG.runVarMonitor()
-    setmetatable(_G,{__newindex=function(self,k,v)print('>>'..k)print(debug.traceback():match("\n.-\n\t(.-): "))rawset(self,k,v)end})
+    setmetatable(_G,{__newindex=function(self,k,v) print('>>'..k)print(debug.traceback():match("\n.-\n\t(.-): "))rawset(self,k,v)end})
 end
 
 -- Wait for the scene swapping animation to finish

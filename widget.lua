@@ -1578,7 +1578,7 @@ do-- function WIDGET.c_goScn(name,style)
     function WIDGET.c_goScn(name,style)
         local hash=style and name..style or name
         if not cache[hash]then
-            cache[hash]=function()SCN.go(name,style)end
+            cache[hash]=function() SCN.go(name,style)end
         end
         return cache[hash]
     end
@@ -1588,7 +1588,7 @@ do-- function WIDGET.c_swapScn(name,style)
     function WIDGET.c_swapScn(name,style)
         local hash=style and name..style or name
         if not cache[hash]then
-            cache[hash]=function()SCN.swapTo(name,style)end
+            cache[hash]=function() SCN.swapTo(name,style)end
         end
         return cache[hash]
     end
@@ -1597,7 +1597,7 @@ do-- function WIDGET.c_pressKey(k)
     local cache={}
     function WIDGET.c_pressKey(k)
         if not cache[k]then
-            cache[k]=function()love.keypressed(k)end
+            cache[k]=function() love.keypressed(k)end
         end
         return cache[k]
     end
