@@ -319,6 +319,36 @@ function Widgets.button:draw()
     end
 end
 
+-- Button_fill
+Widgets.button_fill=setmetatable({
+    type='button_fill',
+},{__index=Widgets.button})
+function Widgets.button_fill:draw()
+    local x,y=self._x,self._y
+    local w,h=self.w,self.h
+    x,y=x-w*.5,y-h*.5
+
+    local c=self.color
+    local r,g,b=c[1],c[2],c[3]
+
+    -- Rectangle
+    gc_setColor(.15+r*.7,.15+g*.7,.15+b*.7,.9)
+    gc_rectangle('fill',x,y,w,h,4)
+    gc_setLineWidth(2)
+    gc_setColor(.3+r*.7,.3+g*.7,.3+b*.7,.4+.6*self._activeTime/self._activeTimeMax)
+    gc_rectangle('line',x,y,w,h,5)
+
+    -- Drawable
+    if self._image then
+        gc_setColor(1,1,1)
+        alignDraw(self,self._image,x+w*.5,y+h*.5)
+    end
+    if self._text then
+        gc_setColor(r*.55,g*.55,b*.55)
+        alignDraw(self,self._text,x+w*.5,y+h*.5)
+    end
+end
+
 
 -- checkBox
 Widgets.checkBox=setmetatable({
