@@ -580,7 +580,7 @@ function love.errorhandler(msg)
     love.audio.stop()
     gc.reset()
 
-    if mainLoopStarted and #errData<3 then
+    if mainLoopStarted and #errData<3 and SCN.scenes['error'] then
         BG.set('none')
         local scn=SCN and SCN.cur or 'NULL'
         table.insert(errData,{mes=err,scene=scn})
@@ -687,7 +687,9 @@ function love.run()
     local drawCounter=0
 
     love.resize(gc.getWidth(),gc.getHeight())
-    if firstScene then
+    if #errData>0 then
+        SCN.load('error')
+    elseif firstScene then
         SCN.load(firstScene)
         SCN.scenes._zenitha=nil
     else
