@@ -7,7 +7,7 @@ local langLib={
 }
 setmetatable(langLib,{
     __index=function(self,k)
-        local lang=FILE.read(langPaths[k],'-luaon')
+        local lang=FILE.load(langPaths[k],'-luaon')
         setmetatable(lang,{__index=langLib[k~=defaultLang and defaultLang]})
         self[k]=lang
         table.insert(langLoaded,k)
@@ -38,9 +38,7 @@ function LANG.setMaxLoaded(n)
 end
 function LANG.add(data)
     for k,v in next,data do
-        assert(type(v)=='table','Invalid language data (need {zh="path1",en="path2",...})')
-        assert(type(k)=='string','Invalid language name (need string)')
-        assert(type(v)=='string','Invalid language file path (need string)')
+        assert(type(k)=='string' and type(v)=='string','Invalid language info list (need {zh="path1",en="path2",...})')
         langPaths[k]=v
     end
 end
