@@ -1,6 +1,7 @@
 local initialized=false
 local IMGlistMeta={__index=function(self,k)
-    local ok,res=pcall(love.graphics.newImage,self.assert(self.__source[k],STRING.repD("No field '$1'",tostring(k))))
+    assert(self.__source[k],STRING.repD("No field '$1'",tostring(k)))
+    local ok,res=pcall(love.graphics.newImage,self.__source[k])
     if ok then
         self[k]=res
         return res
