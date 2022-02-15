@@ -1,9 +1,10 @@
 local audio=love.audio
 
 local nameList={}
-local srcLib={}
+local srcLib={}-- Stored bgm objects: {name='foo',source=bar}
 local lastLoadNames={}
-local nowPlay={}-- Now playing name(s) & source(s), like {{name='foo',source=bar},...}
+local nowPlay={}
+local lastPlay={}-- Directly stored last played bgm name(s)
 
 local defaultBGM=false
 local maxLoadedCount=3
@@ -61,9 +62,13 @@ local function task_setVolume(obj,ve,time,stop)
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
         local v=MATH.lerp(vs,ve,t)
         obj.vol=v
-        obj.source:setVolume(v)
+        obj.source:setVolume(v*volume)
+        if t==1 then
+            obj.volChanging=false
+            break
+        end
     end
-    if t==0 and stop then
+    if stop then
         obj.source:stop()
     end
     obj.volChanging=false
@@ -111,7 +116,7 @@ local function task_setHighgain(obj,pe,time)
         end
     end
 end
-local function clearTask(obj,mode)
+local function _clearTask(obj,mode)
     local taskFunc=
         mode=='volume' and task_setVolume or
         mode=='pitch' and task_setPitch or
@@ -173,7 +178,10 @@ function BGM.play(bgms,args)
     if not bgms then return end
 
     if type(bgms)=='string' then bgms={bgms} end
-    -- if TABLE.compare(nowPlay,bgms) then return end
+    if TABLE.compare(lastPlay,bgms) then return end
+    if not STRING.sArg(args,'-preLoad') then
+        lastPlay=bgms
+    end
 
     assert(type(bgms)=='table',"BGM.play(name,args): name must be string or table")
 
@@ -185,7 +193,7 @@ function BGM.play(bgms,args)
         if not _tryLoad(bgm) or STRING.sArg(args,'-preLoad') then goto _CONTINUE_ end
 
         local obj=srcLib[bgms[i]]
-        obj.vol=1
+        obj.vol=0
         obj.pitch=1
         obj.lowgain=1
         obj.highgain=1
@@ -194,30 +202,37 @@ function BGM.play(bgms,args)
         obj.lowgainChanging=false
         obj.highgainChanging=false
 
+        _clearTask(obj,'volume')
+
         local source=obj.source
-        source:seek(0)
+        source:setLooping(not STRING.sArg(args,'-noloop'))
         source:setPitch(1)
-        source:setVolume(volume)
+        source:seek(0)
+        if STRING.sArg(args,'-sdin') then
+            source:setVolume(0)
+            BGM.set(bgm,'volume',1,.26)
+        else
+            obj.vol=1
+            source:setVolume(volume)
+            BGM.set(bgm,'volume',1,0)
+        end
         source:play()
 
         table.insert(nowPlay,obj)
-        clearTask(obj,'volume')
 
         ::_CONTINUE_::
     end
 end
-function BGM.stop(args)
-    if not args then args='' end
-
+function BGM.stop(time)
     if #nowPlay>0 then
         for i=1,#nowPlay do
             local obj=nowPlay[i]
-            clearTask(obj,'volume')
-            if STRING.sArg(args,'-sdout') then
+            _clearTask(obj,'volume')
+            if time==0 then
                 obj.source:stop()
                 obj.volChanging=false
             else
-                TASK.new(task_setVolume,obj,0,false,true)
+                TASK.new(task_setVolume,obj,0,time or .26,true)
                 obj.volChanging=true
             end
         end
@@ -243,7 +258,7 @@ function BGM.set(bgms,mode,...)
         local obj=bgms[i]
         if obj.source then
             if mode=='volume' then
-                clearTask(obj,'volume')
+                _clearTask(obj,'volume')
 
                 local vol,time=...
                 if not time then time=1 end
@@ -253,7 +268,7 @@ function BGM.set(bgms,mode,...)
 
                 TASK.new(task_setVolume,obj,vol,time)
             elseif mode=='pitch' then
-                clearTask(obj,'pitch')
+                _clearTask(obj,'pitch')
 
                 local pitch,changeTime=...
                 if not pitch then pitch=1 end
@@ -269,7 +284,7 @@ function BGM.set(bgms,mode,...)
                 obj.source:seek(...)
             elseif mode=='lowgain' then
                 if audio.isEffectsSupported() then
-                    clearTask(obj,'lowgain')
+                    _clearTask(obj,'lowgain')
                     local lowgain,changeTime=...
                     if not lowgain then lowgain=1 end
                     if not changeTime then changeTime=1 end
@@ -283,7 +298,7 @@ function BGM.set(bgms,mode,...)
                 end
             elseif mode=='highgain' then
                 if audio.isEffectsSupported() then
-                    clearTask(obj,'highgain')
+                    _clearTask(obj,'highgain')
                     local highgain,changeTime=...
                     if not highgain then highgain=1 end
                     if not changeTime then changeTime=1 end
