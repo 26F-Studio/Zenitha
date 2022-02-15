@@ -20,7 +20,7 @@ local function link(A,B)
 end
 local IMG={
     init=function(_list)
-        assert(not initialized,"Achievement: attempt to initialize IMG lib twice")
+        if initialized then MES.new('info',"Achievement: attempt to initialize IMG lib twice") return end
         initialized,IMG.init=true
         link(IMG,_list)
     end

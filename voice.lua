@@ -18,7 +18,7 @@ function VOC.setVol(v)
     volume=v
 end
 function VOC.init(list)
-    assert(not initialized,"Achievement: attempt to initialize VOC lib twice")
+    if initialized then MES.new('info',"Achievement: attempt to initialize VLC lib twice") return end
     initialized,VOC.init=true
     local rem=table.remove
     local voiceQueue={free=0}
