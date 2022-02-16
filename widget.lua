@@ -335,14 +335,12 @@ function Widgets.button_fill:draw()
         alignDraw(self,self._image,x+w*.5,y+h*.5)
     end
     if self._text then
-        if ATV>0 then
-            gc_setColor(1,1,1,.6*ATV)
-            alignDraw(self,self._text,x+w*.5-1,y+h*.5)
-            alignDraw(self,self._text,x+w*.5+1,y+h*.5)
-            alignDraw(self,self._text,x+w*.5,y+h*.5-1)
-            alignDraw(self,self._text,x+w*.5,y+h*.5+1)
-        end
-        gc_setColor(r*.4,g*.4,b*.4,.8+.2*ATV)
+        gc_setColor(1,1,1,.4+.6*ATV)
+        alignDraw(self,self._text,x+w*.5-1,y+h*.5)
+        alignDraw(self,self._text,x+w*.5+1,y+h*.5)
+        alignDraw(self,self._text,x+w*.5,y+h*.5-1)
+        alignDraw(self,self._text,x+w*.5,y+h*.5+1)
+        gc_setColor(r*.4,g*.4,b*.4,.9+.1*ATV)
         alignDraw(self,self._text,x+w*.5,y+h*.5)
     end
 end
