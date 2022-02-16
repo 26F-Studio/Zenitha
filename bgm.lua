@@ -143,7 +143,7 @@ function BGM.setDefault(bgms)
     defaultBGM=bgms
 end
 function BGM.setMaxSources(count)
-    assert(type(count)=='number' and count>0 and count%1==0,"BGM.setMaxSources(count): count must be a positive integer")
+    assert(type(count)=='number' and count>0 and count%1==0,"BGM.setMaxSources(count): count must be positive integer")
     maxLoadedCount=count
     _updateSources()
 end

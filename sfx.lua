@@ -85,11 +85,11 @@ function SFX.getCount()
     return #sfxList
 end
 function SFX.setVol(vol)
-    assert(type(vol)=='number' and vol>=0 and vol<=1,"SFX.setVol(vol): vol must be a number in range 0~1")
+    assert(type(vol)=='number' and vol>=0 and vol<=1,"SFX.setVol(vol): vol must be number in range 0~1")
     volume=vol
 end
 function SFX.setStereo(s)
-    assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): s must be a number in range 0~1")
+    assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): s must be number in range 0~1")
     stereo=s
 end
 
