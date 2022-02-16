@@ -45,4 +45,17 @@ end
 function LANG.get(name)
     return langLib[name]
 end
+
+local textSrc=langLib[false]
+function LANG.setTextFuncSrc(newSrc)
+    assert(type(newSrc)=='table','LANG.setTextFuncPool(newPool): newPool must be table')
+    textSrc=newSrc
+end
+local keyCache=setmetatable({},{__index=function(self,k)
+    self[k]=function() return textSrc[k] end
+    return self[k]
+end})
+function LANG.getText(key)
+    return keyCache[key]
+end
 return LANG

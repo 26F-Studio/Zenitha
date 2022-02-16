@@ -155,22 +155,22 @@ do-- Create demo scene
             GC.stc_stop()
         end,
         widgetList={
-            WIDGET.new{type='checkBox',rawText='checkBox1', x=260,y=350,w=40,disp=function() return testVal_1[1] end,code=function() testVal_1[1]=not testVal_1[1] end},
-            WIDGET.new{type='checkBox',rawText='checkBox2', x=260,y=400,w=40,disp=function() return testVal_1[2] end,code=function() testVal_1[2]=not testVal_1[2] end},
-            WIDGET.new{type='checkBox',rawText='checkBox3', x=260,y=450,w=40,disp=function() return testVal_1[3] end,code=function() testVal_1[3]=not testVal_1[3] end},
+            WIDGET.new{type='checkBox',    text='checkBox1', x=260,y=350,w=40,disp=function() return testVal_1[1] end,code=function() testVal_1[1]=not testVal_1[1] end},
+            WIDGET.new{type='checkBox',    text='checkBox2', x=260,y=400,w=40,disp=function() return testVal_1[2] end,code=function() testVal_1[2]=not testVal_1[2] end},
+            WIDGET.new{type='checkBox',    text='checkBox3', x=260,y=450,w=40,disp=function() return testVal_1[3] end,code=function() testVal_1[3]=not testVal_1[3] end},
 
-            WIDGET.new{type='slider',  rawText='slider1',   x=460,y=350,w=260,axis={10,26,4},              disp=function() return testVal_2[1] end,code=function(v) testVal_2[1]=v end},
-            WIDGET.new{type='slider',  rawText='slider2',   x=460,y=400,w=260,axis={0,620,10},smooth=true, disp=function() return testVal_2[2] end,code=function(v) testVal_2[2]=v end},
-            WIDGET.new{type='slider_fill',rawText='slider3',x=460,y=450,w=260,                             disp=function() return testVal_2[3] end,code=function(v) testVal_2[3]=v end},
+            WIDGET.new{type='slider',      text='slider1',   x=460,y=350,w=260,axis={10,26,4},              disp=function() return testVal_2[1] end,code=function(v) testVal_2[1]=v end},
+            WIDGET.new{type='slider',      text='slider2',   x=460,y=400,w=260,axis={0,620,10},smooth=true, disp=function() return testVal_2[2] end,code=function(v) testVal_2[2]=v end},
+            WIDGET.new{type='slider_fill', text='slider3',   x=460,y=450,w=260,                             disp=function() return testVal_2[3] end,code=function(v) testVal_2[3]=v end},
 
-            WIDGET.new{type='selector',rawText='selector1', x=330,y=510,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[1] end,code=function(v) testVal_3[1]=v end},
-            WIDGET.new{type='selector',rawText='selector2', x=330,y=560,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[2] end,code=function(v) testVal_3[2]=v end},
-            WIDGET.new{type='selector',rawText='selector3', x=330,y=610,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[3] end,code=function(v) testVal_3[3]=v end},
+            WIDGET.new{type='selector',    text='selector1', x=330,y=510,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[1] end,code=function(v) testVal_3[1]=v end},
+            WIDGET.new{type='selector',    text='selector2', x=330,y=560,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[2] end,code=function(v) testVal_3[2]=v end},
+            WIDGET.new{type='selector',    text='selector3', x=330,y=610,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[3] end,code=function(v) testVal_3[3]=v end},
 
-            WIDGET.new{type='button',  rawText='Quit',      x=600,y=540,w=200,h=100,code=function() love.event.quit() end},
-            WIDGET.new{type='inputBox',rawText='inputBox',  x=100,y=650,w=300,h=100,labelPos='down'},
-            WIDGET.new{type='textBox', name='textBox',      x=100,y=820,w=600,h=160},
-            WIDGET.new{type='listBox', name='listBox',      x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
+            WIDGET.new{type='button',      text='Quit',      x=600,y=540,w=200,h=100,code=function() love.event.quit() end},
+            WIDGET.new{type='inputBox',    text='inputBox',  x=100,y=650,w=300,h=100,labelPos='down'},
+            WIDGET.new{type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
+            WIDGET.new{type='listBox',     name='listBox',   x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
                 setFont(30)
                 gc_setColor(COLOR.Z)
                 gc_print(id,10,-6)

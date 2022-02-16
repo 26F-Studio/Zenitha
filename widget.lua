@@ -30,12 +30,6 @@ local largerThen=GC.DO{20,20,
     {'line',2,2,19,10,2,18},
 }
 
-local langMap=setmetatable({},{
-    __index=function(self,k)
-        self[k]='['..k..']'
-        return self[k]
-    end
-})
 local indexMeta={
     __index=function(L,k)
         for i=1,#L do
@@ -129,20 +123,18 @@ function baseWidget:reset()
     assert(type(self.widthLimit)=='number','[widget].widthLimit must be number')
     assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc can only be a function')
 
-    self._text=nil
-    if self.text then
-        if type(self.text)=='function' then
-            self._text=self.text()
+    self._text=self.text or self.name and ('['..self.name..']')
+    if self._text then
+        if type(self._text)=='function' then
+            self._text=self._text()
             assert(type(self._text)=='string','function text must return a string')
         else
-            assert(type(self.text)=='string',"[widget].text must be string or function return a string")
-            self._text=langMap[self.text]
+            assert(type(self._text)=='string','[widget].text must be string or function return a string')
         end
-    elseif self.rawText then
-        assert(type(self.rawText)=='string',"[widget].rawText must be string")
-        self._text=self.rawText
+        self._text=gc.newText(getFont(self.fontSize,self.fontType),self._text)
+    else
+        self._text=PAPER
     end
-    self._text=gc.newText(getFont(self.fontSize,self.fontType),self._text)
 
     self._image=nil
     if self.image then
@@ -186,7 +178,6 @@ Widgets.text=setmetatable({
     type='text',
 
     text=false,
-    rawText=false,
     alignX='center',alignY='center',
 
     _text=nil,
@@ -196,7 +187,7 @@ Widgets.text=setmetatable({
         'x','y',
         'posX','posY',
 
-        'color','text','rawText',
+        'color','text',
         'fontSize','fontType',
 
         'alignX','alignY',
@@ -253,7 +244,6 @@ Widgets.button=setmetatable({
 
     text=false,
     image=false,
-    rawText=false,
     alignX='center',alignY='center',
     sound=false,
 
@@ -268,7 +258,7 @@ Widgets.button=setmetatable({
         'w','h',
         'alignX','alignY',
         'posX','posY',
-        'color','text','rawText','image',
+        'color','text','image',
         'fontSize','fontType',
         'sound',
 
@@ -326,6 +316,7 @@ Widgets.button_fill=setmetatable({
 function Widgets.button_fill:draw()
     local x,y=self._x,self._y
     local w,h=self.w,self.h
+    local ATV=self._activeTime/self._activeTimeMax
     x,y=x-w*.5,y-h*.5
 
     local c=self.color
@@ -334,9 +325,9 @@ function Widgets.button_fill:draw()
     -- Rectangle
     gc_setColor(.15+r*.7,.15+g*.7,.15+b*.7,.9)
     gc_rectangle('fill',x,y,w,h,4)
-    gc_setLineWidth(2)
-    gc_setColor(.3+r*.7,.3+g*.7,.3+b*.7,.4+.6*self._activeTime/self._activeTimeMax)
-    gc_rectangle('line',x,y,w,h,5)
+    gc_setLineWidth(4+2*ATV)
+    gc_setColor(.5+r*.5,.5+g*.5,.5+b*.5,.4+.6*ATV)
+    gc_rectangle('line',x+1,y+1,w-2,h-2,5)
 
     -- Drawable
     if self._image then
@@ -344,7 +335,14 @@ function Widgets.button_fill:draw()
         alignDraw(self,self._image,x+w*.5,y+h*.5)
     end
     if self._text then
-        gc_setColor(r*.55,g*.55,b*.55)
+        if ATV>0 then
+            gc_setColor(1,1,1,.6*ATV)
+            alignDraw(self,self._text,x+w*.5-1,y+h*.5)
+            alignDraw(self,self._text,x+w*.5+1,y+h*.5)
+            alignDraw(self,self._text,x+w*.5,y+h*.5-1)
+            alignDraw(self,self._text,x+w*.5,y+h*.5+1)
+        end
+        gc_setColor(r*.4,g*.4,b*.4,.8+.2*ATV)
         alignDraw(self,self._text,x+w*.5,y+h*.5)
     end
 end
@@ -357,7 +355,6 @@ Widgets.checkBox=setmetatable({
 
     text=false,
     image=false,
-    rawText=false,
     alignX='center',alignY='center',
     labelPos='left',
     sound=false,
@@ -374,7 +371,7 @@ Widgets.checkBox=setmetatable({
         'posX','posY',
 
         'labelPos',
-        'color','text','rawText',
+        'color','text',
         'fontSize','fontType',
         'widthLimit',
         'sound',
@@ -459,7 +456,6 @@ Widgets.slider=setmetatable({
 
     text=false,
     image=false,
-    rawText=false,
     labelPos='left',
     valueShow=nil,
 
@@ -485,7 +481,7 @@ Widgets.slider=setmetatable({
 
         'axis','smooth',
         'labelPos',
-        'color','text','rawText',
+        'color','text',
         'fontSize','fontType',
         'widthLimit',
 
@@ -680,7 +676,6 @@ Widgets.slider_fill=setmetatable({
 
     text=false,
     image=false,
-    rawText=false,
     labelPos='left',
 
     disp=false,-- function return the displaying _value
@@ -699,7 +694,7 @@ Widgets.slider_fill=setmetatable({
 
         'axis',
         'labelPos',
-        'color','text','rawText',
+        'color','text',
         'fontSize','fontType',
         'widthLimit',
 
@@ -815,7 +810,7 @@ Widgets.selector=setmetatable({
         'x','y','w',
         'posX','posY',
 
-        'color','text','rawText',
+        'color','text',
         'widthLimit',
 
         'labelPos',
@@ -979,7 +974,7 @@ Widgets.inputBox=setmetatable({
         'x','y','w','h',
         'posX','posY',
 
-        'color','text','rawText',
+        'color','text',
         'fontSize','fontType',
         'secret',
         'inputSound',
@@ -1453,7 +1448,7 @@ function WIDGET.setWidgetList(list)
     end
     onChange()
 end
-function WIDGET.setLang(newLangMap)
+function WIDGET.setLangMap(newLangMap)
     langMap=newLangMap
     _resetAllWidgets()
 end
