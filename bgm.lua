@@ -175,14 +175,15 @@ function BGM.play(bgms,args)
     if not bgms then return end
 
     if type(bgms)=='string' then bgms={bgms} end
+    assert(type(bgms)=='table',"BGM.play(name,args): name must be string or table")
+
     if TABLE.compare(lastPlay,bgms) then return end
+
+    BGM.stop()
+
     if not STRING.sArg(args,'-preLoad') then
         lastPlay=bgms
     end
-
-    assert(type(bgms)=='table',"BGM.play(name,args): name must be string or table")
-
-    BGM.stop()
 
     for i=1,#bgms do
         local bgm=bgms[i]
