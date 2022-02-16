@@ -4,7 +4,7 @@ local nameList={}
 local srcLib={}-- Stored bgm objects: {name='foo',source=bar}
 local lastLoadNames={}
 local nowPlay={}
-local lastPlay={}-- Directly stored last played bgm name(s)
+local lastPlay=NONE-- Directly stored last played bgm name(s)
 
 local defaultBGM=false
 local maxLoadedCount=3
@@ -154,9 +154,6 @@ function BGM.setVol(vol)
         local np=nowPlay[i]
         if not np.volChanging then
             np.source:setVolume(vol)
-            if vol==0 then
-                np.source:pause()
-            end
         end
     end
 end
@@ -209,12 +206,12 @@ function BGM.play(bgms,args)
         source:setPitch(1)
         source:seek(0)
         if STRING.sArg(args,'-sdin') then
-            source:setVolume(0)
-            BGM.set(bgm,'volume',1,.26)
-        else
             obj.vol=1
             source:setVolume(volume)
             BGM.set(bgm,'volume',1,0)
+        else
+            source:setVolume(0)
+            BGM.set(bgm,'volume',1,.626)
         end
         source:play()
 
@@ -232,11 +229,12 @@ function BGM.stop(time)
                 obj.source:stop()
                 obj.volChanging=false
             else
-                TASK.new(task_setVolume,obj,0,time or .26,true)
+                TASK.new(task_setVolume,obj,0,time or .626,true)
                 obj.volChanging=true
             end
         end
         TABLE.cut(nowPlay)
+        lastPlay=NONE
     end
 end
 function BGM.set(bgms,mode,...)
@@ -317,7 +315,7 @@ function BGM.set(bgms,mode,...)
     end
 end
 function BGM.isPlaying()
-    return #nowPlay>0
+    return #nowPlay>0 and nowPlay[1].source:isPlaying()
 end
 
 return BGM
