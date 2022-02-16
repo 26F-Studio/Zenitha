@@ -1146,7 +1146,6 @@ function Widgets.textBox:reset()
 
     if not self._texts then self._texts={} end
     self._capacity=ceil((self.h-10)/self.lineHeight)
-    self._scrollPos=0
 end
 function Widgets.textBox:replaceTexts(newList)
     self._texts=newList
@@ -1295,7 +1294,6 @@ function Widgets.listBox:reset()
     assert(type(self.drawFunc)=='function',"[textBox].drawFunc must be function")
     if not self._list then self._list={} end
     self._capacity=ceil((self.h-10)/self.lineHeight)
-    self._scrollPos=0
 end
 function Widgets.listBox:clear()
     self._list={}
@@ -1445,10 +1443,6 @@ function WIDGET.setWidgetList(list)
         _resetAllWidgets()
     end
     onChange()
-end
-function WIDGET.setLangMap(newLangMap)
-    langMap=newLangMap
-    _resetAllWidgets()
 end
 function WIDGET.getSelected()
     return WIDGET.sel
