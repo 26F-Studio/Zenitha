@@ -664,6 +664,7 @@ function love.run()
     local love=love
 
     local BG=BG
+    local SCN_swapUpdate=SCN.swapUpdate
     local TEXT_update,TEXT_draw=TEXT.update,TEXT.draw
     local MES_update,MES_draw=MES.update,MES.draw
     local WS_update=WS.update
@@ -683,8 +684,9 @@ function love.run()
     local lastScreenCheckTime=timer()
 
     -- counters range from 0 to 99, trigger at 100
-    local updateCounter=0
-    local drawCounter=0
+    -- start at 100 to guarantee trigger both of them at first frame
+    local updateCounter=100
+    local drawCounter=100
 
     love.resize(gc.getWidth(),gc.getHeight())
     if #errData>0 then
@@ -734,7 +736,7 @@ function love.run()
             TASK_update(updateDT)
             SYSFX_update(updateDT)
             if SCN.update then SCN.update(updateDT) end
-            if SCN.swapping then SCN.swapUpdate(updateDT) end
+            if SCN.swapping then SCN_swapUpdate(updateDT) end
             WIDGET_update(updateDT)
         end
 
