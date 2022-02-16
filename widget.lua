@@ -1501,7 +1501,7 @@ function WIDGET.press(x,y,k)
             WIDGET.unFocus(true)
         else
             W:press(x,y and y+SCN.curScroll,k)
-            if W._visible then WIDGET.unFocus() end
+            if not W._visible then WIDGET.unFocus() end
         end
     end
 end
