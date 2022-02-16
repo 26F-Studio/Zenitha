@@ -55,7 +55,8 @@ local keyCache=setmetatable({},{__index=function(self,k)
     self[k]=function() return textSrc[k] end
     return self[k]
 end})
-function LANG.getText(key)
+function LANG.getText(_,key)
     return keyCache[key]
 end
+setmetatable(LANG,{__call=LANG.getText})
 return LANG
