@@ -22,7 +22,7 @@ local SCN={
     curScroll=0,
 
     swapping=false,      -- If Swapping
-    stat={
+    state={
         tar=false,       -- Swapping target
         style=false,     -- Swapping style
         changeTime=false,-- Loading point
@@ -50,7 +50,7 @@ function SCN.setScroll(height)
 end
 
 function SCN.swapUpdate(dt)
-    local S=SCN.stat
+    local S=SCN.state
     S.time=S.time-dt
     if S.time<S.changeTime and S.time+dt>=S.changeTime then
         -- Scene swapped this frame
@@ -157,7 +157,7 @@ function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
             style=style or 'fade'
             SCN.swapping=true
             SCN.args={...}
-            local S=SCN.stat
+            local S=SCN.state
             S.tar,S.style=tar,style
             S.time=swap[style].duration
             S.changeTime=swap[style].changeTime

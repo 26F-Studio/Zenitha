@@ -750,10 +750,8 @@ function love.run()
                 lastDrawTime=time
 
                 gc_replaceTransform(SCR.origin)
-                    gc_setColor(1,1,1)
                     BG.draw()
                 gc_replaceTransform(SCR.xOy)
-                    gc_setColor(1,1,1)
                     if SCN.draw then
                         gc_translate(0,-SCN.curScroll)
                         SCN.draw()
@@ -765,13 +763,13 @@ function love.run()
                     if mouseShow then drawCursor(time,mx,my) end
                 gc_replaceTransform(SCR.xOy_ul)
                     drawSysInfo()
-                    MES_draw()
                 gc_replaceTransform(SCR.origin)
-                    -- Draw scene swapping animation
                     if SCN.swapping then
-                        _=SCN.stat
+                        _=SCN.state
                         _.draw(_.time)
                     end
+                gc_replaceTransform(SCR.xOy_ul)
+                    MES_draw()
                 gc_replaceTransform(SCR.xOy_d)
                     -- Draw Version string
                     gc_setColor(.9,.9,.9,.42)
@@ -782,7 +780,7 @@ function love.run()
 
                     -- Draw FPS
                     setFont(15,'_basic')
-                    gc_setColor(1,1,1)
+                    gc_setColor(COLOR.Z)
                     gc_print(FPS(),safeX+5,-20)
 
                     -- Debug info.
@@ -798,7 +796,7 @@ function love.run()
 
                         -- Update & draw frame time
                         table.insert(frameTimeList,1,drawDT) table.remove(frameTimeList,126)
-                        gc_setColor(1,1,1,.3)
+                        gc_setColor(1,1,1,.26)
                         for i=1,#frameTimeList do
                             gc.rectangle('fill',150+2*i,-20,2,-frameTimeList[i]*4000)
                         end
