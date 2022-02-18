@@ -21,11 +21,11 @@ local setFont,getFont=FONT.set,FONT.get
 local mStr,GC_stc_setComp,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_setComp,GC.stc_rect,GC.stc_stop
 local approach=MATH.expApproach
 
-local smallerThen=GC.DO{20,20,
+local leftAngle=GC.DO{20,20,
     {'setLW',5},
     {'line',18,2,1,10,18,18},
 }
-local largerThen=GC.DO{20,20,
+local rightAngle=GC.DO{20,20,
     {'setLW',5},
     {'line',2,2,19,10,2,18},
 }
@@ -866,18 +866,18 @@ function Widgets.selector:draw()
         gc_setColor(1,1,1,.6+ATV*.26)
         local t=(timer()%.5)^.5
         if self._select>1 then
-            gc_draw(smallerThen,x-w*.5,y-10)
+            gc_draw(leftAngle,x-w*.5,y-10)
             if ATV>0 then
                 gc_setColor(1,1,1,ATV*1.5*(.5-t))
-                gc_draw(smallerThen,x-w*.5-t*40,y-10)
+                gc_draw(leftAngle,x-w*.5-t*40,y-10)
                 gc_setColor(1,1,1,.6+ATV*.26)
             end
         end
         if self._select<#self.list then
-            gc_draw(largerThen,x+w*.5-20,y-10)
+            gc_draw(rightAngle,x+w*.5-20,y-10)
             if ATV>0 then
                 gc_setColor(1,1,1,ATV*1.5*(.5-t))
-                gc_draw(largerThen,x+w*.5-20+t*40,y-10)
+                gc_draw(rightAngle,x+w*.5-20+t*40,y-10)
             end
         end
     end

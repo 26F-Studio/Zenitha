@@ -1,4 +1,5 @@
 local audio=love.audio
+local effectsSupported=audio.isEffectsSupported()
 
 local nameList={}
 local srcLib={}-- Stored bgm objects: {name='foo',source=bar}
@@ -279,10 +280,11 @@ function BGM.set(bgms,mode,...)
                 TASK.new(task_setPitch,obj,pitch,changeTime)
             elseif mode=='seek' then
                 local time=...
-                assert(type(time)=='number' and time>=0 and time<=obj.source:getDuration(),"BGM.set(...,time): time must be in range 0~[song length]")
+                assert(type(time)=='number',"BGM.set(...,time): time must be number")
+                assert(time>=0 and time<=obj.source:getDuration(),"BGM.set(...,time): time must be in range 0~[song length]")
                 obj.source:seek(...)
             elseif mode=='lowgain' then
-                if audio.isEffectsSupported() then
+                if effectsSupported then
                     _clearTask(obj,'lowgain')
                     local lowgain,changeTime=...
                     if not lowgain then lowgain=1 end
@@ -296,7 +298,7 @@ function BGM.set(bgms,mode,...)
                     obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
                 end
             elseif mode=='highgain' then
-                if audio.isEffectsSupported() then
+                if effectsSupported then
                     _clearTask(obj,'highgain')
                     local highgain,changeTime=...
                     if not highgain then highgain=1 end

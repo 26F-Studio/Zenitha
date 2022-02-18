@@ -218,24 +218,21 @@ do-- function GC.DO(L)
                 goto REPEAT_tryAgain
             end
             gc.setCanvas(canvas)
-                gc.origin()
-                gc.clear(1,1,1,0)
-                gc.setColor(1,1,1)
-                gc.setLineWidth(1)
-                for i=3,#L do
-                    local cmd=L[i][1]
-                    if type(cmd)=='string' then
-                        local func=cmds[cmd]
-                        if type(func)=='string' then
-                            func=gc[func]
-                        end
-                        if func then
-                            func(unpack(L[i],2))
-                        else
-                            error("No gc command: "..cmd)
-                        end
+            gc.clear(1,1,1,0)
+            gc.origin()
+            gc.setColor(1,1,1)
+            gc.setLineWidth(1)
+            for i=3,#L do
+                local cmd=L[i][1]
+                if type(cmd)=='string' then
+                    local func=cmds[cmd]
+                    if type(func)=='string' then
+                        func=gc[func]
                     end
+                    assert(func,"No gc command: "..cmd)
+                    func(unpack(L[i],2))
                 end
+            end
             gc.setCanvas()
         gc.pop()
         return canvas
