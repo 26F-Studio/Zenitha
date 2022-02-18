@@ -281,8 +281,7 @@ function BGM.set(bgms,mode,...)
             elseif mode=='seek' then
                 local time=...
                 assert(type(time)=='number',"BGM.set(...,time): time must be number")
-                assert(time>=0 and time<=obj.source:getDuration(),"BGM.set(...,time): time must be in range 0~[song length]")
-                obj.source:seek(...)
+                obj.source:seek(MATH.interval(time,0,obj.source:getDuration()))
             elseif mode=='lowgain' then
                 if effectsSupported then
                     _clearTask(obj,'lowgain')
