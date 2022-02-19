@@ -39,6 +39,8 @@ local indexMeta={
         end
     end
 }
+local _rcr_big=10
+local _rcr_small=3
 local onChange=NULL
 local widgetCanvas
 
@@ -245,12 +247,13 @@ Widgets.button=setmetatable({
     text=false,
     image=false,
     alignX='center',alignY='center',
-    sound=false,
+    sound='button',
 
     code=NULL,
 
     _text=nil,
     _image=nil,
+    _lastClickTime=-1e99,
 
     buildArgs={
         'name',
@@ -281,6 +284,7 @@ end
 function Widgets.button:press(_,_,k)
     self.code(k)
     self:playSound()
+    self._lastClickTime=timer()
 end
 function Widgets.button:draw()
     local x,y=self._x,self._y
@@ -290,13 +294,13 @@ function Widgets.button:draw()
     local c=self.color
 
     -- Background
-    gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.1+.2*self._activeTime/self._activeTimeMax))
-    gc_rectangle('fill',x,y,w,h,4)
+    gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.1+.2*self._activeTime/self._activeTimeMax+math.max(.7*((self._lastClickTime-timer()+.26)*2.6),0)))
+    gc_rectangle('fill',x,y,w,h,_rcr_big)
 
     -- Frame
     gc_setLineWidth(2)
     gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
-    gc_rectangle('line',x,y,w,h,3)
+    gc_rectangle('line',x,y,w,h,_rcr_big)
 
     -- Drawable
     if self._image then
@@ -324,10 +328,14 @@ function Widgets.button_fill:draw()
 
     -- Rectangle
     gc_setColor(.15+r*.7,.15+g*.7,.15+b*.7,.9)
-    gc_rectangle('fill',x,y,w,h,4)
-    gc_setLineWidth(4+2*ATV)
-    gc_setColor(.5+r*.5,.5+g*.5,.5+b*.5,.4+.6*ATV)
-    gc_rectangle('line',x+1,y+1,w-2,h-2,5)
+    gc_rectangle('fill',x,y,w,h,_rcr_big)
+    if self._lastClickTime>timer()-.26 then
+        gc_setColor(1,1,1,math.max((self._lastClickTime-timer()+.26)*2.6,0))
+        gc_rectangle('fill',x,y,w,h,_rcr_big)
+    end
+    gc_setLineWidth(2)
+    gc_setColor(1,1,1,ATV)
+    gc_rectangle('line',x-1,y-1,w+2,h+2,_rcr_big*1.2)
 
     -- Drawable
     if self._image then
@@ -335,12 +343,7 @@ function Widgets.button_fill:draw()
         alignDraw(self,self._image,x+w*.5,y+h*.5)
     end
     if self._text then
-        gc_setColor(1,1,1,.4+.6*ATV)
-        alignDraw(self,self._text,x+w*.5-1,y+h*.5)
-        alignDraw(self,self._text,x+w*.5+1,y+h*.5)
-        alignDraw(self,self._text,x+w*.5,y+h*.5-1)
-        alignDraw(self,self._text,x+w*.5,y+h*.5+1)
-        gc_setColor(r*.4,g*.4,b*.4,.9+.1*ATV)
+        gc_setColor(r*.5,g*.5,b*.5)
         alignDraw(self,self._text,x+w*.5,y+h*.5)
     end
 end
@@ -355,7 +358,8 @@ Widgets.checkBox=setmetatable({
     image=false,
     alignX='center',alignY='center',
     labelPos='left',
-    sound=false,
+    sound_on='check',
+    sound_off='uncheck',
 
     disp=false,-- function return a boolean
     code=NULL,
@@ -372,7 +376,7 @@ Widgets.checkBox=setmetatable({
         'color','text',
         'fontSize','fontType',
         'widthLimit',
-        'sound',
+        'sound_on','sound_off',
 
         'disp','code',
         'visibleFunc',
@@ -390,6 +394,17 @@ function Widgets.checkBox:reset()
         self.alignY='up'
     else
         error("[checkBox].labelPos must be 'left', 'right', 'up', or 'down'")
+    end
+end
+function Widgets.checkBox:playSound()
+    if self.disp() then
+        if self.sound_on then
+            SFX.play(self.sound_on)
+        end
+    else
+        if self.sound_off then
+            SFX.play(self.sound_off)
+        end
     end
 end
 function Widgets.checkBox:isAbove(x,y)
@@ -412,14 +427,14 @@ function Widgets.checkBox:draw()
     if self.disp then
         -- Background
         gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.3*ATV))
-        gc_rectangle('fill',x-w*.5,y-w*.5,w,w,4)
+        gc_rectangle('fill',x-w*.5,y-w*.5,w,w,_rcr_small+1)
 
         -- Frame
         gc_setLineWidth(2)
         gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
-        gc_rectangle('line',x-w*.5,y-w*.5,w,w,3)
+        gc_rectangle('line',x-w*.5,y-w*.5,w,w,_rcr_small+1)
         if self.disp() then
-            gc_rectangle('fill',x-w*.3,y-w*.3,w*.6,w*.6,3)
+            gc_rectangle('fill',x-w*.3,y-w*.3,w*.6,w*.6,_rcr_small)
         end
     end
 
@@ -593,13 +608,13 @@ function Widgets.slider:draw()
     local bx,by=cx-10-ATV*2,y-16-ATV*5
     local bw,bh=20+ATV*4,32+ATV*10
     gc_setColor(.8,.8,.8)
-    gc_rectangle('fill',bx,by,bw,bh,3)
+    gc_rectangle('fill',bx,by,bw,bh,_rcr_small)
 
     -- Glow
     if ATV>0 then
         gc_setLineWidth(2)
         gc_setColor(.97,.97,.97,ATV)
-        gc_rectangle('line',bx+1,by+1,bw-2,bh-2,3)
+        gc_rectangle('line',bx+1,by+1,bw-2,bh-2,_rcr_small)
     end
 
     -- Float text
@@ -791,7 +806,7 @@ Widgets.selector=setmetatable({
     w=100,
     labelPos='left',
     labelDistance=10,
-    sound=false,
+    sound='selector',
 
     disp=false,-- function return a boolean
     code=NULL,
@@ -1040,16 +1055,16 @@ function Widgets.inputBox:draw()
 
     -- Background
     gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y,w,h,4)
+    gc_rectangle('fill',x,y,w,h,_rcr_big)
 
     -- Highlight
     gc_setColor(1,1,1,ATV*.2*(math.sin(timer()*6.26)*.25+.75))
-    gc_rectangle('fill',x,y,w,h,4)
+    gc_rectangle('fill',x,y,w,h,_rcr_big)
 
     -- Frame
     gc_setColor(1,1,1)
     gc_setLineWidth(3)
-    gc_rectangle('line',x,y,w,h,3)
+    gc_rectangle('line',x,y,w,h,_rcr_big)
 
     -- Drawable
     if self._text then
@@ -1207,12 +1222,12 @@ function Widgets.textBox:draw()
 
     -- Background
     gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y,w,h,4)
+    gc_rectangle('fill',x,y,w,h,_rcr_big)
 
     -- Frame
     gc_setLineWidth(2)
     gc_setColor(WIDGET.sel==self and COLOR.lN or COLOR.Z)
-    gc_rectangle('line',x,y,w,h,3)
+    gc_rectangle('line',x,y,w,h,_rcr_big)
 
     -- Texts
     gc_push('transform')
@@ -1223,15 +1238,15 @@ function Widgets.textBox:draw()
         if #texts>self._capacity then
             local len=h*h/(#texts*lineH)
             if self.scrollBarPos=='left' then
-                gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,3)
+                gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,_rcr_big)
             elseif self.scrollBarPos=='right' then
-                gc_rectangle('fill',w+5,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,3)
+                gc_rectangle('fill',w+5,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,_rcr_big)
             end
         end
 
         -- Clear button
         if not self.fixContent then
-            gc_rectangle('line',w-40,0,40,40,3)
+            gc_rectangle('line',w-40,0,40,40,_rcr_big)
             if self._sure==0 then
                 gc_rectangle('fill',w-40+16,5,8,3)
                 gc_rectangle('fill',w-40+8,8,24,3)
@@ -1390,18 +1405,18 @@ function Widgets.listBox:draw()
 
         -- Background
         gc_setColor(0,0,0,.4)
-        gc_rectangle('fill',0,0,w,h,4)
+        gc_rectangle('fill',0,0,w,h,_rcr_big)
 
         -- Frame
         gc_setColor(WIDGET.sel==self and COLOR.lN or COLOR.Z)
         gc_setLineWidth(2)
-        gc_rectangle('line',0,0,w,h,3)
+        gc_rectangle('line',0,0,w,h,_rcr_big)
 
         -- Slider
         if #list>cap then
             gc_setColor(1,1,1)
             local len=h*h/(#list*lineH)
-            gc_rectangle('fill',-15,(h-len)*scroll/((#list-cap)*lineH),12,len,3)
+            gc_rectangle('fill',-15,(h-len)*scroll/((#list-cap)*lineH),12,len,_rcr_big)
         end
 
         -- List
@@ -1561,6 +1576,10 @@ function WIDGET.draw()
     gc_replaceTransform(SCR.xOy)
 end
 
+function WIDGET.setRoundCornerRadius(rcr_s,rcr_b)
+    assert(type(rcr_s)=='number' and rcr_s>=0 and type(rcr_b)=='number' and rcr_b>=0,"WIDGET.setRoundCornerRadius(rcr_s,rcr_b): rcr must be two positive number")
+    _rcr_big,_rcr_small=rcr_b,rcr_s
+end
 function WIDGET.new(args)
     local t=args.type
     args.type=nil
