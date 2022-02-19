@@ -188,6 +188,13 @@ do-- Create demo scene
         demoScene.widgetList.listBox:setList(testVal_4)
     end
     SCN.add('_zenitha',demoScene)
+    local quitScene={
+        enter=function()
+            onQuit()
+            love.event.quit()
+        end
+    }
+    SCN.add('_quit',quitScene)
 end
 
 --------------------------------------------------------------
@@ -712,7 +719,6 @@ function love.run()
             if love[N] then
                 love[N](a,b,c,d,e)
             elseif N=='quit' then
-                onQuit()
                 return a or true
             end
         end
@@ -846,6 +852,11 @@ end
 
 -- Zenitha framework & methods
 Zenitha={}
+
+function Zenitha._quit()
+    onQuit()
+    SCN.swapTo('_quit','slowFade')
+end
 
 function Zenitha.setAppName(name)
     assert(type(name)=='string','Zenitha.setAppName(name): name must be string')

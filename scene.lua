@@ -188,7 +188,7 @@ function SCN.back(...)
         table.remove(SCN.stack)
         table.remove(SCN.stack)
     else
-        MES.new('warn',"No Scene to back")
+        Zenitha._quit()
     end
 end
 return SCN
