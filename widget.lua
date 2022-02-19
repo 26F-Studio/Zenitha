@@ -154,11 +154,6 @@ function baseWidget:reset()
         self._visible=self.visibleFunc()
     end
 end
-function baseWidget:playSound()
-    if self.sound then
-        SFX.play(self.sound)
-    end
-end
 function baseWidget:setVisible(bool)
     if bool then
         self._visible=true
@@ -247,7 +242,7 @@ Widgets.button=setmetatable({
     text=false,
     image=false,
     alignX='center',alignY='center',
-    sound='button',
+    sound=false,
 
     code=NULL,
 
@@ -283,7 +278,7 @@ function Widgets.button:isAbove(x,y)
 end
 function Widgets.button:press(_,_,k)
     self.code(k)
-    self:playSound()
+    if self.sound then SFX.play(self.sound) end
     self._lastClickTime=timer()
 end
 function Widgets.button:draw()
@@ -358,8 +353,7 @@ Widgets.checkBox=setmetatable({
     image=false,
     alignX='center',alignY='center',
     labelPos='left',
-    sound_on='check',
-    sound_off='uncheck',
+    sound_on=false,sound_off=false,
 
     disp=false,-- function return a boolean
     code=NULL,
@@ -396,17 +390,6 @@ function Widgets.checkBox:reset()
         error("[checkBox].labelPos must be 'left', 'right', 'up', or 'down'")
     end
 end
-function Widgets.checkBox:playSound()
-    if self.disp() then
-        if self.sound_on then
-            SFX.play(self.sound_on)
-        end
-    else
-        if self.sound_off then
-            SFX.play(self.sound_off)
-        end
-    end
-end
 function Widgets.checkBox:isAbove(x,y)
     return
         self.disp and
@@ -415,7 +398,11 @@ function Widgets.checkBox:isAbove(x,y)
 end
 function Widgets.checkBox:press(_,_,k)
     self.code(k)
-    self:playSound()
+    if self.disp() then
+        if self.sound_on then SFX.play(self.sound_on) end
+    else
+        if self.sound_off then SFX.play(self.sound_off) end
+    end
 end
 function Widgets.checkBox:draw()
     local x,y=self._x,self._y
@@ -806,7 +793,7 @@ Widgets.selector=setmetatable({
     w=100,
     labelPos='left',
     labelDistance=10,
-    sound='selector',
+    sound=false,
 
     disp=false,-- function return a boolean
     code=NULL,
@@ -938,7 +925,7 @@ function Widgets.selector:press(x)
             self.code(self.list[s])
             self._select=s
             self._selText=self.list[s]
-            self:playSound()
+            if self.sound then SFX.play(self.sound) end
         end
     end
 end
@@ -956,7 +943,7 @@ function Widgets.selector:scroll(dx,dy)
         self.code(self.list[s])
         self._select=s
         self._selText=self.list[s]
-        self:playSound()
+        if self.sound then SFX.play(self.sound) end
     end
 end
 function Widgets.selector:arrowKey(k)
@@ -973,12 +960,10 @@ Widgets.inputBox=setmetatable({
     h=40,
 
     secret=false,
-    inputSound=false,
-    delSound=false,
-    clearSound=false,
     regex=false,
     labelPos='left',
     maxInputLength=1e99,
+    sound_input=false,sound_del=false,sound_clear=false,
 
     _value="",-- Text contained
 
@@ -990,12 +975,10 @@ Widgets.inputBox=setmetatable({
         'color','text',
         'fontSize','fontType',
         'secret',
-        'inputSound',
-        'delSound',
-        'clearSound',
         'regex',
         'labelPos',
         'maxInputLength',
+        'sound_input','sound_del','sound_clear',
 
         'list',
         'disp','code',
@@ -1041,6 +1024,7 @@ function Widgets.inputBox:addText(str)
 end
 function Widgets.inputBox:clear()
     self._value=""
+    if self.sound_clear then SFX.play(self.sound_clear) end
 end
 function Widgets.inputBox:isAbove(x,y)
     return
@@ -1111,10 +1095,10 @@ function Widgets.inputBox:keypress(k)
                 p=p-1
             end
             t=sub(t,1,p-1)
-            SFX.play('lock')
+            if self.sound_input then SFX.play(self.sound_input) end
         elseif k=='delete' then
             t=""
-            SFX.play('hold')
+            if self.sound_del then SFX.play(self.sound_del) end
         end
         self._value=t
     end
@@ -1132,6 +1116,7 @@ Widgets.textBox=setmetatable({
     lineHeight=30,
     yOffset=-2,
     fixContent=true,
+    sound_clear=false,
 
     _floatWheel=0,
     _texts=false,
@@ -1148,6 +1133,7 @@ Widgets.textBox=setmetatable({
         'lineHeight',
         'yOffset',
         'fixContent',
+        'sound_clear',
 
         'visibleFunc',
     },
@@ -1180,7 +1166,7 @@ end
 function Widgets.textBox:clear()
     self._texts={}
     self._scrollPos=0
-    SFX.play('fall')
+    if self.sound_clear then SFX.play(self.sound_clear) end
 end
 function Widgets.textBox:isAbove(x,y)
     return
@@ -1222,12 +1208,12 @@ function Widgets.textBox:draw()
 
     -- Background
     gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y,w,h,_rcr_big)
+    gc_rectangle('fill',x,y,w,h,_rcr_small)
 
     -- Frame
     gc_setLineWidth(2)
     gc_setColor(WIDGET.sel==self and COLOR.lN or COLOR.Z)
-    gc_rectangle('line',x,y,w,h,_rcr_big)
+    gc_rectangle('line',x,y,w,h,_rcr_small)
 
     -- Texts
     gc_push('transform')
@@ -1238,15 +1224,15 @@ function Widgets.textBox:draw()
         if #texts>self._capacity then
             local len=h*h/(#texts*lineH)
             if self.scrollBarPos=='left' then
-                gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,_rcr_big)
+                gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,_rcr_small)
             elseif self.scrollBarPos=='right' then
-                gc_rectangle('fill',w+5,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,_rcr_big)
+                gc_rectangle('fill',w+5,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,_rcr_small)
             end
         end
 
         -- Clear button
         if not self.fixContent then
-            gc_rectangle('line',w-40,0,40,40,_rcr_big)
+            gc_rectangle('line',w-40,0,40,40,_rcr_small)
             if self._sure==0 then
                 gc_rectangle('fill',w-40+16,5,8,3)
                 gc_rectangle('fill',w-40+8,8,24,3)
@@ -1405,18 +1391,18 @@ function Widgets.listBox:draw()
 
         -- Background
         gc_setColor(0,0,0,.4)
-        gc_rectangle('fill',0,0,w,h,_rcr_big)
+        gc_rectangle('fill',0,0,w,h,_rcr_small)
 
         -- Frame
         gc_setColor(WIDGET.sel==self and COLOR.lN or COLOR.Z)
         gc_setLineWidth(2)
-        gc_rectangle('line',0,0,w,h,_rcr_big)
+        gc_rectangle('line',0,0,w,h,_rcr_small)
 
         -- Slider
         if #list>cap then
             gc_setColor(1,1,1)
             local len=h*h/(#list*lineH)
-            gc_rectangle('fill',-15,(h-len)*scroll/((#list-cap)*lineH),12,len,_rcr_big)
+            gc_rectangle('fill',-15,(h-len)*scroll/((#list-cap)*lineH),12,len,_rcr_small)
         end
 
         -- List
@@ -1579,6 +1565,29 @@ end
 function WIDGET.setRoundCornerRadius(rcr_s,rcr_b)
     assert(type(rcr_s)=='number' and rcr_s>=0 and type(rcr_b)=='number' and rcr_b>=0,"WIDGET.setRoundCornerRadius(rcr_s,rcr_b): rcr must be two positive number")
     _rcr_big,_rcr_small=rcr_b,rcr_s
+end
+function WIDGET.setDefaultButtonSound(sound)
+    assert(type(sound)=='string',"WIDGET.setDefaultButtonSound(sound): sound must be string")
+    Widgets.button.sound=sound
+end
+function WIDGET.setDefaultCheckBoxSound(sound_on,sound_off)
+    assert(type(sound_on)=='string' and type(sound_off)=='string',"WIDGET.setDefaultCheckBoxSound(sound_on,sound_off): sounds must be string")
+    Widgets.checkBox.sound_on=sound_on
+    Widgets.checkBox.sound_off=sound_off
+end
+function WIDGET.setDefaultSelectorSound(sound)
+    assert(type(sound)=='string',"WIDGET.setDefaultSelectorSound(sound): sound must be string")
+    Widgets.selector.sound=sound
+end
+function WIDGET.setDefaultTypeSound(sound_input,sound_del)
+    assert(type(sound_input)=='string' and type(sound_del)=='string',"WIDGET.setDefaultTypeSound(sound_input,sound_del): sounds must be string")
+    Widgets.inputBox.sound_input=sound_input
+    Widgets.inputBox.sound_del=sound_del
+end
+function WIDGET.setDefaultClearSound(sound_clear)
+    assert(type(sound_clear)=='string',"WIDGET.setDefaultClearSound(sound_clear): sound_clear must be string")
+    Widgets.inputBox.sound_clear=sound_clear
+    Widgets.textBox.sound_clear=sound_clear
 end
 function WIDGET.new(args)
     local t=args.type
