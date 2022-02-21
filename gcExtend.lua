@@ -44,7 +44,7 @@ function GC.shadedPrint(str,x,y,mode,d,shadeCount,clr1,clr2)
     else
         error('shadeCount(6th arg) must be 4 or 8')
     end
-    setColor(clr2 or COLOR.Z)
+    setColor(clr2 or COLOR.L)
     printf(str,x,y,w,mode)
 end
 function GC.regPolygon(mode,x,y,R,segments,phase)

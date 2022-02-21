@@ -74,7 +74,7 @@ local baseWidget={
     keepFocus=false,
     x=0,y=0,
 
-    color=COLOR.Z,
+    color=COLOR.L,
     posX='raw',posY='raw',
     fontSize=30,fontType=false,
     widthLimit=1e99,
@@ -772,7 +772,7 @@ function Widgets.slider_fill:draw()
 
     -- Drawable
     if self._text then
-        gc_setColor(COLOR.Z)
+        gc_setColor(COLOR.L)
         local x2,y2
         if self.labelPos=='left' then
             x2,y2=x-8-ATV*6,y
@@ -885,7 +885,7 @@ function Widgets.selector:draw()
     end
 
     -- Drawable
-    gc_setColor(COLOR.Z)
+    gc_setColor(COLOR.L)
     local x2,y2
     if self.labelPos=='left' then
         x2,y2=x-w*.5-self.labelDistance,y
@@ -1052,7 +1052,7 @@ function Widgets.inputBox:draw()
 
     -- Drawable
     if self._text then
-        gc_setColor(COLOR.Z)
+        gc_setColor(COLOR.L)
         local x2,y2
         if self.labelPos=='left' then
             x2,y2=x-8,y+self.h*.5
@@ -1212,7 +1212,7 @@ function Widgets.textBox:draw()
 
     -- Frame
     gc_setLineWidth(2)
-    gc_setColor(WIDGET.sel==self and COLOR.lN or COLOR.Z)
+    gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
     gc_rectangle('line',x,y,w,h,_rcr_small)
 
     -- Texts
@@ -1394,7 +1394,7 @@ function Widgets.listBox:draw()
         gc_rectangle('fill',0,0,w,h,_rcr_small)
 
         -- Frame
-        gc_setColor(WIDGET.sel==self and COLOR.lN or COLOR.Z)
+        gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
         gc_setLineWidth(2)
         gc_rectangle('line',0,0,w,h,_rcr_small)
 

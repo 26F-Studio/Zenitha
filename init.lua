@@ -172,7 +172,7 @@ do-- Create demo scene
             WIDGET.new{type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
             WIDGET.new{type='listBox',     name='listBox',   x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
                 setFont(30)
-                gc_setColor(COLOR.Z)
+                gc_setColor(COLOR.L)
                 gc_print(id,10,-6)
                 gc_print(opt.name,70,-6)
                 if sel then
@@ -656,7 +656,7 @@ love.draw=nil
 love.update=nil
 
 local devColor={
-    COLOR.Z,
+    COLOR.L,
     COLOR.lM,
     COLOR.lG,
     COLOR.lB,
@@ -786,7 +786,7 @@ function love.run()
 
                     -- Draw FPS
                     setFont(15,'_basic')
-                    gc_setColor(COLOR.Z)
+                    gc_setColor(COLOR.L)
                     gc_print(FPS(),safeX+5,-20)
 
                     -- Debug info.
@@ -818,7 +818,7 @@ function love.run()
                             gc_print(t,x+1,y)
                             gc_print(t,x+1,y-1)
                             gc_print(t,x+2,y-1)
-                            gc_setColor(COLOR.Z)
+                            gc_setColor(COLOR.L)
                             gc_print(t,x+2,y)
                     end
                 gc_present()
