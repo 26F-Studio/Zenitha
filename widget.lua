@@ -956,7 +956,7 @@ Widgets.inputBox=setmetatable({
     regex=false,
     labelPos='left',
     maxInputLength=1e99,
-    sound_input=false,sound_del=false,sound_clear=false,
+    sound_input=false,sound_bksp=false,sound_del=false,sound_clear=false,
 
     _value="",-- Text contained
 
@@ -971,7 +971,7 @@ Widgets.inputBox=setmetatable({
         'regex',
         'labelPos',
         'maxInputLength',
-        'sound_input','sound_del','sound_clear',
+        'sound_input','sound_bksp','sound_del','sound_clear',
 
         'list',
         'disp','code',
@@ -1088,7 +1088,7 @@ function Widgets.inputBox:keypress(k)
                 p=p-1
             end
             t=sub(t,1,p-1)
-            if self.sound_input then SFX.play(self.sound_input) end
+            if self.sound_bksp then SFX.play(self.sound_bksp) end
         elseif k=='delete' then
             t=""
             if self.sound_del then SFX.play(self.sound_del) end
@@ -1520,7 +1520,7 @@ function WIDGET.textinput(texts)
     if W and W.type=='inputBox' then
         if (not W.regex or texts:match(W.regex)) and (not W.limit or #(WIDGET.sel._value..texts)<=W.limit) then
             WIDGET.sel._value=WIDGET.sel._value..texts
-            SFX.play('touch')
+            SFX.play(Widgets.inputBox.sound_input)
         else
             SFX.play('drop_cancel')
         end
@@ -1572,9 +1572,10 @@ function WIDGET.setDefaultSelectorSound(sound)
     assert(type(sound)=='string',"WIDGET.setDefaultSelectorSound(sound): sound must be string")
     Widgets.selector.sound=sound
 end
-function WIDGET.setDefaultTypeSound(sound_input,sound_del)
+function WIDGET.setDefaultTypeSound(sound_input,sound_bksp,sound_del)
     assert(type(sound_input)=='string' and type(sound_del)=='string',"WIDGET.setDefaultTypeSound(sound_input,sound_del): sounds must be string")
     Widgets.inputBox.sound_input=sound_input
+    Widgets.inputBox.sound_bksp=sound_bksp
     Widgets.inputBox.sound_del=sound_del
 end
 function WIDGET.setDefaultClearSound(sound_clear)
