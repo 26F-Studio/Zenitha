@@ -16,7 +16,7 @@ local max,min=math.max,math.min
 local abs=math.abs
 local sub,ins,rem=string.sub,table.insert,table.remove
 
-local xOy=SCR.xOy
+local SCR,xOy=SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
 local mStr,GC_stc_setComp,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_setComp,GC.stc_rect,GC.stc_stop
 local approach=MATH.expApproach
@@ -75,7 +75,7 @@ local baseWidget={
     x=0,y=0,
 
     color=COLOR.L,
-    posX='raw',posY='raw',
+    pos=false,
     fontSize=30,fontType=false,
     widthLimit=1e99,
 
@@ -100,24 +100,18 @@ function baseWidget:reset()
     if type(self.color)=='string' then self.color=COLOR[self.color] end
     assert(type(self.color)=='table','[widget].color must be table')
 
-    if self.posX=='raw' then
+    if self.pos then
+        assert(
+            type(self.pos)=='table' and
+            (type(self.pos[1])=='number' or self.pos[1]==false) and
+            (type(self.pos[2])=='number' or self.pos[2]==false),
+            "[widget].pos[1] and [2] must be [number] or false}"
+        )
+        self._x=self.x+(self.pos[1] and self.pos[1]*(SCR.w0+2*SCR.x/SCR.k)-SCR.x/SCR.k or 0)
+        self._y=self.y+(self.pos[2] and self.pos[2]*(SCR.h0+2*SCR.y/SCR.k)-SCR.y/SCR.k or 0)
+    else
         self._x=self.x
-    elseif self.posX=='left' then
-        self._x=self.x-SCR.x/SCR.k
-    elseif self.posX=='right' then
-        self._x=SCR.w0-self.x+SCR.x/SCR.k
-    else
-        error("[widget].posX must be 'raw', 'left' or 'right'")
-    end
-
-    if self.posY=='raw' then
         self._y=self.y
-    elseif self.posY=='up' then
-        self._y=self.y-SCR.y/SCR.k
-    elseif self.posY=='down' then
-        self._y=SCR.h0-self.y+SCR.y/SCR.k
-    else
-        error("[widget].posY must be 'raw', 'up' or 'down'")
     end
 
     assert(type(self.fontSize)=='number','[widget].fontSize must be number')
@@ -181,8 +175,8 @@ Widgets.text=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y',
-        'posX','posY',
 
         'color','text',
         'fontSize','fontType',
@@ -216,8 +210,8 @@ Widgets.image=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y',
-        'posX','posY',
 
         'ang','k',
         'image',
@@ -252,10 +246,9 @@ Widgets.button=setmetatable({
 
     buildArgs={
         'name',
-        'x','y',
-        'w','h',
+        'pos',
+        'x','y','w','h',
         'alignX','alignY',
-        'posX','posY',
         'color','text','image',
         'fontSize','fontType',
         'sound',
@@ -363,8 +356,8 @@ Widgets.checkBox=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y','w',
-        'posX','posY',
 
         'labelPos',
         'color','text',
@@ -476,8 +469,8 @@ Widgets.slider=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y','w',
-        'posX','posY',
 
         'axis','smooth',
         'labelPos',
@@ -689,8 +682,8 @@ Widgets.slider_fill=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y','w','h',
-        'posX','posY',
 
         'axis',
         'labelPos',
@@ -807,8 +800,8 @@ Widgets.selector=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y','w',
-        'posX','posY',
 
         'color','text',
         'widthLimit',
@@ -969,8 +962,8 @@ Widgets.inputBox=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y','w','h',
-        'posX','posY',
 
         'color','text',
         'fontSize','fontType',
@@ -1125,8 +1118,8 @@ Widgets.textBox=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y','w','h',
-        'posX','posY',
 
         'fontSize','fontType',
         'scrollBarPos',
@@ -1276,8 +1269,8 @@ Widgets.listBox=setmetatable({
 
     buildArgs={
         'name',
+        'pos',
         'x','y','w','h',
-        'posX','posY',
 
         'scrollBarPos',
         'lineHeight',
