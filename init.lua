@@ -316,15 +316,13 @@ function love.keypressed(key,_,isRep)
                 if KBisDown('lctrl','rctrl') then
                     if W and W.arrowKey then W:arrowKey(key) end
                 end
+            elseif W and W.keypress then
+                W:keypress(key)
             elseif key=='space' or key=='return' then
                 mouseShow=true
                 if not isRep then
                     if showClickFX then SYSFX.new('tap',3,mx,my) end
                     _triggerMouseDown(mx,my,1)
-                end
-            else
-                if W and W.keypress then
-                    W:keypress(key)
                 end
             end
         end
