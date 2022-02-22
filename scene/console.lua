@@ -9,7 +9,7 @@ local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_basic
 local function log(str)outputBox:push(str) end
 _SCLOG=log
 
-log{C.lP,Zenitha.getAppName().." Console"}
+log{C.lP,"Z Console"}
 log{C.lC,"© Copyright 2019–2022 26F Studio. Some rights reserved."}
 log{C.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
 
@@ -488,7 +488,7 @@ local commands={} do
     }
     commands.test={
         code=function()
-            SCN.go('test','none')
+            SCN.go('_test','none')
         end,
         description="Enter test scene",
         details={
@@ -681,17 +681,17 @@ local commands={} do
                     TASK.new(function()
                         WIDGET.active.bye.hide=true
                         for _=1,30 do coroutine.yield() end
-                        log{C.R,"Deleting all data in 10..."}SFX.play('ready')SFX.play('clear_1')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 9..."}SFX.play('ready')SFX.play('clear_1')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 8..."}SFX.play('ready')SFX.play('clear_1')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 7..."}SFX.play('ready')SFX.play('clear_2')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 6..."}SFX.play('ready')SFX.play('clear_2')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 5..."}SFX.play('ready')SFX.play('clear_3')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 4..."}SFX.play('ready')SFX.play('clear_3')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 3..."}SFX.play('ready')SFX.play('clear_4')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 2..."}SFX.play('ready')SFX.play('clear_4')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 1..."}SFX.play('ready')SFX.play('clear_5')DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 0..."}SFX.play('start')SFX.play('clear_6')DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 10..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 9..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 8..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 7..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 6..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 5..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 4..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 3..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 2..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 1..."}DEBUG.yieldN(60)
+                        log{C.R,"Deleting all data in 0..."}DEBUG.yieldN(60)
                         outputBox.hide=true DEBUG.yieldN(26)
                         FILE.clear_s('')love.event.quit()
                     end)
@@ -741,15 +741,12 @@ local combKey={
     x=function()
         love.system.setClipboardText(inputBox:getText())
         inputBox:clear()
-        SFX.play('reach')
     end,
     c=function()
         love.system.setClipboardText(inputBox:getText())
-        SFX.play('reach')
     end,
     v=function()
         inputBox:addText(love.system.getClipboardText())
-        SFX.play('reach')
     end,
 }
 
