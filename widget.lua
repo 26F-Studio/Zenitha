@@ -1032,16 +1032,16 @@ function Widgets.inputBox:draw()
 
     -- Background
     gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y,w,h,_rcr_big)
+    gc_rectangle('fill',x,y,w,h,_rcr_small)
 
     -- Highlight
     gc_setColor(1,1,1,ATV*.2*(math.sin(timer()*6.26)*.25+.75))
-    gc_rectangle('fill',x,y,w,h,_rcr_big)
+    gc_rectangle('fill',x,y,w,h,_rcr_small)
 
     -- Frame
     gc_setColor(1,1,1)
     gc_setLineWidth(3)
-    gc_rectangle('line',x,y,w,h,_rcr_big)
+    gc_rectangle('line',x,y,w,h,_rcr_small)
 
     -- Drawable
     if self._text then
