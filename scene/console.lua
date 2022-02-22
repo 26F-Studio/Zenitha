@@ -1,7 +1,6 @@
 local gc=love.graphics
 local kb=love.keyboard
 local ins,rem=table.insert,table.remove
-local C=COLOR
 
 local outputBox=WIDGET.new{type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_basic',lineHeight=25,fixContent=true}
 local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_basic'}
@@ -9,9 +8,9 @@ local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_basic
 local function log(str)outputBox:push(str) end
 _SCLOG=log
 
-log{C.lP,"Z Console"}
-log{C.lC,"© Copyright 2019–2022 26F Studio. Some rights reserved."}
-log{C.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
+log{COLOR.lP,"Z Console"}
+log{COLOR.lC,"© Copyright 2019–2022 26F Studio. Some rights reserved."}
+log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
 
 local history,hisPtr={"?"}
 local sumode=false
@@ -36,15 +35,15 @@ local commands={} do
                 -- help [command]
                 if commands[arg] then
                     if commands[arg].description then
-                        log{C.H,("%s"):format(commands[arg].description)}
+                        log{COLOR.LD,("%s"):format(commands[arg].description)}
                     end
                     if commands[arg].details then
                         for _,v in ipairs(commands[arg].details) do log(v) end
                     else
-                        log{C.Y,("No details for command '%s'"):format(arg)}
+                        log{COLOR.Y,("No details for command '%s'"):format(arg)}
                     end
                 else
-                    log{C.Y,("No command called '%s'"):format(arg)}
+                    log{COLOR.Y,("No command called '%s'"):format(arg)}
                 end
             else
                 -- help
@@ -53,9 +52,9 @@ local commands={} do
                     local body=commands[cmd]
                     log(
                         body.description and
-                            {C.Z,cmd,C.H,STRING.repD(" $1 $2",("·"):rep(16-#cmd),body.description)}
+                            {COLOR.L,cmd,COLOR.LD,STRING.repD(" $1 $2",("·"):rep(16-#cmd),body.description)}
                         or
-                            log{C.Z,cmd}
+                            log{COLOR.L,cmd}
                     )
                 end
             end
@@ -147,29 +146,29 @@ local commands={} do
     do-- del
         local function delFile(name)
             if love.filesystem.remove(name) then
-                log{C.Y,("Deleted: '%s'"):format(name)}
+                log{COLOR.Y,("Deleted: '%s'"):format(name)}
             else
-                log{C.R,("Failed to delete: '%s'"):format(name)}
+                log{COLOR.R,("Failed to delete: '%s'"):format(name)}
             end
         end
         local function delDir(name)
             if #love.filesystem.getDirectoryItems(name)==0 then
                 if love.filesystem.remove(name) then
-                    log{C.Y,("Directory deleted: '%s'"):format(name)}
+                    log{COLOR.Y,("Directory deleted: '%s'"):format(name)}
                 else
-                    log{C.R,("Failed to delete directory '%s'"):format(name)}
+                    log{COLOR.R,("Failed to delete directory '%s'"):format(name)}
                 end
             else
-                log{C.R,"Directory '"..name.."' is not empty"}
+                log{COLOR.R,"Directory '"..name.."' is not empty"}
             end
         end
         local function recursiveDelDir(dir)
             local containing=love.filesystem.getDirectoryItems(dir)
             if #containing==0 then
                 if love.filesystem.remove(dir) then
-                    log{C.Y,("Succesfully deleted directory '%s'"):format(dir)}
+                    log{COLOR.Y,("Succesfully deleted directory '%s'"):format(dir)}
                 else
-                    log{C.R,("Failed to delete directory '%s'"):format(dir)}
+                    log{COLOR.R,("Failed to delete directory '%s'"):format(dir)}
                 end
             else
                 for _,name in next,containing do
@@ -202,7 +201,7 @@ local commands={} do
                             if not recursive then
                                 delFile(name)
                             else
-                                log{C.R,("'%s' is not a directory."):format(name)}
+                                log{COLOR.R,("'%s' is not a directory."):format(name)}
                             end
                         elseif info.type=='directory' then
                             (recursive and recursiveDelDir or delDir)(name)
@@ -210,11 +209,11 @@ local commands={} do
                             log("Unknown item type: %s (%s)"):format(name,info.type)
                         end
                     else
-                        log{C.R,("No file called '%s'"):format(name)}
+                        log{COLOR.R,("No file called '%s'"):format(name)}
                     end
                 else
-                    log{C.A,"Usage: del [filename|dirname]"}
-                    log{C.A,"Usage: del -s [dirname]"}
+                    log{COLOR.I,"Usage: del [filename|dirname]"}
+                    log{COLOR.I,"Usage: del -s [dirname]"}
                 end
             end,
             description="Delete a file or directory",
@@ -234,10 +233,10 @@ local commands={} do
             -- Check arguments
             arg=arg:split(" ")
             if #arg>2 then
-                log{C.lY,"Warning: file names must have no spaces"}
+                log{COLOR.lY,"Warning: file names must have no spaces"}
                 return
             elseif #arg<2 then
-                log{C.A,"Usage: ren [oldfilename] [newfilename]"}
+                log{COLOR.I,"Usage: ren [oldfilename] [newfilename]"}
                 return
             end
 
@@ -245,41 +244,41 @@ local commands={} do
             local info
             info=love.filesystem.getInfo(arg[1])
             if not(info and info.type=='file') then
-                log{C.R,("'%s' is not a file!"):format(arg[1])}
+                log{COLOR.R,("'%s' is not a file!"):format(arg[1])}
                 return
             end
             info=love.filesystem.getInfo(arg[2])
             if info then
-                log{C.R,("'%s' already exists!"):format(arg[2])}
+                log{COLOR.R,("'%s' already exists!"):format(arg[2])}
                 return
             end
 
             -- Read file
             local data,err1=love.filesystem.read('data',arg[1])
             if not data then
-                log{C.R,("Failed to read file '%s': "):format(arg[1],err1 or "Unknown error")}
+                log{COLOR.R,("Failed to read file '%s': "):format(arg[1],err1 or "Unknown error")}
                 return
             end
 
             -- Write file
             local res,err2=love.filesystem.write(arg[2],data)
             if not res then
-                log{C.R,("Failed to write file: "):format(err2 or "Unknown error")}
+                log{COLOR.R,("Failed to write file: "):format(err2 or "Unknown error")}
                 return
             end
 
             -- Delete file
             if not love.filesystem.remove(arg[1]) then
-                log{C.R,("Failed to delete old file ''"):format(arg[1])}
+                log{COLOR.R,("Failed to delete old file ''"):format(arg[1])}
                 return
             end
 
-            log{C.Y,("Succesfully renamed file '%s' to '%s'"):format(arg[1],arg[2])}
+            log{COLOR.Y,("Succesfully renamed file '%s' to '%s'"):format(arg[1],arg[2])}
         end,
         description="Rename or move a file (in saving directory)",
         details={
             "Rename or move a file (in saving directory)",
-            {C.lY,"Warning: file name with space is not allowed"},
+            {COLOR.lY,"Warning: file name with space is not allowed"},
             "",
             "Aliases: mv ren",
             "",
@@ -298,13 +297,13 @@ local commands={} do
                         end
                         log{COLOR.lC,"/* END */"}
                     else
-                        log{C.R,("Unprintable item: %s (%s)"):format(name,info.type)}
+                        log{COLOR.R,("Unprintable item: %s (%s)"):format(name,info.type)}
                     end
                 else
-                    log{C.R,("No file called '%s'"):format(name)}
+                    log{COLOR.R,("No file called '%s'"):format(name)}
                 end
             else
-                log{C.A,"Usage: print [filename]"}
+                log{COLOR.I,"Usage: print [filename]"}
             end
         end,
         description="Print file content",
@@ -336,9 +335,9 @@ local commands={} do
             then
                 MES.new(arg,"Test message",6)
             else
-                log{C.A,"Show a message on the up-left corner"}
+                log{COLOR.I,"Show a message on the up-left corner"}
                 log""
-                log{C.A,"Usage: mes <check|info|broadcast|warn|error>"}
+                log{COLOR.I,"Usage: mes <check|info|broadcast|warn|error>"}
             end
         end,
         description="Show a message",
@@ -367,10 +366,10 @@ local commands={} do
             if url~="" then
                 local res,err=pcall(love.system.openURL,url)
                 if not res then
-                    log{C.R,"[ERR] ",C.Z,err}
+                    log{COLOR.R,"[ERR] ",COLOR.L,err}
                 end
             else
-                log{C.A,"Usage: openurl [url]"}
+                log{COLOR.I,"Usage: openurl [url]"}
             end
         end,
         description="Open a URL",
@@ -399,7 +398,7 @@ local commands={} do
                 gc.setWireframe(bool=="on")
                 log("Wireframe: "..(gc.isWireframe() and "on" or "off"))
             else
-                log{C.A,"Usage: wireframe <on|off>"}
+                log{COLOR.I,"Usage: wireframe <on|off>"}
             end
         end,
         description="Turn on/off wireframe mode",
@@ -415,7 +414,7 @@ local commands={} do
                 love._setGammaCorrect(bool=="on")
                 log("GammaCorrect: "..(gc.isGammaCorrect() and "on" or "off"))
             else
-                log{C.A,"Usage: gammacorrect <on|off>"}
+                log{COLOR.I,"Usage: gammacorrect <on|off>"}
             end
         end,
         description="Turn on/off gamma correction",
@@ -431,7 +430,7 @@ local commands={} do
             if n and n%1==0 and n>=1 and n<=12 then
                 love.keypressed("f"..n)
             else
-                log{C.A,"Usage: fn [1~12]"}
+                log{COLOR.I,"Usage: fn [1~12]"}
             end
         end,
         description="Simulates a Function key press",
@@ -447,7 +446,7 @@ local commands={} do
             if bgm~="" then
                 BGM.play(bgm)
             else
-                log{C.A,"Usage: playbgm [bgmName]"}
+                log{COLOR.I,"Usage: playbgm [bgmName]"}
             end
         end,
         description="Play a BGM",
@@ -481,7 +480,7 @@ local commands={} do
                     log(("Background already set to '%s'"):format(name))
                 end
             else
-                log{C.A,"Usage: setbg [bgName]"}
+                log{COLOR.I,"Usage: setbg [bgName]"}
             end
         end,
         description="Set background",
@@ -633,11 +632,11 @@ local commands={} do
                             return
                         end
                     end
-                    log{C.A,"No applet with this name. Type app -list to view all applets"}
+                    log{COLOR.I,"No applet with this name. Type app -list to view all applets"}
                 else
-                    log{C.A,"Usage:"}
-                    log{C.A,"app -list"}
-                    log{C.A,"app [appName]"}
+                    log{COLOR.I,"Usage:"}
+                    log{COLOR.I,"app -list"}
+                    log{COLOR.I,"app [appName]"}
                 end
             end,
             description="Enter a applet scene",
@@ -667,17 +666,17 @@ local commands={} do
                     TASK.new(function()
                         WIDGET.active.bye.hide=true
                         for _=1,30 do coroutine.yield() end
-                        log{C.R,"Deleting all data in 10..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 9..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 8..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 7..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 6..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 5..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 4..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 3..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 2..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 1..."}DEBUG.yieldN(60)
-                        log{C.R,"Deleting all data in 0..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 10..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 9..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 8..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 7..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 6..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 5..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 4..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 3..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 2..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 1..."}DEBUG.yieldN(60)
+                        log{COLOR.R,"Deleting all data in 0..."}DEBUG.yieldN(60)
                         outputBox.hide=true DEBUG.yieldN(26)
                         FILE.clear_s('')love.event.quit()
                     end)
@@ -697,16 +696,16 @@ local commands={} do
     commands.su={
         code=function(code)
             if sumode then
-                log{C.Y,"You are already in su mode. Use # to run any lua code"}
-                log{C.Y,"已经进入最高权限模式了, 请使用 # 执行任意lua代码"}
+                log{COLOR.Y,"You are already in su mode. Use # to run any lua code"}
+                log{COLOR.Y,"已经进入最高权限模式了, 请使用 # 执行任意lua代码"}
             elseif code=="7126" then
                 sumode=true
-                log{C.Y,"* SU MODE ON - DO NOT RUN ANY CODES IF YOU DO NOT KNOW WHAT THEY DO *"}
-                log{C.Y,"* Use the _SCLOG(message) function to print into this console *"}
-                log{C.Y,"* 最高权限模式开启, 请不要执行任何自己不懂确切含义的代码 *"}
-                log{C.Y,"* 使用_SCLOG(信息)函数在控制台打印信息 *"}
+                log{COLOR.Y,"* SU MODE ON - DO NOT RUN ANY CODES IF YOU DO NOT KNOW WHAT THEY DO *"}
+                log{COLOR.Y,"* Use the _SCLOG(message) function to print into this console *"}
+                log{COLOR.Y,"* 最高权限模式开启, 请不要执行任何自己不懂确切含义的代码 *"}
+                log{COLOR.Y,"* 使用_SCLOG(信息)函数在控制台打印信息 *"}
             else
-                log{C.Y,"Password incorrect"}
+                log{COLOR.Y,"Password incorrect"}
             end
         end,
     }
@@ -833,15 +832,15 @@ function scene.keyDown(key)
         -- Execute
         if input:byte()==35 then
             -- Execute lua code
-            log{C.lC,"> "..input}
+            log{COLOR.lC,"> "..input}
             local code,err=loadstring(input:sub(2))
             if code then
                 local resultColor
                 if sumode then
-                    resultColor=C.lY
+                    resultColor=COLOR.lY
                 else
                     setfenv(code,userG)
-                    resultColor=C.lG
+                    resultColor=COLOR.lG
                 end
                 local success,result=pcall(code)
                 if success then
@@ -851,14 +850,14 @@ function scene.keyDown(key)
                         log{resultColor,"done"}
                     end
                 else
-                    log{C.R,result}
+                    log{COLOR.R,result}
                 end
             else
-                log{C.R,"[SyntaxErr] ",C.R,err}
+                log{COLOR.R,"[SyntaxErr] ",COLOR.R,err}
             end
         else
             -- Execute builtin command
-            log{C.lS,"> "..input}
+            log{COLOR.lS,"> "..input}
             local p=input:find(" ")
             local cmd,arg
             if p then
@@ -871,7 +870,7 @@ function scene.keyDown(key)
             if commands[cmd] then
                 commands[cmd].code(arg)
             else
-                log{C.R,"No command called "..cmd}
+                log{COLOR.R,"No command called "..cmd}
             end
         end
         inputBox:clear()
@@ -916,12 +915,12 @@ function scene.keyDown(key)
                 inputBox:setText(res[1])
             end
         end
-    elseif key=='scrollup' then outputBox:scroll(-5)
-    elseif key=='scrolldown' then outputBox:scroll(5)
-    elseif key=='pageup' then outputBox:scroll(-25)
-    elseif key=='pagedown' then outputBox:scroll(25)
-    elseif key=='home' then outputBox:scroll(-1e99)
-    elseif key==' end' then outputBox:scroll(1e99)
+    elseif key=='scrollup'  then outputBox:scroll(0,5)
+    elseif key=='scrolldown'then outputBox:scroll(0,-5)
+    elseif key=='pageup'    then outputBox:scroll(0,25)
+    elseif key=='pagedown'  then outputBox:scroll(0,-25)
+    elseif key=='home'      then outputBox:scroll(0,1e99)
+    elseif key=='end'       then outputBox:scroll(0,-1e99)
     elseif combKey[key] and kb.isDown('lctrl','rctrl') then combKey[key]()
     elseif key=='escape' then
         if not WIDGET.isFocus(inputBox) then

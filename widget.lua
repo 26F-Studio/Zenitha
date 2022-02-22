@@ -657,7 +657,7 @@ function Widgets.slider:scroll(dx,dy)
     end
 end
 function Widgets.slider:arrowKey(k)
-    self:scroll((k=='left' or k=='up') and -1 or 1)
+    self:scroll((k=='left' or k=='up') and -1 or 1,0)
 end
 
 
@@ -940,7 +940,7 @@ function Widgets.selector:scroll(dx,dy)
     end
 end
 function Widgets.selector:arrowKey(k)
-    self:scroll((k=='left' or k=='up') and -1 or 1)
+    self:scroll((k=='left' or k=='up') and -1 or 1,0)
 end
 
 
@@ -1192,7 +1192,7 @@ function Widgets.textBox:scroll(dx,dy)
     self._scrollPos=max(0,min(self._scrollPos-(dx+dy)*self.lineHeight,(#self._texts-self._capacity)*self.lineHeight))
 end
 function Widgets.textBox:arrowKey(k)
-    self:scroll(k=='up' and -1 or k=='down' and 1 or 0)
+    self:scroll(0,k =='up' and -1 or k=='down' and 1 or 0)
 end
 function Widgets.textBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
