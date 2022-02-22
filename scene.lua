@@ -41,8 +41,9 @@ function SCN.add(name,scene)
     assert(not scene.widgetList or type(scene.widgetList)=='table',"[scene].widgetList must be table")
     assert(not scenes[name],STRING.repD("SCN.add(name,scene): scene '$1' already exists",name))
     for i=1,#eventNames do assert(not scene[eventNames[i]] or type(scene[eventNames[i]])=='function',"[scene]."..eventNames[i].." must be function") end
+    if not scene.widgetList then scene.widgetList={} end
+    setmetatable(scene.widgetList,WIDGET.indexMeta)
     scenes[name]=scene
-    if scene.widgetList then setmetatable(scene.widgetList,WIDGET.indexMeta) end
 end
 function SCN.setScroll(height)
     SCN.maxScroll=height or 0
