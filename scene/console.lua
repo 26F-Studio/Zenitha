@@ -130,7 +130,7 @@ local commands={} do
             code=function()
                 local L=love.filesystem.getDirectoryItems""
                 for _,name in next,L do
-                    if love.filesystem.getRealDirectory(name)==SAVEDIR then
+                    if not FILE.isSafe(name) then
                         tree("",name,0)
                     end
                 end
