@@ -319,6 +319,11 @@ local commands={} do
     commands.crash={
         code=function() error("ERROR") end,
         description="Manually crash the game",
+        details={
+            "Manually crash the game",
+            "",
+            "Usage: crash",
+        },
     }
     commands.mes={
         code=function(arg)
@@ -345,7 +350,7 @@ local commands={} do
     }
     commands.log={
         code=function()
-            local l=LOG.logs
+            local l=LOG.getLogs()
             for i=1,#l do
                 log(l[i])
             end
@@ -495,25 +500,6 @@ local commands={} do
             "Go to an empty test scene",
             "",
             "Usage: test",
-        },
-    }
-    commands.support={
-        code=function(arg)
-            if FNNS then
-                if arg:find"pl" and arg:find"fk" then
-                    SCN.go('support','none')
-                else
-                    love.system.openURL("https://www.bilibili.com/video/BV1uT4y1P7CX?secretcode=fkpl")
-                end
-            else
-                SCN.go('support','none')
-            end
-        end,
-        description="Enter support scene",
-        details={
-            "Go to an support scene",
-            "",
-            "Usage: support",
         },
     }
     do-- app

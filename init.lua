@@ -71,7 +71,6 @@ LOG=        require'Zenitha.log'
 JSON=       require'Zenitha.json'
 
 -- Pure lua modules (complex)
-LOG=        require'Zenitha.log'
 REQUIRE=    require'Zenitha.require'
 TASK=       require'Zenitha.task'
 WS=         require'Zenitha.websocket'
