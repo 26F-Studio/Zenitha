@@ -57,6 +57,7 @@ function scene.touchClick(x,y)
     _push("[touchClick]")
 end
 function scene.touchDown(x,y)
+    if #love.touch.getTouches()>=6 then scene.keyDown('escape') end
     SYSFX.new('rect',.5,x-10,y-10,20,20)
     _push(("[touchDown] <%d, %d>"):format(x,y))
 end
