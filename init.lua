@@ -515,6 +515,7 @@ function love.errorhandler(msg)
 
     -- Reset something
     love.audio.stop()
+    BGM.stop()
     gc.reset()
 
     if mainLoopStarted and #errData<3 and SCN.scenes['error'] then
