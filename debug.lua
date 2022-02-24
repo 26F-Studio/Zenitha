@@ -30,4 +30,9 @@ function DEBUG.yieldN(frames)
     for _=1,frames do yield() end
 end
 
+function DEBUG.yieldT(time)
+    local t=love.timer.getTime()
+    while love.timer.getTime()-t<time do yield() end
+end
+
 return DEBUG
