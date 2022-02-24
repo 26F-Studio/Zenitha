@@ -653,40 +653,36 @@ local commands={} do
         code=function(arg)
             if arg=="sure" then
                 log"FINAL WARNING!"
-                log"Please remember that resetting everything will delete all saved data. Delete the saved data anyway?"
+                log"Please remember that resetting everything will delete all saved data. Delete them anyway?"
                 log"Once the data has been deleted, there is no way to recover it."
                 log"Type: resetall really"
             elseif arg=="really" then
-                WIDGET.unFocus(true)inputBox.hide=true
                 BGM.stop()
+                WIDGET.unFocus(true)
+                inputBox._visible=false
+                table.remove(WIDGET.active,TABLE.find(WIDGET.active,inputBox))
                 commands.cls.code()
                 outputBox:clear()
-                outputBox.h=500
-                local button=WIDGET.new{type='button',text="Bye.",x=640,y=615,w=426,h=100,code=function()
+                outputBox.h=SCR.h0-140
+                local button=WIDGET.new{type='button',name='bye',text=Zenitha.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,code=function()
+                    WIDGET.active.bye._visible=false
+                    outputBox.h=SCR.h0-20
                     TASK.new(function()
-                        WIDGET.active.bye.hide=true
-                        for _=1,30 do coroutine.yield() end
-                        log{COLOR.R,"Deleting all data in 10..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 9..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 8..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 7..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 6..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 5..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 4..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 3..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 2..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 1..."}DEBUG.yieldN(60)
-                        log{COLOR.R,"Deleting all data in 0..."}DEBUG.yieldN(60)
-                        outputBox.hide=true DEBUG.yieldN(26)
-                        FILE.clear_s('')love.event.quit()
+                        DEBUG.yieldT(0.5)
+                        for i=10,0,-1 do
+                            log{COLOR.R,STRING.repD("Deleting all data in $1...",i)}
+                            DEBUG.yieldT(1)
+                        end
+                        outputBox._visible=false
+                        DEBUG.yieldT(0.26)
+                        FILE.clear_s('')
+                        love.event.quit()
                     end)
                 end}
-                button:setObject(Zenitha.getAppName().." is fun. Bye.")
                 ins(WIDGET.active,button)
             else
                 log"Are you sure you want to reset everything?"
-                log"This will delete EVERYTHING in your saved game data, including but not limited to:"
-                log"All your replays, saved scores, settings, etc."
+                log"This will delete EVERYTHING in your saved game data, just like factory reset."
                 log"This cannot be undone."
                 log"Type: resetall sure"
             end
@@ -923,11 +919,7 @@ function scene.keyDown(key)
     elseif key=='end'       then outputBox:scroll(0,-1e99)
     elseif combKey[key] and kb.isDown('lctrl','rctrl') then combKey[key]()
     elseif key=='escape' then
-        if not WIDGET.isFocus(inputBox) then
-            WIDGET.focus(inputBox)
-        else
-            SCN.back()
-        end
+        SCN.back()
     else
         if not WIDGET.isFocus(inputBox) then
             WIDGET.focus(inputBox)
