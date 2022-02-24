@@ -1458,10 +1458,12 @@ function WIDGET.focus(W)
         kb.setTextInput(false)
         EDITING=""
     end
-    WIDGET.sel=W
-    if W and W.type=='inputBox' then
-        local _,y1=xOy:transformPoint(0,W.y+W.h)
-        kb.setTextInput(true,0,y1,1,1)
+    if W and W._visible then
+        WIDGET.sel=W
+        if W.type=='inputBox' then
+            local _,y1=xOy:transformPoint(0,W.y+W.h)
+            kb.setTextInput(true,0,y1,1,1)
+        end
     end
 end
 function WIDGET.unFocus(force)
