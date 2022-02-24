@@ -463,6 +463,7 @@ Widgets.slider=setmetatable({
     _pos=nil,
     _rangeL=nil,
     _rangeR=nil,
+    _rangeWidth=nil,
     _unit=nil,
     _smooth=nil,
     _textShowTime=nil,
@@ -512,6 +513,7 @@ function Widgets.slider:reset()
     )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
+    self._rangeWidth=self._rangeR-self._rangeL
     self._unit=self.axis[3]
     if self.smooth~=nil then
         self._smooth=self.smooth
@@ -574,7 +576,7 @@ function Widgets.slider:draw()
     if not self._smooth then
         gc_setLineWidth(2)
         for p=self._rangeL,self._rangeR,self._unit do
-            local X=x+(x2-x)*(p-self._rangeL)/(self._rangeR-self._rangeL)
+            local X=x+(x2-x)*(p-self._rangeL)/self._rangeWidth
             gc_line(X,y+7,X,y-7)
         end
     end
@@ -584,7 +586,7 @@ function Widgets.slider:draw()
     gc_line(x,y,x2,y)
 
     -- Block
-    local cx=x+(x2-x)*(self._pos-self._rangeL)/(self._rangeR-self._rangeL)
+    local cx=x+(x2-x)*(self._pos-self._rangeL)/self._rangeWidth
     local bx,by=cx-10-ATV*2,y-16-ATV*5
     local bw,bh=20+ATV*4,32+ATV*10
     gc_setColor(.8,.8,.8)
@@ -627,7 +629,7 @@ function Widgets.slider:drag(x)
     if not self._unit then
         newVal=(1-newPos)*self._rangeL+newPos*self._rangeR
     else
-        newVal=newPos*(self._rangeR-self._rangeL)
+        newVal=newPos*self._rangeWidth
         newVal=self._rangeL+int(newVal/self._unit+.5)*self._unit
     end
     if newVal~=self.disp() then
@@ -643,7 +645,7 @@ function Widgets.slider:release(x)
     self.lastTime=0
 end
 function Widgets.slider:scroll(dx,dy)
-    local n=updateWheel(self,(dx+dy)*(self._rangeR-self._rangeL)/(self._unit or .01)/20)
+    local n=updateWheel(self,(dx+dy)*self._rangeWidth/(self._unit or .01)/20)
     if n then
         local p=self.disp()
         local u=self._unit or .01
@@ -679,6 +681,7 @@ Widgets.slider_fill=setmetatable({
     _pos=nil,
     _rangeL=nil,
     _rangeR=nil,
+    _rangeWidth=nil,-- just _rangeR-_rangeL, for convenience
 
     buildArgs={
         'name',
@@ -710,6 +713,7 @@ function Widgets.slider_fill:reset()
     )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
+    self._rangeWidth=self._rangeR-self._rangeL
     self._pos=self._rangeL
     self._textShowTime=3
 
@@ -734,8 +738,8 @@ function Widgets.slider_fill:draw()
     local w,h=self.w,self.h
     local r=h*.5
     local ATV=self._activeTime/self._activeTimeMax
-    local rate=(self._pos-self._rangeL)/(self._rangeR-self._rangeL)
-    local num=int(rate*100+.5)..'%'
+    local rate=(self._pos-self._rangeL)/self._rangeWidth
+    local num=int((self.disp()-self._rangeL)/self._rangeWidth*100+.5)..'%'
 
     -- Capsule
     gc_setColor(1,1,1,.6+ATV*.26)
