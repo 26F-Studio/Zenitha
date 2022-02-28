@@ -1,3 +1,4 @@
+local gc=love.graphics
 local testVal_1={false,false,false}
 local testVal_2={18,260,.26}
 local testVal_3={'medium','large','ex-large'}
