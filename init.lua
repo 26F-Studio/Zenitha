@@ -858,8 +858,11 @@ function Zenitha.setOnGlobalKey(key,func)
     end
 end
 function Zenitha.setOnFnKeys(list)
-    assert(type(list)=='table',"Zenitha.setOnFnKeys(list): list must be table")
-    for i=1,7 do devFnKey[i]=assert(type(list[i])=='function' and list[i]) end
+    assert(type(list)=='table',"Zenitha.setOnFnKeys(list): list must be table, [1~7]=function")
+    for i=1,7 do
+        assert(type(list[i])=='function',"Zenitha.setOnFnKeys(list): list must be table, [1~7]=function")
+        devFnKey[i]=list[i]
+    end
 end
 function Zenitha.setOnFocus(func)
     onFocus=assert(type(func)=='function' and func,"Zenitha.setOnFocus(func): func must be function")
