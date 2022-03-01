@@ -289,10 +289,11 @@ local function noDevkeyPressed(key)
             elseif key=='.' then W.w=W.w+10
             elseif key=='/' then W.h=W.h-10
             elseif key=='\'' then W.h=W.h+10
-            elseif key=='[' then W.font=W.font-5
-            elseif key==']' then W.font=W.font+5
+            elseif key=='[' then W.fontSize=W.fontSize-5
+            elseif key==']' then W.fontSize=W.fontSize+5
             else return true
             end
+            W:reset()
         else
             return true
         end

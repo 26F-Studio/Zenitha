@@ -87,8 +87,8 @@ local baseWidget={
 }
 function baseWidget:getInfo()
     local str=""
-    for k in next,self.buildArgs do
-        str=str..STRING.repD("$1=$2,",k..self[k])
+    for _,v in next,self.buildArgs do
+        str=str..v..'='..tostring(self[v])..'\n'
     end
     return str
 end
