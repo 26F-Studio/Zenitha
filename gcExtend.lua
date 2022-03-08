@@ -160,32 +160,39 @@ end
 
 --------------------------------------------------------------
 
-do-- function GC.DO(L)
+do-- function GC.load(L), GC.execute(t)
     local cmds={
-        origin= gc.origin,
-        move=   gc.translate,
-        scale=  gc.scale,
-        rotate= gc.rotate,
-        shear=  gc.shear,
-        clear=  gc.clear,
+        push=     gc.push,
+        pop=      gc.pop,
 
-        setCL=gc.setColor,
-        setCM=gc.setColorMask,
-        setLW=gc.setLineWidth,
-        setLS=gc.setLineStyle,
-        setLJ=gc.setLineJoin,
+        repT=     gc.replaceTransform,
+        appT=     gc.applyTransform,
+        invT=     gc.inverseTransformPoint,
 
-        print=gc.print,
-        rawFT=function(...) FONT.rawset(...) end,
-        setFT=function(...) FONT.set(...) end,
-        mText=GC.mStr,
-        mDraw=GC.draw,
-        mDrawX=GC.X,
-        mDrawY=GC.Y,
-        mOutDraw=GC.outDraw,
+        origin=   gc.origin,
+        move=     gc.translate,
+        scale=    gc.scale,
+        rotate=   gc.rotate,
+        shear=    gc.shear,
+        clear=    gc.clear,
 
-        draw=gc.draw,
-        line=line,
+        setCL=    gc.setColor,
+        setCM=    gc.setColorMask,
+        setLW=    gc.setLineWidth,
+        setLS=    gc.setLineStyle,
+        setLJ=    gc.setLineJoin,
+
+        print=    gc.print,
+        rawFT=    function(...) FONT.rawset(...) end,
+        setFT=    function(...) FONT.set(...) end,
+        mText=    GC.mStr,
+        mDraw=    GC.draw,
+        mDrawX=   GC.X,
+        mDrawY=   GC.Y,
+        mOutDraw= GC.outDraw,
+
+        draw=     gc.draw,
+        line=     line,
         fRect=function(...) gc.rectangle('fill',...) end,
         dRect=function(...) gc.rectangle('line',...) end,
         fCirc=function(...) gc.circle('fill',...) end,
@@ -207,8 +214,25 @@ do-- function GC.DO(L)
         fRRPol=function(...) GC.regRoundPolygon('fill',...) end,
         dRRPol=function(...) GC.regRoundPolygon('line',...) end,
     }
+
+    local function GC_execute(t)
+        if type(t[1])=='string' then
+            cmds[t[1]](unpack(t,2))
+        elseif type(t[1])=='table' then
+            for i=1,#t do
+                GC_execute(t[i])
+            end
+        elseif type(t[1])=='function' then
+            t[1](unpack(t,2))
+        else
+            error('Wrong type of [1]')
+        end
+    end
+    GC.execute=GC_execute
+
     local sizeLimit=gc.getSystemLimits().texturesize
-    function GC.DO(L)
+    function GC.load(L)
+        assert(type(L[1])=='number' and type(L[2])=='number',"function GC.load(L): L[1] and L[2] must be positive number")
         gc.push()
             ::REPEAT_tryAgain::
             local success,canvas=pcall(gc.newCanvas,math.min(L[1],sizeLimit),math.min(L[2],sizeLimit))
@@ -225,12 +249,11 @@ do-- function GC.DO(L)
             for i=3,#L do
                 local cmd=L[i][1]
                 if type(cmd)=='string' then
-                    local func=cmds[cmd]
-                    if type(func)=='string' then
-                        func=gc[func]
-                    end
-                    assert(func,"No gc command: "..cmd)
-                    func(unpack(L[i],2))
+                    cmd=assert(cmds[cmd],"No gc command: "..cmd)(unpack(L[i],2))
+                elseif type(cmd)=='function' then
+                    cmd(unpack(L[i],2))
+                else
+                    error("cmd must be string or function")
                 end
             end
             gc.setCanvas()

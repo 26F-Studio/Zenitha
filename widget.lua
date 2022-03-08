@@ -21,11 +21,11 @@ local setFont,getFont=FONT.set,FONT.get
 local mStr,GC_stc_setComp,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_setComp,GC.stc_rect,GC.stc_stop
 local approach=MATH.expApproach
 
-local leftAngle=GC.DO{20,20,
+local leftAngle=GC.load{20,20,
     {'setLW',5},
     {'line',18,2,1,10,18,18},
 }
-local rightAngle=GC.DO{20,20,
+local rightAngle=GC.load{20,20,
     {'setLW',5},
     {'line',2,2,19,10,2,18},
 }
