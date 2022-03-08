@@ -169,11 +169,6 @@ end
 
 --------------------------------------------------------------
 
--- Find value in [1~#]
-function TABLE.find(t,val)
-    for i=1,#t do if t[i]==val then return i end end
-end
-
 -- Check if tow list have same elements
 function TABLE.compare(a,b)
     if #a~=#b then return false end
@@ -194,16 +189,42 @@ function TABLE.equal(a,b)
     return true
 end
 
+--------------------------------------------------------------
+
+-- Find value in [1~#], like string.find
+function TABLE.find(t,val,start)
+    for i=start or 1,#t do if t[i]==val then return i end end
+end
+
+-- Replace value in [1~#], like string.gsub
+function TABLE.gsub(t,v_old,v_new,count,start)
+    if not start then start=1 end
+    if not count then count=1e99 end
+    while t[start] and count>0 do
+        if t[start]==v_old then
+            t[start]=v_new
+            count=count-1
+        end
+    end
+end
+
 -- Return next value of [1~#] (by value)
 function TABLE.next(t,val)
     for i=1,#t do if t[i]==val then return t[i%#t+1] end end
 end
 
---------------------------------------------------------------
-
 -- Find value in whole table
 function TABLE.search(t,val)
     for k,v in next,t do if v==val then return k end end
+end
+
+-- Replace all value in t
+function TABLE.replace(t,v_old,v_new)
+    for k,v in next,t do
+        if v==v_old then
+            t[k]=v_new
+        end
+    end
 end
 
 -- Re-index string value of a table
