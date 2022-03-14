@@ -104,6 +104,17 @@ function STRING.cutUnit(s)-- Warning: don't support number format like .26, must
     end
 end
 
+do
+    local chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    local charList={}
+    for i=1,64 do
+        charList[i]=chars:sub(i,i)
+    end
+    function STRING.base64(num)
+        return charList[num] or error('function STRING.base64(num): num must be 1~64')
+    end
+end
+
 function STRING.UTF8(num)-- Simple utf8 coding
     assert(type(num)=='number','Wrong type ('..type(num)..')')
     assert(num>=0 and num<2^31,'Out of range ('..num..')')
