@@ -188,38 +188,36 @@ function BGM.play(bgms,args)
 
     for i=1,#bgms do
         local bgm=bgms[i]
-        if type(bgm)~='string' then error("BGM list can only be list of string") end
-        if not _tryLoad(bgm) or STRING.sArg(args,'-preLoad') then goto _CONTINUE_ end
+        assert(type(bgm)=='string',"BGM list can only be list of string")
+        if _tryLoad(bgm) and not STRING.sArg(args,'-preLoad') then
+            local obj=srcLib[bgms[i]]
+            obj.vol=0
+            obj.pitch=1
+            obj.lowgain=1
+            obj.highgain=1
+            obj.volChanging=false
+            obj.pitchChanging=false
+            obj.lowgainChanging=false
+            obj.highgainChanging=false
 
-        local obj=srcLib[bgms[i]]
-        obj.vol=0
-        obj.pitch=1
-        obj.lowgain=1
-        obj.highgain=1
-        obj.volChanging=false
-        obj.pitchChanging=false
-        obj.lowgainChanging=false
-        obj.highgainChanging=false
+            _clearTask(obj,'volume')
 
-        _clearTask(obj,'volume')
+            local source=obj.source
+            source:setLooping(not STRING.sArg(args,'-noloop'))
+            source:setPitch(1)
+            source:seek(0)
+            if STRING.sArg(args,'-sdin') then
+                obj.vol=1
+                source:setVolume(volume)
+                BGM.set(bgm,'volume',1,0)
+            else
+                source:setVolume(0)
+                BGM.set(bgm,'volume',1,.626)
+            end
+            source:play()
 
-        local source=obj.source
-        source:setLooping(not STRING.sArg(args,'-noloop'))
-        source:setPitch(1)
-        source:seek(0)
-        if STRING.sArg(args,'-sdin') then
-            obj.vol=1
-            source:setVolume(volume)
-            BGM.set(bgm,'volume',1,0)
-        else
-            source:setVolume(0)
-            BGM.set(bgm,'volume',1,.626)
+            table.insert(nowPlay,obj)
         end
-        source:play()
-
-        table.insert(nowPlay,obj)
-
-        ::_CONTINUE_::
     end
 end
 function BGM.stop(time)

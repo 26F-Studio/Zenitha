@@ -838,17 +838,17 @@ function Widgets.selector:reset()
     end
 
     local V,L=self.disp(),self.list
+    self._select,self._selText=false,false
     for i=1,#L do
         if L[i]==V then
             self._select=i
             self._selText=self.list[i]
-            goto _BREAK_
+            break
         end
     end
-    self._select=false
-    self._selText=false
-    MES.new('error',"Selector "..self.name.." dead, disp= "..tostring(V))
-    ::_BREAK_::
+    if not self._select then
+        MES.new('error',"Selector "..self.name.." dead, disp= "..tostring(V))
+    end
 end
 function Widgets.selector:isAbove(x,y)
     return

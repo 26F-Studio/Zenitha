@@ -234,12 +234,16 @@ do-- function GC.load(L), GC.execute(t)
     function GC.load(L)
         assert(type(L[1])=='number' and type(L[2])=='number',"function GC.load(L): L[1] and L[2] must be positive number")
         gc.push()
-            ::REPEAT_tryAgain::
-            local success,canvas=pcall(gc.newCanvas,math.min(L[1],sizeLimit),math.min(L[2],sizeLimit))
-            if not success then
-                sizeLimit=math.floor(sizeLimit*.8)
-                assert(sizeLimit>=1,"WTF why can't I create a canvas?")
-                goto REPEAT_tryAgain
+            local canvas
+            while true do
+                local success
+                success,canvas=pcall(gc.newCanvas,math.min(L[1],sizeLimit),math.min(L[2],sizeLimit))
+                if success then
+                    break
+                else
+                    sizeLimit=math.floor(sizeLimit*.8)
+                    assert(sizeLimit>=1,"WTF why can't I create a canvas?")
+                end
             end
             gc.setCanvas(canvas)
             gc.clear(1,1,1,0)
