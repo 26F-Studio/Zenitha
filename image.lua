@@ -4,10 +4,11 @@ local IMGlistMeta={__index=function(self,k)
     local ok,res=pcall(love.graphics.newImage,self.__source[k])
     if ok then
         self[k]=res
-        return res
     else
+        self[k]=PAPER
         MES.new('error',STRING.repD("Cannot load image '$1': $2",self.__source[k],res))
     end
+    return self[k]
 end}
 local function link(A,B)
     A.__source=B
