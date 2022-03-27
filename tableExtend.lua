@@ -240,14 +240,16 @@ end
 
 -- Dump a simple lua table
 do-- function TABLE.dump(L,t)
-    local tabs={
+    local tabs=setmetatable({
         [0]='',
         '\t',
-        '\t\t',
-        '\t\t\t',
-        '\t\t\t\t',
-        '\t\t\t\t\t',
-    }
+    },{__index=function(self,k)
+        if k>=626 then error("Too many tabs!") end
+        for i=#self+1,k do
+            self[i]=self[i-1]..'\t'
+        end
+        return self[k]
+    end})
     local function dump(L,t)
         local s
         if t then
@@ -276,14 +278,14 @@ do-- function TABLE.dump(L,t)
                     k=k..'='
                 end
             elseif T=='boolean' then k='['..k..']='
-            else error("Error key type!")
+            else k='[\'*'..tostring(k)..'\']='
             end
             T=type(v)
             if T=='number' then v=tostring(v)
             elseif T=='string' then v='\''..v..'\''
             elseif T=='table' then v=dump(v,t+1)
             elseif T=='boolean' then v=tostring(v)
-            else error("Error data type!")
+            else v='*'..tostring(v)
             end
             s=s..tabs[t]..k..v..',\n'
         end
@@ -295,8 +297,8 @@ end
 -- Dump a simple lua table (no whitespaces)
 do-- function TABLE.dumpDeflate(L,t)
     local function dump(L)
-        local s='return{'
         if type(L)~='table' then return end
+        local s='return{'
         local count=1
         for k,v in next,L do
             local T=type(k)
@@ -321,8 +323,9 @@ do-- function TABLE.dumpDeflate(L,t)
             elseif T=='string' then v='\''..v..'\''
             elseif T=='table' then v=dump(v)
             elseif T=='boolean' then v=tostring(v)
-            else error("Error data type!")
+            else v='*'..tostring(v)
             end
+            s=s..k..v..','
         end
         return s..'}'
     end
