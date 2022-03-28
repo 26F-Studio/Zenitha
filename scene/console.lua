@@ -911,12 +911,12 @@ function scene.keyDown(key)
                 inputBox:setText(res[1])
             end
         end
-    elseif key=='scrollup'  then outputBox:scroll(0,5)
-    elseif key=='scrolldown'then outputBox:scroll(0,-5)
-    elseif key=='pageup'    then outputBox:scroll(0,25)
-    elseif key=='pagedown'  then outputBox:scroll(0,-25)
-    elseif key=='home'      then outputBox:scroll(0,1e99)
-    elseif key=='end'       then outputBox:scroll(0,-1e99)
+    elseif key=='scrollup'   then outputBox:scroll(0,5)
+    elseif key=='scrolldown' then outputBox:scroll(0,-5)
+    elseif key=='pageup'     then outputBox:scroll(0,25)
+    elseif key=='pagedown'   then outputBox:scroll(0,-25)
+    elseif key=='home'       then outputBox:scroll(0,1e99)
+    elseif key=='end'        then outputBox:scroll(0,-1e99)
     elseif combKey[key] and kb.isDown('lctrl','rctrl') then combKey[key]()
     elseif key=='escape' then
         SCN.back()
