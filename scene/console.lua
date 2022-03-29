@@ -6,7 +6,6 @@ local outputBox=WIDGET.new{type='textBox',x=20,y=20,w=999,h=999,fontSize=25,font
 local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_basic'}
 
 local function log(str)outputBox:push(str) end
-_SCLOG=log
 
 log{COLOR.lP,"Z Console"}
 log{COLOR.lC,"© Copyright 2019–2022 26F Studio. Some rights reserved."}
@@ -243,7 +242,7 @@ local commands={} do
             -- Check file exist
             local info
             info=love.filesystem.getInfo(arg[1])
-            if not(info and info.type=='file') then
+            if not (info and info.type=='file') then
                 log{COLOR.R,("'%s' is not a file!"):format(arg[1])}
                 return
             end
@@ -697,9 +696,10 @@ local commands={} do
             elseif code=="7126" then
                 sumode=true
                 log{COLOR.Y,"* SU MODE ON - DO NOT RUN ANY CODES IF YOU DO NOT KNOW WHAT THEY DO *"}
-                log{COLOR.Y,"* Use the _SCLOG(message) function to print into this console *"}
+                log{COLOR.Y,"* Now you should use the _CL(message) function to print into this console *"}
                 log{COLOR.Y,"* 最高权限模式开启, 请不要执行任何自己不懂确切含义的代码 *"}
-                log{COLOR.Y,"* 使用_SCLOG(信息)函数在控制台打印信息 *"}
+                log{COLOR.Y,"* 从现在开始请使用_CL(信息)函数在控制台打印信息 *"}
+                _CL=log
             else
                 log{COLOR.Y,"Password incorrect"}
             end
