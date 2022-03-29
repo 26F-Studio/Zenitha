@@ -238,6 +238,36 @@ end
 
 --------------------------------------------------------------
 
+-- Copy a rotated matrix table
+function TABLE.rotate(cb,dir)
+    local icb={}
+    if dir=='R' then-- Rotate CW
+        for y=1,#cb[1] do
+            icb[y]={}
+            for x=1,#cb do
+                icb[y][x]=cb[x][#cb[1]-y+1]
+            end
+        end
+    elseif dir=='L' then-- Rotate CCW
+        for y=1,#cb[1] do
+            icb[y]={}
+            for x=1,#cb do
+                icb[y][x]=cb[#cb-x+1][y]
+            end
+        end
+    elseif dir=='F' then-- Rotate 180 degree
+        for y=1,#cb do
+            icb[y]={}
+            for x=1,#cb[1] do
+                icb[y][x]=cb[#cb-y+1][#cb[1]-x+1]
+            end
+        end
+    end
+    return icb
+end
+
+--------------------------------------------------------------
+
 -- Dump a simple lua table
 do-- function TABLE.dump(L,t)
     local tabs=setmetatable({
