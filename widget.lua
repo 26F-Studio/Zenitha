@@ -1,7 +1,6 @@
 local gc=love.graphics
 local gc_translate,gc_replaceTransform=gc.translate,gc.replaceTransform
 local gc_push,gc_pop=gc.push,gc.pop
-local gc_setCanvas=gc.setCanvas
 local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
 local gc_draw,gc_line=gc.draw,gc.line
 local gc_rectangle=gc.rectangle
@@ -1550,12 +1549,10 @@ function WIDGET.resize(w,h)
     _resetAllWidgets()
 end
 function WIDGET.draw()
-    gc_setCanvas({stencil=true},widgetCanvas)
-        gc_translate(0,-SCN.curScroll)
-        for _,W in next,WIDGET.active do
-            if W._visible then W:draw() end
-        end
-    gc_setCanvas()
+    gc_translate(0,-SCN.curScroll)
+    for _,W in next,WIDGET.active do
+        if W._visible then W:draw() end
+    end
     gc_setColor(1,1,1)
     gc_draw(widgetCanvas)
     gc_replaceTransform(SCR.xOy)
