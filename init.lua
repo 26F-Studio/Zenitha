@@ -30,6 +30,10 @@ local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastX,lastY=0,0-- Last click pos
 local jsState={}-- map, joystickID->axisStates: {axisName->axisVal}
 local errData={}-- list, each error create {mes={errMes strings},scene=sceneNameStr}
+local bigCanvases=setmetatable({},{__index=function(self,k)
+    self[k]=gc.newCanvas()
+    return self[k]
+end})
 
 -- User-changeable values
 local appName='Zenitha'
@@ -479,6 +483,10 @@ end
 function love.resize(w,h)
     if SCR.w==w and SCR.h==h then return end
     SCR.resize(w,h)
+    for k in next,bigCanvases do
+        bigCanvases[k]:release()
+        bigCanvases[k]=gc.newCanvas()
+    end
     if BG.resize then BG.resize(w,h) end
     if SCN.resize then SCN.resize(w,h) end
     WIDGET.resize(w,h)
@@ -881,6 +889,10 @@ function Zenitha.setDrawCursor(func)
 end
 function Zenitha.setDrawSysInfo(func)
     drawSysInfo=assert(type(func)=='function' and func,"Zenitha.setDrawSysInfo(func): func must be function")
+end
+
+function Zenitha.getBigCanvas(id)
+    return bigCanvases[id]
 end
 
 --------------------------------------------------------------
