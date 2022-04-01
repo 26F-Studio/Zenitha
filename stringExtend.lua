@@ -28,7 +28,7 @@ function STRING.sArg(str,switch)-- "Scan arg", scan if str has the arg (format o
     end
 end
 
-do-- function STRING.shiftChar(c)
+do-- function STRING.shiftChar(c)-- "Capitalize" a character like string.upper, but can also shift numbers to signs
     local shiftMap={
         ['1']='!',['2']='@',['3']='#',['4']='$',['5']='%',
         ['6']='^',['7']='&',['8']='*',['9']='(',['0']=')',
@@ -68,7 +68,7 @@ function STRING.split(str,sep,regex)-- Split a string by sep
     return L
 end
 
-function STRING.simpEmailCheck(str)
+function STRING.simpEmailCheck(str)-- Check if the string is a valid email address
     str=STRING.split(str,'@')
     if #str~=2 then return false end
     if str[1]:sub(-1)=='.' or str[2]:sub(-1)=='.' then return false end
@@ -95,24 +95,31 @@ end
 
 function STRING.cutUnit(s)-- Warning: don't support number format like .26, must have digits before the dot, like 0.26
     local _s,_e=s:find('^-?%d+%.?%d*')
-    if _e==#s then--All numbers
+    if _e==#s then-- All numbers
         return tonumber(s),nil
-    elseif not _s then--No numbers
+    elseif not _s then-- No numbers
         return nil,s
     else
         return tonumber(s:sub(_s,_e)),s:sub(_e+1)
     end
 end
 
-do
-    local chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-    local charList={}
-    for i=1,64 do
-        charList[i]=chars:sub(i,i)
+do-- function STRING.base64(num)-- Convert one number to base64
+    STRING.base64={} for c in string.gmatch('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','.') do
+        table.insert(STRING.base64,c)
     end
-    function STRING.base64(num)
-        return charList[num] or error('function STRING.base64(num): num must be 1~64')
-    end
+    setmetatable(STRING.base64,{
+        __call=function(self,k)
+            return self[k]
+        end,
+        __index=function()
+            error('function STRING.base64(num): num must be 1~64')
+        end,
+        __newindex=function()
+            error('STRING.base64 is read-only')
+        end,
+        __metatable=true,
+    })
 end
 
 function STRING.UTF8(num)-- Simple utf8 coding
@@ -127,7 +134,7 @@ function STRING.UTF8(num)-- Simple utf8 coding
     end
 end
 
-do-- function STRING.bigInt(num)
+do-- function STRING.bigInt(num)-- Convert a number to a approximate integer with large unit
     local lg=math.log10
     local units={'','K','M','B','T','Qa','Qt','Sx','Sp','Oc','No'}
     local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}
@@ -173,7 +180,7 @@ do-- function STRING.toBin, STRING.toOct, STRING.toHex(num,len)
     end
 end
 
-do-- function STRING.urlEncode(str)
+do-- function STRING.urlEncode(str)-- Simple url encoding
     local rshift=bit.rshift
     local b16={[0]='0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'}
     function STRING.urlEncode(str)
