@@ -1,16 +1,14 @@
 local gc_clear=love.graphics.clear
-local BGs={
-    none={draw=function() gc_clear(.08,.08,.084) end}
-}
+local BGs={}-- Stored backgrounds
 local BG={
     default='none',
     locked=false,
     cur='none',
-    init=false,
-    resize=false,
+    init=NULL,
+    resize=NULL,
     update=NULL,
-    draw=BGs.none.draw,
-    event=false,
+    draw=NULL,
+    event=NULL,
     discard=NULL,
 }
 
@@ -19,9 +17,11 @@ function BG.unlock() BG.locked=false end
 function BG.add(name,bg)
     BGs[name]=bg
 end
-function BG.send(...)
-    if BG.event then
-        BG.event(...)
+function BG.send(name,...)
+    if BGs[name] then
+        BGs[name].event(...)
+    else
+        MES.new('warning',"No background named '"..name.."' to send data to")
     end
 end
 function BG.setDefault(bg)
@@ -29,7 +29,11 @@ function BG.setDefault(bg)
 end
 function BG.set(name)
     name=name or BG.default
-    if not BGs[name] or BG.locked then return end
+    if BG.locked then return end
+    if not BGs[name] then
+        MES.new('warning',"No background named '"..name.."' to set")
+        return
+    end
     if name~=BG.cur then
         BG.discard()
         BG.cur=name
@@ -46,19 +50,25 @@ function BG.set(name)
     return true
 end
 
-do
-    local gc=love.graphics
+do-- Built-in: None
+    BG.add('none',{
+        draw=function()
+            gc_clear(.08,.08,.084)
+        end,
+    })
+end
+do-- Built-in: Color
     local r,g,b=.26,.26,.26
     BG.add('color',{
         draw=function()
-            gc.clear(r,g,b)
+            gc_clear(r,g,b)
         end,
         event=function(_r,_g,_b)
             r,g,b=_r,_g,_b
         end,
     })
 end
-do
+do-- Built-in: Image
     local gc_setColor=love.graphics.setColor
     local back={}
     local image=false
@@ -88,5 +98,7 @@ do
 
     BG.add('image',back)
 end
+
+BG.set('none')
 
 return BG
