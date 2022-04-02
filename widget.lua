@@ -1066,7 +1066,7 @@ function Widgets.inputBox:draw()
     if self.secret then
         y=y+h*.5-f*.2
         for i=1,#self._value do
-            gc_rectangle("fill",x+f*.6*i,y,f*.4,f*.4)
+            gc_rectangle('fill',x+f*.6*i,y,f*.4,f*.4)
         end
     else
         setFont(f,self.fontType)
