@@ -846,7 +846,7 @@ function Widgets.selector:reset()
         end
     end
     if not self._select then
-        MES.new('error',"Selector "..self.name.." dead, disp= "..tostring(V))
+        MES.new('error',"Selector "..(self.name or '[NULL]').." dead, disp= "..tostring(V))
     end
 end
 function Widgets.selector:isAbove(x,y)
