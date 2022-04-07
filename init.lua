@@ -10,6 +10,7 @@ local gc_print,gc_printf=gc.print,gc.printf
 
 local max,min=math.max,math.min
 math.randomseed(os.time()*2600)
+kb.setKeyRepeat(true)
 
 --------------------------------------------------------------
 

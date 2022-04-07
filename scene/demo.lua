@@ -36,6 +36,9 @@ local scene={
         WIDGET.new{type='selector',    text='selector3', x=330,y=610,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[3] end,code=function(v) testVal_3[3]=v end},
 
         WIDGET.new{type='button',      text='Quit',      x=600,y=540,w=200,h=100,code=function() love.event.quit() end},
+        WIDGET.new{type='button',      text='Console',   x=600,y=630,w=160,h=60,code=WIDGET.c_goScn'_console'},
+        WIDGET.new{type='button',      text='Editor',    x=600,y=700,w=160,h=60,code=WIDGET.c_goScn'_editor'},
+
         WIDGET.new{type='inputBox',    text='inputBox',  x=100,y=650,w=300,h=100,labelPos='down'},
         WIDGET.new{type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
         WIDGET.new{type='listBox',     name='listBox',   x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)

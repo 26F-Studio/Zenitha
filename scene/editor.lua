@@ -49,7 +49,7 @@ Page.__index=Page
 function Page.new(args)
     args=args or ''
     local p=setmetatable({
-        windowW=1500,windowH=900,
+        windowW=SCR.w-100,windowH=SCR.h-100,
         scrollX=0,scrollY=0,
         curX=0,curY=1,
         memX=0,
