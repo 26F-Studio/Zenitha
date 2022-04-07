@@ -9,7 +9,19 @@ local sArg=STRING.sArg
 local tempInputBox=WIDGET.new{type='inputBox'}
 local clipboardText=""
 
-local rainbowShader-- We generate shader later
+-- Compile this when enter scene
+local rainbowShader=[[
+    uniform float phase;
+    vec4 effect(vec4 color,sampler2D tex,vec2 texCoord,vec2 scrCoord){
+        float iphase=phase-(scrCoord.x/love_ScreenSize.x+scrCoord.y/love_ScreenSize.y)*6.26;
+        return vec4(
+            sin(iphase),
+            sin(iphase+2.0944),
+            sin(iphase-2.0944),
+            1.0
+        )*.5+.5;
+    }
+]]
 
 local function freshClipboard()
     clipboardText=love.system.getClipboardText()
@@ -49,7 +61,7 @@ Page.__index=Page
 function Page.new(args)
     args=args or ''
     local p=setmetatable({
-        windowW=SCR.w-100,windowH=SCR.h-100,
+        windowW=SCR.w0-100,windowH=SCR.h0-100,
         scrollX=0,scrollY=0,
         curX=0,curY=1,
         memX=0,
@@ -272,6 +284,8 @@ function Page:delete(args)
         self.curX,self.curY=0,1
         self.memX=0
         self.selX,self.selY=false,false
+        result=true
+        SFX.play(tempInputBox.sound_clear)
     elseif self.selX then
         local startX,startY,endX,endY=self:getSelArea()
         if startY==endY then
@@ -283,6 +297,7 @@ function Page:delete(args)
         self.curX,self.curY=startX,startY
         self.selX,self.selY=false,false
         result=true
+        SFX.play(tempInputBox.sound_del)
     else
         if sArg(args,'-left') then
             if self.curX==0 then
@@ -292,6 +307,7 @@ function Page:delete(args)
                     rem(self,self.curY)
                     self.curY=self.curY-1
                     result=true
+                    SFX.play(tempInputBox.sound_bksp)
                 end
             else
                 local l=self[self.curY]
@@ -299,6 +315,7 @@ function Page:delete(args)
                 self[self.curY]=l
                 self.curX=max(self.curX-1,0)
                 result=true
+                SFX.play(tempInputBox.sound_bksp)
             end
         elseif sArg(args,'-right') then
             if self.curX==#self[self.curY] then
@@ -306,17 +323,18 @@ function Page:delete(args)
                     self[self.curY]=self[self.curY]..self[self.curY+1]
                     rem(self,self.curY+1)
                     result=true
+                    SFX.play(tempInputBox.sound_bksp)
                 end
             else
                 local l=self[self.curY]
                 l=l:sub(1,self.curX)..l:sub(self.curX+2)
                 self[self.curY]=l
                 result=true
+                SFX.play(tempInputBox.sound_bksp)
             end
         end
     end
     if result then
-        SFX.play(tempInputBox.sound_bksp)
         self:updateScroll()
         self:saveCurX()
     end
@@ -332,6 +350,9 @@ function Page:insLine(args)
         ins(self,self.curY+1,"")
         self.curY=self.curY+1
         self.curX=0
+    end
+    if not sArg(args,'-auto') then
+        SFX.play(tempInputBox.sound_input)
     end
     self:updateScroll()
     self:saveCurX()
@@ -401,6 +422,7 @@ function Page:cut()
     self:delete()
     if lineAdded then self:delete('-left') end
     self:updateScroll()
+    SFX.play(tempInputBox.sound_clear)
 end
 
 function Page:copy()
@@ -425,7 +447,7 @@ function Page:paste(data)
     str=STRING.split(str,'\n')
     for i=1,#str-1 do
         self:insStr(str[i])
-        self:insLine('-normal')
+        self:insLine('-auto -normal')
     end
     self:insStr(str[#str])
     self:updateScroll()
@@ -585,27 +607,8 @@ end
 
 local activePages={}
 local curPage=false
-
-local scene={}
-
-function scene.enter()
-    BG.set('none')
-    curPage=Page.new('-welcome')
-    ins(activePages,curPage)
-    freshClipboard()
-    rainbowShader=rainbowShader or gc.newShader[[
-        uniform float phase;
-        vec4 effect(vec4 color,sampler2D tex,vec2 texCoord,vec2 scrCoord){
-            float iphase=phase-(scrCoord.x/love_ScreenSize.x+scrCoord.y/love_ScreenSize.y)*6.26;
-            return vec4(
-                sin(iphase),
-                sin(iphase+2.0944),
-                sin(iphase-2.0944),
-                1.0
-            )*.5+.5;
-        }
-    ]]
-end
+local clipboardFreshCD
+local escapeHoldTime
 
 local keyMap={
     ['left']=               {func='moveCursor',  args='-left'},
@@ -676,7 +679,21 @@ local comboKeys={
     ['lalt']=true,['ralt']=true,
 }
 
-function scene.keyDown(key)
+local scene={}
+
+function scene.enter()
+    BG.set('none')
+    if type(rainbowShader)=='string' then rainbowShader=gc.newShader(rainbowShader) end
+    if #activePages==0 then
+        ins(activePages,curPage)
+        curPage=Page.new('-welcome')
+    end
+    clipboardFreshCD=0
+    escapeHoldTime=0
+    freshClipboard()
+end
+
+function scene.keyDown(key,isRep)
     if curPage then
         if comboKeys[key] then return end
         if keyAlias[key] then key=keyAlias[key] end
@@ -698,12 +715,14 @@ function scene.keyDown(key)
             if curPage.selX then
                 curPage.selX=false
                 curPage.selY=false
+            elseif not isRep then
+                MES.new('info',"Hold esc to quit",.26)
             end
         else
             MES.new('info',"Unknown key: "..combo)
         end
     else
-
+        -- ?
     end
 end
 function scene.mouseDown(x,y,k)
@@ -768,12 +787,20 @@ function scene.fileDropped(file)
     curPage:loadFile(file)
 end
 
-local clipboardFreshCD=0
 function scene.update(dt)
     clipboardFreshCD=clipboardFreshCD+dt
     if clipboardFreshCD>=1 then
         clipboardFreshCD=0
         freshClipboard()
+    end
+    if kb.isDown('escape') then
+        escapeHoldTime=escapeHoldTime+dt
+        if escapeHoldTime>2 then
+            escapeHoldTime=-1e99
+            SCN.back()
+        end
+    else
+        escapeHoldTime=0
     end
 end
 
