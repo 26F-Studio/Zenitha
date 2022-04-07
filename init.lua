@@ -129,7 +129,10 @@ local ITP=xOy.inverseTransformPoint
 local setFont=FONT.set
 
 -- Set default font
-FONT.load({_basic='Zenitha/basic.otf'})
+FONT.load({
+    _basic='Zenitha/basic.otf',
+    _codePixel='Zenitha/codePixel.ttf',
+})
 FONT.setDefaultFont('_basic')
 FONT.setDefaultFallback('_basic')
 
@@ -899,5 +902,6 @@ end
 
 SCN.add('_quit',{enter=function() onQuit() love.event.quit() end})
 SCN.add('_console',require'Zenitha/scene/console')
+SCN.add('_editor',require'Zenitha/scene/editor')
 SCN.add('_zenitha',require'Zenitha/scene/demo')
 SCN.add('_test',require'Zenitha/scene/test')
