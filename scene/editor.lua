@@ -1,7 +1,5 @@
-local utf8=require('utf8')
-for k,v in next,utf8 do print(k,v)end
 local gc=love.graphics
-local kb=love.keyboard
+local ms,kb=love.mouse,love.keyboard
 local ins,rem=table.insert,table.remove
 local max,min=math.max,math.min
 local int,ceil=math.floor,math.ceil
@@ -69,7 +67,6 @@ function Page.new(args)
             "",
             "by 26F Studio",
             "",
-            "",
         })
         p:moveCursor('-auto -end -jump')
     end
@@ -114,99 +111,109 @@ function Page:scrollH(args)
 end
 
 function Page:moveCursor(args)
-    if not sArg(args,'-auto') and sArg(args,'-hold') and not self.selX then
-        self.selX,self.selY=self.curX,self.curY
-    end
-    if sArg(args,'-left') then
-        if sArg(args,'-jump') then
-            local state='ready'
-            while true do
-                state=nextWordState(state,
-                    self.curX==0 and (self.curY==1 and 'eof' or 'space') or
-                    STRING.type(self[self.curY]:sub(self.curX,self.curX))
-                )
-                if state=='stop' then break end
+    if sArg(args,'-mouse') then
+        if self.curY<1 then self.curY=1; self.curX=0 end
+        if self.curY>#self then self.curY=#self; self.curX=#self[self.curY] end
+        if self.curX<0 then self.curX=0 end
+        if self.curX>#self[self.curY] then self.curX=#self[self.curY] end
+        if self.selX==self.curX and self.selY==self.curY then
+            self.selX,self.selY=false,false
+        end
+    else
+        if not sArg(args,'-auto') and sArg(args,'-hold') and not self.selX then
+            self.selX,self.selY=self.curX,self.curY
+        end
+        if sArg(args,'-left') then
+            if sArg(args,'-jump') then
+                local state='ready'
+                while true do
+                    state=nextWordState(state,
+                        self.curX==0 and (self.curY==1 and 'eof' or 'space') or
+                        STRING.type(self[self.curY]:sub(self.curX,self.curX))
+                    )
+                    if state=='stop' then break end
+                    if self.curX==0 then
+                        self.curY=self.curY-1
+                        self.curX=#self[self.curY]
+                    else
+                        self.curX=self.curX-1
+                    end
+                end
+            else
                 if self.curX==0 then
-                    self.curY=self.curY-1
-                    self.curX=#self[self.curY]
+                    if self.curY>1 then
+                        self:moveCursor('-auto -up')
+                        self.curX=#self[self.curY]
+                    end
                 else
                     self.curX=self.curX-1
                 end
             end
-        else
-            if self.curX==0 then
-                if self.curY>1 then
-                    self:moveCursor('-auto -up')
-                    self.curX=#self[self.curY]
+            self:saveCurX()
+        elseif sArg(args,'-right') then
+            if sArg(args,'-jump') then
+                local state='ready'
+                while true do
+                    state=nextWordState(state,
+                        self.curX==#self[self.curY] and (self.curY==#self and 'eof' or 'space') or
+                        STRING.type(self[self.curY]:sub(self.curX+1,self.curX+1))
+                    )
+                    if state=='stop' then break end
+                    if self.curX==#self[self.curY] then
+                        self.curY=self.curY+1
+                        self.curX=0
+                    else
+                        self.curX=self.curX+1
+                    end
                 end
             else
-                self.curX=self.curX-1
-            end
-        end
-        self:saveCurX()
-    elseif sArg(args,'-right') then
-        if sArg(args,'-jump') then
-            local state='ready'
-            while true do
-                state=nextWordState(state,
-                    self.curX==#self[self.curY] and (self.curY==#self and 'eof' or 'space') or
-                    STRING.type(self[self.curY]:sub(self.curX+1,self.curX+1))
-                )
-                if state=='stop' then break end
                 if self.curX==#self[self.curY] then
-                    self.curY=self.curY+1
-                    self.curX=0
+                    if self.curY<#self then
+                        self:moveCursor('-auto -down')
+                        self.curX=0
+                    end
                 else
                     self.curX=self.curX+1
                 end
             end
-        else
-            if self.curX==#self[self.curY] then
-                if self.curY<#self then
-                    self:moveCursor('-auto -down')
-                    self.curX=0
-                end
-            else
-                self.curX=self.curX+1
+            self:saveCurX()
+        elseif sArg(args,'-home') then
+            if sArg(args,'-jump') then
+                self.curY=1
             end
-        end
-        self:saveCurX()
-    elseif sArg(args,'-home') then
-        if sArg(args,'-jump') then
-            self.curY=1
-        end
-        self.curX=0
-        self:saveCurX()
-    elseif sArg(args,'-end') then
-        if sArg(args,'-jump') then
-            self.curY=#self
-        end
-        self.curX=#self[self.curY]
-        self:saveCurX()
-    elseif sArg(args,'-up') then
-        local l=sArg(args,'-jump') and 26 or 1
-        if self.curY>l then
-            self.curY=self.curY-l
-        else
-            self.curY=1
             self.curX=0
-        end
-        self.curX=min(self.memX,#self[self.curY])
-    elseif sArg(args,'-down') then
-        local l=sArg(args,'-jump') and 26 or 1
-        if self.curY<=#self-l then
-            self.curY=self.curY+l
-        else
-            self.curY=#self
+            self:saveCurX()
+        elseif sArg(args,'-end') then
+            if sArg(args,'-jump') then
+                self.curY=#self
+            end
             self.curX=#self[self.curY]
+            self:saveCurX()
+        elseif sArg(args,'-up') then
+            local l=sArg(args,'-jump') and 26 or 1
+            if self.curY>l then
+                self.curY=self.curY-l
+            else
+                self.curY=1
+                self.curX=0
+            end
+            self.curX=min(self.memX,#self[self.curY])
+        elseif sArg(args,'-down') then
+            local l=sArg(args,'-jump') and 26 or 1
+            if self.curY<=#self-l then
+                self.curY=self.curY+l
+            else
+                self.curY=#self
+                self.curX=#self[self.curY]
+            end
+            self.curX=min(self.memX,#self[self.curY])
         end
-        self.curX=min(self.memX,#self[self.curY])
-    end
-    if not sArg(args,'-auto') then
-        if not sArg(args,'-hold') or self.selX==self.curX and self.selY==self.curY then
-            self.selX,self.selY=false,false
+        if not sArg(args,'-auto') then
+            if not sArg(args,'-hold') or self.selX==self.curX and self.selY==self.curY then
+                self.selX,self.selY=false,false
+            end
+            self:updateScroll()
         end
-        self:updateScroll()
     end
 end
 
@@ -542,13 +549,15 @@ function Page:draw(x,y)
     end
 
     -- Highlight line
-    gc.setColor(1,1,1,.355)
-    gc.setLineWidth(2)
-    _x,_y=max(camX,100),lineH*self.curY
-    _w=winW+min(camX-100,0)
-    gc.line(_x,_y,_x+_w,_y)
-    _y=_y-lineH
-    gc.line(_x,_y,_x+_w,_y)
+    if not self.selX then
+        gc.setColor(1,1,1,.355)
+        gc.setLineWidth(2)
+        _x,_y=max(camX,100),lineH*self.curY
+        _w=winW+min(camX-100,0)
+        gc.line(_x,_y,_x+_w,_y)
+        _y=_y-lineH
+        gc.line(_x,_y,_x+_w,_y)
+    end
 
     -- Cancel camera
     gc.pop()
@@ -646,20 +655,30 @@ local keyMap={
     ['return']=             {func='insLine',     args='-normal'},
     ['ctrl+return']=        {func='insLine',     args='-newLine'},
 
+    ['ctrl+tab']=           {func='switchFile',  args='-next'},
+    ['ctrl+shift+tab']=     {func='switchFile',  args='-prev'},
+
     ['backspace']=          {func='delete',      args='-left'},
     ['delete']=             {func='delete',      args='-right'},
 }
 
 local keyAlias={
-    ['kp7']='home',
-    ['kp1']='end',
-    ['kp9']='pageup',
-    ['kp3']='pagedown',
+    ['kp+']='+',['kp-']='-',['kp*']='*',['kp/']='/',
+    ['kpenter']='return',
+    ['kp.']='.',
+    ['kp7']='home',['kp1']='end',
+    ['kp9']='pageup',['kp3']='pagedown',
+}
+
+local comboKeys={
+    ['lctrl']=true,['rctrl']=true,
+    ['lshift']=true,['rshift']=true,
+    ['lalt']=true,['ralt']=true,
 }
 
 function scene.keyDown(key)
     if curPage then
-        if key:find('ctrl') or key:find('shift') or key:find('alt') then return end
+        if comboKeys[key] then return end
         if keyAlias[key] then key=keyAlias[key] end
         local combo=key
         if kb.isDown('lalt','ralt') then combo='alt+'..combo end
@@ -688,8 +707,47 @@ function scene.keyDown(key)
     end
 end
 function scene.mouseDown(x,y,k)
+    if not curPage then return end
+    local p=curPage
+
+    -- Outside mouse posion
+    local mx,my=x-50,y-50
+    if not (mx>0 and mx<p.windowW and my>0 and my<p.windowH) then return end
+
+    -- Inside position
+    mx,my=mx-100+p.scrollX*p.charWidth,my+p.scrollY*p.lineHeight
+    if mx<0 then-- Select line
+        local ty=int(my/p.lineHeight)+1
+
+        if not (kb.isDown('lshift','rshift') and p.selX) then
+            p.selX,p.selY=0,ty
+        end
+        p.curX,p.curY=0,ty+1
+        p:moveCursor('-mouse')
+    else-- Select char
+        if kb.isDown('lshift','rshift') then
+            if not p.selX then p.selX,p.selY=p.curX,p.curY end
+            p.curX,p.curY=int(mx/p.charWidth+.5),int(my/p.lineHeight)+1
+            p:moveCursor('-mouse -hold')
+        else
+            p.selX,p.selY=false,false
+            p.curX,p.curY=int(mx/p.charWidth+.5),int(my/p.lineHeight)+1
+            p:moveCursor('-mouse')
+        end
+    end
+    p:saveCurX()
 end
 function scene.mouseMove(x,y)
+    if not curPage then return end
+    local p=curPage
+    if ms.isDown(1) or ms.isDown(2) then
+        if not p.selX then p.selX,p.selY=p.curX,p.curY end
+        local mx,my=x-50,y-50
+        mx,my=mx-100+p.scrollX*p.charWidth,my+p.scrollY*p.lineHeight
+        p.curX,p.curY=int(mx/p.charWidth+.5),int(my/p.lineHeight)+1
+        p:moveCursor('-mouse')
+        p:saveCurX()
+    end
 end
 function scene.mouseUp(x,y,k)
 end
