@@ -6,6 +6,12 @@ local int,ceil=math.floor,math.ceil
 
 local sArg=STRING.sArg
 
+local activePages={}
+local curPage=false
+local pageInfo={COLOR.L,"Page: ",COLOR.LR,false,COLOR.LD,"/",COLOR.lI,false}
+local clipboardFreshCD
+local escapeHoldTime
+
 local tempInputBox=WIDGET.new{type='inputBox'}
 local clipboardText=""
 
@@ -27,8 +33,11 @@ local function freshClipboard()
     clipboardText=love.system.getClipboardText()
     if clipboardText=="" then
         clipboardText=false
-    elseif #clipboardText>26 then
-        clipboardText=clipboardText:sub(1,21).."...("..#clipboardText..")"
+    else
+        clipboardText=clipboardText:gsub('[\r\n]','')
+        if #clipboardText>26 then
+            clipboardText=clipboardText:sub(1,21).."...("..#clipboardText..")"
+        end
     end
 end
 
@@ -54,13 +63,18 @@ local function nextWordState(state,t)
         )
 end
 
+local function freshPageInfo()
+    pageInfo[4]=curPage
+    pageInfo[8]=#activePages
+end
+
 -------------------------------------------------------------
 
 local Page={}
 Page.__index=Page
 function Page.new(args)
     args=args or ''
-    local p=setmetatable({
+    local P=setmetatable({
         windowW=SCR.w0-100,windowH=SCR.h0-100,
         scrollX=0,scrollY=0,
         curX=0,curY=1,
@@ -72,7 +86,7 @@ function Page.new(args)
         fileInfo={COLOR.L,"*Untitled"},
     },Page)
     if sArg(args,'-welcome') then
-        TABLE.connect(p,{
+        TABLE.connect(P,{
             "-- Welcome to Zenitha editor --",
             "",
             "Type freely on any devices.",
@@ -80,10 +94,12 @@ function Page.new(args)
             "by 26F Studio",
             "",
         })
-        p:moveCursor('-auto -end -jump')
+        P:moveCursor('-auto -end -jump')
+    else
+        P[1]=""
     end
-    p:saveCurX()
-    return p
+    P:saveCurX()
+    return P
 end
 
 function Page:loadFile(file)
@@ -98,7 +114,7 @@ function Page:loadFile(file)
 
     -- Reset cursor and scroll
     self.curX,self.curY=0,1
-    self:updateScroll()
+    self:freshScroll()
     self:saveCurX()
 end
 
@@ -118,7 +134,7 @@ end
 function Page:scrollH(args)
     local dx=sArg(args,'-left') and 1 or sArg(args,'-right') and -1
     if not dx then return end
-    if sArg(args,'-jump') then dx=10*dx end
+    if jump then dx=10*dx end
     self.scrollX=max(self.scrollX+dx,0)
 end
 
@@ -132,11 +148,14 @@ function Page:moveCursor(args)
             self.selX,self.selY=false,false
         end
     else
-        if not sArg(args,'-auto') and sArg(args,'-hold') and not self.selX then
+        local hold=sArg(args,'-hold')
+        local jump=sArg(args,'-jump')
+        if not sArg(args,'-auto') and hold and not self.selX then
             self.selX,self.selY=self.curX,self.curY
         end
         if sArg(args,'-left') then
-            if sArg(args,'-jump') then
+            if jump then
+                if not hold and self.selX then self.selX,self.selY=false,false end
                 local state='ready'
                 while true do
                     state=nextWordState(state,
@@ -151,6 +170,9 @@ function Page:moveCursor(args)
                         self.curX=self.curX-1
                     end
                 end
+            elseif not hold and self.selX then
+                self.curX,self.curY=self:getSelArea()
+                self.selX,self.selY=false,false
             else
                 if self.curX==0 then
                     if self.curY>1 then
@@ -163,7 +185,8 @@ function Page:moveCursor(args)
             end
             self:saveCurX()
         elseif sArg(args,'-right') then
-            if sArg(args,'-jump') then
+            if jump then
+                if not hold and self.selX then self.selX,self.selY=false,false end
                 local state='ready'
                 while true do
                     state=nextWordState(state,
@@ -178,6 +201,10 @@ function Page:moveCursor(args)
                         self.curX=self.curX+1
                     end
                 end
+            elseif not hold and self.selX then
+                local _
+                _,_,self.curX,self.curY=self:getSelArea()
+                self.selX,self.selY=false,false
             else
                 if self.curX==#self[self.curY] then
                     if self.curY<#self then
@@ -190,19 +217,19 @@ function Page:moveCursor(args)
             end
             self:saveCurX()
         elseif sArg(args,'-home') then
-            if sArg(args,'-jump') then
+            if jump then
                 self.curY=1
             end
             self.curX=0
             self:saveCurX()
         elseif sArg(args,'-end') then
-            if sArg(args,'-jump') then
+            if jump then
                 self.curY=#self
             end
             self.curX=#self[self.curY]
             self:saveCurX()
         elseif sArg(args,'-up') then
-            local l=sArg(args,'-jump') and 26 or 1
+            local l=jump and 26 or 1
             if self.curY>l then
                 self.curY=self.curY-l
             else
@@ -211,7 +238,7 @@ function Page:moveCursor(args)
             end
             self.curX=min(self.memX,#self[self.curY])
         elseif sArg(args,'-down') then
-            local l=sArg(args,'-jump') and 26 or 1
+            local l=jump and 26 or 1
             if self.curY<=#self-l then
                 self.curY=self.curY+l
             else
@@ -221,10 +248,10 @@ function Page:moveCursor(args)
             self.curX=min(self.memX,#self[self.curY])
         end
         if not sArg(args,'-auto') then
-            if not sArg(args,'-hold') or self.selX==self.curX and self.selY==self.curY then
+            if not hold or self.selX==self.curX and self.selY==self.curY then
                 self.selX,self.selY=false,false
             end
-            self:updateScroll()
+            self:freshScroll()
         end
     end
 end
@@ -233,7 +260,8 @@ function Page:saveCurX()
     self.memX=self.curX
 end
 
-function Page:updateScroll()
+function Page:freshScroll()
+    self.scrollX=MATH.interval(self.scrollX,ceil(self.curX-(self.windowW-100)/self.charWidth),self.curX)
     self.scrollY=MATH.interval(self.scrollY,ceil(self.curY-self.windowH/self.lineHeight),self.curY-1)
 end
 
@@ -245,6 +273,7 @@ function Page:insStr(str)
     l=l:sub(1,self.curX)..str..l:sub(self.curX+1)
     self.curX=self.curX+#str
     self[self.curY]=l
+    self:freshScroll()
     self:saveCurX()
     SFX.play(tempInputBox.sound_input)
 end
@@ -253,23 +282,46 @@ function Page:indent(args)
     if sArg(args,'-add') then
         if self.selX then
             local _,startY,_,endY=self:getSelArea()
-            for l=startY,endY do
-                self[l]='    '..self[l]
+            if self.curY==endY and self.curX==0 then
+                endY=endY-1
+            else
+                self.curX=self.curX+4
             end
             self.selX=self.selX+4
-            self.curX=self.curX+4
+            for l=startY,endY do self[l]='    '..self[l] end
         else
             self:insStr('    ')
         end
     elseif sArg(args,'-remove') then
-        local _,startY,_,endY=self:getSelArea()
-        for l=startY,endY do
-            if self[l]:sub(1,4)=='    ' then
-                self[l]=self[l]:sub(5)
+        local startX,startY,endX,endY=self:getSelArea()
+        local pos
+
+        -- Cut head
+        pos=string.find(self[startY],'%S') or #self[startY]
+        if pos>1 then
+            startX=max(startX-4,pos-5,0)
+            self[startY]=self[startY]:sub(min(pos,5))
+        end
+
+        if endY>startY then
+            -- Cut body
+            for l=startY+1,endY-1 do
+                pos=string.find(self[l],'%S') or #self[l]
+                if pos>1 then self[l]=self[l]:sub(min(pos,5)) end
+            end
+
+            -- Cut tail
+            pos=string.find(self[endY],'%S') or #self[endY]
+            if pos>1 then
+                endX=max(endX-4,pos-5,0)
+                self[endY]=self[endY]:sub(min(pos,5))
             end
         end
-        self.selX=self.selX-4
-        self.curX=self.curX-4
+        if self.selY==endY then
+            self.curX,self.selX=startX,self.selX and endX
+        else
+            self.curX,self.selX=endX,self.selX and startX
+        end
     end
     self:saveCurX()
 end
@@ -335,7 +387,7 @@ function Page:delete(args)
         end
     end
     if result then
-        self:updateScroll()
+        self:freshScroll()
         self:saveCurX()
     end
 end
@@ -354,7 +406,7 @@ function Page:insLine(args)
     if not sArg(args,'-auto') then
         SFX.play(tempInputBox.sound_input)
     end
-    self:updateScroll()
+    self:freshScroll()
     self:saveCurX()
 end
 
@@ -366,7 +418,7 @@ function Page:moveLine(args)
             ins(self,endY,rem(self,startY-1))
             self.curY=self.curY-1
             if self.selY then self.selY=self.selY-1 end
-            self:updateScroll()
+            self:freshScroll()
             self:saveCurX()
         end
     elseif sArg(args,'-down') then
@@ -376,7 +428,7 @@ function Page:moveLine(args)
             ins(self,startY,rem(self,endY+1))
             self.curY=self.curY+1
             if self.selY then self.selY=self.selY+1 end
-            self:updateScroll()
+            self:freshScroll()
             self:saveCurX()
         end
     end
@@ -421,7 +473,7 @@ function Page:cut()
     self:copy()
     self:delete()
     if lineAdded then self:delete('-left') end
-    self:updateScroll()
+    self:freshScroll()
     SFX.play(tempInputBox.sound_clear)
 end
 
@@ -436,6 +488,7 @@ function Page:copy()
         strings[#strings+1]=self[endY]:sub(1,endX)
     end
     love.system.setClipboardText(table.concat(strings,'\n'))
+    freshClipboard()
 end
 
 function Page:paste(data)
@@ -450,7 +503,7 @@ function Page:paste(data)
         self:insLine('-auto -normal')
     end
     self:insStr(str[#str])
-    self:updateScroll()
+    self:freshScroll()
 end
 function Page:draw(x,y)
     local _x,_y,_w
@@ -605,66 +658,93 @@ end
 
 -------------------------------------------------------------
 
-local activePages={}
-local curPage=false
-local clipboardFreshCD
-local escapeHoldTime
+local globalFuncs={}
 
-local keyMap={
-    ['left']=               {func='moveCursor',  args='-left'},
-    ['right']=              {func='moveCursor',  args='-right'},
-    ['up']=                 {func='moveCursor',  args='-up'},
-    ['down']=               {func='moveCursor',  args='-down'},
-    ['home']=               {func='moveCursor',  args='-home'},
-    ['end']=                {func='moveCursor',  args='-end'},
-    ['pageup']=             {func='moveCursor',  args='-jump -up'},
-    ['pagedown']=           {func='moveCursor',  args='-jump -down'},
+function globalFuncs.switchFile(args)
+    if sArg(args,'-next') then
+        curPage=curPage%#activePages+1
+    elseif sArg(args,'-prev') then
+        curPage=(curPage-2)%#activePages+1
+    end
+    freshPageInfo()
+end
 
-    ['ctrl+left']=          {func='moveCursor',  args='-left -jump'},
-    ['ctrl+right']=         {func='moveCursor',  args='-right -jump'},
-    ['ctrl+up']=            {func='scrollV',     args='-up'},
-    ['ctrl+down']=          {func='scrollV',     args='-down'},
-    ['ctrl+home']=          {func='moveCursor',  args='-home -jump'},
-    ['ctrl+end']=           {func='moveCursor',  args='-end -jump'},
-    ['ctrl+pageup']=        {func='scrollV',     args='-up -jump'},
-    ['ctrl+pagedown']=      {func='scrollV',     args='-down -jump'},
+function globalFuncs.closeFile()
+    if not curPage then return end
+    rem(activePages,curPage)
+    if not activePages[curPage] then
+        curPage=curPage>1 and curPage-1
+    end
+    freshPageInfo()
+end
 
-    ['shift+left']=         {func='moveCursor',  args='-left -hold'},
-    ['shift+right']=        {func='moveCursor',  args='-right -hold'},
-    ['shift+up']=           {func='moveCursor',  args='-up -hold'},
-    ['shift+down']=         {func='moveCursor',  args='-down -hold'},
-    ['shift+home']=         {func='moveCursor',  args='-home -hold'},
-    ['shift+end']=          {func='moveCursor',  args='-end -hold'},
+function globalFuncs.newFile(args)
+    ins(activePages,Page.new(args))
+    curPage=#activePages
+    freshPageInfo()
+end
 
-    ['ctrl+shift+left']=    {func='moveCursor',  args='-left -jump -hold'},
-    ['ctrl+shift+right']=   {func='moveCursor',  args='-right -jump -hold'},
-    ['ctrl+shift+up']=      {func='moveCursor',  args='-up -hold'},-- Same as no ctrl
-    ['ctrl+shift+down']=    {func='moveCursor',  args='-down -hold'},-- Same as no ctrl
-    ['ctrl+shift+home']=    {func='moveCursor',  args='-home -jump -hold'},
-    ['ctrl+shift+end']=     {func='moveCursor',  args='-end -jump -hold'},
+local globalComboMap={
+    ['ctrl+tab']=           {func='switchFile',     args='-next'},
+    ['ctrl+shift+tab']=     {func='switchFile',     args='-prev'},
 
-    ['alt+up']=             {func='moveLine',    args='-up'},
-    ['alt+down']=           {func='moveLine',    args='-down'},
-
-    ['ctrl+a']=             {func='selectAll'},
-    ['ctrl+d']=             {func='duplicateLine'},
-    ['ctrl+x']=             {func='cut'},
-    ['ctrl+c']=             {func='copy'},
-    ['ctrl+v']=             {func='paste'},
-
-    ['space']=              {func='insStr',      args=' '},
-    ['tab']=                {func='indent',      args='-add'},
-    ['shift+tab']=          {func='indent',      args='-remove'},
-    ['return']=             {func='insLine',     args='-normal'},
-    ['ctrl+return']=        {func='insLine',     args='-newLine'},
-
-    ['ctrl+tab']=           {func='switchFile',  args='-next'},
-    ['ctrl+shift+tab']=     {func='switchFile',  args='-prev'},
-
-    ['backspace']=          {func='delete',      args='-left'},
-    ['delete']=             {func='delete',      args='-right'},
+    ['ctrl+w']=             {func='closeFile',      args=''},
+    ['ctrl+n']=             {func='newFile',        args=''},
 }
 
+-------------------------------------------------------------
+
+local pageComboMap={
+    ['left']=               {func='moveCursor',     args='-left'},
+    ['right']=              {func='moveCursor',     args='-right'},
+    ['up']=                 {func='moveCursor',     args='-up'},
+    ['down']=               {func='moveCursor',     args='-down'},
+    ['home']=               {func='moveCursor',     args='-home'},
+    ['end']=                {func='moveCursor',     args='-end'},
+    ['pageup']=             {func='moveCursor',     args='-jump -up'},
+    ['pagedown']=           {func='moveCursor',     args='-jump -down'},
+
+    ['ctrl+left']=          {func='moveCursor',     args='-left -jump'},
+    ['ctrl+right']=         {func='moveCursor',     args='-right -jump'},
+    ['ctrl+up']=            {func='scrollV',        args='-up'},
+    ['ctrl+down']=          {func='scrollV',        args='-down'},
+    ['ctrl+home']=          {func='moveCursor',     args='-home -jump'},
+    ['ctrl+end']=           {func='moveCursor',     args='-end -jump'},
+    ['ctrl+pageup']=        {func='scrollV',        args='-up -jump'},
+    ['ctrl+pagedown']=      {func='scrollV',        args='-down -jump'},
+
+    ['shift+left']=         {func='moveCursor',     args='-left -hold'},
+    ['shift+right']=        {func='moveCursor',     args='-right -hold'},
+    ['shift+up']=           {func='moveCursor',     args='-up -hold'},
+    ['shift+down']=         {func='moveCursor',     args='-down -hold'},
+    ['shift+home']=         {func='moveCursor',     args='-home -hold'},
+    ['shift+end']=          {func='moveCursor',     args='-end -hold'},
+
+    ['ctrl+shift+left']=    {func='moveCursor',     args='-left -jump -hold'},
+    ['ctrl+shift+right']=   {func='moveCursor',     args='-right -jump -hold'},
+    ['ctrl+shift+up']=      {func='moveCursor',     args='-up -hold'},-- Same as no ctrl
+    ['ctrl+shift+down']=    {func='moveCursor',     args='-down -hold'},-- Same as no ctrl
+    ['ctrl+shift+home']=    {func='moveCursor',     args='-home -jump -hold'},
+    ['ctrl+shift+end']=     {func='moveCursor',     args='-end -jump -hold'},
+
+    ['alt+up']=             {func='moveLine',       args='-up'},
+    ['alt+down']=           {func='moveLine',       args='-down'},
+
+    ['space']=              {func='insStr',         args=' '},
+    ['backspace']=          {func='delete',         args='-left'},
+    ['delete']=             {func='delete',         args='-right'},
+    ['tab']=                {func='indent',         args='-add'},
+    ['shift+tab']=          {func='indent',         args='-remove'},
+    ['return']=             {func='insLine',        args='-normal'},
+    ['ctrl+return']=        {func='insLine',        args='-newLine'},
+
+    ['ctrl+a']=             {func='selectAll',      args=''},
+    ['ctrl+d']=             {func='duplicateLine',  args=''},
+    ['ctrl+x']=             {func='cut',            args=''},
+    ['ctrl+c']=             {func='copy',           args=''},
+    ['ctrl+v']=             {func='paste',          args=''},
+    ['ctrl+s']=             {func='save',           args=''},
+}
 local keyAlias={
     ['kp+']='+',['kp-']='-',['kp*']='*',['kp/']='/',
     ['kpenter']='return',
@@ -672,119 +752,125 @@ local keyAlias={
     ['kp7']='home',['kp1']='end',
     ['kp9']='pageup',['kp3']='pagedown',
 }
-
-local comboKeys={
+local unimportantKeys={
     ['lctrl']=true,['rctrl']=true,
     ['lshift']=true,['rshift']=true,
     ['lalt']=true,['ralt']=true,
 }
+if SYSTEM=='Windows' then
+    unimportantKeys['lgui']=true
+    unimportantKeys['rgui']=true
+elseif SYSTEM=='macOS' then
+    TABLE.cover({},pageComboMap)
+    TABLE.cover({},keyAlias)
+end
 
 local scene={}
 
 function scene.enter()
     BG.set('none')
     if type(rainbowShader)=='string' then rainbowShader=gc.newShader(rainbowShader) end
-    if #activePages==0 then
-        ins(activePages,curPage)
-        curPage=Page.new('-welcome')
-    end
+    if #activePages==0 then globalFuncs.newFile('-welcome') end
     clipboardFreshCD=0
     escapeHoldTime=0
     freshClipboard()
 end
 
 function scene.keyDown(key,isRep)
-    if curPage then
-        if comboKeys[key] then return end
-        if keyAlias[key] then key=keyAlias[key] end
-        local combo=key
-        if kb.isDown('lalt','ralt') then combo='alt+'..combo end
-        if kb.isDown('lshift','rshift') then combo='shift+'..combo end
-        if kb.isDown('lctrl','rctrl') then combo='ctrl+'..combo end
-        if keyMap[combo] then
-            curPage[keyMap[combo].func](curPage,keyMap[combo].args)
-        elseif #key==1 then
-            if combo=='shift+'..key then
-                curPage:insStr(STRING.shiftChar(key))
-            elseif combo==key then
-                curPage:insStr(key)
-            else
-                MES.new('info',"Unknown combo: "..combo)
-            end
-        elseif key=='escape' then
-            if curPage.selX then
-                curPage.selX=false
-                curPage.selY=false
-            elseif not isRep then
-                MES.new('info',"Hold esc to quit",.26)
-            end
-        else
-            MES.new('info',"Unknown key: "..combo)
+    if unimportantKeys[key] then return end
+    if keyAlias[key] then key=keyAlias[key] end
+    local combo=key
+    if kb.isDown('lalt','ralt') then combo='alt+'..combo end
+    if kb.isDown('lshift','rshift') then combo='shift+'..combo end
+    if kb.isDown('lctrl','rctrl') then combo='ctrl+'..combo end
+    local P=activePages[curPage]
+    if pageComboMap[combo] then
+        if P then
+            P[pageComboMap[combo].func](P,pageComboMap[combo].args)
         end
+    elseif globalComboMap[combo] then
+        globalFuncs[globalComboMap[combo].func](globalComboMap[combo].args)
+    elseif #key==1 then
+        if P then
+            if combo=='shift+'..key then
+                P:insStr(STRING.shiftChar(key))
+            elseif combo==key then
+                P:insStr(key)
+            else
+                MES.new('info',"Unknown combo: "..combo,1.26)
+            end
+        end
+    elseif key=='escape' then
+        if P then
+            if P.selX then
+                P.selX=false
+                P.selY=false
+            end
+        elseif not isRep then
+            MES.new('info',"Hold esc to quit",.26)
+        end
+    elseif #combo==#key then
+        MES.new('info',"Unknown key: "..key,1.26)
     else
-        -- ?
+        MES.new('info',"Unknown combo: "..combo,1.26)
     end
 end
 function scene.mouseDown(x,y,k)
     if not curPage then return end
-    local p=curPage
+    local P=activePages[curPage]
 
     -- Outside mouse posion
     local mx,my=x-50,y-50
-    if not (mx>0 and mx<p.windowW and my>0 and my<p.windowH) then return end
+    if not (mx>0 and mx<P.windowW and my>0 and my<P.windowH) then return end
 
     -- Inside position
-    mx,my=mx-100+p.scrollX*p.charWidth,my+p.scrollY*p.lineHeight
+    mx,my=mx-100+P.scrollX*P.charWidth,my+P.scrollY*P.lineHeight
     if mx<0 then-- Select line
-        local ty=int(my/p.lineHeight)+1
+        local ty=int(my/P.lineHeight)+1
 
-        if not (kb.isDown('lshift','rshift') and p.selX) then
-            p.selX,p.selY=0,ty
+        if not (kb.isDown('lshift','rshift') and P.selX) then
+            P.selX,P.selY=0,ty
         end
-        p.curX,p.curY=0,ty+1
-        p:moveCursor('-mouse')
+        P.curX,P.curY=0,ty+1
+        P:moveCursor('-mouse')
     else-- Select char
         if kb.isDown('lshift','rshift') then
-            if not p.selX then p.selX,p.selY=p.curX,p.curY end
-            p.curX,p.curY=int(mx/p.charWidth+.5),int(my/p.lineHeight)+1
-            p:moveCursor('-mouse -hold')
+            if not P.selX then P.selX,P.selY=P.curX,P.curY end
+            P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+            P:moveCursor('-mouse -hold')
         else
-            p.selX,p.selY=false,false
-            p.curX,p.curY=int(mx/p.charWidth+.5),int(my/p.lineHeight)+1
-            p:moveCursor('-mouse')
+            P.selX,P.selY=false,false
+            P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+            P:moveCursor('-mouse')
         end
     end
-    p:saveCurX()
+    P:saveCurX()
 end
 function scene.mouseMove(x,y)
     if not curPage then return end
-    local p=curPage
+    local P=activePages[curPage]
     if ms.isDown(1) or ms.isDown(2) then
-        if not p.selX then p.selX,p.selY=p.curX,p.curY end
+        if not P.selX then P.selX,P.selY=P.curX,P.curY end
         local mx,my=x-50,y-50
-        mx,my=mx-100+p.scrollX*p.charWidth,my+p.scrollY*p.lineHeight
-        p.curX,p.curY=int(mx/p.charWidth+.5),int(my/p.lineHeight)+1
-        p:moveCursor('-mouse')
-        p:saveCurX()
+        mx,my=mx-100+P.scrollX*P.charWidth,my+P.scrollY*P.lineHeight
+        P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+        P:moveCursor('-mouse')
+        P:saveCurX()
     end
 end
 function scene.mouseUp(x,y,k)
 end
 function scene.wheelMoved(dx,dy)
-    if not curPage then return end
-    while dy>0 do dy=dy-1; curPage:scrollV('-up') end
-    while dy<0 do dy=dy+1; curPage:scrollV('-down') end
-    while dx>0 do dx=dx-1; curPage:scrollH('-left') end
-    while dx<0 do dx=dx+1; curPage:scrollH('-right') end
+    local P=activePages[curPage]
+    if not P then return end
+    while dy>0 do dy=dy-1; P:scrollV('-up') end
+    while dy<0 do dy=dy+1; P:scrollV('-down') end
+    while dx>0 do dx=dx-1; P:scrollH('-left') end
+    while dx<0 do dx=dx+1; P:scrollH('-right') end
 end
 function scene.fileDropped(file)
-    if curPage then
-        curPage:delete('-all')
-    else
-        curPage=Page.new()
-        ins(activePages,curPage)
-    end
-    curPage:loadFile(file)
+    globalFuncs.newFile()
+    activePages[curPage]:loadFile(file)
 end
 
 function scene.update(dt)
@@ -806,12 +892,20 @@ end
 
 function scene.draw()
     gc.clear(0,0,0)
-    if curPage then curPage:draw(50,50) end
-    if clipboardText then
-        gc.replaceTransform(SCR.xOy_ur)
+    if curPage then
+        activePages[curPage]:draw(50,50)
+        gc.replaceTransform(SCR.xOy_ul)
         FONT.set(20,'_codePixel')
-        gc.setColor(COLOR.LD)
-        GC.safePrintf(clipboardText,-2605,5,2600,'right')
+        gc.print(pageInfo,50,5)
+        if clipboardText then
+            gc.replaceTransform(SCR.xOy_ur)
+            FONT.set(20,'_codePixel')
+            gc.setColor(COLOR.LD)
+            GC.safePrintf(clipboardText,-2605,5,2600,'right')
+        end
+    else
+        FONT.set(35,'_codePixel')
+        GC.mStr('Press Ctrl+N to create a new file',SCR.w0/2,SCR.h0/2-26,'center')
     end
 end
 
