@@ -104,6 +104,20 @@ function STRING.cutUnit(s)-- Warning: don't support number format like .26, must
     end
 end
 
+function STRING.type(c)
+    assert(type(c)=='string' and #c==1,'function STRING.type(c): c must be a single-charater string')
+    local t=byte(c)
+    if t==9 or t==10 or t==13 or t==32 then
+        return 'space'
+    elseif t>=48 and t<=57 or t>=65 and t<=90 or t>=97 and t<=122 then
+        return 'word'
+    elseif t>=33 and t<=47 or t>=58 and t<=64 or t>=91 and t<=96 or t>=123 and t<=126 then
+        return 'sign'
+    else
+        return 'other'
+    end
+end
+
 do-- function STRING.base64(num)-- Convert one number to base64
     STRING.base64={} for c in string.gmatch('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','.') do
         table.insert(STRING.base64,c)
