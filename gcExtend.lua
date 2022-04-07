@@ -1,7 +1,8 @@
 local gc=love.graphics
-local setColor,printf,draw=gc.setColor,gc.printf,gc.draw
+local setColor,prints,printf,draw=gc.setColor,gc.print,gc.printf,gc.draw
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
 local sin,cos=math.sin,math.cos
+local pcall=pcall
 local NULL=NULL
 
 local GC={}
@@ -11,6 +12,15 @@ function GC.simpY(obj,x,y) draw(obj,x,y-obj:getHeight()*.5) end-- Simply draw an
 function GC.X(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end-- Draw an obj with x=obj:getWidth()/2
 function GC.Y(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end-- Draw an obj with y=obj:getWidth()/2
 function GC.draw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end-- Draw an obj with both middle X & Y
+
+--------------------------------------------------------------
+
+function GC.safePrint(...)
+    return pcall(prints,...)
+end
+function GC.safePrintf(...)
+    return pcall(printf,...)
+end
 function GC.outDraw(obj,div,x,y,a,k)
     local w,h=obj:getWidth()*.5,obj:getHeight()*.5
     draw(obj,x-div,y-div,a,k,nil,w,h)
