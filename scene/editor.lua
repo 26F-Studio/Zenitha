@@ -20,12 +20,7 @@ local rainbowShader=[[
     uniform float phase;
     vec4 effect(vec4 color,sampler2D tex,vec2 texCoord,vec2 scrCoord){
         float iphase=phase-(scrCoord.x/love_ScreenSize.x+scrCoord.y/love_ScreenSize.y)*6.26;
-        return vec4(
-            sin(iphase),
-            sin(iphase+2.0944),
-            sin(iphase-2.0944),
-            1.0
-        )*.5+.5;
+        return vec4(sin(iphase),sin(iphase+2.0944),sin(iphase-2.0944),1.0)*.5+.5;
     }
 ]]
 
@@ -90,8 +85,6 @@ function Page.new(args)
             "-- Welcome to Zenitha editor --",
             "",
             "Type freely on any devices.",
-            "",
-            "by 26F Studio",
             "",
         })
         P:moveCursor('-auto -end -jump')
@@ -684,6 +677,8 @@ function globalFuncs.newFile(args)
     freshPageInfo()
 end
 
+-------------------------------------------------------------
+
 local globalComboMap={
     ['ctrl+tab']=           {func='switchFile',     args='-next'},
     ['ctrl+shift+tab']=     {func='switchFile',     args='-prev'},
@@ -691,8 +686,6 @@ local globalComboMap={
     ['ctrl+w']=             {func='closeFile',      args=''},
     ['ctrl+n']=             {func='newFile',        args=''},
 }
-
--------------------------------------------------------------
 
 local pageComboMap={
     ['left']=               {func='moveCursor',     args='-left'},
@@ -761,6 +754,7 @@ if SYSTEM=='Windows' then
     unimportantKeys['lgui']=true
     unimportantKeys['rgui']=true
 elseif SYSTEM=='macOS' then
+    TABLE.cover({},globalComboMap)
     TABLE.cover({},pageComboMap)
     TABLE.cover({},keyAlias)
 end
@@ -801,18 +795,13 @@ function scene.keyDown(key,isRep)
             end
         end
     elseif key=='escape' then
-        if P then
-            if P.selX then
-                P.selX=false
-                P.selY=false
-            end
+        if P and P.selX then
+            P.selX,P.selY=false,false
         elseif not isRep then
             MES.new('info',"Hold esc to quit",.26)
         end
-    elseif #combo==#key then
-        MES.new('info',"Unknown key: "..key,1.26)
     else
-        MES.new('info',"Unknown combo: "..combo,1.26)
+        MES.new('info',"Unknown operation: "..combo,1.26)
     end
 end
 function scene.mouseDown(x,y,k)
@@ -903,6 +892,11 @@ function scene.draw()
             gc.setColor(COLOR.LD)
             GC.safePrintf(clipboardText,-2605,5,2600,'right')
         end
+        gc.replaceTransform(SCR.xOy_dl)
+        FONT.set(15,'_codePixel')
+        if kb.isDown('lctrl','rctrl')   then gc.setColor(COLOR.lB) gc.print('CTRL',50,-45) end
+        if kb.isDown('lshift','rshift') then gc.setColor(COLOR.lG) gc.print('SHIFT',100,-45) end
+        if kb.isDown('lalt','ralt')     then gc.setColor(COLOR.lR) gc.print('ALT',162,-45) end
     else
         FONT.set(35,'_codePixel')
         GC.mStr('Press Ctrl+N to create a new file',SCR.w0/2,SCR.h0/2-26,'center')
