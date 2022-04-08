@@ -788,9 +788,9 @@ local comboKeyName={}-- Combokeys indicator
 if SYSTEM=='Windows' then
     unimportantKeys['lgui'],unimportantKeys['rgui']=true,true
     comboKeyName={
-        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='ctrl'},
-        {color=COLOR.lG,keys={'lshift','rshift'},name='shift'},
-        {color=COLOR.lR,keys={'lalt','ralt'},    name='alt'},
+        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='ctrl', text='CTRL'},
+        {color=COLOR.lG,keys={'lshift','rshift'},name='shift',text='SHIFT'},
+        {color=COLOR.lR,keys={'lalt','ralt'},    name='alt',  text='ALT'},
     }
     TABLE.cover({
         newFile='Press ctrl+N to create a new file',
@@ -799,28 +799,24 @@ elseif SYSTEM=='macOS' then
     keyAlias['lalt'],keyAlias['ralt']='option','option'
     keyAlias['lgui'],keyAlias['rgui']='command','command'
     comboKeyName={
-        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='control'},
-        {color=COLOR.lR,keys={'lalt','ralt'},    name='option'},
-        {color=COLOR.lR,keys={'lgui','rgui'},    name='command'},
-        {color=COLOR.lG,keys={'lshift','rshift'},name='shift'},
+        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='ctrl',   text='CONTROL'},
+        {color=COLOR.lR,keys={'lalt','ralt'},    name='option', text='OPTION'},
+        {color=COLOR.lR,keys={'lgui','rgui'},    name='command',text='COMMAND'},
+        {color=COLOR.lG,keys={'lshift','rshift'},name='shift',  text='SHIFT'},
     }
     alteredComboMap={
-        ['shift+control+tab']='ctrl+shift+tab',
-        
-        ['shift+option+left']='ctrl+shift+left',
-        ['shift+option+right']='ctrl+shift+right',
-        ['shift+option+up']='ctrl+shift+up',
-        ['shift+option+down']='ctrl+shift+down',
-        
-        ['shift+command+d']='ctrl+d',
-        ['shift+command+w']='ctrl+w',
-        ['shift+command+z']='ctrl+y',
-        ['shift+command+up']='ctrl+shift+home',
-        ['shift+command+down']='ctrl+shift+end',
-        ['shift+command+left']='shift+home',
-        ['shift+command+right']='shift+end',       
-        
-        ['control+tab']='ctrl+tab',
+        ['option+shift+left']='ctrl+shift+left',
+        ['option+shift+right']='ctrl+shift+right',
+        ['option+shift+up']='ctrl+shift+up',
+        ['option+shift+down']='ctrl+shift+down',
+
+        ['command+shift+d']='ctrl+d',
+        ['command+shift+w']='ctrl+w',
+        ['command+shift+z']='ctrl+y',
+        ['command+shift+up']='ctrl+shift+home',
+        ['command+shift+down']='ctrl+shift+end',
+        ['command+shift+left']='shift+home',
+        ['command+shift+right']='shift+end',
 
         ['option+up']='alt+up',
         ['option+down']='alt+down',
@@ -869,7 +865,7 @@ function scene.enter()
     if type(rainbowShader)=='string' then rainbowShader=gc.newShader(rainbowShader) end
     if type(comboKeyName[1].name)=='string' then
         for i=1,#comboKeyName do
-            comboKeyName[i].text=gc.newText(FONT.get(15,'_codePixel'),comboKeyName[i].name:upper())
+            comboKeyName[i].text=gc.newText(FONT.get(15,'_codePixel'),comboKeyName[i].text)
         end
     end
     if #activePages==0 then globalFuncs.newFile('-welcome') end

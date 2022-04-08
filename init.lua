@@ -1,3 +1,11 @@
+-- #  _____           _ _   _            #
+-- # / _  / ___ _ __ (_) |_| |__   __ _  #
+-- # \// / / _ \ '_ \| | __| '_ \ / _` | #
+-- #  / //\  __/ | | | | |_| | | | (_| | #
+-- # /____/\___|_| |_|_|\__|_| |_|\__,_| #
+-- #                                     #
+-- Zenitha is an awesome pure-lua framework using Love2D
+
 -- #define (lol)
 local ms,kb=love.mouse,love.keyboard
 local KBisDown=kb.isDown
