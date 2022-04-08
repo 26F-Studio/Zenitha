@@ -407,7 +407,7 @@ function Page:moveLine(args)
     if sArg(args,'-up') then
         local _,startY,endX,endY=self:getSelArea()
         if startY>1 then
-            if endX==0 then endY=endY-1 end
+            if startY~=endY and endX==0 then endY=endY-1 end
             ins(self,endY,rem(self,startY-1))
             self.curY=self.curY-1
             if self.selY then self.selY=self.selY-1 end
@@ -417,7 +417,7 @@ function Page:moveLine(args)
     elseif sArg(args,'-down') then
         local _,startY,endX,endY=self:getSelArea()
         if endY<#self then
-            if endX==0 then endY=endY-1 end
+            if startY~=endY and endX==0 then endY=endY-1 end
             ins(self,startY,rem(self,endY+1))
             self.curY=self.curY+1
             if self.selY then self.selY=self.selY+1 end
@@ -686,7 +686,6 @@ local globalComboMap={
     ['ctrl+w']=             {func='closeFile',      args=''},
     ['ctrl+n']=             {func='newFile',        args=''},
 }
-
 local pageComboMap={
     ['left']=               {func='moveCursor',     args='-left'},
     ['right']=              {func='moveCursor',     args='-right'},
@@ -738,45 +737,78 @@ local pageComboMap={
     ['ctrl+v']=             {func='paste',          args=''},
     ['ctrl+s']=             {func='save',           args=''},
 }
-local keyAlias={
+local alteredComboMap-- If exist, it will map combo to another
+local keyAlias={-- Directly ovveride original key
     ['kp+']='+',['kp-']='-',['kp*']='*',['kp/']='/',
     ['kpenter']='return',
     ['kp.']='.',
     ['kp7']='home',['kp1']='end',
     ['kp9']='pageup',['kp3']='pagedown',
 }
-local unimportantKeys={
-    ['lctrl']=true,['rctrl']=true,
-    ['lshift']=true,['rshift']=true,
-    ['lalt']=true,['ralt']=true,
-}
+local unimportantKeys={}-- Combokeys (nothing happen when pressed)
+local comboKeyName={}-- Combokeys indicator
+
 if SYSTEM=='Windows' then
-    unimportantKeys['lgui']=true
-    unimportantKeys['rgui']=true
+    unimportantKeys['lgui'],unimportantKeys['rgui']=true,true
+    comboKeyName={
+        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='ctrl'},
+        {color=COLOR.lG,keys={'lshift','rshift'},name='shift'},
+        {color=COLOR.lR,keys={'lalt','ralt'},    name='alt'},
+    }
 elseif SYSTEM=='macOS' then
-    TABLE.cover({},globalComboMap)
-    TABLE.cover({},pageComboMap)
-    TABLE.cover({},keyAlias)
+    keyAlias['lalt'],keyAlias['ralt']='option','option'
+    keyAlias['lgui'],keyAlias['rgui']='command','command'
+    comboKeyName={
+        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='control'},
+        {color=COLOR.lR,keys={'lalt','ralt'},    name='option'},
+        {color=COLOR.lR,keys={'lgui','rgui'},    name='command'},
+        {color=COLOR.lG,keys={'lshift','rshift'},name='shift'},
+    }
+    alteredComboMap={
+        ['command+x']='ctrl+x',
+        ['command+c']='ctrl+c',
+        ['command+v']='ctrl+v',
+    }
 end
+
+for i=1,#comboKeyName do for _,v in next,comboKeyName[i].keys do unimportantKeys[v]=true end end
 
 local scene={}
 
 function scene.enter()
     BG.set('none')
-    if type(rainbowShader)=='string' then rainbowShader=gc.newShader(rainbowShader) end
-    if #activePages==0 then globalFuncs.newFile('-welcome') end
     clipboardFreshCD=0
     escapeHoldTime=0
     freshClipboard()
+
+    if type(rainbowShader)=='string' then rainbowShader=gc.newShader(rainbowShader) end
+    if type(comboKeyName[1].name)=='string' then
+        for i=1,#comboKeyName do
+            comboKeyName[i].text=gc.newText(FONT.get(15,'_codePixel'),comboKeyName[i].name:upper())
+        end
+    end
+    if #activePages==0 then globalFuncs.newFile('-welcome') end
 end
 
 function scene.keyDown(key,isRep)
+    -- Do nothing when press combokey itself
     if unimportantKeys[key] then return end
+
+    -- Translate keys
     if keyAlias[key] then key=keyAlias[key] end
+
+    -- Generate combo
     local combo=key
-    if kb.isDown('lalt','ralt') then combo='alt+'..combo end
-    if kb.isDown('lshift','rshift') then combo='shift+'..combo end
-    if kb.isDown('lctrl','rctrl') then combo='ctrl+'..combo end
+    for i=1,#comboKeyName do
+        if kb.isDown(unpack(comboKeyName[i].keys)) then
+            combo=comboKeyName[i].name..'+'..combo
+        end
+    end
+
+    -- Translate combo (for macOS)
+    if alteredComboMap and alteredComboMap[combo] then combo=alteredComboMap[combo] end
+
+    -- Execute
     local P=activePages[curPage]
     if pageComboMap[combo] then
         if P then
@@ -893,10 +925,15 @@ function scene.draw()
             GC.safePrintf(clipboardText,-2605,5,2600,'right')
         end
         gc.replaceTransform(SCR.xOy_dl)
+        local x=50
         FONT.set(15,'_codePixel')
-        if kb.isDown('lctrl','rctrl')   then gc.setColor(COLOR.lB) gc.print('CTRL',50,-45) end
-        if kb.isDown('lshift','rshift') then gc.setColor(COLOR.lG) gc.print('SHIFT',100,-45) end
-        if kb.isDown('lalt','ralt')     then gc.setColor(COLOR.lR) gc.print('ALT',162,-45) end
+        for i=1,#comboKeyName do
+            if kb.isDown(unpack(comboKeyName[i].keys)) then
+                gc.setColor(comboKeyName[i].color)
+                gc.draw(comboKeyName[i].text,x,-45)
+                x=x+comboKeyName[i].text:getWidth()+10
+            end
+        end
     else
         FONT.set(35,'_codePixel')
         GC.mStr('Press Ctrl+N to create a new file',SCR.w0/2,SCR.h0/2-26,'center')
