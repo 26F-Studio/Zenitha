@@ -882,7 +882,7 @@ function scene.keyDown(key,isRep)
 
     -- Generate combo
     local combo=key
-    for i=1,#comboKeyName do
+    for i=#comboKeyName,1,-1 do
         if kb.isDown(unpack(comboKeyName[i].keys)) then
             combo=comboKeyName[i].name..'+'..combo
         end
@@ -933,7 +933,7 @@ function scene.mouseDown(x,y,k)
         local ty=int(my/P.lineHeight)+1
 
         if not (kb.isDown('lshift','rshift') and P.selX) then
-            P.selX,P.selY=0,ty
+            P.selX,P.selY=0,min(ty,#P)
         end
         P.curX,P.curY=0,ty+1
         P:moveCursor('-mouse')
