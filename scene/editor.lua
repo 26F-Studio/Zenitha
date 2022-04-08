@@ -95,7 +95,7 @@ function Page.new(args)
     return P
 end
 
-function Page:loadFile(file)
+function Page:loadFile(args,file)
     -- Parse file path and name
     self.filePath=file:getFilename()
     self.fileName=self.filePath:match('.+\\(.+)$') or self.filePath
@@ -103,12 +103,20 @@ function Page:loadFile(file)
 
     -- Load file data
     self:delete('-all')
-    self:paste((file:read()))
+    self:paste('-file',(file:read()))
 
     -- Reset cursor and scroll
     self.curX,self.curY=0,1
     self:freshScroll()
     self:saveCurX()
+end
+
+function Page:undo()
+    -- TODO
+end
+
+function Page:redo()
+    -- TODO
 end
 
 function Page:save()
@@ -260,7 +268,7 @@ end
 
 -- Edit
 function Page:insStr(str)
-    if str=="" then return end
+    if str=="" or not str then return end
     if self.selX then self:delete('-normal') end
     local l=self[self.curY]
     l=l:sub(1,self.curX)..str..l:sub(self.curX+1)
@@ -343,6 +351,13 @@ function Page:delete(args)
         self.selX,self.selY=false,false
         result=true
         SFX.play(tempInputBox.sound_del)
+    elseif sArg(args,'-word') then
+        if sArg(args,'-left') then
+            self:moveCursor('-hold -jump -left')
+        elseif sArg(args,'-right') then
+            self:moveCursor('-hold -jump -right')
+        end
+        self:delete('')
     else
         if sArg(args,'-left') then
             if self.curX==0 then
@@ -391,9 +406,12 @@ function Page:insLine(args)
         self[self.curY]=self[self.curY]:sub(1,self.curX)
         self.curY=self.curY+1
         self.curX=0
-    elseif sArg(args,'-newLine') then
+    elseif sArg(args,'-under') then
         ins(self,self.curY+1,"")
         self.curY=self.curY+1
+        self.curX=0
+    elseif sArg(args,'-above') then
+        ins(self,self.curY,"")
         self.curX=0
     end
     if not sArg(args,'-auto') then
@@ -427,14 +445,14 @@ function Page:moveLine(args)
     end
 end
 
-function Page:duplicateLine()
-    local _,startY,_,endY=self:getSelArea()
+function Page:duplicate()
+    local _,startY,endX,endY=self:getSelArea()
+    if startY~=endY and endX==0 then endY=endY-1 end
+
     if startY==endY then
         ins(self,startY+1,self[startY])
-        self:moveCursor('-auto -down')
     else
-        for i=startY,endY do ins(self,i+1,self[i]) end
-        self:moveCursor('-auto -down')
+        for i=startY,endY do ins(self,endY+1,self[i]) end
     end
 end
 
@@ -484,12 +502,24 @@ function Page:copy()
     freshClipboard()
 end
 
-function Page:paste(data)
+function Page:paste(args,data)
+    -- Delete selection first
     if self.selX then self:delete('-normal') end
-    local str=data or love.system.getClipboardText()
-    str=str:gsub('\r','')
-    str=str:gsub('\t','    ')
+
+    -- Get paste data
+    local str
+    if sArg(args,'-clipboard') then
+        str=love.system.getClipboardText()
+    elseif sArg(args,'-data') then
+        str=data
+    end
+    if not str or str=="" then return end
+
+    -- Remove \r
+    str=str:gsub('\r',''):gsub('\t','    ')
     if str:sub(-1)=='\n' then str=str..'\n' end
+
+    -- Split into lines and insert them
     str=STRING.split(str,'\n')
     for i=1,#str-1 do
         self:insStr(str[i])
@@ -679,6 +709,7 @@ end
 
 -------------------------------------------------------------
 
+local help=setmetatable({},{__index=function()return '[-]' end})
 local globalComboMap={
     ['ctrl+tab']=           {func='switchFile',     args='-next'},
     ['ctrl+shift+tab']=     {func='switchFile',     args='-prev'},
@@ -725,16 +756,22 @@ local pageComboMap={
     ['space']=              {func='insStr',         args=' '},
     ['backspace']=          {func='delete',         args='-left'},
     ['delete']=             {func='delete',         args='-right'},
+    ['ctrl+backspace']=     {func='delete',         args='-word -left'},
+    ['ctrl+delete']=        {func='delete',         args='-word -right'},
     ['tab']=                {func='indent',         args='-add'},
     ['shift+tab']=          {func='indent',         args='-remove'},
     ['return']=             {func='insLine',        args='-normal'},
-    ['ctrl+return']=        {func='insLine',        args='-newLine'},
+    ['ctrl+return']=        {func='insLine',        args='-under'},
+    ['shift+return']=       {func='insLine',        args='-above'},
 
     ['ctrl+a']=             {func='selectAll',      args=''},
-    ['ctrl+d']=             {func='duplicateLine',  args=''},
+    ['ctrl+d']=             {func='duplicate',      args=''},
     ['ctrl+x']=             {func='cut',            args=''},
     ['ctrl+c']=             {func='copy',           args=''},
-    ['ctrl+v']=             {func='paste',          args=''},
+    ['ctrl+v']=             {func='paste',          args='-clipboard'},
+
+    ['ctrl+z']=             {func='undo',           args=''},
+    ['ctrl+y']=             {func='redo',           args=''},
     ['ctrl+s']=             {func='save',           args=''},
 }
 local alteredComboMap-- If exist, it will map combo to another
@@ -755,6 +792,9 @@ if SYSTEM=='Windows' then
         {color=COLOR.lG,keys={'lshift','rshift'},name='shift'},
         {color=COLOR.lR,keys={'lalt','ralt'},    name='alt'},
     }
+    TABLE.cover({
+        newFile='Press ctrl+N to create a new file',
+    },help)
 elseif SYSTEM=='macOS' then
     keyAlias['lalt'],keyAlias['ralt']='option','option'
     keyAlias['lgui'],keyAlias['rgui']='command','command'
@@ -769,6 +809,13 @@ elseif SYSTEM=='macOS' then
         ['command+c']='ctrl+c',
         ['command+v']='ctrl+v',
     }
+    TABLE.cover({
+        newFile='Press command+N to create a new file',
+    },help)
+elseif MOBILE then
+    TABLE.cover({
+        -- TODO
+    },help)
 end
 
 for i=1,#comboKeyName do for _,v in next,comboKeyName[i].keys do unimportantKeys[v]=true end end
@@ -891,7 +938,7 @@ function scene.wheelMoved(dx,dy)
 end
 function scene.fileDropped(file)
     globalFuncs.newFile()
-    activePages[curPage]:loadFile(file)
+    activePages[curPage]:loadFile('-drop',file)
 end
 
 function scene.update(dt)
@@ -936,7 +983,7 @@ function scene.draw()
         end
     else
         FONT.set(35,'_codePixel')
-        GC.mStr('Press Ctrl+N to create a new file',SCR.w0/2,SCR.h0/2-26,'center')
+        GC.mStr(help.newFile,SCR.w0/2,SCR.h0/2-26,'center')
     end
 end
 
