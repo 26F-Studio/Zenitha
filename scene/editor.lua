@@ -805,9 +805,47 @@ elseif SYSTEM=='macOS' then
         {color=COLOR.lG,keys={'lshift','rshift'},name='shift'},
     }
     alteredComboMap={
-        ['command+x']='ctrl+x',
+        ['shift+control+tab']='ctrl+shift+tab',
+        
+        ['shift+option+left']='ctrl+shift+left',
+        ['shift+option+right']='ctrl+shift+right',
+        ['shift+option+up']='ctrl+shift+up',
+        ['shift+option+down']='ctrl+shift+down',
+        
+        ['shift+command+d']='ctrl+d',
+        ['shift+command+w']='ctrl+w',
+        ['shift+command+z']='ctrl+y',
+        ['shift+command+up']='ctrl+shift+home',
+        ['shift+command+down']='ctrl+shift+end',
+        ['shift+command+left']='shift+home',
+        ['shift+command+right']='shift+end',       
+        
+        ['control+tab']='ctrl+tab',
+
+        ['option+up']='alt+up',
+        ['option+down']='alt+down',
+        ['option+left']='ctrl+left',
+        ['option+right']='ctrl+right',
+        ['option+backspace']='ctrl+backspace',
+        ['option+delete']='ctrl+delete',
+
+        ['command+a']='ctrl+a',
         ['command+c']='ctrl+c',
+        ['command+n']='ctrl+n',
+        ['command+s']='ctrl+s',
         ['command+v']='ctrl+v',
+        ['command+x']='ctrl+x',
+        ['command+z']='ctrl+z',
+        ['command+up']='ctrl+home',
+        ['command+down']='ctrl+end',
+        ['command+left']='home',
+        ['command+right']='end',
+        ['command+pageup']='ctrl+pageup',
+        ['command+pagedown']='ctrl+pagedown',
+        ['command+home']='ctrl+home',
+        ['command+end']='ctrl+end',
+        ['command+backspace']='ctrl+shift+backspace',
+        ['command+delete']='ctrl+shift+delete',
     }
     TABLE.cover({
         newFile='Press command+N to create a new file',
