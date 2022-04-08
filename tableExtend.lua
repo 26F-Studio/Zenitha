@@ -79,6 +79,20 @@ function TABLE.coverR(new,old)
     end
 end
 
+-- For all things in org, delete them if it's in sub
+function TABLE.subtract(org,sub)
+    for _,v in next,sub do
+        while true do
+            local p=TABLE.search(org,v)
+            if p then
+                rem(org,p)
+            else
+                break
+            end
+        end
+    end
+end
+
 -- For all things in new if same type in old, push to old
 function TABLE.update(new,old)
     for k,v in next,new do
