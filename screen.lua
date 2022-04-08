@@ -58,7 +58,7 @@ function SCR.resize(w,h)
     SCR.xOy_dr:setTransformation(w,h,0,SCR.k)
 end
 function SCR.info()
-    return{
+    return {
         ("w0,h0 : %d, %d"):format(SCR.w0,SCR.h0),
         ("x,y : %d, %d"):format(SCR.x,SCR.y),
         ("cx,cy : %d, %d"):format(SCR.cx,SCR.cy),

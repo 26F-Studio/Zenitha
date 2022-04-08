@@ -76,6 +76,8 @@ function Page.new(args)
         memX=0,
         selX=false,selY=false,
         charWidth=23,lineHeight=35,
+        baseX=1,
+        baseY=4,
         fileName="*Untitled",
         filePath=false,
         fileInfo={COLOR.L,"*Untitled"},
@@ -129,13 +131,13 @@ end
 function Page:scrollV(args)
     local dy=sArg(args,'-up') and -1 or sArg(args,'-down') and 1
     if not dy then return end
+    if sArg(args,'-jump') then dy=max(1,int(self.windowH/self.lineHeight))*dy end
     self.scrollY=max(min(self.scrollY+dy,#self-1),0)
 end
 
 function Page:scrollH(args)
     local dx=sArg(args,'-left') and 1 or sArg(args,'-right') and -1
     if not dx then return end
-    if jump then dx=10*dx end
     self.scrollX=max(self.scrollX+dx,0)
 end
 
@@ -230,7 +232,7 @@ function Page:moveCursor(args)
             self.curX=#self[self.curY]
             self:saveCurX()
         elseif sArg(args,'-up') then
-            local l=jump and 26 or 1
+            local l=jump and max(1,int(self.windowH/self.lineHeight)) or 1
             if self.curY>l then
                 self.curY=self.curY-l
             else
@@ -239,7 +241,7 @@ function Page:moveCursor(args)
             end
             self.curX=min(self.memX,#self[self.curY])
         elseif sArg(args,'-down') then
-            local l=jump and 26 or 1
+            local l=jump and max(1,int(self.windowH/self.lineHeight)) or 1
             if self.curY<=#self-l then
                 self.curY=self.curY+l
             else
@@ -564,7 +566,7 @@ function Page:draw(x,y)
     FONT.set(30,'_codePixel')
     gc.setColor(COLOR.dL)
     for i=self.scrollY+1,min(self.scrollY+lineCount,#self) do
-        GC.safePrint(self[i],101,lineH*(i-1)+4)
+        GC.safePrint(self[i],100+self.baseX,lineH*(i-1)+self.baseY)
     end
 
     -- Stencil selection

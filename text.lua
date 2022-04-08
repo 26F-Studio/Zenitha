@@ -112,7 +112,7 @@ function TEXT.show(text,x,y,font,style,spd,stop)
     })
 end
 function TEXT.getText(text,x,y,font,style,spd,stop)-- Another version of TEXT.show(), but only return text object, need manual management
-    return{
+    return {
         c=0,
         text=gc.newText(FONT.get(int(font/5)*5 or 40),text),
         x=x or 0,
