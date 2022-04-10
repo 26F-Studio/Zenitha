@@ -245,6 +245,7 @@ function BGM.set(bgms,mode,...)
             bgms={srcLib[bgms]}
         end
     elseif type(bgms)=='table' then
+        bgms=TABLE.shift(bgms)
         for i=1,#bgms do
             assert(type(bgms[i])=='string',"BGM list must be list of strings")
             bgms[i]=srcLib[bgms[i]]
@@ -313,6 +314,10 @@ function BGM.set(bgms,mode,...)
             end
         end
     end
+end
+
+function BGM.getPlaying()
+    return TABLE.shift(lastPlay)
 end
 function BGM.isPlaying()
     return #nowPlay>0 and nowPlay[1].source:isPlaying()
