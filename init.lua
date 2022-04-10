@@ -4,7 +4,7 @@
 -- #  / //\  __/ | | | | |_| | | | (_| | #
 -- # /____/\___|_| |_|_|\__|_| |_|\__,_| #
 -- #                                     #
--- Zenitha is an awesome pure-lua framework using Love2D
+-- An awesome pure-lua framework using Love2D
 
 -- #define (lol)
 local ms,kb=love.mouse,love.keyboard
@@ -23,7 +23,7 @@ kb.setKeyRepeat(true)
 --------------------------------------------------------------
 
 -- Useful global values/variables
-NONE={} setmetatable(NONE,{__newindex=function() error('Attempt to modify a constant table') end})
+NONE=setmetatable({},{__newindex=function() error('Attempt to modify a constant table') end,__metatable=true})
 NULL=function(...) end
 PAPER=love.graphics.newCanvas(1,1)
 
@@ -661,7 +661,6 @@ function love.run()
     end
 
     return function()
-        local _
         local time=timer()
         STEP()
 
@@ -726,8 +725,7 @@ function love.run()
                     drawSysInfo()
                 gc_replaceTransform(SCR.origin)
                     if SCN.swapping then
-                        _=SCN.state
-                        _.draw(_.time)
+                        SCN.state.draw(SCN.state.time)
                     end
                 gc_replaceTransform(SCR.xOy_ul)
                     MES_draw()
@@ -778,7 +776,7 @@ function love.run()
                     end
                 gc_present()
 
-                -- SPEED UPUPUP!
+                -- SPEED UPUP! (probably not that obvious)
                 if discardCanvas then gc_discard() end
             end
         end
@@ -797,8 +795,8 @@ function love.run()
             end
         end
 
-        _=timer()-lastLoopTime
-        if _<sleepInterval*.9626 then WAIT(sleepInterval*.9626-_) end
+        local curFrameInterval=timer()-lastLoopTime
+        if curFrameInterval<sleepInterval*.9626 then WAIT(sleepInterval*.9626-curFrameInterval) end
         while timer()-lastLoopTime<sleepInterval do end
     end
 end
