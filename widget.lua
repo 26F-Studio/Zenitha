@@ -15,7 +15,7 @@ local max,min=math.max,math.min
 local abs=math.abs
 local sub,ins,rem=string.sub,table.insert,table.remove
 
-local SCR,xOy=SCR,SCR.xOy
+local SCN,SCR,xOy=SCN,SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
 local mStr,GC_stc_setComp,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_setComp,GC.stc_rect,GC.stc_stop
 local approach=MATH.expApproach
@@ -85,7 +85,7 @@ local baseWidget={
     _visible=nil,
 }
 function baseWidget:getInfo()
-    local str=""
+    local str=''
     for _,v in next,self.buildArgs do
         str=str..v..'='..tostring(self[v])..'\n'
     end
@@ -961,7 +961,7 @@ Widgets.inputBox=setmetatable({
     maxInputLength=1e99,
     sound_input=false,sound_bksp=false,sound_del=false,sound_clear=false,
 
-    _value="",-- Text contained
+    _value='',-- Text contained
 
     buildArgs={
         'name',
@@ -1019,7 +1019,7 @@ function Widgets.inputBox:addText(str)
     end
 end
 function Widgets.inputBox:clear()
-    self._value=""
+    self._value=''
     if self.sound_clear then SFX.play(self.sound_clear) end
 end
 function Widgets.inputBox:isAbove(x,y)
@@ -1076,15 +1076,9 @@ function Widgets.inputBox:draw()
         end
     end
 end
-function Widgets.inputBox:press()
-    if MOBILE then
-        local _,y1=xOy:transformPoint(0,self.y+self.h)
-        kb.setTextInput(true,0,y1,1,1)
-    end
-end
 function Widgets.inputBox:keypress(k)
     local t=self._value
-    if #t>0 and EDITING=="" then
+    if #t>0 and EDITING=='' then
         if k=='backspace' then
             local p=#t
             while t:byte(p)>=128 and t:byte(p)<192 do
@@ -1093,7 +1087,7 @@ function Widgets.inputBox:keypress(k)
             t=sub(t,1,p-1)
             if self.sound_bksp then SFX.play(self.sound_bksp) end
         elseif k=='delete' then
-            t=""
+            t=''
             if self.sound_del then SFX.play(self.sound_del) end
         end
         self._value=t
@@ -1355,12 +1349,12 @@ function Widgets.listBox:scroll(dx,dy)
     self._scrollPos=max(0,min(self._scrollPos-(dx+dy)*self.lineHeight,(#self._list-self._capacity)*self.lineHeight))
 end
 function Widgets.listBox:arrowKey(dir)
-    if dir=="up" then
+    if dir=='up' then
         self._selected=max(self._selected-1,1)
         if self._selected<int(self._scrollPos/self.lineHeight)+2 then
             self:drag(nil,nil,nil,self.lineHeight)
         end
-    elseif dir=="down" then
+    elseif dir=='down' then
         self._selected=min(self._selected+1,#self._list)
         if self._selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
             self:drag(nil,nil,nil,-self.lineHeight)
@@ -1455,11 +1449,11 @@ function WIDGET.focus(W)
     if WIDGET.sel==W then return end
     if WIDGET.sel and WIDGET.sel.type=='inputBox' then
         kb.setTextInput(false)
-        EDITING=""
+        EDITING=''
     end
     if W and W._visible then
         WIDGET.sel=W
-        if W.type=='inputBox' then
+        if W.type=='inputBox' and not kb.hasTextInput() then
             local _,y1=xOy:transformPoint(0,W.y+W.h)
             kb.setTextInput(true,0,y1,1,1)
         end
@@ -1470,7 +1464,7 @@ function WIDGET.unFocus(force)
     if W and (force or not W.keepFocus) then
         if W.type=='inputBox' then
             kb.setTextInput(false)
-            EDITING=""
+            EDITING=''
         end
         WIDGET.sel=false
     end
