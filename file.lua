@@ -57,7 +57,11 @@ function FILE.save(data,name,args)
 
     if type(data)=='table' then
         if STRING.sArg(args,'-luaon') then
-            data=TABLE.dump(data)
+            if STRING.sArg(args,'-expand') then
+                data=TABLE.dump(data)
+            else
+                data=TABLE.dumpDeflate(data)
+            end
             if not data then
                 error('encode error')
             end

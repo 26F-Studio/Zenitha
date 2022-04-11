@@ -282,6 +282,44 @@ end
 
 --------------------------------------------------------------
 
+-- Dump a simple lua table (no whitespaces)
+do-- function TABLE.dumpDeflate(L,t)
+    local function dump(L)
+        if type(L)~='table' then return end
+        local s='return{'
+        local count=1
+        for k,v in next,L do
+            local T=type(k)
+            if T=='number' then
+                if k==count then
+                    k=''
+                    count=count+1
+                else
+                    k='['..k..']='
+                end
+            elseif T=='string' then
+                if find(k,'[^0-9a-zA-Z_]') then
+                    k='[\''..k..'\']='
+                else
+                    k=k..'='
+                end
+            elseif T=='boolean' then k='['..k..']='
+            else error("Error key type!")
+            end
+            T=type(v)
+            if T=='number' then v=tostring(v)
+            elseif T=='string' then v='\''..v..'\''
+            elseif T=='table' then v=dump(v)
+            elseif T=='boolean' then v=tostring(v)
+            else v='*'..tostring(v)
+            end
+            s=s..k..v..','
+        end
+        return s..'}'
+    end
+    TABLE.dumpDeflate=dump
+end
+
 -- Dump a simple lua table
 do-- function TABLE.dump(L,t)
     local tabs=setmetatable({
@@ -336,44 +374,6 @@ do-- function TABLE.dump(L,t)
         return s..tabs[t-1]..'}'
     end
     TABLE.dump=dump
-end
-
--- Dump a simple lua table (no whitespaces)
-do-- function TABLE.dumpDeflate(L,t)
-    local function dump(L)
-        if type(L)~='table' then return end
-        local s='return{'
-        local count=1
-        for k,v in next,L do
-            local T=type(k)
-            if T=='number' then
-                if k==count then
-                    k=''
-                    count=count+1
-                else
-                    k='['..k..']='
-                end
-            elseif T=='string' then
-                if find(k,'[^0-9a-zA-Z_]') then
-                    k='[\''..k..'\']='
-                else
-                    k=k..'='
-                end
-            elseif T=='boolean' then k='['..k..']='
-            else error("Error key type!")
-            end
-            T=type(v)
-            if T=='number' then v=tostring(v)
-            elseif T=='string' then v='\''..v..'\''
-            elseif T=='table' then v=dump(v)
-            elseif T=='boolean' then v=tostring(v)
-            else v='*'..tostring(v)
-            end
-            s=s..k..v..','
-        end
-        return s..'}'
-    end
-    TABLE.dumpDeflate=dump
 end
 
 return TABLE
