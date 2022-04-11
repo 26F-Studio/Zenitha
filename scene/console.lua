@@ -11,7 +11,7 @@ log{COLOR.lP,"Z Console"}
 log{COLOR.lC,"© Copyright 2019–2022 26F Studio. Some rights reserved."}
 log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
 
-local history,hisPtr={"?"}
+local history,hisPtr={"?"},nil
 local sumode=false
 local the_secret=(0xe^2*10)..(2*0xb)
 
@@ -410,7 +410,7 @@ local commands={} do
     commands.gammacorrect={
         code=function(bool)
             if bool=="on" or bool=="off" then
-                love._setGammaCorrect(bool=="on")
+                love['_setGammaCorrect'](bool=="on")
                 log("GammaCorrect: "..(gc.isGammaCorrect() and "on" or "off"))
             else
                 log{COLOR.I,"Usage: gammacorrect <on|off>"}

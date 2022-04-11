@@ -23,7 +23,7 @@ end
 local IMG={
     init=function(_list)
         if initialized then MES.new('info',"Achievement: attempt to initialize IMG lib twice") return end
-        initialized,IMG.init=true
+        initialized,IMG.init=true,nil
         link(IMG,_list)
     end
 }
