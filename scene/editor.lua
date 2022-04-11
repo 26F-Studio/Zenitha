@@ -3,6 +3,8 @@ local ms,kb=love.mouse,love.keyboard
 local ins,rem=table.insert,table.remove
 local max,min=math.max,math.min
 local int,ceil=math.floor,math.ceil
+local abs,sin=math.abs,math.sin
+local sub=string.sub
 
 local sArg=STRING.sArg
 
@@ -13,7 +15,7 @@ local clipboardFreshCD
 local escapeHoldTime
 
 local tempInputBox=WIDGET.new{type='inputBox'}
-local clipboardText=""
+local clipboardText=''
 
 -- Compile this when enter scene
 local rainbowShader=[[
@@ -26,7 +28,7 @@ local rainbowShader=[[
 
 local function freshClipboard()
     clipboardText=love.system.getClipboardText()
-    if clipboardText=="" then
+    if clipboardText=='' then
         clipboardText=false
     else
         clipboardText=clipboardText:gsub('[\r\n]','')
@@ -75,9 +77,9 @@ function Page.new(args)
         curX=0,curY=1,
         memX=0,
         selX=false,selY=false,
-        charWidth=23,lineHeight=35,
+        charWidth=24,lineHeight=35,
         baseX=1,
-        baseY=4,
+        baseY=3,
         fileName="*Untitled",
         filePath=false,
         fileInfo={COLOR.L,"*Untitled"},
@@ -85,13 +87,14 @@ function Page.new(args)
     if sArg(args,'-welcome') then
         TABLE.connect(P,{
             "-- Welcome to Zenitha editor --",
-            "",
+            '',
             "Type freely on any devices.",
-            "",
+            '',
+            string.char(unpack((function() local l={} for i=1,128 do l[i]=128-i end return l end)()))
         })
         P:moveCursor('-auto -end -jump')
     else
-        P[1]=""
+        P[1]=''
     end
     P:saveCurX()
     return P
@@ -235,20 +238,20 @@ function Page:moveCursor(args)
             local l=jump and max(1,int(self.windowH/self.lineHeight)) or 1
             if self.curY>l then
                 self.curY=self.curY-l
+                self.curX=min(self.memX,#self[self.curY])
             else
                 self.curY=1
                 self.curX=0
             end
-            self.curX=min(self.memX,#self[self.curY])
         elseif sArg(args,'-down') then
             local l=jump and max(1,int(self.windowH/self.lineHeight)) or 1
             if self.curY<=#self-l then
                 self.curY=self.curY+l
+                self.curX=min(self.memX,#self[self.curY])
             else
                 self.curY=#self
                 self.curX=#self[self.curY]
             end
-            self.curX=min(self.memX,#self[self.curY])
         end
         if not sArg(args,'-auto') then
             if not hold or self.selX==self.curX and self.selY==self.curY then
@@ -270,8 +273,8 @@ end
 
 -- Edit
 function Page:insStr(str)
-    if str=="" or not str then return end
-    if self.selX then self:delete('-normal') end
+    if str=='' or not str then return end
+    if self.selX then self:delete() end
     local l=self[self.curY]
     l=l:sub(1,self.curX)..str..l:sub(self.curX+1)
     self.curX=self.curX+#str
@@ -334,7 +337,7 @@ function Page:delete(args)
     local result=false-- If delete was successful
     if sArg(args,'-all') then
         TABLE.cut(self)
-        self[1]=""
+        self[1]=''
         self.scrollX,self.scrollY=0,0
         self.curX,self.curY=0,1
         self.memX=0
@@ -403,22 +406,24 @@ function Page:delete(args)
 end
 
 function Page:insLine(args)
+    local spaces=not sArg(args,'-auto') and self[self.curY]:match('^ +') or ''
     if sArg(args,'-normal') then
         ins(self,self.curY+1,self[self.curY]:sub(self.curX+1))
         self[self.curY]=self[self.curY]:sub(1,self.curX)
         self.curY=self.curY+1
-        self.curX=0
     elseif sArg(args,'-under') then
-        ins(self,self.curY+1,"")
+        ins(self,self.curY+1,'')
         self.curY=self.curY+1
         self.curX=0
     elseif sArg(args,'-above') then
-        ins(self,self.curY,"")
+        ins(self,self.curY,'')
         self.curX=0
     end
     if not sArg(args,'-auto') then
         SFX.play(tempInputBox.sound_input)
+        if spaces~='' then self[self.curY]=spaces..self[self.curY] end
     end
+    self.curX=#spaces
     self:freshScroll()
     self:saveCurX()
 end
@@ -479,7 +484,7 @@ end
 function Page:cut()
     local lineAdded=false
     if not self.selX then
-        if self.curY==#self then lineAdded=true; ins(self,"") end
+        if self.curY==#self then lineAdded=true; ins(self,'') end
         self.selX,self.selY=0,self.curY
         self.curX,self.curY=0,self.curY+1
     end
@@ -506,7 +511,7 @@ end
 
 function Page:paste(args,data)
     -- Delete selection first
-    if self.selX then self:delete('-normal') end
+    if self.selX then self:delete() end
 
     -- Get paste data
     local str
@@ -515,7 +520,7 @@ function Page:paste(args,data)
     elseif sArg(args,'-data') then
         str=data
     end
-    if not str or str=="" then return end
+    if not str or str=='' then return end
 
     -- Remove \r
     str=str:gsub('\r',''):gsub('\t','    ')
@@ -530,7 +535,50 @@ function Page:paste(args,data)
     self:insStr(str[#str])
     self:freshScroll()
 end
+
+-- Render
+local charRender={
+    ['\0']=function(x,y,w,h)
+        gc.setColor(COLOR.LD)
+        gc.setLineWidth(1)
+        gc.rectangle('line',x,y+3,w,h-6)
+        gc.line(x+3,y+6,x+w-3,y+h-6)
+        gc.line(x+3,y+h-6,x+w-3,y+6)
+    end,
+    ['\t']=function(x,y,w,h,t)
+        gc.setColor(COLOR.DL)
+        gc.setLineWidth(2)
+        local dx=(t%.8*.3-.1)*w
+        gc.translate(dx,0)
+        gc.line(x+w*.2,y+h*.5,x+w*.8,y+h*.5)
+        gc.line(x+w*.65,y+h*.6,x+w*.8, y+h*.5,x+w*.65,y+h*.4)
+        gc.translate(-dx,0)
+    end,
+    ['\r']=function(x,y,w,h,t)
+        gc.setColor(COLOR.DL)
+        gc.setLineWidth(2)
+        local dx=(abs(((t*6%2-1)^2)*.1)-.1)*w
+        gc.translate(-dx,0)
+        gc.line(x+w*.8,y+h*.7,x+w*.2,y+h*.7)
+        gc.line(x+w*.35,y+h*.8,x+w*.2, y+h*.7,x+w*.35,y+h*.6)
+        gc.translate(dx,0)
+    end,
+    ['\n']=function(x,y,w,h,t)
+        gc.setColor(COLOR.DL)
+        gc.setLineWidth(2)
+        local dy=(abs(((t*6%2-1)^2)*.1)-.05)*w
+        gc.translate(0,dy)
+        gc.line(x+w*.2,y+h*.3,x+w*.2,y+h*.7)
+        gc.line(x+w*.1,y+h*.6,x+w*.2,y+h*.7,x+w*.3,y+h*.6)
+        gc.translate(0,-dy)
+    end,
+    [' ']=function(x,y,w,h,t)
+        gc.setColor(COLOR.lD)
+        gc.rectangle('fill',x+.28*w,y+.42*h+2.6*sin(t*4-(x/w+y/h)),.24*w,.16*h)
+    end,
+}
 function Page:draw(x,y)
+    local _time=love.timer.getTime()
     local _x,_y,_w
     local charW,lineH=self.charWidth,self.lineHeight
     local winW,winH=self.windowW,self.windowH
@@ -563,10 +611,63 @@ function Page:draw(x,y)
     end
 
     -- File data
-    FONT.set(30,'_codePixel')
-    gc.setColor(COLOR.dL)
-    for i=self.scrollY+1,min(self.scrollY+lineCount,#self) do
-        GC.safePrint(self[i],100+self.baseX,lineH*(i-1)+self.baseY)
+    do
+        local baseX,baseY=self.baseX,self.baseY
+        local firstChar=1+int(max(self.scrollX-100/charW,0))
+        local lastChar=ceil((self.scrollX*charW+self.windowW-100)/charW)
+        gc.setLineWidth(1)
+        FONT.set(30,'_codePixel')
+        -- local inString=false
+        for cy=self.scrollY+1,min(self.scrollY+lineCount,#self) do
+            local line=self[cy]
+
+            gc.setColor(COLOR.lD)
+            local cx=1
+            while cx<=#line do
+                local char=sub(line,cx,cx)
+
+                do
+                    -- TODO: coloring
+                end
+
+                local ifDisplay=cx+#char-1>=firstChar and cx<=lastChar
+                if char:byte()<=127 then
+                    if ifDisplay then
+                        _x,_y=(cx-1)*charW+100,(cy-1)*lineH
+                        _w=charRender[char]
+                        if charRender[char] then
+                            _w(_x,_y,charW,lineH,_time)
+                        else
+                            gc.setColor(COLOR.dL)
+                            GC.safePrintf(char,_x+baseX,_y+baseY,charW,'center')
+                        end
+                    end
+                    cx=cx+1
+                else
+                    -- Calculate utf8 length
+                    local utf8offset=1
+                    local cb=char:byte()-128
+                    while true do
+                        cb=cb-2^(7-utf8offset)
+                        if cb<0 then break end
+                        utf8offset=utf8offset+1
+                    end
+
+                    -- Draw string block
+                    if ifDisplay then
+                        gc.setColor(COLOR.dL)
+                        local utf8str=sub(line,cx,cx+utf8offset-1)
+                        local bx,by=(cx-1)*charW+100,(cy-1)*lineH
+                        gc.rectangle('line',bx+3,by+2,#utf8str*charW-6,lineH-4)
+                        if not GC.safePrintf(utf8str,bx+baseX,by+baseY,#utf8str*charW,'center') then
+                            -- TODO: draw sth
+                        end
+                    end
+
+                    cx=cx+utf8offset
+                end
+            end
+        end
     end
 
     -- Stencil selection
@@ -610,7 +711,7 @@ function Page:draw(x,y)
 
         -- Rainbow layer
         gc.setBlendMode('multiply','premultiplied')
-        rainbowShader:send('phase',love.timer.getTime()*2.6%6.2832)
+        rainbowShader:send('phase',_time*2.6%6.2832)
         gc.setShader(rainbowShader)
         gc.rectangle('fill',0,0,winW,winH)
         gc.setShader()
@@ -627,7 +728,7 @@ function Page:draw(x,y)
         gc.translate(-camX,-camY)
     end
 
-    -- Real cursor
+    -- Cursor
     gc.setLineWidth(4)
     gc.setColor(.26,1,.26,(-love.timer.getTime()%.4*4)^2)
     _x,_y=100+charW*self.curX,lineH*self.curY
