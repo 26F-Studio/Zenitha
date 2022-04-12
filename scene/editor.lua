@@ -1,10 +1,12 @@
 local gc=love.graphics
 local ms,kb=love.mouse,love.keyboard
+local getTime=love.timer.getTime
+
 local ins,rem=table.insert,table.remove
 local max,min=math.max,math.min
 local int,ceil=math.floor,math.ceil
 local abs,sin=math.abs,math.sin
-local sub=string.sub
+local byte,sub=string.byte,string.sub
 
 local sArg=STRING.sArg
 
@@ -83,6 +85,8 @@ function Page.new(args)
         fileName="*Untitled",
         filePath=false,
         fileInfo={COLOR.L,"*Untitled"},
+
+        lastInputTime=-1e6,
     },Page)
     if sArg(args,'-welcome') then
         TABLE.connect(P,{
@@ -90,7 +94,6 @@ function Page.new(args)
             '',
             "Type freely on any devices.",
             '',
-            string.char(unpack((function() local l={} for i=1,128 do l[i]=128-i end return l end)()))
         })
         P:moveCursor('-auto -end -jump')
     else
@@ -172,6 +175,7 @@ function Page:moveCursor(args)
                     if self.curX==0 then
                         self.curY=self.curY-1
                         self.curX=#self[self.curY]
+                        break
                     else
                         self.curX=self.curX-1
                     end
@@ -203,6 +207,7 @@ function Page:moveCursor(args)
                     if self.curX==#self[self.curY] then
                         self.curY=self.curY+1
                         self.curX=0
+                        break
                     else
                         self.curX=self.curX+1
                     end
@@ -335,7 +340,7 @@ end
 function Page:delete(args)
     if not args then args='' end
     local result=false-- If delete was successful
-    if sArg(args,'-all') then
+    if sArg(args,'-all') then-- Clear all file content
         TABLE.cut(self)
         self[1]=''
         self.scrollX,self.scrollY=0,0
@@ -343,8 +348,7 @@ function Page:delete(args)
         self.memX=0
         self.selX,self.selY=false,false
         result=true
-        SFX.play(tempInputBox.sound_clear)
-    elseif self.selX then
+    elseif self.selX then-- Delete selected area
         local startX,startY,endX,endY=self:getSelArea()
         if startY==endY then
             self[startY]=self[startY]:sub(1,startX)..self[startY]:sub(endX+1)
@@ -355,15 +359,14 @@ function Page:delete(args)
         self.curX,self.curY=startX,startY
         self.selX,self.selY=false,false
         result=true
-        SFX.play(tempInputBox.sound_del)
-    elseif sArg(args,'-word') then
+    elseif sArg(args,'-word') then-- Delete word
         if sArg(args,'-left') then
             self:moveCursor('-hold -jump -left')
         elseif sArg(args,'-right') then
             self:moveCursor('-hold -jump -right')
         end
         self:delete('')
-    else
+    else-- Delete single char
         if sArg(args,'-left') then
             if self.curX==0 then
                 if self.curY>1 then
@@ -372,7 +375,6 @@ function Page:delete(args)
                     rem(self,self.curY)
                     self.curY=self.curY-1
                     result=true
-                    SFX.play(tempInputBox.sound_bksp)
                 end
             else
                 local l=self[self.curY]
@@ -380,7 +382,6 @@ function Page:delete(args)
                 self[self.curY]=l
                 self.curX=max(self.curX-1,0)
                 result=true
-                SFX.play(tempInputBox.sound_bksp)
             end
         elseif sArg(args,'-right') then
             if self.curX==#self[self.curY] then
@@ -388,18 +389,20 @@ function Page:delete(args)
                     self[self.curY]=self[self.curY]..self[self.curY+1]
                     rem(self,self.curY+1)
                     result=true
-                    SFX.play(tempInputBox.sound_bksp)
                 end
             else
                 local l=self[self.curY]
                 l=l:sub(1,self.curX)..l:sub(self.curX+2)
                 self[self.curY]=l
                 result=true
-                SFX.play(tempInputBox.sound_bksp)
             end
         end
     end
     if result then
+        if not sArg(args,'-auto') then
+            SFX.play(tempInputBox.sound_bksp)
+            self.lastInputTime=getTime()
+        end
         self:freshScroll()
         self:saveCurX()
     end
@@ -574,11 +577,40 @@ local charRender={
     end,
     [' ']=function(x,y,w,h,t)
         gc.setColor(COLOR.lD)
-        gc.rectangle('fill',x+.28*w,y+.42*h+2.6*sin(t*4-(x/w+y/h)),.24*w,.16*h)
+        gc.rectangle('fill',x+.28*w,y+.42*h+2.6*sin(t*4+(int(x/w/4)*11-y/h)),.24*w,.16*h)
     end,
 }
+local colorData={}
+local colorList={'LR','LF','LO','LY','LA','LK','LG','LJ','LC','LI','LS','LB','LP','LV','LM','LW'}
+for k,v in next,colorList do colorList[k]=COLOR[v] end
+local wordColor={
+    _sign='DL',
+    ['do']='lS',
+    ['else']='lS',
+    ['elseif']='lS',
+    ['end']='lS',
+    ['for']='lS',
+    ['function']='lS',
+    ['if']='lS',
+    ['repeat']='lS',
+    ['return']='lS',
+    ['then']='lS',
+    ['until']='lS',
+    ['while']='lS',
+
+    ['true']='lM',
+    ['false']='lM',
+    ['nil']='lM',
+} for k,v in next,wordColor do wordColor[k]=COLOR[v] end
+setmetatable(wordColor,{__index=function(_,k)
+    local s=0
+    for i=1,#k do
+        s=s+byte(k,i)*(26+i)
+    end
+    return colorList[s%#colorList+1]
+end})
 function Page:draw(x,y)
-    local _time=love.timer.getTime()
+    local _time=getTime()
     local _x,_y,_w
     local charW,lineH=self.charWidth,self.lineHeight
     local winW,winH=self.windowW,self.windowH
@@ -617,36 +649,103 @@ function Page:draw(x,y)
         local lastChar=ceil((self.scrollX*charW+self.windowW-100)/charW)
         gc.setLineWidth(1)
         FONT.set(30,'_codePixel')
-        -- local inString=false
+        local multiLineComment=false-- Attention: string value means the finishing pattern
+        local multiLineString=false
         for cy=self.scrollY+1,min(self.scrollY+lineCount,#self) do
             local line=self[cy]
 
-            gc.setColor(COLOR.lD)
+            TABLE.cut(colorData)
+            local currentWord=''
+            local parsePointer=1
+            local parseState=false
+            local commentMode=multiLineComment-- Attention: string value means the finishing pattern
+            local stringMode=multiLineString-- Attention: string value means the finishing pattern
+            local justStartString=false
+
+            -- Coloring
+            for cx=1,#line+1 do
+                local char=sub(line,cx,cx)
+                local t=char~='' and STRING.type(char)
+
+                if t==parseState then
+                    currentWord=currentWord..char
+                else
+                    colorData[parsePointer]=cx
+                    if parseState then
+                        -- Special case: Annoying strings/comments
+                        if not commentMode and not stringMode then
+                            -- TODO: better parsing with string.find
+                            if currentWord=='"' or currentWord=='\'' then
+                                if not stringMode then
+                                    stringMode=currentWord
+                                    justStartString=true
+                                end
+                            elseif currentWord:match('^%[=*%[') then
+                                multiLineString='%]'..(currentWord:match('=+') or '')..'%]$'
+                                stringMode=true
+                            end
+                            if currentWord:sub(1,2)=='--' then
+                                commentMode=true
+                            elseif currentWord:match('^%-%-%[=*%[') then
+                                multiLineComment='%]'..(currentWord:match('=+') or '')..'%]$'
+                                commentMode=true
+                            end
+                        end
+                        colorData[parsePointer-1]=
+                            commentMode and COLOR.dG or
+                            stringMode and COLOR.dO or
+                            wordColor[currentWord] or
+                            wordColor._sign
+
+                        -- Cancel multiline strings/comments
+                        if justStartString then
+                            justStartString=false
+                        elseif stringMode and stringMode==currentWord then
+                            stringMode=false
+                        end
+
+                        if multiLineComment and currentWord:match(multiLineComment) then
+                            multiLineComment=false
+                            commentMode=false
+                        elseif multiLineString and currentWord:match(multiLineString) then
+                            multiLineString=false
+                            stringMode=false
+                        end
+                    end
+
+                    parsePointer=parsePointer+2
+                    parseState=t
+                    currentWord=char
+                end
+            end
+
+            -- Try to displaying
             local cx=1
+            parsePointer=1
             while cx<=#line do
                 local char=sub(line,cx,cx)
-
-                do
-                    -- TODO: coloring
+                local ifDisplay=cx+#char-1>=firstChar and cx<=lastChar
+                if cx==colorData[parsePointer] then
+                    gc.setColor(colorData[parsePointer+1])
+                    -- gc.rectangle('fill',_x,_y,6,6)
+                    parsePointer=parsePointer+2
                 end
 
-                local ifDisplay=cx+#char-1>=firstChar and cx<=lastChar
-                if char:byte()<=127 then
+                if byte(char)<=127 then
                     if ifDisplay then
                         _x,_y=(cx-1)*charW+100,(cy-1)*lineH
                         _w=charRender[char]
                         if charRender[char] then
                             _w(_x,_y,charW,lineH,_time)
                         else
-                            gc.setColor(COLOR.dL)
-                            GC.safePrintf(char,_x+baseX,_y+baseY,charW,'center')
+                            gc.printf(char,_x+baseX,_y+baseY,charW,'center')
                         end
                     end
                     cx=cx+1
                 else
                     -- Calculate utf8 length
                     local utf8offset=1
-                    local cb=char:byte()-128
+                    local cb=byte(char)-128
                     while true do
                         cb=cb-2^(7-utf8offset)
                         if cb<0 then break end
@@ -655,7 +754,6 @@ function Page:draw(x,y)
 
                     -- Draw string block
                     if ifDisplay then
-                        gc.setColor(COLOR.dL)
                         local utf8str=sub(line,cx,cx+utf8offset-1)
                         local bx,by=(cx-1)*charW+100,(cy-1)*lineH
                         gc.rectangle('line',bx+3,by+2,#utf8str*charW-6,lineH-4)
@@ -730,10 +828,12 @@ function Page:draw(x,y)
 
     -- Cursor
     gc.setLineWidth(4)
-    gc.setColor(.26,1,.26,(-love.timer.getTime()%.4*4)^2)
+    local inputTime=_time-self.lastInputTime
+    gc.setColor(.26,1,.26,(-inputTime%.4*4)^2.6)
     _x,_y=100+charW*self.curX,lineH*self.curY
+    _w=(max(.26-inputTime,0)/.26)^2*26
     -- gc.line(_x,_y-lineH,_x,_y)-- Normal cursor style, if you dislike the 'Z' one
-    gc.line(_x-4,_y-lineH,_x+2,_y-lineH,_x,_y,_x+6,_y)
+    gc.line(_x-4,_y-lineH-_w,_x+2,_y-lineH-_w,_x,_y+_w,_x+6,_y+_w)
 
     -- Select cursor
     if self.selX then
@@ -1003,8 +1103,10 @@ function scene.keyDown(key,isRep)
     elseif #key==1 then
         if P then
             if combo=='shift+'..key then
+                P.lastInputTime=getTime()
                 P:insStr(STRING.shiftChar(key))
             elseif combo==key then
+                P.lastInputTime=getTime()
                 P:insStr(key)
             else
                 MES.new('info',"Unknown combo: "..combo,1.26)
