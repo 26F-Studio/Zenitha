@@ -7,9 +7,11 @@ local max,min=math.max,math.min
 local int,ceil=math.floor,math.ceil
 local abs,sin=math.abs,math.sin
 local byte,sub=string.byte,string.sub
+local find,match=string.find,string.match
 
 local sArg=STRING.sArg
 
+local touchMode=false
 local activePages={}
 local curPage=false
 local pageInfo={COLOR.L,"Page: ",COLOR.LR,false,COLOR.LD,"/",COLOR.lI,false}
@@ -18,6 +20,155 @@ local escapeHoldTime
 
 local tempInputBox=WIDGET.new{type='inputBox'}
 local clipboardText=''
+
+-------------------------------------------------------------
+
+local help=setmetatable({},{__index=function()return '[-]' end})
+local globalComboMap={
+    ['ctrl+tab']=           {func='switchFile',     args='-next'},
+    ['ctrl+shift+tab']=     {func='switchFile',     args='-prev'},
+
+    ['ctrl+w']=             {func='closeFile',      args=''},
+    ['ctrl+n']=             {func='newFile',        args=''},
+}
+local pageComboMap={
+    ['left']=               {func='moveCursor',     args='-left'},
+    ['right']=              {func='moveCursor',     args='-right'},
+    ['up']=                 {func='moveCursor',     args='-up'},
+    ['down']=               {func='moveCursor',     args='-down'},
+    ['home']=               {func='moveCursor',     args='-home'},
+    ['end']=                {func='moveCursor',     args='-end'},
+    ['pageup']=             {func='moveCursor',     args='-jump -up'},
+    ['pagedown']=           {func='moveCursor',     args='-jump -down'},
+
+    ['ctrl+left']=          {func='moveCursor',     args='-left -jump'},
+    ['ctrl+right']=         {func='moveCursor',     args='-right -jump'},
+    ['ctrl+up']=            {func='scrollV',        args='-up'},
+    ['ctrl+down']=          {func='scrollV',        args='-down'},
+    ['ctrl+home']=          {func='moveCursor',     args='-home -jump'},
+    ['ctrl+end']=           {func='moveCursor',     args='-end -jump'},
+    ['ctrl+pageup']=        {func='scrollV',        args='-up -jump'},
+    ['ctrl+pagedown']=      {func='scrollV',        args='-down -jump'},
+
+    ['shift+left']=         {func='moveCursor',     args='-left -hold'},
+    ['shift+right']=        {func='moveCursor',     args='-right -hold'},
+    ['shift+up']=           {func='moveCursor',     args='-up -hold'},
+    ['shift+down']=         {func='moveCursor',     args='-down -hold'},
+    ['shift+home']=         {func='moveCursor',     args='-home -hold'},
+    ['shift+end']=          {func='moveCursor',     args='-end -hold'},
+
+    ['ctrl+shift+left']=    {func='moveCursor',     args='-left -jump -hold'},
+    ['ctrl+shift+right']=   {func='moveCursor',     args='-right -jump -hold'},
+    ['ctrl+shift+up']=      {func='moveCursor',     args='-up -hold'},-- Same as no ctrl
+    ['ctrl+shift+down']=    {func='moveCursor',     args='-down -hold'},-- Same as no ctrl
+    ['ctrl+shift+home']=    {func='moveCursor',     args='-home -jump -hold'},
+    ['ctrl+shift+end']=     {func='moveCursor',     args='-end -jump -hold'},
+
+    ['alt+up']=             {func='moveLine',       args='-up'},
+    ['alt+down']=           {func='moveLine',       args='-down'},
+
+    ['space']=              {func='insStr',         args=' '},
+    ['backspace']=          {func='delete',         args='-left'},
+    ['delete']=             {func='delete',         args='-right'},
+    ['ctrl+backspace']=     {func='delete',         args='-word -left'},
+    ['ctrl+delete']=        {func='delete',         args='-word -right'},
+    ['tab']=                {func='indent',         args='-add'},
+    ['shift+tab']=          {func='indent',         args='-remove'},
+    ['return']=             {func='insLine',        args='-normal'},
+    ['ctrl+return']=        {func='insLine',        args='-under'},
+    ['shift+return']=       {func='insLine',        args='-above'},
+
+    ['ctrl+a']=             {func='selectAll',      args=''},
+    ['ctrl+d']=             {func='duplicate',      args=''},
+    ['ctrl+x']=             {func='cut',            args=''},
+    ['ctrl+c']=             {func='copy',           args=''},
+    ['ctrl+v']=             {func='paste',          args='-clipboard'},
+
+    ['ctrl+z']=             {func='undo',           args=''},
+    ['ctrl+y']=             {func='redo',           args=''},
+    ['ctrl+s']=             {func='save',           args=''},
+}
+local alteredComboMap-- If exist, it will map combo to another
+local keyAlias={-- Directly ovveride original key
+    ['kp+']='+',['kp-']='-',['kp*']='*',['kp/']='/',
+    ['kpenter']='return',
+    ['kp.']='.',
+    ['kp7']='home',['kp1']='end',
+    ['kp9']='pageup',['kp3']='pagedown',
+}
+local unimportantKeys={}-- Combokeys (nothing happen when pressed)
+local comboKeyName={}-- Combokeys indicator
+
+if SYSTEM=='Windows' then
+    unimportantKeys['lgui'],unimportantKeys['rgui']=true,true
+    comboKeyName={
+        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='ctrl', text='CTRL'},
+        {color=COLOR.lG,keys={'lshift','rshift'},name='shift',text='SHIFT'},
+        {color=COLOR.lR,keys={'lalt','ralt'},    name='alt',  text='ALT'},
+    }
+    TABLE.cover({
+        newFile='Press ctrl+N to create a new file',
+    },help)
+elseif SYSTEM=='macOS' then
+    keyAlias['lalt'],keyAlias['ralt']='option','option'
+    keyAlias['lgui'],keyAlias['rgui']='command','command'
+    comboKeyName={
+        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='ctrl',   text='CONTROL'},
+        {color=COLOR.lR,keys={'lalt','ralt'},    name='option', text='OPTION'},
+        {color=COLOR.lR,keys={'lgui','rgui'},    name='command',text='COMMAND'},
+        {color=COLOR.lG,keys={'lshift','rshift'},name='shift',  text='SHIFT'},
+    }
+    alteredComboMap={
+        ['option+shift+left']='ctrl+shift+left',
+        ['option+shift+right']='ctrl+shift+right',
+        ['option+shift+up']='ctrl+shift+up',
+        ['option+shift+down']='ctrl+shift+down',
+
+        ['command+shift+d']='ctrl+d',
+        ['command+shift+w']='ctrl+w',
+        ['command+shift+z']='ctrl+y',
+        ['command+shift+up']='ctrl+shift+home',
+        ['command+shift+down']='ctrl+shift+end',
+        ['command+shift+left']='shift+home',
+        ['command+shift+right']='shift+end',
+
+        ['option+up']='alt+up',
+        ['option+down']='alt+down',
+        ['option+left']='ctrl+left',
+        ['option+right']='ctrl+right',
+        ['option+backspace']='ctrl+backspace',
+        ['option+delete']='ctrl+delete',
+
+        ['command+a']='ctrl+a',
+        ['command+c']='ctrl+c',
+        ['command+n']='ctrl+n',
+        ['command+s']='ctrl+s',
+        ['command+v']='ctrl+v',
+        ['command+x']='ctrl+x',
+        ['command+z']='ctrl+z',
+        ['command+up']='ctrl+home',
+        ['command+down']='ctrl+end',
+        ['command+left']='home',
+        ['command+right']='end',
+        ['command+pageup']='ctrl+pageup',
+        ['command+pagedown']='ctrl+pagedown',
+        ['command+home']='ctrl+home',
+        ['command+end']='ctrl+end',
+        ['command+backspace']='ctrl+shift+backspace',
+        ['command+delete']='ctrl+shift+delete',
+    }
+    TABLE.cover({
+        newFile='Press command+N to create a new file',
+    },help)
+elseif MOBILE then
+    TABLE.cover({
+        -- TODO
+    },help)
+end
+
+for i=1,#comboKeyName do for _,v in next,comboKeyName[i].keys do unimportantKeys[v]=true end end
+
+-------------------------------------------------------------
 
 -- Compile this when enter scene
 local rainbowShader=[[
@@ -121,15 +272,18 @@ end
 
 function Page:undo()
     -- TODO
+    MES.new('warn','not implemented yet')
 end
 
 function Page:redo()
     -- TODO
+    MES.new('warn','not implemented yet')
 end
 
 function Page:save()
     if self.filePath then
         -- TODO
+        MES.new('warn','not implemented yet')
     end
 end
 
@@ -660,7 +814,6 @@ function Page:draw(x,y)
             local parseState=false
             local commentMode=multiLineComment-- Attention: string value means the finishing pattern
             local stringMode=multiLineString-- Attention: string value means the finishing pattern
-            local justStartString=false
 
             -- Coloring
             for cx=1,#line+1 do
@@ -672,38 +825,40 @@ function Page:draw(x,y)
                 else
                     colorData[parsePointer]=cx
                     if parseState then
+                        local stopString
                         -- Special case: Annoying strings/comments
-                        if not commentMode and not stringMode then
-                            -- TODO: better parsing with string.find
-                            if currentWord=='"' or currentWord=='\'' then
-                                if not stringMode then
-                                    stringMode=currentWord
-                                    justStartString=true
-                                end
-                            elseif currentWord:match('^%[=*%[') then
-                                multiLineString='%]'..(currentWord:match('=+') or '')..'%]$'
+                        if stringMode then
+                            if find(currentWord,'[\"\']') and stringMode==match(currentWord,'[\"\']') then
+                                stopString=true
+                            end
+                        elseif not commentMode and not stringMode then
+                            if find(currentWord,'[\"\']') then
+                                stringMode=match(currentWord,'[\"\']')
+                            elseif sub(currentWord,1,2)=='--' then
+                                commentMode=true
+                            elseif match(currentWord,'%-%-%[=*%[') then
+                                multiLineComment='%]'..(match(currentWord,'=+') or '')..'%]$'
+                                commentMode=true
+                            elseif match(currentWord,'%[=*%[') then
+                                multiLineString='%]'..(match(currentWord,'=+') or '')..'%]$'
                                 stringMode=true
                             end
-                            if currentWord:sub(1,2)=='--' then
-                                commentMode=true
-                            elseif currentWord:match('^%-%-%[=*%[') then
-                                multiLineComment='%]'..(currentWord:match('=+') or '')..'%]$'
-                                commentMode=true
-                            end
                         end
+
+                        -- Coloring prev word
                         colorData[parsePointer-1]=
                             commentMode and COLOR.dG or
                             stringMode and COLOR.dO or
+                            parseState=='sign' and wordColor._sign or
                             wordColor[currentWord] or
                             wordColor._sign
 
-                        -- Cancel multiline strings/comments
-                        if justStartString then
-                            justStartString=false
-                        elseif stringMode and stringMode==currentWord then
+                        -- Stop string
+                        if stopString then
                             stringMode=false
                         end
 
+                        -- Stop multiline string/comment
                         if multiLineComment and currentWord:match(multiLineComment) then
                             multiLineComment=false
                             commentMode=false
@@ -725,9 +880,10 @@ function Page:draw(x,y)
             while cx<=#line do
                 local char=sub(line,cx,cx)
                 local ifDisplay=cx+#char-1>=firstChar and cx<=lastChar
+
+                -- Apply coloring
                 if cx==colorData[parsePointer] then
                     gc.setColor(colorData[parsePointer+1])
-                    -- gc.rectangle('fill',_x,_y,6,6)
                     parsePointer=parsePointer+2
                 end
 
@@ -752,13 +908,14 @@ function Page:draw(x,y)
                         utf8offset=utf8offset+1
                     end
 
-                    -- Draw string block
+                    -- Draw utf8 string block
                     if ifDisplay then
                         local utf8str=sub(line,cx,cx+utf8offset-1)
-                        local bx,by=(cx-1)*charW+100,(cy-1)*lineH
-                        gc.rectangle('line',bx+3,by+2,#utf8str*charW-6,lineH-4)
-                        if not GC.safePrintf(utf8str,bx+baseX,by+baseY,#utf8str*charW,'center') then
-                            -- TODO: draw sth
+                        _x,_y=(cx-1)*charW+100,(cy-1)*lineH
+                        _w=#utf8str*charW
+                        gc.rectangle('line',_x+3,_y+2,_w-6,lineH-4)
+                        if not GC.safePrintf(utf8str,_x+baseX,_y+baseY,_w,'center') then
+                            gc.line(_x+3,_y+2,_x+_w-3,_y+lineH-2)-- Invalid utf8 mark
                         end
                     end
 
@@ -912,150 +1069,98 @@ end
 
 -------------------------------------------------------------
 
-local help=setmetatable({},{__index=function()return '[-]' end})
-local globalComboMap={
-    ['ctrl+tab']=           {func='switchFile',     args='-next'},
-    ['ctrl+shift+tab']=     {func='switchFile',     args='-prev'},
+local Menu={}
+Menu.__index=Menu
+function Menu.new(M)
+    M.name=gc.newText(FONT.get(40),M.name)
+    return setmetatable(M,Menu)
+end
+function Menu:update(dt)
+    if self.expand and self.expand<1 then
+        self.expand=min(self.expand+6.26*dt,1)
+    end
+end
+function Menu:draw()
+    if self.xOy then gc.replaceTransform(self.xOy) end
+    gc.translate(self.x,self.y)
 
-    ['ctrl+w']=             {func='closeFile',      args=''},
-    ['ctrl+n']=             {func='newFile',        args=''},
-}
-local pageComboMap={
-    ['left']=               {func='moveCursor',     args='-left'},
-    ['right']=              {func='moveCursor',     args='-right'},
-    ['up']=                 {func='moveCursor',     args='-up'},
-    ['down']=               {func='moveCursor',     args='-down'},
-    ['home']=               {func='moveCursor',     args='-home'},
-    ['end']=                {func='moveCursor',     args='-end'},
-    ['pageup']=             {func='moveCursor',     args='-jump -up'},
-    ['pagedown']=           {func='moveCursor',     args='-jump -down'},
+    gc.setColor(1,1,1,.2+(self.expand and self.expand*.2 or 0))
+    gc.circle('fill',0,0,self.r-6)
 
-    ['ctrl+left']=          {func='moveCursor',     args='-left -jump'},
-    ['ctrl+right']=         {func='moveCursor',     args='-right -jump'},
-    ['ctrl+up']=            {func='scrollV',        args='-up'},
-    ['ctrl+down']=          {func='scrollV',        args='-down'},
-    ['ctrl+home']=          {func='moveCursor',     args='-home -jump'},
-    ['ctrl+end']=           {func='moveCursor',     args='-end -jump'},
-    ['ctrl+pageup']=        {func='scrollV',        args='-up -jump'},
-    ['ctrl+pagedown']=      {func='scrollV',        args='-down -jump'},
+    gc.setColor(self.color or COLOR.L)
+    gc.circle('line',0,0,self.r-3)
+    FONT.get(40)
+    GC.draw(self.name,nil,nil,nil,min(1,.8*self.r/self.name:getWidth()))
 
-    ['shift+left']=         {func='moveCursor',     args='-left -hold'},
-    ['shift+right']=        {func='moveCursor',     args='-right -hold'},
-    ['shift+up']=           {func='moveCursor',     args='-up -hold'},
-    ['shift+down']=         {func='moveCursor',     args='-down -hold'},
-    ['shift+home']=         {func='moveCursor',     args='-home -hold'},
-    ['shift+end']=          {func='moveCursor',     args='-end -hold'},
+    if self.list and self.expand then
+        gc.scale(1-(self.expand-1)^2)
+        for j=1,#self.list do
+            self.list[j]:draw()
+        end
+    end
 
-    ['ctrl+shift+left']=    {func='moveCursor',     args='-left -jump -hold'},
-    ['ctrl+shift+right']=   {func='moveCursor',     args='-right -jump -hold'},
-    ['ctrl+shift+up']=      {func='moveCursor',     args='-up -hold'},-- Same as no ctrl
-    ['ctrl+shift+down']=    {func='moveCursor',     args='-down -hold'},-- Same as no ctrl
-    ['ctrl+shift+home']=    {func='moveCursor',     args='-home -jump -hold'},
-    ['ctrl+shift+end']=     {func='moveCursor',     args='-end -jump -hold'},
-
-    ['alt+up']=             {func='moveLine',       args='-up'},
-    ['alt+down']=           {func='moveLine',       args='-down'},
-
-    ['space']=              {func='insStr',         args=' '},
-    ['backspace']=          {func='delete',         args='-left'},
-    ['delete']=             {func='delete',         args='-right'},
-    ['ctrl+backspace']=     {func='delete',         args='-word -left'},
-    ['ctrl+delete']=        {func='delete',         args='-word -right'},
-    ['tab']=                {func='indent',         args='-add'},
-    ['shift+tab']=          {func='indent',         args='-remove'},
-    ['return']=             {func='insLine',        args='-normal'},
-    ['ctrl+return']=        {func='insLine',        args='-under'},
-    ['shift+return']=       {func='insLine',        args='-above'},
-
-    ['ctrl+a']=             {func='selectAll',      args=''},
-    ['ctrl+d']=             {func='duplicate',      args=''},
-    ['ctrl+x']=             {func='cut',            args=''},
-    ['ctrl+c']=             {func='copy',           args=''},
-    ['ctrl+v']=             {func='paste',          args='-clipboard'},
-
-    ['ctrl+z']=             {func='undo',           args=''},
-    ['ctrl+y']=             {func='redo',           args=''},
-    ['ctrl+s']=             {func='save',           args=''},
-}
-local alteredComboMap-- If exist, it will map combo to another
-local keyAlias={-- Directly ovveride original key
-    ['kp+']='+',['kp-']='-',['kp*']='*',['kp/']='/',
-    ['kpenter']='return',
-    ['kp.']='.',
-    ['kp7']='home',['kp1']='end',
-    ['kp9']='pageup',['kp3']='pagedown',
-}
-local unimportantKeys={}-- Combokeys (nothing happen when pressed)
-local comboKeyName={}-- Combokeys indicator
-
-if SYSTEM=='Windows' then
-    unimportantKeys['lgui'],unimportantKeys['rgui']=true,true
-    comboKeyName={
-        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='ctrl', text='CTRL'},
-        {color=COLOR.lG,keys={'lshift','rshift'},name='shift',text='SHIFT'},
-        {color=COLOR.lR,keys={'lalt','ralt'},    name='alt',  text='ALT'},
-    }
-    TABLE.cover({
-        newFile='Press ctrl+N to create a new file',
-    },help)
-elseif SYSTEM=='macOS' then
-    keyAlias['lalt'],keyAlias['ralt']='option','option'
-    keyAlias['lgui'],keyAlias['rgui']='command','command'
-    comboKeyName={
-        {color=COLOR.lB,keys={'lctrl','rctrl'},  name='ctrl',   text='CONTROL'},
-        {color=COLOR.lR,keys={'lalt','ralt'},    name='option', text='OPTION'},
-        {color=COLOR.lR,keys={'lgui','rgui'},    name='command',text='COMMAND'},
-        {color=COLOR.lG,keys={'lshift','rshift'},name='shift',  text='SHIFT'},
-    }
-    alteredComboMap={
-        ['option+shift+left']='ctrl+shift+left',
-        ['option+shift+right']='ctrl+shift+right',
-        ['option+shift+up']='ctrl+shift+up',
-        ['option+shift+down']='ctrl+shift+down',
-
-        ['command+shift+d']='ctrl+d',
-        ['command+shift+w']='ctrl+w',
-        ['command+shift+z']='ctrl+y',
-        ['command+shift+up']='ctrl+shift+home',
-        ['command+shift+down']='ctrl+shift+end',
-        ['command+shift+left']='shift+home',
-        ['command+shift+right']='shift+end',
-
-        ['option+up']='alt+up',
-        ['option+down']='alt+down',
-        ['option+left']='ctrl+left',
-        ['option+right']='ctrl+right',
-        ['option+backspace']='ctrl+backspace',
-        ['option+delete']='ctrl+delete',
-
-        ['command+a']='ctrl+a',
-        ['command+c']='ctrl+c',
-        ['command+n']='ctrl+n',
-        ['command+s']='ctrl+s',
-        ['command+v']='ctrl+v',
-        ['command+x']='ctrl+x',
-        ['command+z']='ctrl+z',
-        ['command+up']='ctrl+home',
-        ['command+down']='ctrl+end',
-        ['command+left']='home',
-        ['command+right']='end',
-        ['command+pageup']='ctrl+pageup',
-        ['command+pagedown']='ctrl+pagedown',
-        ['command+home']='ctrl+home',
-        ['command+end']='ctrl+end',
-        ['command+backspace']='ctrl+shift+backspace',
-        ['command+delete']='ctrl+shift+delete',
-    }
-    TABLE.cover({
-        newFile='Press command+N to create a new file',
-    },help)
-elseif MOBILE then
-    TABLE.cover({
-        -- TODO
-    },help)
+    gc.translate(-self.x,-self.y)
+end
+function Menu:press(x,y)
+    if self.xOy then
+        x,y=self.xOy:inverseTransformPoint(x,y)
+    end
+    if (x-self.x)^2+(y-self.y)^2<=self.r^2 then
+        if self.list then
+            self.expand=not self.expand and 0
+        elseif self.func then
+            if type(self.func)=='string' then
+                love.keypressed(self.func)
+            elseif type(self.func)=='function' then
+                self.func()
+            end
+        end
+    else
+        if self.list and self.expand then
+            for i=1,#self.list do
+                self.list[i]:press(x-self.x,y-self.y)
+            end
+        end
+    end
 end
 
-for i=1,#comboKeyName do for _,v in next,comboKeyName[i].keys do unimportantKeys[v]=true end end
+local touchMenu={
+    Menu.new{
+        name='CTRL',
+        xOy=SCR.xOy_dl,
+        color=COLOR.lS,
+        x=50,y=-50,r=100,
+        expand=false,
+        list={
+            Menu.new{
+                name='Z',
+                x=130,y=-100,r=60,
+                color=COLOR.LS,
+                func='ctrl+z',
+            },
+            Menu.new{
+                name='X',
+                x=250,y=-100,r=60,
+                color=COLOR.LS,
+                func='ctrl+x',
+            },
+            Menu.new{
+                name='C',
+                x=370,y=-100,r=60,
+                color=COLOR.LS,
+                func='ctrl+c',
+            },
+            Menu.new{
+                name='V',
+                x=490,y=-100,r=60,
+                color=COLOR.LS,
+                func='ctrl+v',
+            },
+        },
+    },
+}
+
+-------------------------------------------------------------
 
 local scene={}
 
@@ -1124,39 +1229,43 @@ function scene.keyDown(key,isRep)
 end
 function scene.mouseDown(x,y,k)
     if not curPage then return end
-    local P=activePages[curPage]
+    if k==1 then
+        local P=activePages[curPage]
 
-    -- Outside mouse posion
-    local mx,my=x-50,y-50
-    if not (mx>0 and mx<P.windowW and my>0 and my<P.windowH) then return end
+        -- Outside mouse posion
+        local mx,my=x-50,y-50
+        if not (mx>0 and mx<P.windowW and my>0 and my<P.windowH) then return end
 
-    -- Inside position
-    mx,my=mx-100+P.scrollX*P.charWidth,my+P.scrollY*P.lineHeight
-    if mx<0 then-- Select line
-        local ty=int(my/P.lineHeight)+1
+        -- Inside position
+        mx,my=mx-100+P.scrollX*P.charWidth,my+P.scrollY*P.lineHeight
+        if mx<0 then-- Select line
+            local ty=int(my/P.lineHeight)+1
 
-        if not (kb.isDown('lshift','rshift') and P.selX) then
-            P.selX,P.selY=0,min(ty,#P)
-        end
-        P.curX,P.curY=0,ty+1
-        P:moveCursor('-mouse')
-    else-- Select char
-        if kb.isDown('lshift','rshift') then
-            if not P.selX then P.selX,P.selY=P.curX,P.curY end
-            P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
-            P:moveCursor('-mouse -hold')
-        else
-            P.selX,P.selY=false,false
-            P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+            if not (kb.isDown('lshift','rshift') and P.selX) then
+                P.selX,P.selY=0,min(ty,#P)
+            end
+            P.curX,P.curY=0,ty+1
             P:moveCursor('-mouse')
+        else-- Select char
+            if kb.isDown('lshift','rshift') then
+                if not P.selX then P.selX,P.selY=P.curX,P.curY end
+                P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+                P:moveCursor('-mouse -hold')
+            else
+                P.selX,P.selY=false,false
+                P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+                P:moveCursor('-mouse')
+            end
         end
+        P:saveCurX()
+    elseif k==2 then
+        scene.touchDown(x,y,'m2')
     end
-    P:saveCurX()
 end
 function scene.mouseMove(x,y)
     if not curPage then return end
     local P=activePages[curPage]
-    if ms.isDown(1) or ms.isDown(2) then
+    if ms.isDown(1) then
         if not P.selX then P.selX,P.selY=P.curX,P.curY end
         local mx,my=x-50,y-50
         mx,my=mx-100+P.scrollX*P.charWidth,my+P.scrollY*P.lineHeight
@@ -1166,7 +1275,27 @@ function scene.mouseMove(x,y)
     end
 end
 function scene.mouseUp(x,y,k)
+    if k==1 then
+        -- Nothing, maybe
+    elseif k==2 then
+        scene.touchUp(x,y,'m2')
+    end
 end
+function scene.touchDown(x,y,id)
+    if not touchMode then touchMode=true return end
+    local _x,_y=SCR.xOy:transformPoint(x,y)
+    for i=1,#touchMenu do
+        local M=touchMenu[i]
+        M:press(_x,_y)
+    end
+end
+function scene.touchMove(x,y,id)
+    -- TODO
+end
+function scene.touchUp(x,y,id)
+    -- TODO
+end
+
 function scene.wheelMoved(dx,dy)
     local P=activePages[curPage]
     if not P then return end
@@ -1181,6 +1310,12 @@ function scene.fileDropped(file)
 end
 
 function scene.update(dt)
+    if touchMode then
+        for i=1,#touchMenu do
+            touchMenu[i]:update(dt)
+        end
+    end
+
     clipboardFreshCD=clipboardFreshCD+dt
     if clipboardFreshCD>=1 then
         clipboardFreshCD=0
@@ -1223,6 +1358,13 @@ function scene.draw()
     else
         FONT.set(35,'_codePixel')
         GC.mStr(help.newFile,SCR.w0/2,SCR.h0/2-26,'center')
+    end
+
+    if touchMode then
+        gc.setLineWidth(6)
+        for i=1,#touchMenu do
+            touchMenu[i]:draw()
+        end
     end
 end
 
