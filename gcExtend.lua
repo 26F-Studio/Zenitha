@@ -21,14 +21,25 @@ end
 function GC.safePrintf(...)
     return pcall(printf,...)
 end
-function GC.outDraw(obj,div,x,y,a,k)
+function GC.outDraw(obj,x,y,a,k,d,shadeCount)
     local w,h=obj:getWidth()*.5,obj:getHeight()*.5
-    draw(obj,x-div,y-div,a,k,nil,w,h)
-    draw(obj,x-div,y+div,a,k,nil,w,h)
-    draw(obj,x+div,y-div,a,k,nil,w,h)
-    draw(obj,x+div,y+div,a,k,nil,w,h)
+    if shadeCount==4 then
+        draw(obj,x-d,y-d,a,k,nil,w,h)
+        draw(obj,x-d,y+d,a,k,nil,w,h)
+        draw(obj,x+d,y-d,a,k,nil,w,h)
+        draw(obj,x+d,y+d,a,k,nil,w,h)
+    elseif shadeCount==8 then
+        draw(obj,x-d,y-d,a,k,nil,w,h)
+        draw(obj,x-d,y+d,a,k,nil,w,h)
+        draw(obj,x+d,y-d,a,k,nil,w,h)
+        draw(obj,x+d,y+d,a,k,nil,w,h)
+        draw(obj,x-d,y,a,k,nil,w,h)
+        draw(obj,x+d,y,a,k,nil,w,h)
+        draw(obj,x,y-d,a,k,nil,w,h)
+        draw(obj,x,y+d,a,k,nil,w,h)
+    end
 end
-function GC.shadedPrint(str,x,y,mode,d,shadeCount,clr1,clr2)
+function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
     local w=1280
     if mode=='center' then
         x=x-w*.5
@@ -36,7 +47,7 @@ function GC.shadedPrint(str,x,y,mode,d,shadeCount,clr1,clr2)
         x=x-w
     end
     if not d then d=1 end
-    setColor(clr1 or COLOR.D)
+    setColor(c1 or COLOR.D)
     if shadeCount==4 then
         printf(str,x-d,y-d,w,mode)
         printf(str,x-d,y+d,w,mode)
@@ -54,7 +65,7 @@ function GC.shadedPrint(str,x,y,mode,d,shadeCount,clr1,clr2)
     else
         error('shadeCount(6th arg) must be 4 or 8')
     end
-    setColor(clr2 or COLOR.L)
+    setColor(c2 or COLOR.L)
     printf(str,x,y,w,mode)
 end
 function GC.regPolygon(mode,x,y,R,segments,phase)
