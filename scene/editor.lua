@@ -5,7 +5,8 @@ local getTime=love.timer.getTime
 local ins,rem=table.insert,table.remove
 local max,min=math.max,math.min
 local int,ceil=math.floor,math.ceil
-local abs,sin=math.abs,math.sin
+local abs,atan2=math.abs,math.atan2
+local sin,cos=math.sin,math.cos
 local byte,sub=string.byte,string.sub
 local find,match=string.find,string.match
 
@@ -237,13 +238,14 @@ function Page.new(args)
         filePath=false,
         fileInfo={COLOR.L,"*Untitled"},
 
+        lastMoveTime=-1e6,
         lastInputTime=-1e6,
     },Page)
     if sArg(args,'-welcome') then
         TABLE.connect(P,{
             "-- Welcome to Zenitha editor --",
             '',
-            "Type freely on any devices.",
+            "Type freely on any device.",
             '',
         })
         P:moveCursor('-auto -end -jump')
@@ -419,6 +421,7 @@ function Page:moveCursor(args)
             self:freshScroll()
         end
     end
+    self.lastMoveTime=getTime()
 end
 
 function Page:saveCurX()
@@ -837,10 +840,10 @@ function Page:draw(x,y)
                             elseif sub(currentWord,1,2)=='--' then
                                 commentMode=true
                             elseif match(currentWord,'%-%-%[=*%[') then
-                                multiLineComment='%]'..(match(currentWord,'=+') or '')..'%]$'
+                                multiLineComment='%]'..(match(currentWord,'=+') or '')..'%]'
                                 commentMode=true
                             elseif match(currentWord,'%[=*%[') then
-                                multiLineString='%]'..(match(currentWord,'=+') or '')..'%]$'
+                                multiLineString='%]'..(match(currentWord,'=+') or '')..'%]'
                                 stringMode=true
                             end
                         end
@@ -985,8 +988,9 @@ function Page:draw(x,y)
 
     -- Cursor
     gc.setLineWidth(4)
+    local moveTime=_time-self.lastMoveTime
     local inputTime=_time-self.lastInputTime
-    gc.setColor(.26,1,.26,(-inputTime%.4*4)^2.6)
+    gc.setColor(.26,1,.26,(-min(inputTime,moveTime)%.4*4)^2.6)
     _x,_y=100+charW*self.curX,lineH*self.curY
     _w=(max(.26-inputTime,0)/.26)^2*26
     -- gc.line(_x,_y-lineH,_x,_y)-- Normal cursor style, if you dislike the 'Z' one
@@ -1073,27 +1077,54 @@ local Menu={}
 Menu.__index=Menu
 function Menu.new(M)
     M.name=gc.newText(FONT.get(40),M.name)
+    M.pressLight=0
+    if not M.color then M.color=COLOR.L end
+    if not M.r then M.r=60 end
+    if M.list then
+        M.expand=false
+        M.expandState=0
+    end
     return setmetatable(M,Menu)
 end
 function Menu:update(dt)
-    if self.expand and self.expand<1 then
-        self.expand=min(self.expand+6.26*dt,1)
+    if self.pressLight>0 then
+        self.pressLight=max(self.pressLight-5*dt,0)
+    end
+    if self.list then
+        if self.expand then
+            for j=1,#self.list do
+                self.list[j]:update(dt)
+            end
+            if self.expandState<1 then
+                self.expandState=min(self.expandState+6.26*dt,1)
+            end
+        else
+            if self.expandState>0 then
+                self.expandState=max(self.expandState-6.26*dt,0)
+            end
+        end
     end
 end
 function Menu:draw()
     if self.xOy then gc.replaceTransform(self.xOy) end
     gc.translate(self.x,self.y)
 
-    gc.setColor(1,1,1,.2+(self.expand and self.expand*.2 or 0))
-    gc.circle('fill',0,0,self.r-6)
+    local lw=3+(self.expandState and self.expandState*17 or 0)
+    gc.setLineWidth(lw)
 
-    gc.setColor(self.color or COLOR.L)
-    gc.circle('line',0,0,self.r-3)
+    gc.setColor(1,1,1,.2+self.pressLight*.626)
+    gc.circle('fill',0,0,self.r-lw)
+
     FONT.get(40)
-    GC.draw(self.name,nil,nil,nil,min(1,.8*self.r/self.name:getWidth()))
+    gc.setColor(COLOR.lD)
+    local k=min(1,1.2*self.r/self.name:getWidth())
+    GC.outDraw(self.name,0,0,nil,k,2,8)
+    gc.setColor(self.color)
+    GC.draw(self.name,nil,nil,nil,k)
+    gc.circle('line',0,0,self.r-lw/2)
 
-    if self.list and self.expand then
-        gc.scale(1-(self.expand-1)^2)
+    if self.list and self.expandState>0 then
+        gc.scale(1-(self.expandState-1)^2)
         for j=1,#self.list do
             self.list[j]:draw()
         end
@@ -1107,7 +1138,7 @@ function Menu:press(x,y)
     end
     if (x-self.x)^2+(y-self.y)^2<=self.r^2 then
         if self.list then
-            self.expand=not self.expand and 0
+            self.expand=not self.expand
         elseif self.func then
             if type(self.func)=='string' then
                 love.keypressed(self.func)
@@ -1115,10 +1146,12 @@ function Menu:press(x,y)
                 self.func()
             end
         end
+        self.pressLight=1
+        return true
     else
         if self.list and self.expand then
             for i=1,#self.list do
-                self.list[i]:press(x-self.x,y-self.y)
+                if self.list[i]:press(x-self.x,y-self.y) then return true end
             end
         end
     end
@@ -1126,39 +1159,102 @@ end
 
 local touchMenu={
     Menu.new{
-        name='CTRL',
+        name='FILE',
+        xOy=SCR.xOy_ul,
+        color=COLOR.Y,
+        x=50,y=250,r=100,
+        list={
+            Menu.new{name='close',  x=160,y=80,color=COLOR.lY,func='ctrl+w'},
+            Menu.new{name='new',    x=280,y=80,color=COLOR.lY,func='ctrl+n'},
+            Menu.new{name='save',   x=400,y=80,color=COLOR.lY,func='ctrl+s'},
+            Menu.new{name='<-',     x=160,y=200,color=COLOR.lY,func='ctrl+shift+tab'},
+            Menu.new{name='->',     x=280,y=200,color=COLOR.lY,func='ctrl+tab'},
+        },
+    },
+    Menu.new{
+        name='SELECT',
+        xOy=SCR.xOy_dl,
+        color=COLOR.lP,
+        x=50,y=-400,r=100,
+        list={
+            Menu.new{name='pageUp', x=160,y=-60,color=COLOR.LP,func='pageup'},
+            Menu.new{name='pageDn', x=280,y=-60,color=COLOR.LP,func='pagedown'},
+            Menu.new{name='all',    x=400,y=-60,color=COLOR.LP,func='ctrl+a'},
+            Menu.new{name='moveUp', x=160,y=60,color=COLOR.LP,func='alt+up'},
+            Menu.new{name='moveDn', x=280,y=60,color=COLOR.LP,func='alt+down'},
+        },
+    },
+    Menu.new{
+        name='EDIT',
         xOy=SCR.xOy_dl,
         color=COLOR.lS,
         x=50,y=-50,r=100,
-        expand=false,
         list={
-            Menu.new{
-                name='Z',
-                x=130,y=-100,r=60,
-                color=COLOR.LS,
-                func='ctrl+z',
-            },
-            Menu.new{
-                name='X',
-                x=250,y=-100,r=60,
-                color=COLOR.LS,
-                func='ctrl+x',
-            },
-            Menu.new{
-                name='C',
-                x=370,y=-100,r=60,
-                color=COLOR.LS,
-                func='ctrl+c',
-            },
-            Menu.new{
-                name='V',
-                x=490,y=-100,r=60,
-                color=COLOR.LS,
-                func='ctrl+v',
-            },
+            Menu.new{name='duplicate',  x=160,y=-200,color=COLOR.LS,func='ctrl+d'},
+            Menu.new{name='undo',       x=160,y=-80, color=COLOR.LS,func='ctrl+z'},
+            Menu.new{name='cut',        x=280,y=-80, color=COLOR.LS,func='ctrl+x'},
+            Menu.new{name='copy',       x=400,y=-80, color=COLOR.LS,func='ctrl+c'},
+            Menu.new{name='paste',      x=520,y=-80, color=COLOR.LS,func='ctrl+v'},
         },
     },
 }
+
+local directPad={
+    xOy=SCR.xOy_ur,
+    x=-220,y=260,r=160,
+    barDist=0,barAngle=0,
+    touchID=nil,
+
+    moveX=0,moveY=0,
+}
+function directPad:press(x,y,id)
+    self:move(x,y)
+    if self.barDist>self.r/2 then
+        local a=self.barAngle%6.283185307179586/6.283185307179586
+        love.keypressed(
+            a<1/8 or a>7/8 and 'right' or
+            a<3/8          and 'down' or
+            a<5/8          and 'left' or
+            a<7/8          and 'up'
+        )
+    end
+    self.touchID=id
+end
+function directPad:move(x,y)
+    self.barDist=min(((x-self.x)^2+(y-self.y)^2)^.5,self.r)
+    self.barAngle=atan2(y-self.y,x-self.x)
+end
+function directPad:release()
+    self.touchID=nil
+    self.barDist=0
+    self.barAngle=0
+    self.moveX,self.moveY=0,0
+end
+function directPad:update(dt)
+    if self.touchID and self.barDist>self.r*.26 then
+        self.moveX=self.moveX+self.barDist/self.r*cos(self.barAngle)*dt*6
+        if abs(self.moveX)>1 then
+            love.keypressed(self.moveX>0 and 'right' or 'left')
+            self.moveX=self.moveX*0.8
+        end
+        self.moveY=self.moveY+self.barDist/self.r*sin(self.barAngle)*dt*6
+        if abs(self.moveY)>1 then
+            love.keypressed(self.moveY>0 and 'down' or 'up')
+            self.moveY=self.moveY*0.8
+        end
+    end
+end
+function directPad:draw()
+    gc.push('transform')
+    gc.replaceTransform(self.xOy)
+    gc.translate(self.x,self.y)
+    gc.setColor(.3,1,.4,self.barDist>self.r*.26 and .9 or .26)
+    gc.setLineWidth(6)
+    gc.circle('line',0,0,self.r-3)
+    gc.setColor(.8,1,.9,.6)
+    gc.circle('fill',self.barDist*cos(self.barAngle),self.barDist*sin(self.barAngle),self.r*.26)
+    gc.pop()
+end
 
 -------------------------------------------------------------
 
@@ -1228,8 +1324,8 @@ function scene.keyDown(key,isRep)
     end
 end
 function scene.mouseDown(x,y,k)
-    if not curPage then return end
     if k==1 then
+        if not curPage then return end
         local P=activePages[curPage]
 
         -- Outside mouse posion
@@ -1272,6 +1368,8 @@ function scene.mouseMove(x,y)
         P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
         P:moveCursor('-mouse')
         P:saveCurX()
+    elseif ms.isDown(2) then
+        scene.touchMove(x,y,'m2')
     end
 end
 function scene.mouseUp(x,y,k)
@@ -1286,14 +1384,23 @@ function scene.touchDown(x,y,id)
     local _x,_y=SCR.xOy:transformPoint(x,y)
     for i=1,#touchMenu do
         local M=touchMenu[i]
-        M:press(_x,_y)
+        if M:press(_x,_y) then return end
+    end
+
+    _x,_y=directPad.xOy:inverseTransformPoint(_x,_y)
+    if (_x-directPad.x)^2+(_y-directPad.y)^2<=directPad.r^2 then
+        directPad:press(_x,_y,id)
     end
 end
 function scene.touchMove(x,y,id)
-    -- TODO
+    if directPad.touchID==id then
+        directPad:move(directPad.xOy:inverseTransformPoint(SCR.xOy:transformPoint(x,y)))
+    end
 end
 function scene.touchUp(x,y,id)
-    -- TODO
+    if directPad.touchID==id then
+        directPad:release()
+    end
 end
 
 function scene.wheelMoved(dx,dy)
@@ -1314,6 +1421,7 @@ function scene.update(dt)
         for i=1,#touchMenu do
             touchMenu[i]:update(dt)
         end
+        directPad:update(dt)
     end
 
     clipboardFreshCD=clipboardFreshCD+dt
@@ -1361,10 +1469,10 @@ function scene.draw()
     end
 
     if touchMode then
-        gc.setLineWidth(6)
         for i=1,#touchMenu do
             touchMenu[i]:draw()
         end
+        directPad:draw()
     end
 end
 
