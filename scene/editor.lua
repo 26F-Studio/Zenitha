@@ -1,5 +1,5 @@
 local gc=love.graphics
-local ms,kb=love.mouse,love.keyboard
+local ms,kb,tc=love.mouse,love.keyboard,love.touch
 local getTime=love.timer.getTime
 
 local ins,rem=table.insert,table.remove
@@ -21,6 +21,8 @@ local escapeHoldTime
 
 local tempInputBox=WIDGET.new{type='inputBox'}
 local clipboardText=''
+
+local scene
 
 -------------------------------------------------------------
 
@@ -217,6 +219,10 @@ end
 local function freshPageInfo()
     pageInfo[4]=curPage
     pageInfo[8]=#activePages
+end
+
+local function ifSelecting()
+    return kb.isDown('lshift','rshift') or #tc.getTouches()==2
 end
 
 -------------------------------------------------------------
@@ -1112,13 +1118,13 @@ function Menu:draw()
     local lw=3+(self.expandState and self.expandState*17 or 0)
     gc.setLineWidth(lw)
 
-    gc.setColor(1,1,1,.2+self.pressLight*.626)
+    gc.setColor(1,1,1,.5+self.pressLight*.3)
     gc.circle('fill',0,0,self.r-lw)
 
     FONT.get(40)
-    gc.setColor(COLOR.lD)
     local k=min(1,1.2*self.r/self.name:getWidth())
-    GC.outDraw(self.name,0,0,nil,k,2,8)
+    gc.setColor(COLOR.D)
+    GC.outDraw(self.name,0,0,nil,k,1,8)
     gc.setColor(self.color)
     GC.draw(self.name,nil,nil,nil,k)
     gc.circle('line',0,0,self.r-lw/2)
@@ -1138,15 +1144,15 @@ function Menu:press(x,y)
     end
     if (x-self.x)^2+(y-self.y)^2<=self.r^2 then
         if self.list then
-            self.expand=not self.expand
+            self:switch()
         elseif self.func then
             if type(self.func)=='string' then
-                love.keypressed(self.func)
+                scene.keyDown(self.func)
             elseif type(self.func)=='function' then
-                self.func()
+                self.func(self.args)
             end
+            self.pressLight=1
         end
-        self.pressLight=1
         return true
     else
         if self.list and self.expand then
@@ -1156,69 +1162,149 @@ function Menu:press(x,y)
         end
     end
 end
+function Menu:switch()
+    if self.list then
+        self.expand=not self.expand
+    end
+end
+function Menu:expand()
+    if self.list then
+        self.expand=true
+    end
+end
+function Menu:fold()
+    if self.list then
+        self.expand=false
+    end
+end
+
+local function ZKB(key)
+    scene.keyDown(key)
+end
 
 local touchMenu={
     Menu.new{
-        name='FILE',
+        name='File',
         xOy=SCR.xOy_ul,
-        color=COLOR.Y,
+        color=COLOR.lY,
         x=50,y=250,r=100,
         list={
-            Menu.new{name='close',  x=160,y=80,color=COLOR.lY,func='ctrl+w'},
-            Menu.new{name='new',    x=280,y=80,color=COLOR.lY,func='ctrl+n'},
-            Menu.new{name='save',   x=400,y=80,color=COLOR.lY,func='ctrl+s'},
-            Menu.new{name='<-',     x=160,y=200,color=COLOR.lY,func='ctrl+shift+tab'},
-            Menu.new{name='->',     x=280,y=200,color=COLOR.lY,func='ctrl+tab'},
+            Menu.new{name='close',  x=160,y=40,color=COLOR.lY,func='ctrl+w'},
+            Menu.new{name='new',    x=280,y=40,color=COLOR.lY,func='ctrl+n'},
+            Menu.new{name='save',   x=400,y=40,color=COLOR.lY,func='ctrl+s'},
+            Menu.new{name='<-',     x=160,y=160,color=COLOR.lY,func='ctrl+shift+tab'},
+            Menu.new{name='->',     x=280,y=160,color=COLOR.lY,func='ctrl+tab'},
         },
     },
     Menu.new{
-        name='SELECT',
+        name='Select',
         xOy=SCR.xOy_dl,
-        color=COLOR.lP,
+        color=COLOR.LP,
         x=50,y=-400,r=100,
         list={
             Menu.new{name='pageUp', x=160,y=-60,color=COLOR.LP,func='pageup'},
-            Menu.new{name='pageDn', x=280,y=-60,color=COLOR.LP,func='pagedown'},
+            Menu.new{name='pageDn', x=160,y=60, color=COLOR.LP,func='pagedown'},
+            Menu.new{name='moveUp', x=280,y=-60,color=COLOR.LP,func='alt+up'},
+            Menu.new{name='moveDn', x=280,y=60, color=COLOR.LP,func='alt+down'},
             Menu.new{name='all',    x=400,y=-60,color=COLOR.LP,func='ctrl+a'},
-            Menu.new{name='moveUp', x=160,y=60,color=COLOR.LP,func='alt+up'},
-            Menu.new{name='moveDn', x=280,y=60,color=COLOR.LP,func='alt+down'},
         },
     },
     Menu.new{
-        name='EDIT',
+        name='Edit',
         xOy=SCR.xOy_dl,
-        color=COLOR.lS,
+        color=COLOR.LS,
         x=50,y=-50,r=100,
         list={
-            Menu.new{name='duplicate',  x=160,y=-200,color=COLOR.LS,func='ctrl+d'},
-            Menu.new{name='undo',       x=160,y=-80, color=COLOR.LS,func='ctrl+z'},
-            Menu.new{name='cut',        x=280,y=-80, color=COLOR.LS,func='ctrl+x'},
-            Menu.new{name='copy',       x=400,y=-80, color=COLOR.LS,func='ctrl+c'},
-            Menu.new{name='paste',      x=520,y=-80, color=COLOR.LS,func='ctrl+v'},
+            Menu.new{name='duplicate',  x=160,y=-160,color=COLOR.LS,func='ctrl+d'},
+            Menu.new{name='undo',       x=160,y=-40, color=COLOR.LS,func='ctrl+z'},
+            Menu.new{name='cut',        x=280,y=-40, color=COLOR.LS,func='ctrl+x'},
+            Menu.new{name='copy',       x=400,y=-40, color=COLOR.LS,func='ctrl+c'},
+            Menu.new{name='paste',      x=520,y=-40, color=COLOR.LS,func='ctrl+v'},
+        },
+    },
+    Menu.new{
+        name='Keyboard',
+        xOy=SCR.xOy_dr,
+        color=COLOR.lR,
+        x=-50,y=-50,r=100,
+        list={
+            Menu.new{name='1',x=-1340,y=-390,r=55,color=COLOR.LO,func=ZKB,args='1'},
+            Menu.new{name='2',x=-1220,y=-390,r=55,color=COLOR.LO,func=ZKB,args='2'},
+            Menu.new{name='3',x=-1100,y=-390,r=55,color=COLOR.LO,func=ZKB,args='3'},
+            Menu.new{name='4',x=-980, y=-390,r=55,color=COLOR.LO,func=ZKB,args='4'},
+            Menu.new{name='5',x=-860, y=-390,r=55,color=COLOR.LO,func=ZKB,args='5'},
+            Menu.new{name='6',x=-740, y=-390,r=55,color=COLOR.LO,func=ZKB,args='6'},
+            Menu.new{name='7',x=-620, y=-390,r=55,color=COLOR.LO,func=ZKB,args='7'},
+            Menu.new{name='8',x=-500, y=-390,r=55,color=COLOR.LO,func=ZKB,args='8'},
+            Menu.new{name='9',x=-380, y=-390,r=55,color=COLOR.LO,func=ZKB,args='9'},
+            Menu.new{name='0',x=-260, y=-390,r=55,color=COLOR.LO,func=ZKB,args='0'},
+            Menu.new{name='-',x=-140, y=-390,r=55,color=COLOR.DL,func=ZKB,args='-'},
+            Menu.new{name='=',x=-20,  y=-390,r=55,color=COLOR.DL,func=ZKB,args='='},
+
+            Menu.new{name='Q',x=-1330,y=-270,r=55,color=COLOR.LB,func=ZKB,args='q'},
+            Menu.new{name='W',x=-1210,y=-270,r=55,color=COLOR.LB,func=ZKB,args='w'},
+            Menu.new{name='E',x=-1090,y=-270,r=55,color=COLOR.LB,func=ZKB,args='e'},
+            Menu.new{name='R',x=-970, y=-270,r=55,color=COLOR.LB,func=ZKB,args='r'},
+            Menu.new{name='T',x=-850, y=-270,r=55,color=COLOR.LB,func=ZKB,args='t'},
+            Menu.new{name='Y',x=-730, y=-270,r=55,color=COLOR.LB,func=ZKB,args='y'},
+            Menu.new{name='U',x=-610, y=-270,r=55,color=COLOR.LB,func=ZKB,args='u'},
+            Menu.new{name='I',x=-490, y=-270,r=55,color=COLOR.LB,func=ZKB,args='i'},
+            Menu.new{name='O',x=-370, y=-270,r=55,color=COLOR.LB,func=ZKB,args='o'},
+            Menu.new{name='P',x=-250, y=-270,r=55,color=COLOR.LB,func=ZKB,args='p'},
+            Menu.new{name='[',x=-130, y=-270,r=55,color=COLOR.DL,func=ZKB,args='['},
+            Menu.new{name=']',x=-10,  y=-270,r=55,color=COLOR.DL,func=ZKB,args=']'},
+
+            Menu.new{name='A',x=-1290,y=-160,r=55,color=COLOR.LB,func=ZKB,args='a'},
+            Menu.new{name='S',x=-1170,y=-160,r=55,color=COLOR.LB,func=ZKB,args='s'},
+            Menu.new{name='D',x=-1050,y=-160,r=55,color=COLOR.LB,func=ZKB,args='d'},
+            Menu.new{name='F',x=-930, y=-160,r=55,color=COLOR.LB,func=ZKB,args='f'},
+            Menu.new{name='G',x=-810, y=-160,r=55,color=COLOR.LB,func=ZKB,args='g'},
+            Menu.new{name='H',x=-690, y=-160,r=55,color=COLOR.LB,func=ZKB,args='h'},
+            Menu.new{name='J',x=-570, y=-160,r=55,color=COLOR.LB,func=ZKB,args='j'},
+            Menu.new{name='K',x=-450, y=-160,r=55,color=COLOR.LB,func=ZKB,args='k'},
+            Menu.new{name='L',x=-330, y=-160,r=55,color=COLOR.LB,func=ZKB,args='l'},
+            Menu.new{name=';',x=-210, y=-160,r=55,color=COLOR.DL,func=ZKB,args=';'},
+            Menu.new{name="'",x=-90,  y=-160,r=55,color=COLOR.DL,func=ZKB,args="'"},
+
+            Menu.new{name='Z',x=-1250,y=-50,r=55,color=COLOR.LB,func=ZKB,args='z'},
+            Menu.new{name='X',x=-1130,y=-50,r=55,color=COLOR.LB,func=ZKB,args='x'},
+            Menu.new{name='C',x=-1010,y=-50,r=55,color=COLOR.LB,func=ZKB,args='c'},
+            Menu.new{name='V',x=-890, y=-50,r=55,color=COLOR.LB,func=ZKB,args='v'},
+            Menu.new{name='B',x=-770, y=-50,r=55,color=COLOR.LB,func=ZKB,args='b'},
+            Menu.new{name='N',x=-650, y=-50,r=55,color=COLOR.LB,func=ZKB,args='n'},
+            Menu.new{name='M',x=-530, y=-50,r=55,color=COLOR.LB,func=ZKB,args='m'},
+            Menu.new{name=',',x=-410, y=-50,r=55,color=COLOR.DL,func=ZKB,args=','},
+            Menu.new{name='.',x=-290, y=-50,r=55,color=COLOR.DL,func=ZKB,args='.'},
+            Menu.new{name='/',x=-170, y=-50,r=55,color=COLOR.DL,func=ZKB,args='/'},
         },
     },
 }
+local touchMenuMeta={__index=function(self,k)
+    for i=1,#self do
+        if self.name==k then
+            return self[i]
+        end
+    end
+end}
+do
+    local function f(m)
+        setmetatable(m,touchMenuMeta)
+        for i=1,#m do if m[i].list then f(m[i].list) end end
+    end f(touchMenu)
+end
 
 local directPad={
     xOy=SCR.xOy_ur,
-    x=-220,y=260,r=160,
+    x=-220,y=260,
+    r=160,r2=160*.3,
     barDist=0,barAngle=0,
     touchID=nil,
 
     moveX=0,moveY=0,
 }
 function directPad:press(x,y,id)
-    self:move(x,y)
-    if self.barDist>self.r/2 then
-        local a=self.barAngle%6.283185307179586/6.283185307179586
-        love.keypressed(
-            a<1/8 or a>7/8 and 'right' or
-            a<3/8          and 'down' or
-            a<5/8          and 'left' or
-            a<7/8          and 'up'
-        )
-    end
     self.touchID=id
+    self:move(x,y)
 end
 function directPad:move(x,y)
     self.barDist=min(((x-self.x)^2+(y-self.y)^2)^.5,self.r)
@@ -1231,16 +1317,55 @@ function directPad:release()
     self.moveX,self.moveY=0,0
 end
 function directPad:update(dt)
-    if self.touchID and self.barDist>self.r*.26 then
-        self.moveX=self.moveX+self.barDist/self.r*cos(self.barAngle)*dt*6
-        if abs(self.moveX)>1 then
-            love.keypressed(self.moveX>0 and 'right' or 'left')
-            self.moveX=self.moveX*0.8
+    if self.touchID and self.barDist>=self.r2 then
+        local dx,dy=self.barDist/self.r*cos(self.barAngle),self.barDist/self.r*sin(self.barAngle)
+
+        local a=self.barAngle%6.283185307179586/6.283185307179586
+        if a<1/8 then     dy=0-- Right
+        elseif a<3/8 then dx=0-- Down
+        elseif a<5/8 then dy=0-- Left
+        elseif a<7/8 then dx=0-- Up
+        else dy=0-- Aha, right too
         end
-        self.moveY=self.moveY+self.barDist/self.r*sin(self.barAngle)*dt*6
-        if abs(self.moveY)>1 then
-            love.keypressed(self.moveY>0 and 'down' or 'up')
-            self.moveY=self.moveY*0.8
+
+        if dx~=0 then
+            dx=dx*dt*6.26
+            if dx>0 then
+                if self.moveX<=0 then
+                    self.moveX=0
+                    scene.keyDown('right')
+                end
+            else
+                if self.moveX>=0 then
+                    self.moveX=0
+                    scene.keyDown('left')
+                end
+            end
+            self.moveX=self.moveX+dx
+            if abs(self.moveX)>1 then
+                scene.keyDown(self.moveX>0 and 'right' or 'left')
+                self.moveX=self.moveX*.8
+            end
+        end
+
+        if dy~=0 then
+            dy=dy*dt*6.26
+            if dy>0 then
+                if self.moveY<=0 then
+                    self.moveY=0
+                    scene.keyDown('down')
+                end
+            else
+                if self.moveY>=0 then
+                    self.moveY=0
+                    scene.keyDown('up')
+                end
+            end
+            self.moveY=self.moveY+dy
+            if abs(self.moveY)>1 then
+                scene.keyDown(self.moveY>0 and 'down' or 'up')
+                self.moveY=self.moveY*.8
+            end
         end
     end
 end
@@ -1248,17 +1373,25 @@ function directPad:draw()
     gc.push('transform')
     gc.replaceTransform(self.xOy)
     gc.translate(self.x,self.y)
-    gc.setColor(.3,1,.4,self.barDist>self.r*.26 and .9 or .26)
     gc.setLineWidth(6)
+    gc.setColor(.2,.626,.26,.5)
+    local rootR1=self.r/2^.5-3
+    local rootR2=self.r2/2^.5
+    gc.line(-rootR1,-rootR1,-rootR2,-rootR2)
+    gc.line(-rootR1,rootR1,-rootR2,rootR2)
+    gc.line(rootR1,-rootR1,rootR2,-rootR2)
+    gc.line(rootR1,rootR1,rootR2,rootR2)
+    gc.circle('line',0,0,self.r2-3)
+    gc.setColor(.3,1,.4,self.barDist>self.r2 and .9 or .3)
     gc.circle('line',0,0,self.r-3)
     gc.setColor(.8,1,.9,.6)
-    gc.circle('fill',self.barDist*cos(self.barAngle),self.barDist*sin(self.barAngle),self.r*.26)
+    gc.circle('fill',self.barDist*cos(self.barAngle),self.barDist*sin(self.barAngle),self.r2)
     gc.pop()
 end
 
 -------------------------------------------------------------
 
-local scene={}
+scene={}
 
 function scene.enter()
     BG.set('none')
@@ -1337,13 +1470,13 @@ function scene.mouseDown(x,y,k)
         if mx<0 then-- Select line
             local ty=int(my/P.lineHeight)+1
 
-            if not (kb.isDown('lshift','rshift') and P.selX) then
+            if not (ifSelecting() and P.selX) then
                 P.selX,P.selY=0,min(ty,#P)
             end
             P.curX,P.curY=0,ty+1
             P:moveCursor('-mouse')
         else-- Select char
-            if kb.isDown('lshift','rshift') then
+            if ifSelecting() then
                 if not P.selX then P.selX,P.selY=P.curX,P.curY end
                 P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
                 P:moveCursor('-mouse -hold')
@@ -1358,7 +1491,7 @@ function scene.mouseDown(x,y,k)
         scene.touchDown(x,y,'m2')
     end
 end
-function scene.mouseMove(x,y)
+function scene.mouseMove(x,y,dx,dy)
     if not curPage then return end
     local P=activePages[curPage]
     if ms.isDown(1) then
@@ -1369,7 +1502,7 @@ function scene.mouseMove(x,y)
         P:moveCursor('-mouse')
         P:saveCurX()
     elseif ms.isDown(2) then
-        scene.touchMove(x,y,'m2')
+        scene.touchMove(x,y,dx,dy,'m2')
     end
 end
 function scene.mouseUp(x,y,k)
@@ -1392,9 +1525,14 @@ function scene.touchDown(x,y,id)
         directPad:press(_x,_y,id)
     end
 end
-function scene.touchMove(x,y,id)
+function scene.touchMove(x,y,dx,dy,id)
     if directPad.touchID==id then
         directPad:move(directPad.xOy:inverseTransformPoint(SCR.xOy:transformPoint(x,y)))
+    end
+    if #tc.getTouches()==1 or directPad.touchID~=id and id=='m2' then
+        WHEELMOV(dy/50,'ctrl+up','ctrl+down')
+    elseif #tc.getTouches()==2 then
+        WHEELMOV(dy/100,'ctrl+pageup','ctrl+pagedown')
     end
 end
 function scene.touchUp(x,y,id)

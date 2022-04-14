@@ -61,9 +61,9 @@ local commands={} do
         description="Display help messages",
         details={
             "Display help messages.",
-            "",
+            '',
             "Aliases: help ?",
-            "",
+            '',
             "Usage:",
             "help",
             "help [command_name]",
@@ -73,9 +73,9 @@ local commands={} do
         description="Run arbitrary Lua code",
         details={
             "Run arbitrary Lua code.",
-            "",
+            '',
             "Usage: #[lua_source_code]",
-            "",
+            '',
             "print() can be used to print text into this window.",
         },
     }
@@ -84,18 +84,18 @@ local commands={} do
         description="Return to the last menu",
         details={
             "Return to the last menu.",
-            "",
+            '',
             "Aliases: exit quit",
-            "",
+            '',
             "Usage: exit",
         },
     }commands.quit="exit"
     commands.echo={
-        code=function(str) if str~="" then log(str) end end,
+        code=function(str) if str~='' then log(str) end end,
         description="Print a message",
         details={
             "Print a message to this window.",
-            "",
+            '',
             "Usage: echo [message]",
         },
     }
@@ -104,7 +104,7 @@ local commands={} do
         description="Clear the window",
         details={
             "Clear the log output.",
-            "",
+            '',
             "Usage: cls",
         },
     }
@@ -127,17 +127,17 @@ local commands={} do
         end
         commands.tree={
             code=function()
-                local L=love.filesystem.getDirectoryItems""
+                local L=love.filesystem.getDirectoryItems''
                 for _,name in next,L do
                     if not FILE.isSafe(name) then
-                        tree("",name,0)
+                        tree('',name,0)
                     end
                 end
             end,
             description="List all files & directories",
             details={
                 "List all files & directories in saving directory",
-                "",
+                '',
                 "Usage: tree",
             },
         }
@@ -193,7 +193,7 @@ local commands={} do
                     name=name:sub(4)
                 end
 
-                if name~="" then
+                if name~='' then
                     local info=love.filesystem.getInfo(name)
                     if info then
                         if info.type=='file' then
@@ -218,9 +218,9 @@ local commands={} do
             description="Delete a file or directory",
             details={
                 "Attempt to delete a file or directory (in saving directory)",
-                "",
+                '',
                 "Aliases: del rm",
-                "",
+                '',
                 "Usage: del [filename|dirname]",
                 "Usage: del -s [dirname]",
             }
@@ -278,15 +278,15 @@ local commands={} do
         details={
             "Rename or move a file (in saving directory)",
             {COLOR.lY,"Warning: file name with space is not allowed"},
-            "",
+            '',
             "Aliases: mv ren",
-            "",
+            '',
             "Usage: mv [oldfilename] [newfilename]",
         },
     }commands.ren="mv"
     commands.print={
         code=function(name)
-            if name~="" then
+            if name~='' then
                 local info=love.filesystem.getInfo(name)
                 if info then
                     if info.type=='file' then
@@ -308,7 +308,7 @@ local commands={} do
         description="Print file content",
         details={
             "Print a file to this window.",
-            "",
+            '',
             "Usage: print [filename]",
         },
     }
@@ -319,7 +319,7 @@ local commands={} do
         description="Manually crash the game",
         details={
             "Manually crash the game",
-            "",
+            '',
             "Usage: crash",
         },
     }
@@ -335,14 +335,14 @@ local commands={} do
                 MES.new(arg,"Test message",6)
             else
                 log{COLOR.I,"Show a message on the up-left corner"}
-                log""
+                log''
                 log{COLOR.I,"Usage: mes <check|info|broadcast|warn|error>"}
             end
         end,
         description="Show a message",
         details={
             "Show a message on the up-left corner",
-            "",
+            '',
             "Usage: mes <check|info|warn|error>",
         },
     }
@@ -356,13 +356,13 @@ local commands={} do
         description="Show the logs",
         details={
             "Show the logs",
-            "",
+            '',
             "Usage: log",
         },
     }
     commands.openurl={
         code=function(url)
-            if url~="" then
+            if url~='' then
                 local res,err=pcall(love.system.openURL,url)
                 if not res then
                     log{COLOR.R,"[ERR] ",COLOR.L,err}
@@ -374,7 +374,7 @@ local commands={} do
         description="Open a URL",
         details={
             "Attempt to open a URL with your device.",
-            "",
+            '',
             "Usage: openurl [url]",
         },
     }
@@ -387,7 +387,7 @@ local commands={} do
         description="Display window info.",
         details={
             "Display information about the game window.",
-            "",
+            '',
             "Usage: scrinfo",
         },
     }
@@ -403,7 +403,7 @@ local commands={} do
         description="Turn on/off wireframe mode",
         details={
             "Enable or disable wireframe drawing mode.",
-            "",
+            '',
             "Usage: wireframe <on|off>",
         },
     }
@@ -419,7 +419,7 @@ local commands={} do
         description="Turn on/off gamma correction",
         details={
             "Enable or disable gamma correction.",
-            "",
+            '',
             "Usage: gammacorrect <on|off>",
         },
     }
@@ -436,13 +436,13 @@ local commands={} do
         details={
             "Acts as if you have pressed a function key (i.e. F1-F12) on a keyboard.",
             "Useful if you are on a mobile device without access to these keys.",
-            "",
+            '',
             "Usage: fn <1-12>",
         },
     }
     commands.playbgm={
         code=function(bgm)
-            if bgm~="" then
+            if bgm~='' then
                 BGM.play(bgm)
             else
                 log{COLOR.I,"Usage: playbgm [bgmName]"}
@@ -451,7 +451,7 @@ local commands={} do
         description="Play a BGM",
         details={
             "Play a BGM.",
-            "",
+            '',
             "Usage: playbgm [bgmName]"
         },
     }
@@ -462,13 +462,13 @@ local commands={} do
         description="Stop BGM",
         details={
             "Stop the currently playing BGM.",
-            "",
+            '',
             "Usage: stopbgm"
         },
     }
     commands.setbg={
         code=function(name)
-            if name~="" then
+            if name~='' then
                 if name~=BG.cur then
                     if BG.set(name) then
                         log(("Background set to '%s'"):format(name))
@@ -485,7 +485,7 @@ local commands={} do
         description="Set background",
         details={
             "Set a background.",
-            "",
+            '',
             "Usage: setbg [bgName]",
         },
     }
@@ -496,7 +496,7 @@ local commands={} do
         description="Enter test scene",
         details={
             "Go to an empty test scene",
-            "",
+            '',
             "Usage: test",
         },
     }
@@ -507,7 +507,7 @@ local commands={} do
         description="Enter editor scene",
         details={
             "Go to an editor scene",
-            "",
+            '',
             "Usage: editor",
         },
     }
@@ -635,7 +635,7 @@ local commands={} do
                     for i=1,#APPs do
                         log(STRING.repD("$1 $2 $3",APPs[i].code,("·"):rep(10-#APPs[i].code),APPs[i].description))
                     end
-                elseif name~="" then
+                elseif name~='' then
                     for i=1,#APPs do
                         if APPs[i].code==name then
                             SCN.go(APPs[i].scene)
@@ -652,7 +652,7 @@ local commands={} do
             description="Enter a applet scene",
             details={
                 "Go to an applet scene",
-                "",
+                '',
                 "Usage:",
                 "app -list",
                 "app [appName]",
@@ -821,13 +821,13 @@ function scene.enter()
 end
 
 function scene.wheelMoved(_,y)
-    WHEELMOV(y,"scrollup","scrolldown")
+    WHEELMOV(y,'scrollup','scrolldown')
 end
 
 function scene.keyDown(key)
     if key=='return' or key=='kpenter' then
         local input=STRING.trim(inputBox:getText())
-        if input=="" then return end
+        if input=='' then return end
 
         -- Write History
         ins(history,input)
@@ -872,7 +872,7 @@ function scene.keyDown(key)
                 arg=input:sub(input:find("%S",p+1) or -1)
             else
                 cmd=input
-                arg=""
+                arg=''
             end
             if commands[cmd] then
                 commands[cmd].code(arg)
@@ -883,7 +883,7 @@ function scene.keyDown(key)
         inputBox:clear()
 
         -- Insert empty line
-        log""
+        log''
     elseif key=='up' then
         if not hisPtr then
             hisPtr=#history
@@ -906,7 +906,7 @@ function scene.keyDown(key)
         end
     elseif key=='tab' then
         local str=inputBox:getText()
-        if str~="" and not str:find("%s") then
+        if str~='' and not str:find("%s") then
             local res={}
             for c in next,commands do
                 if c:find(str,nil,true)==1 then
