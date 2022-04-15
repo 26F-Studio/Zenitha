@@ -21,8 +21,9 @@ local escapeHoldTime
 
 local tempInputBox=WIDGET.new{type='inputBox'}
 local clipboardText=''
+local touches={}
 
-local scene
+local scene={}
 
 -------------------------------------------------------------
 
@@ -222,7 +223,15 @@ local function freshPageInfo()
 end
 
 local function ifSelecting()
-    return kb.isDown('lshift','rshift') or #tc.getTouches()==2
+    if kb.isDown('lshift','rshift') then
+        return true
+    elseif touchMode and #touches>0 then
+        for i=1,#touches do
+            if touches[i].keep then
+                return true
+            end
+        end
+    end
 end
 
 -------------------------------------------------------------
@@ -1082,7 +1091,7 @@ end
 local Menu={}
 Menu.__index=Menu
 function Menu.new(M)
-    M.name=gc.newText(FONT.get(40),M.name)
+    M.label=gc.newText(FONT.get(40,'_codePixel'),M.name)
     M.pressLight=0
     if not M.color then M.color=COLOR.L end
     if not M.r then M.r=60 end
@@ -1122,15 +1131,15 @@ function Menu:draw()
     gc.circle('fill',0,0,self.r-lw)
 
     FONT.get(40)
-    local k=min(1,1.2*self.r/self.name:getWidth())
+    local k=min(1,1.2*self.r/self.label:getWidth())
     gc.setColor(COLOR.D)
-    GC.outDraw(self.name,0,0,nil,k,1,8)
+    GC.outDraw(self.label,0,0,nil,k,1,8)
     gc.setColor(self.color)
-    GC.draw(self.name,nil,nil,nil,k)
+    GC.draw(self.label,nil,nil,nil,k)
     gc.circle('line',0,0,self.r-lw/2)
 
     if self.list and self.expandState>0 then
-        gc.scale(1-(self.expandState-1)^2)
+        gc.scale(1-(1-self.expandState)^2.6)
         for j=1,#self.list do
             self.list[j]:draw()
         end
@@ -1182,16 +1191,16 @@ local function ZKB(key)
     scene.keyDown(key)
 end
 
-local touchMenu={
+local touchMenu; touchMenu={
     Menu.new{
         name='File',
         xOy=SCR.xOy_ul,
         color=COLOR.lY,
         x=50,y=250,r=100,
         list={
-            Menu.new{name='close',  x=160,y=40,color=COLOR.lY,func='ctrl+w'},
-            Menu.new{name='new',    x=280,y=40,color=COLOR.lY,func='ctrl+n'},
-            Menu.new{name='save',   x=400,y=40,color=COLOR.lY,func='ctrl+s'},
+            Menu.new{name='Close',  x=160,y=40,color=COLOR.lY,func='ctrl+w'},
+            Menu.new{name='New',    x=280,y=40,color=COLOR.lY,func='ctrl+n'},
+            Menu.new{name='Save',   x=400,y=40,color=COLOR.lY,func='ctrl+s'},
             Menu.new{name='<-',     x=160,y=160,color=COLOR.lY,func='ctrl+shift+tab'},
             Menu.new{name='->',     x=280,y=160,color=COLOR.lY,func='ctrl+tab'},
         },
@@ -1202,11 +1211,11 @@ local touchMenu={
         color=COLOR.LP,
         x=50,y=-400,r=100,
         list={
-            Menu.new{name='pageUp', x=160,y=-60,color=COLOR.LP,func='pageup'},
-            Menu.new{name='pageDn', x=160,y=60, color=COLOR.LP,func='pagedown'},
-            Menu.new{name='moveUp', x=280,y=-60,color=COLOR.LP,func='alt+up'},
-            Menu.new{name='moveDn', x=280,y=60, color=COLOR.LP,func='alt+down'},
-            Menu.new{name='all',    x=400,y=-60,color=COLOR.LP,func='ctrl+a'},
+            Menu.new{name='PgUp', x=160,y=-60,color=COLOR.LP,func='pageup'},
+            Menu.new{name='PgDn', x=160,y=60, color=COLOR.LP,func='pagedown'},
+            Menu.new{name='MvUp', x=280,y=-60,color=COLOR.LP,func='alt+up'},
+            Menu.new{name='MvDn', x=280,y=60, color=COLOR.LP,func='alt+down'},
+            Menu.new{name='All',    x=400,y=-60,color=COLOR.LP,func='ctrl+a'},
         },
     },
     Menu.new{
@@ -1215,11 +1224,11 @@ local touchMenu={
         color=COLOR.LS,
         x=50,y=-50,r=100,
         list={
-            Menu.new{name='duplicate',  x=160,y=-160,color=COLOR.LS,func='ctrl+d'},
-            Menu.new{name='undo',       x=160,y=-40, color=COLOR.LS,func='ctrl+z'},
-            Menu.new{name='cut',        x=280,y=-40, color=COLOR.LS,func='ctrl+x'},
-            Menu.new{name='copy',       x=400,y=-40, color=COLOR.LS,func='ctrl+c'},
-            Menu.new{name='paste',      x=520,y=-40, color=COLOR.LS,func='ctrl+v'},
+            Menu.new{name='Duplicate',  x=160,y=-160,color=COLOR.LS,func='ctrl+d'},
+            Menu.new{name='Undo',       x=160,y=-40, color=COLOR.LS,func='ctrl+z'},
+            Menu.new{name='Cut',        x=280,y=-40, color=COLOR.LS,func='ctrl+x'},
+            Menu.new{name='Copy',       x=400,y=-40, color=COLOR.LS,func='ctrl+c'},
+            Menu.new{name='Paste',      x=520,y=-40, color=COLOR.LS,func='ctrl+v'},
         },
     },
     Menu.new{
@@ -1228,60 +1237,150 @@ local touchMenu={
         color=COLOR.lR,
         x=-50,y=-50,r=100,
         list={
-            Menu.new{name='1',x=-1340,y=-390,r=55,color=COLOR.LO,func=ZKB,args='1'},
-            Menu.new{name='2',x=-1220,y=-390,r=55,color=COLOR.LO,func=ZKB,args='2'},
-            Menu.new{name='3',x=-1100,y=-390,r=55,color=COLOR.LO,func=ZKB,args='3'},
-            Menu.new{name='4',x=-980, y=-390,r=55,color=COLOR.LO,func=ZKB,args='4'},
-            Menu.new{name='5',x=-860, y=-390,r=55,color=COLOR.LO,func=ZKB,args='5'},
-            Menu.new{name='6',x=-740, y=-390,r=55,color=COLOR.LO,func=ZKB,args='6'},
-            Menu.new{name='7',x=-620, y=-390,r=55,color=COLOR.LO,func=ZKB,args='7'},
-            Menu.new{name='8',x=-500, y=-390,r=55,color=COLOR.LO,func=ZKB,args='8'},
-            Menu.new{name='9',x=-380, y=-390,r=55,color=COLOR.LO,func=ZKB,args='9'},
-            Menu.new{name='0',x=-260, y=-390,r=55,color=COLOR.LO,func=ZKB,args='0'},
-            Menu.new{name='-',x=-140, y=-390,r=55,color=COLOR.DL,func=ZKB,args='-'},
-            Menu.new{name='=',x=-20,  y=-390,r=55,color=COLOR.DL,func=ZKB,args='='},
+            Menu.new{name='`',x=-1390,y=-465,r=45,color=COLOR.dL,func=ZKB,args='`'},
+            Menu.new{name='!',x=-1295,y=-465,r=45,color=COLOR.dL,func=ZKB,args='!'},
+            Menu.new{name='@',x=-1185,y=-465,r=45,color=COLOR.dL,func=ZKB,args='@'},
+            Menu.new{name='#',x=-1075,y=-465,r=45,color=COLOR.dL,func=ZKB,args='#'},
+            Menu.new{name='$',x=-965, y=-465,r=45,color=COLOR.dL,func=ZKB,args='$'},
+            Menu.new{name='%',x=-855, y=-465,r=45,color=COLOR.dL,func=ZKB,args='%'},
+            Menu.new{name='^',x=-745, y=-465,r=45,color=COLOR.dL,func=ZKB,args='^'},
+            Menu.new{name='&',x=-635, y=-465,r=45,color=COLOR.dL,func=ZKB,args='&'},
+            Menu.new{name='*',x=-525, y=-465,r=45,color=COLOR.dL,func=ZKB,args='*'},
+            Menu.new{name='(',x=-415, y=-465,r=45,color=COLOR.dL,func=ZKB,args='('},
+            Menu.new{name=')',x=-305, y=-465,r=45,color=COLOR.dL,func=ZKB,args=')'},
+            Menu.new{name='_',x=-195, y=-465,r=45,color=COLOR.dL,func=ZKB,args='_'},
+            Menu.new{name='+',x=-85,  y=-465,r=45,color=COLOR.dL,func=ZKB,args='+'},
 
-            Menu.new{name='Q',x=-1330,y=-270,r=55,color=COLOR.LB,func=ZKB,args='q'},
-            Menu.new{name='W',x=-1210,y=-270,r=55,color=COLOR.LB,func=ZKB,args='w'},
-            Menu.new{name='E',x=-1090,y=-270,r=55,color=COLOR.LB,func=ZKB,args='e'},
-            Menu.new{name='R',x=-970, y=-270,r=55,color=COLOR.LB,func=ZKB,args='r'},
-            Menu.new{name='T',x=-850, y=-270,r=55,color=COLOR.LB,func=ZKB,args='t'},
-            Menu.new{name='Y',x=-730, y=-270,r=55,color=COLOR.LB,func=ZKB,args='y'},
-            Menu.new{name='U',x=-610, y=-270,r=55,color=COLOR.LB,func=ZKB,args='u'},
-            Menu.new{name='I',x=-490, y=-270,r=55,color=COLOR.LB,func=ZKB,args='i'},
-            Menu.new{name='O',x=-370, y=-270,r=55,color=COLOR.LB,func=ZKB,args='o'},
-            Menu.new{name='P',x=-250, y=-270,r=55,color=COLOR.LB,func=ZKB,args='p'},
-            Menu.new{name='[',x=-130, y=-270,r=55,color=COLOR.DL,func=ZKB,args='['},
-            Menu.new{name=']',x=-10,  y=-270,r=55,color=COLOR.DL,func=ZKB,args=']'},
+            Menu.new{name='1',x=-1340,y=-380,r=55,color=COLOR.LO,func=ZKB,args='1'},
+            Menu.new{name='2',x=-1230,y=-380,r=55,color=COLOR.LO,func=ZKB,args='2'},
+            Menu.new{name='3',x=-1120,y=-380,r=55,color=COLOR.LO,func=ZKB,args='3'},
+            Menu.new{name='4',x=-1010,y=-380,r=55,color=COLOR.LO,func=ZKB,args='4'},
+            Menu.new{name='5',x=-900, y=-380,r=55,color=COLOR.LO,func=ZKB,args='5'},
+            Menu.new{name='6',x=-790, y=-380,r=55,color=COLOR.LO,func=ZKB,args='6'},
+            Menu.new{name='7',x=-680, y=-380,r=55,color=COLOR.LO,func=ZKB,args='7'},
+            Menu.new{name='8',x=-570, y=-380,r=55,color=COLOR.LO,func=ZKB,args='8'},
+            Menu.new{name='9',x=-460, y=-380,r=55,color=COLOR.LO,func=ZKB,args='9'},
+            Menu.new{name='0',x=-350, y=-380,r=55,color=COLOR.LO,func=ZKB,args='0'},
+            Menu.new{name='-',x=-240, y=-380,r=55,color=COLOR.dL,func=ZKB,args='-'},
+            Menu.new{name='=',x=-130, y=-380,r=55,color=COLOR.dL,func=ZKB,args='='},
+            Menu.new{name='<-',x=-20, y=-380,r=55,color=COLOR.dL,func=ZKB,args='backspace'},
 
-            Menu.new{name='A',x=-1290,y=-160,r=55,color=COLOR.LB,func=ZKB,args='a'},
-            Menu.new{name='S',x=-1170,y=-160,r=55,color=COLOR.LB,func=ZKB,args='s'},
-            Menu.new{name='D',x=-1050,y=-160,r=55,color=COLOR.LB,func=ZKB,args='d'},
-            Menu.new{name='F',x=-930, y=-160,r=55,color=COLOR.LB,func=ZKB,args='f'},
-            Menu.new{name='G',x=-810, y=-160,r=55,color=COLOR.LB,func=ZKB,args='g'},
-            Menu.new{name='H',x=-690, y=-160,r=55,color=COLOR.LB,func=ZKB,args='h'},
-            Menu.new{name='J',x=-570, y=-160,r=55,color=COLOR.LB,func=ZKB,args='j'},
-            Menu.new{name='K',x=-450, y=-160,r=55,color=COLOR.LB,func=ZKB,args='k'},
-            Menu.new{name='L',x=-330, y=-160,r=55,color=COLOR.LB,func=ZKB,args='l'},
-            Menu.new{name=';',x=-210, y=-160,r=55,color=COLOR.DL,func=ZKB,args=';'},
-            Menu.new{name="'",x=-90,  y=-160,r=55,color=COLOR.DL,func=ZKB,args="'"},
+            Menu.new{name='q',x=-1330,y=-270,r=55,color=COLOR.LG,func=ZKB,args='q'},
+            Menu.new{name='w',x=-1220,y=-270,r=55,color=COLOR.LG,func=ZKB,args='w'},
+            Menu.new{name='e',x=-1110,y=-270,r=55,color=COLOR.LG,func=ZKB,args='e'},
+            Menu.new{name='r',x=-1000,y=-270,r=55,color=COLOR.LG,func=ZKB,args='r'},
+            Menu.new{name='t',x=-890, y=-270,r=55,color=COLOR.LG,func=ZKB,args='t'},
+            Menu.new{name='y',x=-780, y=-270,r=55,color=COLOR.LG,func=ZKB,args='y'},
+            Menu.new{name='u',x=-670, y=-270,r=55,color=COLOR.LG,func=ZKB,args='u'},
+            Menu.new{name='i',x=-560, y=-270,r=55,color=COLOR.LG,func=ZKB,args='i'},
+            Menu.new{name='o',x=-450, y=-270,r=55,color=COLOR.LG,func=ZKB,args='o'},
+            Menu.new{name='p',x=-340, y=-270,r=55,color=COLOR.LG,func=ZKB,args='p'},
+            Menu.new{name='[',x=-230, y=-270,r=55,color=COLOR.dL,func=ZKB,args='['},
+            Menu.new{name=']',x=-120, y=-270,r=55,color=COLOR.dL,func=ZKB,args=']'},
+            Menu.new{name='\\',x=-10, y=-270,r=55,color=COLOR.dL,func=ZKB,args='\\'},
 
-            Menu.new{name='Z',x=-1250,y=-50,r=55,color=COLOR.LB,func=ZKB,args='z'},
-            Menu.new{name='X',x=-1130,y=-50,r=55,color=COLOR.LB,func=ZKB,args='x'},
-            Menu.new{name='C',x=-1010,y=-50,r=55,color=COLOR.LB,func=ZKB,args='c'},
-            Menu.new{name='V',x=-890, y=-50,r=55,color=COLOR.LB,func=ZKB,args='v'},
-            Menu.new{name='B',x=-770, y=-50,r=55,color=COLOR.LB,func=ZKB,args='b'},
-            Menu.new{name='N',x=-650, y=-50,r=55,color=COLOR.LB,func=ZKB,args='n'},
-            Menu.new{name='M',x=-530, y=-50,r=55,color=COLOR.LB,func=ZKB,args='m'},
-            Menu.new{name=',',x=-410, y=-50,r=55,color=COLOR.DL,func=ZKB,args=','},
-            Menu.new{name='.',x=-290, y=-50,r=55,color=COLOR.DL,func=ZKB,args='.'},
-            Menu.new{name='/',x=-170, y=-50,r=55,color=COLOR.DL,func=ZKB,args='/'},
+            Menu.new{name='a',x=-1290,y=-165,r=55,color=COLOR.LG,func=ZKB,args='a'},
+            Menu.new{name='s',x=-1180,y=-165,r=55,color=COLOR.LG,func=ZKB,args='s'},
+            Menu.new{name='d',x=-1070,y=-165,r=55,color=COLOR.LG,func=ZKB,args='d'},
+            Menu.new{name='f',x=-960, y=-165,r=55,color=COLOR.LG,func=ZKB,args='f'},
+            Menu.new{name='g',x=-850, y=-165,r=55,color=COLOR.LG,func=ZKB,args='g'},
+            Menu.new{name='h',x=-740, y=-165,r=55,color=COLOR.LG,func=ZKB,args='h'},
+            Menu.new{name='j',x=-630, y=-165,r=55,color=COLOR.LG,func=ZKB,args='j'},
+            Menu.new{name='k',x=-520, y=-165,r=55,color=COLOR.LG,func=ZKB,args='k'},
+            Menu.new{name='l',x=-410, y=-165,r=55,color=COLOR.LG,func=ZKB,args='l'},
+            Menu.new{name=';',x=-300, y=-165,r=55,color=COLOR.dL,func=ZKB,args=';'},
+            Menu.new{name="'",x=-190, y=-165,r=55,color=COLOR.dL,func=ZKB,args="'"},
+            Menu.new{name='"',x=-80,  y=-165,r=55,color=COLOR.dL,func=ZKB,args='"'},
+
+            Menu.new{name='z',x=-1250,y=-60, r=55,color=COLOR.LG,func=ZKB,args='z'},
+            Menu.new{name='x',x=-1140,y=-60, r=55,color=COLOR.LG,func=ZKB,args='x'},
+            Menu.new{name='c',x=-1030,y=-60, r=55,color=COLOR.LG,func=ZKB,args='c'},
+            Menu.new{name='v',x=-920, y=-60, r=55,color=COLOR.LG,func=ZKB,args='v'},
+            Menu.new{name='b',x=-810, y=-60, r=55,color=COLOR.LG,func=ZKB,args='b'},
+            Menu.new{name='n',x=-700, y=-60, r=55,color=COLOR.LG,func=ZKB,args='n'},
+            Menu.new{name='m',x=-590, y=-60, r=55,color=COLOR.LG,func=ZKB,args='m'},
+            Menu.new{name=',',x=-480, y=-60, r=55,color=COLOR.dL,func=ZKB,args=','},
+            Menu.new{name='.',x=-370, y=-60, r=55,color=COLOR.dL,func=ZKB,args='.'},
+            Menu.new{name='/',x=-260, y=-60, r=55,color=COLOR.dL,func=ZKB,args='/'},
+            Menu.new{name='|',x=-150, y=-60, r=55,color=COLOR.dL,func=ZKB,args='|'},
+
+            Menu.new{name='CAP',x=-1410,y=-180,r=65,color=COLOR.dR,func=function()touchMenu.Keyboard.list,touchMenu.Keyboard.list2=touchMenu.Keyboard.list2,touchMenu.Keyboard.list end},
+        },
+        list2={
+            Menu.new{name='~',x=-1390,y=-465,r=45,color=COLOR.lR,func=ZKB,args='~'},
+            Menu.new{name='!',x=-1295,y=-465,r=45,color=COLOR.dL,func=ZKB,args='!'},
+            Menu.new{name='@',x=-1185,y=-465,r=45,color=COLOR.dL,func=ZKB,args='@'},
+            Menu.new{name='#',x=-1075,y=-465,r=45,color=COLOR.dL,func=ZKB,args='#'},
+            Menu.new{name='$',x=-965, y=-465,r=45,color=COLOR.dL,func=ZKB,args='$'},
+            Menu.new{name='%',x=-855, y=-465,r=45,color=COLOR.dL,func=ZKB,args='%'},
+            Menu.new{name='^',x=-745, y=-465,r=45,color=COLOR.dL,func=ZKB,args='^'},
+            Menu.new{name='&',x=-635, y=-465,r=45,color=COLOR.dL,func=ZKB,args='&'},
+            Menu.new{name='*',x=-525, y=-465,r=45,color=COLOR.dL,func=ZKB,args='*'},
+            Menu.new{name='(',x=-415, y=-465,r=45,color=COLOR.dL,func=ZKB,args='('},
+            Menu.new{name=')',x=-305, y=-465,r=45,color=COLOR.dL,func=ZKB,args=')'},
+            Menu.new{name='_',x=-195, y=-465,r=45,color=COLOR.dL,func=ZKB,args='_'},
+            Menu.new{name='+',x=-85,  y=-465,r=45,color=COLOR.dL,func=ZKB,args='+'},
+
+            Menu.new{name='1',x=-1340,y=-380,r=55,color=COLOR.LO,func=ZKB,args='1'},
+            Menu.new{name='2',x=-1230,y=-380,r=55,color=COLOR.LO,func=ZKB,args='2'},
+            Menu.new{name='3',x=-1120,y=-380,r=55,color=COLOR.LO,func=ZKB,args='3'},
+            Menu.new{name='4',x=-1010,y=-380,r=55,color=COLOR.LO,func=ZKB,args='4'},
+            Menu.new{name='5',x=-900, y=-380,r=55,color=COLOR.LO,func=ZKB,args='5'},
+            Menu.new{name='6',x=-790, y=-380,r=55,color=COLOR.LO,func=ZKB,args='6'},
+            Menu.new{name='7',x=-680, y=-380,r=55,color=COLOR.LO,func=ZKB,args='7'},
+            Menu.new{name='8',x=-570, y=-380,r=55,color=COLOR.LO,func=ZKB,args='8'},
+            Menu.new{name='9',x=-460, y=-380,r=55,color=COLOR.LO,func=ZKB,args='9'},
+            Menu.new{name='0',x=-350, y=-380,r=55,color=COLOR.LO,func=ZKB,args='0'},
+            Menu.new{name='-',x=-240, y=-380,r=55,color=COLOR.dL,func=ZKB,args='-'},
+            Menu.new{name='=',x=-130, y=-380,r=55,color=COLOR.dL,func=ZKB,args='='},
+            Menu.new{name='<-',x=-20, y=-380,r=55,color=COLOR.dL,func=ZKB,args='backspace'},
+
+            Menu.new{name='Q',x=-1330,y=-270,r=55,color=COLOR.lO,func=ZKB,args='Q'},
+            Menu.new{name='W',x=-1220,y=-270,r=55,color=COLOR.lO,func=ZKB,args='W'},
+            Menu.new{name='E',x=-1110,y=-270,r=55,color=COLOR.lO,func=ZKB,args='E'},
+            Menu.new{name='R',x=-1000,y=-270,r=55,color=COLOR.lO,func=ZKB,args='R'},
+            Menu.new{name='T',x=-890, y=-270,r=55,color=COLOR.lO,func=ZKB,args='T'},
+            Menu.new{name='Y',x=-780, y=-270,r=55,color=COLOR.lO,func=ZKB,args='Y'},
+            Menu.new{name='U',x=-670, y=-270,r=55,color=COLOR.lO,func=ZKB,args='U'},
+            Menu.new{name='I',x=-560, y=-270,r=55,color=COLOR.lO,func=ZKB,args='I'},
+            Menu.new{name='O',x=-450, y=-270,r=55,color=COLOR.lO,func=ZKB,args='O'},
+            Menu.new{name='P',x=-340, y=-270,r=55,color=COLOR.lO,func=ZKB,args='P'},
+            Menu.new{name='{',x=-230, y=-270,r=55,color=COLOR.lR,func=ZKB,args='{'},
+            Menu.new{name='}',x=-120, y=-270,r=55,color=COLOR.lR,func=ZKB,args='}'},
+            Menu.new{name='\\',x=-10, y=-270,r=55,color=COLOR.dL,func=ZKB,args='\\'},
+
+            Menu.new{name='A',x=-1290,y=-165,r=55,color=COLOR.lO,func=ZKB,args='A'},
+            Menu.new{name='S',x=-1180,y=-165,r=55,color=COLOR.lO,func=ZKB,args='S'},
+            Menu.new{name='D',x=-1070,y=-165,r=55,color=COLOR.lO,func=ZKB,args='D'},
+            Menu.new{name='F',x=-960, y=-165,r=55,color=COLOR.lO,func=ZKB,args='F'},
+            Menu.new{name='G',x=-850, y=-165,r=55,color=COLOR.lO,func=ZKB,args='G'},
+            Menu.new{name='H',x=-740, y=-165,r=55,color=COLOR.lO,func=ZKB,args='H'},
+            Menu.new{name='J',x=-630, y=-165,r=55,color=COLOR.lO,func=ZKB,args='J'},
+            Menu.new{name='K',x=-520, y=-165,r=55,color=COLOR.lO,func=ZKB,args='K'},
+            Menu.new{name='L',x=-410, y=-165,r=55,color=COLOR.lO,func=ZKB,args='L'},
+            Menu.new{name=':',x=-300, y=-165,r=55,color=COLOR.lR,func=ZKB,args=':'},
+            Menu.new{name="'",x=-190, y=-165,r=55,color=COLOR.dL,func=ZKB,args="'"},
+            Menu.new{name='"',x=-80,  y=-165,r=55,color=COLOR.dL,func=ZKB,args='"'},
+
+            Menu.new{name='Z',x=-1250,y=-60, r=55,color=COLOR.lO,func=ZKB,args='Z'},
+            Menu.new{name='X',x=-1140,y=-60, r=55,color=COLOR.lO,func=ZKB,args='X'},
+            Menu.new{name='C',x=-1030,y=-60, r=55,color=COLOR.lO,func=ZKB,args='C'},
+            Menu.new{name='V',x=-920, y=-60, r=55,color=COLOR.lO,func=ZKB,args='V'},
+            Menu.new{name='B',x=-810, y=-60, r=55,color=COLOR.lO,func=ZKB,args='B'},
+            Menu.new{name='N',x=-700, y=-60, r=55,color=COLOR.lO,func=ZKB,args='N'},
+            Menu.new{name='M',x=-590, y=-60, r=55,color=COLOR.lO,func=ZKB,args='M'},
+            Menu.new{name='<',x=-480, y=-60, r=55,color=COLOR.lR,func=ZKB,args='<'},
+            Menu.new{name='>',x=-370, y=-60, r=55,color=COLOR.lR,func=ZKB,args='>'},
+            Menu.new{name='?',x=-260, y=-60, r=55,color=COLOR.lR,func=ZKB,args='?'},
+            Menu.new{name='|',x=-150, y=-60, r=55,color=COLOR.dL,func=ZKB,args='|'},
+
+            Menu.new{name='CAP',x=-1410,y=-180,r=65,color=COLOR.lR,func=function()touchMenu.Keyboard.list,touchMenu.Keyboard.list2=touchMenu.Keyboard.list2,touchMenu.Keyboard.list end},
         },
     },
 }
 local touchMenuMeta={__index=function(self,k)
     for i=1,#self do
-        if self.name==k then
+        if self[i].name==k then
             return self[i]
         end
     end
@@ -1290,7 +1389,8 @@ do
     local function f(m)
         setmetatable(m,touchMenuMeta)
         for i=1,#m do if m[i].list then f(m[i].list) end end
-    end f(touchMenu)
+    end
+    f(touchMenu)
 end
 
 local directPad={
@@ -1305,6 +1405,7 @@ local directPad={
 function directPad:press(x,y,id)
     self.touchID=id
     self:move(x,y)
+    self:update(1e-26)
 end
 function directPad:move(x,y)
     self.barDist=min(((x-self.x)^2+(y-self.y)^2)^.5,self.r)
@@ -1316,16 +1417,26 @@ function directPad:release()
     self.barAngle=0
     self.moveX,self.moveY=0,0
 end
+function directPad:getDirection()
+    if self.barDist>=self.r2 then
+        local a=self.barAngle%6.283185307179586/6.283185307179586
+        return
+            a<1/8 and 'right' or
+            a<3/8 and 'down' or
+            a<5/8 and 'left' or
+            a<7/8 and 'up' or
+            'right'
+    end
+end
 function directPad:update(dt)
     if self.touchID and self.barDist>=self.r2 then
         local dx,dy=self.barDist/self.r*cos(self.barAngle),self.barDist/self.r*sin(self.barAngle)
 
-        local a=self.barAngle%6.283185307179586/6.283185307179586
-        if a<1/8 then     dy=0-- Right
-        elseif a<3/8 then dx=0-- Down
-        elseif a<5/8 then dy=0-- Left
-        elseif a<7/8 then dx=0-- Up
-        else dy=0-- Aha, right too
+        local a=self:getDirection()
+        if a=='right' then    dy=0
+        elseif a=='down' then dx=0
+        elseif a=='left' then dy=0
+        elseif a=='up' then   dx=0
         end
 
         if dx~=0 then
@@ -1373,17 +1484,38 @@ function directPad:draw()
     gc.push('transform')
     gc.replaceTransform(self.xOy)
     gc.translate(self.x,self.y)
+
+    gc.setColor(.3,.626,.4,.5)
+    if self.barDist>=self.r2 then
+        GC.stc_reset()
+        GC.stc_setComp('notequal',1)
+        GC.stc_setPen('replace',1)
+        GC.stc_circ(0,0,self.r2)
+
+        local a=self:getDirection()
+        if a=='right' then    a=6.2832*0/4
+        elseif a=='down' then a=6.2832*1/4
+        elseif a=='left' then a=6.2832*2/4
+        elseif a=='up' then   a=6.2832*3/4
+        end
+        gc.setLineWidth(self.r)
+        gc.arc('fill','pie',0,0,self.r,a-.7854,a+.7854)
+        GC.stc_stop()
+    end
+
     gc.setLineWidth(6)
-    gc.setColor(.2,.626,.26,.5)
+
     local rootR1=self.r/2^.5-3
-    local rootR2=self.r2/2^.5
+    local rootR2=self.r2/2^.5+3
+    gc.setColor(.2,.626,.26,.5)
     gc.line(-rootR1,-rootR1,-rootR2,-rootR2)
     gc.line(-rootR1,rootR1,-rootR2,rootR2)
     gc.line(rootR1,-rootR1,rootR2,-rootR2)
     gc.line(rootR1,rootR1,rootR2,rootR2)
-    gc.circle('line',0,0,self.r2-3)
+
+    gc.circle('line',0,0,self.r2)
     gc.setColor(.3,1,.4,self.barDist>self.r2 and .9 or .3)
-    gc.circle('line',0,0,self.r-3)
+    gc.circle('line',0,0,self.r)
     gc.setColor(.8,1,.9,.6)
     gc.circle('fill',self.barDist*cos(self.barAngle),self.barDist*sin(self.barAngle),self.r2)
     gc.pop()
@@ -1391,10 +1523,9 @@ end
 
 -------------------------------------------------------------
 
-scene={}
-
 function scene.enter()
     BG.set('none')
+    touchMode=false
     clipboardFreshCD=0
     escapeHoldTime=0
     freshClipboard()
@@ -1449,6 +1580,8 @@ function scene.keyDown(key,isRep)
     elseif key=='escape' then
         if P and P.selX then
             P.selX,P.selY=false,false
+        elseif touchMode then
+            touchMode=false
         elseif not isRep then
             MES.new('info',"Hold esc to quit",.26)
         end
@@ -1512,8 +1645,10 @@ function scene.mouseUp(x,y,k)
         scene.touchUp(x,y,'m2')
     end
 end
+
 function scene.touchDown(x,y,id)
     if not touchMode then touchMode=true return end
+
     local _x,_y=SCR.xOy:transformPoint(x,y)
     for i=1,#touchMenu do
         local M=touchMenu[i]
@@ -1523,21 +1658,40 @@ function scene.touchDown(x,y,id)
     _x,_y=directPad.xOy:inverseTransformPoint(_x,_y)
     if (_x-directPad.x)^2+(_y-directPad.y)^2<=directPad.r^2 then
         directPad:press(_x,_y,id)
+        return
+    end
+
+    ins(touches,{x=x,y=y,id=id,keep=true,time=getTime()})
+end
+function scene.touchUp(x,y,id)
+    if directPad.touchID==id then
+        directPad:release()
+    else
+        for i=1,#touches do
+            if touches[i].id==id then
+                local T=rem(touches,i)
+                if T.keep and getTime()-T.time<.26 then
+                    scene.mouseDown(x,y,1)
+                end
+                return
+            end
+        end
     end
 end
 function scene.touchMove(x,y,dx,dy,id)
     if directPad.touchID==id then
         directPad:move(directPad.xOy:inverseTransformPoint(SCR.xOy:transformPoint(x,y)))
-    end
-    if #tc.getTouches()==1 or directPad.touchID~=id and id=='m2' then
+    else
+        for i=1,#touches do
+            local T=touches[i]
+            if T.keep and T.id==id then
+                if (T.x-x)^2+(T.y-y)^2>=62 then
+                    T.keep=false
+                end
+                break
+            end
+        end
         WHEELMOV(dy/50,'ctrl+up','ctrl+down')
-    elseif #tc.getTouches()==2 then
-        WHEELMOV(dy/100,'ctrl+pageup','ctrl+pagedown')
-    end
-end
-function scene.touchUp(x,y,id)
-    if directPad.touchID==id then
-        directPad:release()
     end
 end
 
