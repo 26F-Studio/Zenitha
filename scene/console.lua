@@ -7,13 +7,12 @@ local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_basic
 
 local function log(str)outputBox:push(str) end
 
-log{COLOR.lP,"Z Console"}
+log{COLOR.lP,"Zenitha Console"}
 log{COLOR.lC,"© Copyright 2019–2022 26F Studio. Some rights reserved."}
 log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
 
-local history,hisPtr={"?"},nil
+local history,hisPtr={"?"},false
 local sumode=false
-local the_secret=(0xe^2*10)..(2*0xb)
 
 local commands={} do
     --[[
@@ -61,9 +60,9 @@ local commands={} do
         description="Display help messages",
         details={
             "Display help messages.",
-            '',
+            "",
             "Aliases: help ?",
-            '',
+            "",
             "Usage:",
             "help",
             "help [command_name]",
@@ -73,9 +72,9 @@ local commands={} do
         description="Run arbitrary Lua code",
         details={
             "Run arbitrary Lua code.",
-            '',
+            "",
             "Usage: #[lua_source_code]",
-            '',
+            "",
             "print() can be used to print text into this window.",
         },
     }
@@ -84,18 +83,18 @@ local commands={} do
         description="Return to the last menu",
         details={
             "Return to the last menu.",
-            '',
+            "",
             "Aliases: exit quit",
-            '',
+            "",
             "Usage: exit",
         },
     }commands.quit="exit"
     commands.echo={
-        code=function(str) if str~='' then log(str) end end,
+        code=function(str) if str~="" then log(str) end end,
         description="Print a message",
         details={
             "Print a message to this window.",
-            '',
+            "",
             "Usage: echo [message]",
         },
     }
@@ -104,7 +103,7 @@ local commands={} do
         description="Clear the window",
         details={
             "Clear the log output.",
-            '',
+            "",
             "Usage: cls",
         },
     }
@@ -137,7 +136,7 @@ local commands={} do
             description="List all files & directories",
             details={
                 "List all files & directories in saving directory",
-                '',
+                "",
                 "Usage: tree",
             },
         }
@@ -218,9 +217,9 @@ local commands={} do
             description="Delete a file or directory",
             details={
                 "Attempt to delete a file or directory (in saving directory)",
-                '',
+                "",
                 "Aliases: del rm",
-                '',
+                "",
                 "Usage: del [filename|dirname]",
                 "Usage: del -s [dirname]",
             }
@@ -278,9 +277,9 @@ local commands={} do
         details={
             "Rename or move a file (in saving directory)",
             {COLOR.lY,"Warning: file name with space is not allowed"},
-            '',
+            "",
             "Aliases: mv ren",
-            '',
+            "",
             "Usage: mv [oldfilename] [newfilename]",
         },
     }commands.ren="mv"
@@ -308,7 +307,7 @@ local commands={} do
         description="Print file content",
         details={
             "Print a file to this window.",
-            '',
+            "",
             "Usage: print [filename]",
         },
     }
@@ -319,7 +318,7 @@ local commands={} do
         description="Manually crash the game",
         details={
             "Manually crash the game",
-            '',
+            "",
             "Usage: crash",
         },
     }
@@ -335,14 +334,14 @@ local commands={} do
                 MES.new(arg,"Test message",6)
             else
                 log{COLOR.I,"Show a message on the up-left corner"}
-                log''
+                log""
                 log{COLOR.I,"Usage: mes <check|info|broadcast|warn|error>"}
             end
         end,
         description="Show a message",
         details={
             "Show a message on the up-left corner",
-            '',
+            "",
             "Usage: mes <check|info|warn|error>",
         },
     }
@@ -356,13 +355,13 @@ local commands={} do
         description="Show the logs",
         details={
             "Show the logs",
-            '',
+            "",
             "Usage: log",
         },
     }
     commands.openurl={
         code=function(url)
-            if url~='' then
+            if url~="" then
                 local res,err=pcall(love.system.openURL,url)
                 if not res then
                     log{COLOR.R,"[ERR] ",COLOR.L,err}
@@ -374,7 +373,7 @@ local commands={} do
         description="Open a URL",
         details={
             "Attempt to open a URL with your device.",
-            '',
+            "",
             "Usage: openurl [url]",
         },
     }
@@ -387,7 +386,7 @@ local commands={} do
         description="Display window info.",
         details={
             "Display information about the game window.",
-            '',
+            "",
             "Usage: scrinfo",
         },
     }
@@ -403,7 +402,7 @@ local commands={} do
         description="Turn on/off wireframe mode",
         details={
             "Enable or disable wireframe drawing mode.",
-            '',
+            "",
             "Usage: wireframe <on|off>",
         },
     }
@@ -419,7 +418,7 @@ local commands={} do
         description="Turn on/off gamma correction",
         details={
             "Enable or disable gamma correction.",
-            '',
+            "",
             "Usage: gammacorrect <on|off>",
         },
     }
@@ -436,7 +435,7 @@ local commands={} do
         details={
             "Acts as if you have pressed a function key (i.e. F1-F12) on a keyboard.",
             "Useful if you are on a mobile device without access to these keys.",
-            '',
+            "",
             "Usage: fn <1-12>",
         },
     }
@@ -451,7 +450,7 @@ local commands={} do
         description="Play a BGM",
         details={
             "Play a BGM.",
-            '',
+            "",
             "Usage: playbgm [bgmName]"
         },
     }
@@ -462,7 +461,7 @@ local commands={} do
         description="Stop BGM",
         details={
             "Stop the currently playing BGM.",
-            '',
+            "",
             "Usage: stopbgm"
         },
     }
@@ -485,7 +484,7 @@ local commands={} do
         description="Set background",
         details={
             "Set a background.",
-            '',
+            "",
             "Usage: setbg [bgName]",
         },
     }
@@ -496,7 +495,7 @@ local commands={} do
         description="Enter test scene",
         details={
             "Go to an empty test scene",
-            '',
+            "",
             "Usage: test",
         },
     }
@@ -507,7 +506,7 @@ local commands={} do
         description="Enter editor scene",
         details={
             "Go to an editor scene",
-            '',
+            "",
             "Usage: editor",
         },
     }
@@ -652,7 +651,7 @@ local commands={} do
             description="Enter a applet scene",
             details={
                 "Go to an applet scene",
-                '',
+                "",
                 "Usage:",
                 "app -list",
                 "app [appName]",
@@ -789,26 +788,6 @@ setmetatable(userG.package,dangerousLibMeta)
 setmetatable(userG.io,dangerousLibMeta)
 setmetatable(userG.os,dangerousLibMeta)
 
--- Puzzle box
-local first_key={}
-local fleg={
-    pw=the_secret,
-    supw=7126,
-    second_box="Coming soon",
-}setmetatable(fleg,{__tostring=function() return"The fl\97g." end})
-function userG.the_box(k)
-    if k~=first_key then
-        log"Usage:"log"*The box is locked*"
-        return
-    end
-    log"*Breaking sound*"
-    userG.the_box,userG.the_key=nil,nil
-    return fleg
-end
-userG.the_key=first_key
-
-
-
 local scene={}
 
 function scene.enter()
@@ -834,7 +813,7 @@ function scene.keyDown(key)
         if history[27] then
             rem(history,1)
         end
-        hisPtr=nil
+        hisPtr=false
 
         -- Execute
         if input:byte()==35 then
@@ -883,7 +862,7 @@ function scene.keyDown(key)
         inputBox:clear()
 
         -- Insert empty line
-        log''
+        log""
     elseif key=='up' then
         if not hisPtr then
             hisPtr=#history
@@ -900,7 +879,7 @@ function scene.keyDown(key)
             if history[hisPtr] then
                 inputBox:setText(history[hisPtr])
             else
-                hisPtr=nil
+                hisPtr=false
                 inputBox:clear()
             end
         end
