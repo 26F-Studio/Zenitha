@@ -803,7 +803,7 @@ function scene.wheelMoved(_,y)
     WHEELMOV(y,'scrollup','scrolldown')
 end
 
-function scene.keyDown(key)
+function scene.keyDown(key,isRep)
     if key=='return' or key=='kpenter' then
         local input=STRING.trim(inputBox:getText())
         if input=='' then return end
@@ -909,7 +909,9 @@ function scene.keyDown(key)
     elseif key=='end'        then outputBox:scroll(0,-1e99)
     elseif combKey[key] and kb.isDown('lctrl','rctrl') then combKey[key]()
     elseif key=='escape' then
-        SCN.back()
+        if not isRep then
+            SCN.back()
+        end
     else
         if not WIDGET.isFocus(inputBox) then
             WIDGET.focus(inputBox)

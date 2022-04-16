@@ -1,5 +1,5 @@
 local gc=love.graphics
-local ms,kb,tc=love.mouse,love.keyboard,love.touch
+local ms,kb=love.mouse,love.keyboard
 local getTime=love.timer.getTime
 
 local ins,rem=table.insert,table.remove
@@ -11,6 +11,8 @@ local byte,sub=string.byte,string.sub
 local find,match=string.find,string.match
 
 local sArg=STRING.sArg
+
+local UIscale=(SCR.w0^2+SCR.h0^2)^.5/1260
 
 local touchMode=false
 local activePages={}
@@ -1091,10 +1093,13 @@ end
 local Menu={}
 Menu.__index=Menu
 function Menu.new(M)
-    M.label=gc.newText(FONT.get(40,'_codePixel'),M.name)
+    M.label=gc.newText(FONT.get(40),M.name)
     M.pressLight=0
     if not M.color then M.color=COLOR.L end
     if not M.r then M.r=60 end
+    M.x=M.x*UIscale
+    M.y=M.y*UIscale
+    M.r=M.r*UIscale
     if M.list then
         M.expand=false
         M.expandState=0
@@ -1196,7 +1201,7 @@ local touchMenu; touchMenu={
         name='File',
         xOy=SCR.xOy_ul,
         color=COLOR.lY,
-        x=50,y=250,r=100,
+        x=50,y=200,r=100,
         list={
             Menu.new{name='Close',  x=160,y=40,color=COLOR.lY,func='ctrl+w'},
             Menu.new{name='New',    x=280,y=40,color=COLOR.lY,func='ctrl+n'},
@@ -1395,8 +1400,8 @@ end
 
 local directPad={
     xOy=SCR.xOy_ur,
-    x=-220,y=260,
-    r=160,r2=160*.3,
+    x=-220*UIscale,y=260*UIscale,
+    r=160*UIscale,r2=160*.3*UIscale,
     barDist=0,barAngle=0,
     touchID=nil,
 
@@ -1533,7 +1538,7 @@ function scene.enter()
     if type(rainbowShader)=='string' then rainbowShader=gc.newShader(rainbowShader) end
     if type(comboKeyName[1].name)=='string' then
         for i=1,#comboKeyName do
-            comboKeyName[i].text=gc.newText(FONT.get(15,'_codePixel'),comboKeyName[i].text)
+            comboKeyName[i].label=gc.newText(FONT.get(15,'_codePixel'),comboKeyName[i].text)
         end
     end
     if #activePages==0 then globalFuncs.newFile('-welcome') end
@@ -1733,12 +1738,12 @@ function scene.update(dt)
 end
 
 function scene.draw()
-    gc.clear(0,0,0)
+    gc.clear(.08,.05,.02)
     if curPage then
+        FONT.set(20,'_codePixel')
+        gc.print(pageInfo,162,5)
         activePages[curPage]:draw(50,50)
         gc.replaceTransform(SCR.xOy_ul)
-        FONT.set(20,'_codePixel')
-        gc.print(pageInfo,50,5)
         if clipboardText then
             gc.replaceTransform(SCR.xOy_ur)
             FONT.set(20,'_codePixel')
@@ -1751,13 +1756,13 @@ function scene.draw()
         for i=1,#comboKeyName do
             if kb.isDown(unpack(comboKeyName[i].keys)) then
                 gc.setColor(comboKeyName[i].color)
-                gc.draw(comboKeyName[i].text,x,-45)
-                x=x+comboKeyName[i].text:getWidth()+10
+                gc.draw(comboKeyName[i].label,x,-45)
+                x=x+comboKeyName[i].label:getWidth()+10
             end
         end
     else
         FONT.set(35,'_codePixel')
-        GC.mStr(help.newFile,SCR.w0/2,SCR.h0/2-26,'center')
+        GC.mStr(help.newFile,SCR.w0/2,SCR.h0/2-26)
     end
 
     if touchMode then
