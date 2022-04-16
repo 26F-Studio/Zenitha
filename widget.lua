@@ -1076,6 +1076,12 @@ function Widgets.inputBox:draw()
         end
     end
 end
+function Widgets.inputBox:press()
+    if MOBILE then
+        local _,y1=xOy:transformPoint(0,self.y+self.h)
+        kb.setTextInput(true,0,y1,1,1)
+    end
+end
 function Widgets.inputBox:keypress(k)
     local t=self._value
     if #t>0 and EDITING=='' then
