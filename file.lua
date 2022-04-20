@@ -45,7 +45,7 @@ function FILE.load(name,args)
         else
             error('unknown mode')
         end
-    else
+    elseif not STRING.sArg(args,'-canskip') then
         error('no file')
     end
 end
