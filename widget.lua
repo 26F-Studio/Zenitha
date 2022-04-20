@@ -142,17 +142,14 @@ function baseWidget:reset()
 
     self._activeTime=0
 
-    self._visible=true
     if self.visibleFunc then
         self._visible=self.visibleFunc()
+    elseif self._visible==nil then
+        self._visible=true
     end
 end
 function baseWidget:setVisible(bool)
-    if bool then
-        self._visible=true
-    else
-        self._visible=false
-    end
+    self._visible=bool and true or false
 end
 function baseWidget:update(dt)
     if WIDGET.sel==self then
@@ -270,7 +267,9 @@ function Widgets.button:isAbove(x,y)
 end
 function Widgets.button:press(_,_,k)
     self.code(k)
-    if self.sound then SFX.play(self.sound) end
+    if self.sound then
+        SFX.play(self.sound)
+    end
     self._lastClickTime=timer()
 end
 function Widgets.button:draw()
@@ -391,9 +390,13 @@ end
 function Widgets.checkBox:press(_,_,k)
     self.code(k)
     if self.disp() then
-        if self.sound_on then SFX.play(self.sound_on) end
+        if self.sound_on then
+            SFX.play(self.sound_on)
+        end
     else
-        if self.sound_off then SFX.play(self.sound_off) end
+        if self.sound_off then
+            SFX.play(self.sound_off)
+        end
     end
 end
 function Widgets.checkBox:draw()
@@ -921,7 +924,9 @@ function Widgets.selector:press(x)
             self.code(self.list[s])
             self._select=s
             self._selText=self.list[s]
-            if self.sound then SFX.play(self.sound) end
+            if self.sound then
+                SFX.play(self.sound)
+            end
         end
     end
 end
@@ -939,7 +944,9 @@ function Widgets.selector:scroll(dx,dy)
         self.code(self.list[s])
         self._select=s
         self._selText=self.list[s]
-        if self.sound then SFX.play(self.sound) end
+        if self.sound then
+            SFX.play(self.sound)
+        end
     end
 end
 function Widgets.selector:arrowKey(k)
@@ -1020,7 +1027,9 @@ function Widgets.inputBox:addText(str)
 end
 function Widgets.inputBox:clear()
     self._value=''
-    if self.sound_clear then SFX.play(self.sound_clear) end
+    if self.sound_clear then
+        SFX.play(self.sound_clear)
+    end
 end
 function Widgets.inputBox:isAbove(x,y)
     return
@@ -1076,6 +1085,12 @@ function Widgets.inputBox:draw()
         end
     end
 end
+function Widgets.inputBox:press()
+    if MOBILE then
+        local _,y1=xOy:transformPoint(0,self.y+self.h)
+        kb.setTextInput(true,0,y1,1,1)
+    end
+end
 function Widgets.inputBox:keypress(k)
     local t=self._value
     if #t>0 and EDITING=='' then
@@ -1085,10 +1100,14 @@ function Widgets.inputBox:keypress(k)
                 p=p-1
             end
             t=sub(t,1,p-1)
-            if self.sound_bksp then SFX.play(self.sound_bksp) end
+            if self.sound_bksp then
+                SFX.play(self.sound_bksp)
+            end
         elseif k=='delete' then
             t=''
-            if self.sound_del then SFX.play(self.sound_del) end
+            if self.sound_del then
+                SFX.play(self.sound_del)
+            end
         end
         self._value=t
     end
@@ -1156,7 +1175,9 @@ end
 function Widgets.textBox:clear()
     self._texts={}
     self._scrollPos=0
-    if self.sound_clear then SFX.play(self.sound_clear) end
+    if self.sound_clear then
+        SFX.play(self.sound_clear)
+    end
 end
 function Widgets.textBox:isAbove(x,y)
     return

@@ -254,9 +254,12 @@ function love.touchpressed(id,x,y)
     end
     x,y=ITP(xOy,x,y)
     lastX,lastY=x,y
+    if WIDGET.sel and WIDGET.sel.type=='inputBox' and not WIDGET.sel:isAbove(x,y) then
+        WIDGET.unFocus(true)
+        kb.setTextInput(false)
+    end
     WIDGET.cursorMove(x,y)
     if SCN.touchDown then SCN.touchDown(x,y,id) end
-    if kb.hasTextInput() then kb.setTextInput(false) end
 end
 function love.touchmoved(id,x,y,dx,dy)
     if SCN.swapping then return end
