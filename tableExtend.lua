@@ -282,6 +282,23 @@ end
 
 --------------------------------------------------------------
 
+-- Return a function that return a value of table
+function TABLE.func_getVal(t,k)
+    return function() return t[k] end
+end
+
+-- Return a function that reverse a value of table
+function TABLE.func_revVal(t,k)
+    return function() t[k]=not t[k] end
+end
+
+-- Return a function that set a value of table
+function TABLE.func_setVal(t,k)
+    return function(v) t[k]=v end
+end
+
+--------------------------------------------------------------
+
 -- Dump a simple lua table (no whitespaces)
 do-- function TABLE.dumpDeflate(L,t)
     local function dump(L)
