@@ -122,9 +122,10 @@ local function _clearTask(obj,mode)
         mode=='volume' and task_setVolume or
         mode=='pitch' and task_setPitch or
         mode=='lowgain' and task_setLowgain or
-        mode=='highgain' and task_setHighgain
+        mode=='highgain' and task_setHighgain or
+        'any'
     TASK.removeTask_iterate(function(task)
-        return task.code==taskFunc and task.args[1]==obj
+        return task.args[1]==obj and (taskFunc=='any' or task.code==taskFunc)
     end,obj)
 end
 
@@ -178,7 +179,13 @@ function BGM.play(bgms,args)
     if type(bgms)=='string' then bgms={bgms} end
     assert(type(bgms)=='table',"BGM.play(name,args): name must be string or table")
 
-    if TABLE.compare(lastPlay,bgms) then return end
+    if
+        TABLE.compare(lastPlay,bgms) and
+        srcLib[lastPlay[1]] and srcLib[lastPlay[1]].source and
+        srcLib[lastPlay[1]].source:isPlaying()
+    then
+        return
+    end
 
     BGM.stop()
 
@@ -200,7 +207,7 @@ function BGM.play(bgms,args)
             obj.lowgainChanging=false
             obj.highgainChanging=false
 
-            _clearTask(obj,'volume')
+            _clearTask(obj)
 
             local source=obj.source
             source:setLooping(not STRING.sArg(args,'-noloop'))
