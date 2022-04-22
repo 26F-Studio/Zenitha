@@ -5,8 +5,6 @@ local int,rnd=math.floor,math.random
 local ins,rem=table.insert,table.remove
 local draw=gc.draw
 
-local texts={}
-
 local textFX={}
 function textFX.appear(t)
     draw(
@@ -96,36 +94,23 @@ function textFX.score(t)
     )
 end
 
-local TEXT={}
-function TEXT.clear()
-    texts={}
+local TEXT={_texts={}}
+function TEXT:clear()
+    self._texts={}
 end
-function TEXT.show(text,x,y,font,style,spd,stop)
-    ins(texts,{
-        c=0,                                                          -- Timer
-        text=gc.newText(FONT.get(int(font/5)*5 or 40),text),          -- String
-        x=x or 0,                                                     -- X
-        y=y or 0,                                                     -- Y
-        spd=(spd or 1),                                               -- Timing speed(1=last 1 sec)
-        stop=stop,                                                    -- Stop time(sustained text)
-        draw=assert(textFX[style or 'appear'],"no text type:"..style),-- Draw method
+function TEXT:add(text,x,y,font,style,spd,stop)
+    ins(self._texts,{
+        c=0,                                                 -- Timer
+        text=gc.newText(FONT.get(int(font/5)*5 or 40),text), -- String
+        x=x or 0,                                            -- X
+        y=y or 0,                                            -- Y
+        spd=(spd or 1),                                      -- Timing speed(1=last 1 sec)
+        stop=stop,                                           -- Stop time(sustained text)
+        draw=assert(textFX[style or 'appear'],"no text type:"..tostring(style)),-- Draw method
     })
 end
-function TEXT.getText(text,x,y,font,style,spd,stop)-- Another version of TEXT.show(), but only return text object, need manual management
-    return {
-        c=0,
-        text=gc.newText(FONT.get(int(font/5)*5 or 40),text),
-        x=x or 0,
-        y=y or 0,
-        spd=(spd or 1),
-        stop=stop,
-        draw=textFX[style or 'appear'] or error("unavailable type:"..style),
-    }
-end
-function TEXT.update(dt,list)
-    if not list then
-        list=texts
-    end
+function TEXT:update(dt)
+    local list=self._texts
     for i=#list,1,-1 do
         local t=list[i]
         t.c=t.c+t.spd*dt
@@ -139,15 +124,16 @@ function TEXT.update(dt,list)
         end
     end
 end
-function TEXT.draw(list)
-    if not list then
-        list=texts
-    end
+function TEXT:draw()
+    local list=self._texts
     for i=1,#list do
         local t=list[i]
         local p=t.c
         setColor(1,1,1,p<.2 and p*5 or p<.8 and 1 or 5-p*5)
         t:draw()
     end
+end
+function TEXT.new()
+    return setmetatable({_texts={}},{__index=TEXT})
 end
 return TEXT
