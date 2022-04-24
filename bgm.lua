@@ -153,9 +153,9 @@ function BGM.setVol(vol)
     assert(type(vol)=='number' and vol>=0 and vol<=1,"BGM.setVol(vol): count must be in range 0~1")
     volume=vol
     for i=1,#nowPlay do
-        local np=nowPlay[i]
-        if not np.volChanging then
-            np.source:setVolume(vol)
+        local bgm=nowPlay[i]
+        if not bgm.volChanging then
+            bgm.source:setVolume(bgm.vol*vol)
         end
     end
 end
