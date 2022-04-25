@@ -1,6 +1,6 @@
 local data=love.data
 local assert,tostring,tonumber=assert,tostring,tonumber
-local int,format=math.floor,string.format
+local floor,format=math.floor,string.format
 local find,sub,gsub=string.find,string.sub,string.gsub
 local rep,upper=string.rep,string.upper
 local char,byte=string.char,string.byte
@@ -80,16 +80,16 @@ function STRING.simpEmailCheck(str)-- Check if the string is a valid email addre
 end
 
 function STRING.time_simp(t)-- Convert time (second) to MM:SS
-    return format('%02d:%02d',int(t/60),int(t%60))
+    return format('%02d:%02d',floor(t/60),floor(t%60))
 end
 
 function STRING.time(t)-- Convert time (second) to SS or MM:SS or HH:MM:SS
     if t<60 then
         return format('%.3f″',t)
     elseif t<3600 then
-        return format('%d′%05.2f″',int(t/60),int(t%60*100)/100)
+        return format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100)
     else
-        return format('%d:%.2d′%05.2f″',int(t/3600),int(t/60%60),int(t%60*100)/100)
+        return format('%d:%.2d′%05.2f″',floor(t/3600),floor(t/60%60),floor(t%60*100)/100)
     end
 end
 
@@ -140,11 +140,11 @@ function STRING.UTF8(num)-- Simple utf8 coding
     assert(type(num)=='number','Wrong type ('..type(num)..')')
     assert(num>=0 and num<2^31,'Out of range ('..num..')')
     if num<2^7 then return char(num)
-    elseif num<2^11 then return char(192+int(num/2^06),128+num%2^6)
-    elseif num<2^16 then return char(224+int(num/2^12),128+int(num/2^06)%2^6,128+num%2^6)
-    elseif num<2^21 then return char(240+int(num/2^18),128+int(num/2^12)%2^6,128+int(num/2^06)%2^6,128+num%2^6)
-    elseif num<2^26 then return char(248+int(num/2^24),128+int(num/2^18)%2^6,128+int(num/2^12)%2^6,128+int(num/2^06)%2^6,128+num%2^6)
-    elseif num<2^31 then return char(252+int(num/2^30),128+int(num/2^24)%2^6,128+int(num/2^18)%2^6,128+int(num/2^12)%2^6,128+int(num/2^06)%2^6,128+num%2^6)
+    elseif num<2^11 then return char(192+floor(num/2^06),128+num%2^6)
+    elseif num<2^16 then return char(224+floor(num/2^12),128+floor(num/2^06)%2^6,128+num%2^6)
+    elseif num<2^21 then return char(240+floor(num/2^18),128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
+    elseif num<2^26 then return char(248+floor(num/2^24),128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
+    elseif num<2^31 then return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     end
 end
 
@@ -158,7 +158,7 @@ do-- function STRING.bigInt(num)-- Convert a number to a approximate integer wit
         if num<1000 then
             return tostring(num)
         elseif num~=1e999 then
-            local e=int(lg(num)/3)
+            local e=floor(lg(num)/3)
             return (num/10^(e*3))..units[e+1]
         else
             return 'INF'
@@ -171,7 +171,7 @@ do-- function STRING.toBin, STRING.toOct, STRING.toHex(num,len)
         local s=''
         while num>0 do
             s=(num%2)..s
-            num=int(num/2)
+            num=floor(num/2)
         end
         return len and rep('0',len-#s)..s or s
     end
@@ -179,7 +179,7 @@ do-- function STRING.toBin, STRING.toOct, STRING.toHex(num,len)
         local s=''
         while num>0 do
             s=(num%8)..s
-            num=int(num/8)
+            num=floor(num/8)
         end
         return len and rep('0',len-#s)..s or s
     end
@@ -188,7 +188,7 @@ do-- function STRING.toBin, STRING.toOct, STRING.toHex(num,len)
         local s=''
         while num>0 do
             s=b16[num%16]..s
-            num=int(num/16)
+            num=floor(num/16)
         end
         return len and rep('0',len-#s)..s or s
     end

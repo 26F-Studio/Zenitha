@@ -10,7 +10,7 @@ local kb=love.keyboard
 local timer=love.timer.getTime
 
 local assert,next=assert,next
-local int,ceil=math.floor,math.ceil
+local floor,ceil=math.floor,math.ceil
 local max,min=math.max,math.min
 local abs=math.abs
 local sub,ins,rem=string.sub,table.insert,table.remove
@@ -46,7 +46,7 @@ local widgetCanvas
 local function updateWheel(self,d)
     self._floatWheel=self._floatWheel+(d or 0)
     if abs(self._floatWheel)>=1 then
-        local n=MATH.sign(self._floatWheel)*int(abs(self._floatWheel))
+        local n=MATH.sign(self._floatWheel)*floor(abs(self._floatWheel))
         self._floatWheel=self._floatWheel-n
         return n
     end
@@ -495,10 +495,10 @@ local sliderShowFunc={
         return S.disp()
     end,
     float=function(S)
-        return int(S.disp()*100+.5)*.01
+        return floor(S.disp()*100+.5)*.01
     end,
     percent=function(S)
-        return int(S.disp()*100+.5)..'%'
+        return floor(S.disp()*100+.5)..'%'
     end,
 }
 function Widgets.slider:reset()
@@ -632,7 +632,7 @@ function Widgets.slider:drag(x)
         newVal=(1-newPos)*self._rangeL+newPos*self._rangeR
     else
         newVal=newPos*self._rangeWidth
-        newVal=self._rangeL+int(newVal/self._unit+.5)*self._unit
+        newVal=self._rangeL+floor(newVal/self._unit+.5)*self._unit
     end
     if newVal~=self.disp() then
         self.code(newVal)
@@ -741,7 +741,7 @@ function Widgets.slider_fill:draw()
     local r=h*.5
     local ATV=self._activeTime/self._activeTimeMax
     local rate=(self._pos-self._rangeL)/self._rangeWidth
-    local num=int((self.disp()-self._rangeL)/self._rangeWidth*100+.5)..'%'
+    local num=floor((self.disp()-self._rangeL)/self._rangeWidth*100+.5)..'%'
 
     -- Capsule
     gc_setColor(1,1,1,.6+ATV*.26)
@@ -1259,7 +1259,7 @@ function Widgets.textBox:draw()
         GC_stc_setComp('equal',1)
         GC_stc_rect(0,0,w,h)
         gc_translate(0,-(self._scrollPos%lineH))
-        local pos=int(self._scrollPos/lineH)
+        local pos=floor(self._scrollPos/lineH)
         for i=pos+1,min(pos+self._capacity+1,#texts) do
             gc_printf(texts[i],10,self.yOffset,w-16)
             gc_translate(0,lineH)
@@ -1355,7 +1355,7 @@ function Widgets.listBox:press(x,y)
     x,y=x-self._x,y-self._y
     if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
     self:drag(0,0,0,0)
-    y=int((y+self._scrollPos)/self.lineHeight)+1
+    y=floor((y+self._scrollPos)/self.lineHeight)+1
     if self._list[y] then
         if self._selected~=y then
             self._selected=y
@@ -1372,21 +1372,21 @@ end
 function Widgets.listBox:arrowKey(dir)
     if dir=='up' then
         self._selected=max(self._selected-1,1)
-        if self._selected<int(self._scrollPos/self.lineHeight)+2 then
+        if self._selected<floor(self._scrollPos/self.lineHeight)+2 then
             self:drag(nil,nil,nil,self.lineHeight)
         end
     elseif dir=='down' then
         self._selected=min(self._selected+1,#self._list)
-        if self._selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
+        if self._selected>floor(self._scrollPos/self.lineHeight)+self._capacity-1 then
             self:drag(nil,nil,nil,-self.lineHeight)
         end
     end
 end
 function Widgets.listBox:select(i)
     self._selected=i
-    if self._selected<int(self._scrollPos/self.lineHeight)+2 then
+    if self._selected<floor(self._scrollPos/self.lineHeight)+2 then
         self:drag(nil,nil,nil,1e99)
-    elseif self._selected>int(self._scrollPos/self.lineHeight)+self._capacity-1 then
+    elseif self._selected>floor(self._scrollPos/self.lineHeight)+self._capacity-1 then
         self:drag(nil,nil,nil,-1e99)
     end
 end
@@ -1419,7 +1419,7 @@ function Widgets.listBox:draw()
         -- List
         GC_stc_setComp('equal',1)
         GC_stc_rect(0,0,w,h)
-        local pos=int(scroll/lineH)
+        local pos=floor(scroll/lineH)
         gc_translate(0,-(scroll%lineH))
         for i=pos+1,min(pos+cap+1,#list) do
             self.drawFunc(list[i],i,i==self._selected)

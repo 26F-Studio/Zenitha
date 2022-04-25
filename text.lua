@@ -1,7 +1,7 @@
 local gc=love.graphics
 local getColor,setColor=gc.getColor,gc.setColor
 
-local int,rnd=math.floor,math.random
+local floor,rnd=math.floor,math.random
 local ins,rem=table.insert,table.remove
 local draw=gc.draw
 
@@ -101,7 +101,7 @@ end
 function TEXT:add(text,x,y,font,style,spd,stop)
     ins(self._texts,{
         c=0,                                                 -- Timer
-        text=gc.newText(FONT.get(int(font/5)*5 or 40),text), -- String
+        text=gc.newText(FONT.get(floor(font/5)*5 or 40),text), -- String
         x=x or 0,                                            -- X
         y=y or 0,                                            -- Y
         spd=(spd or 1),                                      -- Timing speed(1=last 1 sec)

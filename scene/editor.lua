@@ -4,7 +4,7 @@ local getTime=love.timer.getTime
 
 local ins,rem=table.insert,table.remove
 local max,min=math.max,math.min
-local int,ceil=math.floor,math.ceil
+local floor,ceil=math.floor,math.ceil
 local abs,atan2=math.abs,math.atan2
 local sin,cos=math.sin,math.cos
 local byte,sub=string.byte,string.sub
@@ -310,7 +310,7 @@ end
 function Page:scrollV(args)
     local dy=sArg(args,'-up') and -1 or sArg(args,'-down') and 1
     if not dy then return end
-    if sArg(args,'-jump') then dy=max(1,int(self.windowH/self.lineHeight))*dy end
+    if sArg(args,'-jump') then dy=max(1,floor(self.windowH/self.lineHeight))*dy end
     self.scrollY=max(min(self.scrollY+dy,#self-1),0)
 end
 
@@ -413,7 +413,7 @@ function Page:moveCursor(args)
             self.curX=#self[self.curY]
             self:saveCurX()
         elseif sArg(args,'-up') then
-            local l=jump and max(1,int(self.windowH/self.lineHeight)) or 1
+            local l=jump and max(1,floor(self.windowH/self.lineHeight)) or 1
             if self.curY>l then
                 self.curY=self.curY-l
                 self.curX=min(self.memX,#self[self.curY])
@@ -422,7 +422,7 @@ function Page:moveCursor(args)
                 self.curX=0
             end
         elseif sArg(args,'-down') then
-            local l=jump and max(1,int(self.windowH/self.lineHeight)) or 1
+            local l=jump and max(1,floor(self.windowH/self.lineHeight)) or 1
             if self.curY<=#self-l then
                 self.curY=self.curY+l
                 self.curX=min(self.memX,#self[self.curY])
@@ -751,7 +751,7 @@ local charRender={
     end,
     [' ']=function(x,y,w,h,t)
         gc.setColor(COLOR.lD)
-        gc.rectangle('fill',x+.28*w,y+.42*h+2.6*sin(t*4+(int(x/w/4)*11-y/h)),.24*w,.16*h)
+        gc.rectangle('fill',x+.28*w,y+.42*h+2.6*sin(t*4+(floor(x/w/4)*11-y/h)),.24*w,.16*h)
     end,
 }
 local colorData={}
@@ -819,7 +819,7 @@ function Page:draw(x,y)
     -- File data
     do
         local baseX,baseY=self.baseX,self.baseY
-        local firstChar=1+int(max(self.scrollX-100/charW,0))
+        local firstChar=1+floor(max(self.scrollX-100/charW,0))
         local lastChar=ceil((self.scrollX*charW+self.windowW-100)/charW)
         gc.setLineWidth(1)
         FONT.set(30,'_codePixel')
@@ -1606,7 +1606,7 @@ function scene.mouseDown(x,y,k)
         -- Inside position
         mx,my=mx-100+P.scrollX*P.charWidth,my+P.scrollY*P.lineHeight
         if mx<0 then-- Select line
-            local ty=int(my/P.lineHeight)+1
+            local ty=floor(my/P.lineHeight)+1
 
             if not (ifSelecting() and P.selX) then
                 P.selX,P.selY=0,min(ty,#P)
@@ -1616,11 +1616,11 @@ function scene.mouseDown(x,y,k)
         else-- Select char
             if ifSelecting() then
                 if not P.selX then P.selX,P.selY=P.curX,P.curY end
-                P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+                P.curX,P.curY=floor(mx/P.charWidth+.5),floor(my/P.lineHeight)+1
                 P:moveCursor('-mouse -hold')
             else
                 P.selX,P.selY=false,false
-                P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+                P.curX,P.curY=floor(mx/P.charWidth+.5),floor(my/P.lineHeight)+1
                 P:moveCursor('-mouse')
             end
         end
@@ -1636,7 +1636,7 @@ function scene.mouseMove(x,y,dx,dy)
         if not P.selX then P.selX,P.selY=P.curX,P.curY end
         local mx,my=x-50,y-50
         mx,my=mx-100+P.scrollX*P.charWidth,my+P.scrollY*P.lineHeight
-        P.curX,P.curY=int(mx/P.charWidth+.5),int(my/P.lineHeight)+1
+        P.curX,P.curY=floor(mx/P.charWidth+.5),floor(my/P.lineHeight)+1
         P:moveCursor('-mouse')
         P:saveCurX()
     elseif ms.isDown(2) then

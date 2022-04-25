@@ -1,6 +1,6 @@
 local MATH={} for k,v in next,math do MATH[k]=v end
 
-local int,ceil=math.floor,math.ceil
+local floor,ceil=math.floor,math.ceil
 local rnd=math.random
 
 MATH.tau=2*math.pi
@@ -39,7 +39,7 @@ do-- function MATH.listLerp(list,t)
     local interval,lerp=MATH.interval,MATH.lerp
     function MATH.listLerp(list,t)
         local t2=(#list-1)*interval(t,0,1)+1
-        return lerp(list[int(t2)],list[ceil(t2)],t2%1)
+        return lerp(list[floor(t2)],list[ceil(t2)],t2%1)
     end
 end
 
