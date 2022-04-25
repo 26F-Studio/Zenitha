@@ -446,8 +446,8 @@ function Page:saveCurX()
 end
 
 function Page:freshScroll()
-    self.scrollX=MATH.interval(self.scrollX,ceil(self.curX-(self.windowW-100)/self.charWidth),self.curX)
-    self.scrollY=MATH.interval(self.scrollY,ceil(self.curY-self.windowH/self.lineHeight),self.curY-1)
+    self.scrollX=MATH.clamp(self.scrollX,ceil(self.curX-(self.windowW-100)/self.charWidth),self.curX)
+    self.scrollY=MATH.clamp(self.scrollY,ceil(self.curY-self.windowH/self.lineHeight),self.curY-1)
 end
 
 -- Edit

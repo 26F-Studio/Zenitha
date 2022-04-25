@@ -626,7 +626,7 @@ end
 function Widgets.slider:drag(x)
     if not x then return end
     x=x-self._x
-    local newPos=MATH.interval(x/self.w,0,1)
+    local newPos=MATH.clamp(x/self.w,0,1)
     local newVal
     if not self._unit then
         newVal=(1-newPos)*self._rangeL+newPos*self._rangeR
@@ -651,7 +651,7 @@ function Widgets.slider:scroll(dx,dy)
     if n then
         local p=self.disp()
         local u=self._unit or .01
-        local P=MATH.interval(p+u*n,self._rangeL,self._rangeR)
+        local P=MATH.clamp(p+u*n,self._rangeL,self._rangeR)
         if p==P or not P then return end
         self.code(P)
         if self.change and timer()-self.lastTime>.18 then
@@ -1518,7 +1518,7 @@ function WIDGET.drag(x,y,dx,dy)
     if W and W.drag then
         W:drag(x,y+SCN.curScroll,dx,dy)
     else
-        SCN.curScroll=MATH.interval(SCN.curScroll-dy,0,SCN.maxScroll)
+        SCN.curScroll=MATH.clamp(SCN.curScroll-dy,0,SCN.maxScroll)
     end
 end
 function WIDGET.scroll(dx,dy)
@@ -1526,7 +1526,7 @@ function WIDGET.scroll(dx,dy)
     if W and W.scroll then
         W:scroll(dx,dy)
     else
-        SCN.curScroll=MATH.interval(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
+        SCN.curScroll=MATH.clamp(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
     end
 end
 function WIDGET.release(x,y)

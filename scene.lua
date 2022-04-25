@@ -47,7 +47,7 @@ function SCN.add(name,scene)
 end
 function SCN.setScroll(height)
     SCN.maxScroll=height or 0
-    SCN.curScroll=MATH.interval(SCN.curScroll,0,SCN.maxScroll)
+    SCN.curScroll=MATH.clamp(SCN.curScroll,0,SCN.maxScroll)
 end
 
 function SCN.swapUpdate(dt)

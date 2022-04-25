@@ -1,6 +1,6 @@
 local type,rem=type,table.remove
 local floor,rnd=math.floor,math.random
-local interval=MATH.interval
+local clamp=MATH.clamp
 
 local sfxList={}
 local packSetting={}
@@ -145,7 +145,7 @@ function SFX.play(name,vol,pos,pitch)
     S=S[n]-- AU_SRC
     if S:getChannelCount()==1 then
         if pos then
-            pos=interval(pos,-1,1)*stereo
+            pos=clamp(pos,-1,1)*stereo
             S:setPosition(pos,1-pos^2,0)
         else
             S:setPosition(0,0,0)

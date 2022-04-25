@@ -61,7 +61,7 @@ local function task_setVolume(obj,ve,time,stop)
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
-        local v=MATH.lerp(vs,ve,t)
+        local v=MATH.mix(vs,ve,t)
         obj.vol=v
         obj.source:setVolume(v*volume)
         if t==1 then
@@ -80,7 +80,7 @@ local function task_setPitch(obj,pe,time)
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
-        local p=MATH.lerp(ps,pe,t)
+        local p=MATH.mix(ps,pe,t)
         obj.pitch=p
         obj.source:setPitch(p)
         if t==1 then
@@ -94,7 +94,7 @@ local function task_setLowgain(obj,pe,time)
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
-        local p=MATH.lerp(ps,pe,t)
+        local p=MATH.mix(ps,pe,t)
         obj.lowgain=p
         obj.source:setFilter{type='bandpass',lowgain=obj.lowgain^9.42,highgain=obj.highgain^9.42,volume=1}
         if t==1 then
@@ -108,7 +108,7 @@ local function task_setHighgain(obj,pe,time)
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
-        local p=MATH.lerp(ps,pe,t)
+        local p=MATH.mix(ps,pe,t)
         obj.highgain=p
         obj.source:setFilter{type='bandpass',lowgain=obj.lowgain^9.42,highgain=obj.highgain^9.42,volume=1}
         if t==1 then
@@ -287,7 +287,7 @@ function BGM.set(bgms,mode,...)
             elseif mode=='seek' then
                 local time=...
                 assert(type(time)=='number',"BGM.set(...,time): time must be number")
-                obj.source:seek(MATH.interval(time,0,obj.source:getDuration()))
+                obj.source:seek(MATH.clamp(time,0,obj.source:getDuration()))
             elseif mode=='lowgain' then
                 if effectsSupported then
                     _clearTask(obj,'lowgain')
