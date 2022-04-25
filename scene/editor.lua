@@ -29,7 +29,7 @@ local scene={}
 
 -------------------------------------------------------------
 
-local help=setmetatable({},{__index=function()return '[-]' end})
+local help=setmetatable({},{__index=function() return '[-]' end})
 local globalComboMap={
     ['ctrl+tab']=           {func='switchFile',     args='-next'},
     ['ctrl+shift+tab']=     {func='switchFile',     args='-prev'},
@@ -1309,7 +1309,7 @@ local touchMenu; touchMenu={
             Menu.new{name='/',x=-260, y=-60, r=55,color=COLOR.dL,func=ZKB,args='/'},
             Menu.new{name='|',x=-150, y=-60, r=55,color=COLOR.dL,func=ZKB,args='|'},
 
-            Menu.new{name='CAP',x=-1410,y=-180,r=65,color=COLOR.dR,func=function()touchMenu.Keyboard.list,touchMenu.Keyboard.list2=touchMenu.Keyboard.list2,touchMenu.Keyboard.list end},
+            Menu.new{name='CAP',x=-1410,y=-180,r=65,color=COLOR.dR,func=function() touchMenu.Keyboard.list,touchMenu.Keyboard.list2=touchMenu.Keyboard.list2,touchMenu.Keyboard.list end},
         },
         list2={
             Menu.new{name='~',x=-1390,y=-465,r=45,color=COLOR.lR,func=ZKB,args='~'},
@@ -1379,7 +1379,7 @@ local touchMenu; touchMenu={
             Menu.new{name='?',x=-260, y=-60, r=55,color=COLOR.lR,func=ZKB,args='?'},
             Menu.new{name='|',x=-150, y=-60, r=55,color=COLOR.dL,func=ZKB,args='|'},
 
-            Menu.new{name='CAP',x=-1410,y=-180,r=65,color=COLOR.lR,func=function()touchMenu.Keyboard.list,touchMenu.Keyboard.list2=touchMenu.Keyboard.list2,touchMenu.Keyboard.list end},
+            Menu.new{name='CAP',x=-1410,y=-180,r=65,color=COLOR.lR,func=function() touchMenu.Keyboard.list,touchMenu.Keyboard.list2=touchMenu.Keyboard.list2,touchMenu.Keyboard.list end},
         },
     },
 }
