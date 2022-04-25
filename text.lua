@@ -98,14 +98,13 @@ local TEXT={_texts={}}
 function TEXT:clear()
     self._texts={}
 end
-function TEXT:add(text,x,y,font,style,spd,stop)
+function TEXT:add(text,x,y,font,style,spd)
     ins(self._texts,{
-        c=0,                                                 -- Timer
+        c=0,                                                   -- Timer
         text=gc.newText(FONT.get(floor(font/5)*5 or 40),text), -- String
-        x=x or 0,                                            -- X
-        y=y or 0,                                            -- Y
-        spd=(spd or 1),                                      -- Timing speed(1=last 1 sec)
-        stop=stop,                                           -- Stop time(sustained text)
+        x=x or 0,                                              -- X
+        y=y or 0,                                              -- Y
+        spd=(spd or 1),                                        -- Timing speed(1=last 1 sec)
         draw=assert(textFX[style or 'appear'],"no text type:"..tostring(style)),-- Draw method
     })
 end
@@ -114,11 +113,6 @@ function TEXT:update(dt)
     for i=#list,1,-1 do
         local t=list[i]
         t.c=t.c+t.spd*dt
-        if t.stop then
-            if t.c>t.stop then
-                t.c=t.stop
-            end
-        end
         if t.c>1 then
             rem(list,i)
         end
@@ -127,10 +121,9 @@ end
 function TEXT:draw()
     local list=self._texts
     for i=1,#list do
-        local t=list[i]
-        local p=t.c
+        local p=list[i].c
         setColor(1,1,1,p<.2 and p*5 or p<.8 and 1 or 5-p*5)
-        t:draw()
+        list[i]:draw()
     end
 end
 function TEXT.new()
