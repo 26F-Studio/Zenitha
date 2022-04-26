@@ -182,7 +182,7 @@ Widgets.text=setmetatable({
 
         'visibleFunc',
     }
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 function Widgets.text:reset()
     baseWidget.reset(self)
 end
@@ -215,7 +215,7 @@ Widgets.image=setmetatable({
 
         'visibleFunc',
     },
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
@@ -252,7 +252,7 @@ Widgets.button=setmetatable({
         'code',
         'visibleFunc',
     },
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 function Widgets.button:reset()
     baseWidget.reset(self)
     if not self.h then self.h=self.w end
@@ -366,7 +366,7 @@ Widgets.checkBox=setmetatable({
         'disp','code',
         'visibleFunc',
     },
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 function Widgets.checkBox:reset()
     baseWidget.reset(self)
     if self.labelPos=='left' then
@@ -486,7 +486,7 @@ Widgets.slider=setmetatable({
         'change',
         'visibleFunc',
     },
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 local sliderShowFunc={
     null=function()
         return ''
@@ -820,7 +820,7 @@ Widgets.selector=setmetatable({
         'disp','code',
         'visibleFunc',
     },
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 function Widgets.selector:reset()
     baseWidget.reset(self)
 
@@ -987,7 +987,7 @@ Widgets.inputBox=setmetatable({
         'disp','code',
         'visibleFunc',
     },
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 function Widgets.inputBox:reset()
     baseWidget.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
@@ -1146,7 +1146,7 @@ Widgets.textBox=setmetatable({
 
         'visibleFunc',
     },
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 function Widgets.textBox:reset()
     baseWidget.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
@@ -1296,7 +1296,7 @@ Widgets.listBox=setmetatable({
 
         'visibleFunc',
     },
-},{__index=baseWidget})
+},{__index=baseWidget,__metatable=true})
 function Widgets.listBox:reset()
     baseWidget.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
@@ -1607,7 +1607,7 @@ function WIDGET.new(args)
 
     local W=Widgets[t]
     assert(W,'Widget type '..tostring(t)..' does not exist')
-    local w=setmetatable({},{__index=W})
+    local w=setmetatable({},{__index=W,__metatable=true})
 
     for k,v in next,args do
         if TABLE.find(W.buildArgs,k) then

@@ -1,15 +1,18 @@
 local initialized=false
-local IMGlistMeta={__index=function(self,k)
-    assert(self.__source[k],STRING.repD("No field '$1'",tostring(k)))
-    local ok,res=pcall(love.graphics.newImage,self.__source[k])
-    if ok then
-        self[k]=res
-    else
-        self[k]=PAPER
-        MES.new('error',STRING.repD("Cannot load image '$1': $2",self.__source[k],res))
-    end
-    return self[k]
-end}
+local IMGlistMeta={
+    __index=function(self,k)
+        assert(self.__source[k],STRING.repD("No field '$1'",tostring(k)))
+        local ok,res=pcall(love.graphics.newImage,self.__source[k])
+        if ok then
+            self[k]=res
+        else
+            self[k]=PAPER
+            MES.new('error',STRING.repD("Cannot load image '$1': $2",self.__source[k],res))
+        end
+        return self[k]
+    end,
+    __metatable=true,
+}
 local function link(A,B)
     A.__source=B
     setmetatable(A,IMGlistMeta)

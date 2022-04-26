@@ -15,13 +15,13 @@ setmetatable(langLib,{
             langLib[table.remove(langLoaded,1)]=nil
         end
         return self[k]
-    end
+    end,
 })
 setmetatable(langLib[false],{
     __index=function(self,k)
         self[k]='['..k..']'
         return self[k]
-    end
+    end,
 })
 
 local LANG={}
@@ -51,12 +51,14 @@ function LANG.setTextFuncSrc(newSrc)
     assert(type(newSrc)=='table','LANG.setTextFuncPool(newPool): newPool must be table')
     textSrc=newSrc
 end
-local keyCache=setmetatable({},{__index=function(self,k)
-    self[k]=function() return textSrc[k] end
-    return self[k]
-end})
+local keyCache=setmetatable({},{
+    __index=function(self,k)
+        self[k]=function() return textSrc[k] end
+        return self[k]
+    end,
+})
 function LANG.getText(_,key)
     return keyCache[key]
 end
-setmetatable(LANG,{__call=LANG.getText})
+setmetatable(LANG,{__call=LANG.getText,__metatable=true})
 return LANG

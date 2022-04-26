@@ -782,7 +782,7 @@ TABLE.complete(string,userG.string)userG.string.dump=nil
 TABLE.complete(table,userG.table)
 TABLE.complete(bit,userG.bit)
 TABLE.complete(coroutine,userG.coroutine)
-local dangerousLibMeta={__index=function() error("No way.") end}
+local dangerousLibMeta={__index=function() error("No way.") end,__metatable=true}
 setmetatable(userG.debug,dangerousLibMeta)
 setmetatable(userG.package,dangerousLibMeta)
 setmetatable(userG.io,dangerousLibMeta)

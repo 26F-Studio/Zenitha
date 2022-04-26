@@ -79,7 +79,7 @@ end
 setmetatable(COLOR,{__index=function(_,k)
     assert(type(k)=='string', "COLOR[name]: name must be string")
     error("No color: "..tostring(k))
-end})
+end,__metatable=true})
 
 
 do-- Random generators

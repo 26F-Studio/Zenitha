@@ -13,7 +13,8 @@ local LOG=setmetatable({},{
     __call=function(_,message)
         print(message)
         log(message)
-    end
+    end,
+    __metatable=true,
 })
 
 -- Get raw logs data
