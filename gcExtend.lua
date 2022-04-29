@@ -202,6 +202,8 @@ do-- function GC.load(L), GC.execute(t)
         setLW=    gc.setLineWidth,
         setLS=    gc.setLineStyle,
         setLJ=    gc.setLineJoin,
+        setBM=    gc.setBlendMode,
+        setSD=    gc.setShader,
 
         print=    gc.print,
         rawFT=    function(...) FONT.rawset(...) end,
@@ -281,6 +283,9 @@ do-- function GC.load(L), GC.execute(t)
                     error("cmd must be string or function")
                 end
             end
+            gc.setShader()
+            gc.setColorMask()
+            gc.setBlendMode('alpha')
             gc.setCanvas()
         gc.pop()
         return canvas
