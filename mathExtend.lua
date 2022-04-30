@@ -53,4 +53,8 @@ function MATH.expApproach(a,b,k)
     return b+(a-b)*2.718281828459045^-k
 end
 
+function MATH.distance(x1,y1,x2,y2)
+    return ((x1-x2)^2+(y1-y2)^2)^.5
+end
+
 return MATH

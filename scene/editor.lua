@@ -1413,7 +1413,7 @@ function directPad:press(x,y,id)
     self:update(1e-26)
 end
 function directPad:move(x,y)
-    self.barDist=min(((x-self.x)^2+(y-self.y)^2)^.5,self.r)
+    self.barDist=min(MATH.distance(x,y,self.x,self.y),self.r)
     self.barAngle=atan2(y-self.y,x-self.x)
 end
 function directPad:release()
