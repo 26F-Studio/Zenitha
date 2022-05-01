@@ -78,6 +78,7 @@ local baseWidget={
     fontSize=30,fontType=false,
     widthLimit=1e99,
 
+    isAbove=NULL,
     visibleFunc=false,-- function return a boolean
 
     _activeTime=0,
@@ -189,7 +190,7 @@ end
 function Widgets.text:draw()
     if self._text then
         gc_setColor(self.color)
-        alignDraw(self,self._text,self._x,self._y,self.widthLimit)
+        alignDraw(self,self._text,self._x,self._y)
     end
 end
 
@@ -427,9 +428,9 @@ function Widgets.checkBox:draw()
     elseif self.labelPos=='right' then
         x2,y2=x+w*.5+10+ATV*6,y
     elseif self.labelPos=='up' then
-        x2,y2=x+w*.5,y-w*.5-8-ATV*6
+        x2,y2=x,y-w*.5-8-ATV*6
     elseif self.labelPos=='down' then
-        x2,y2=x+w*.5,y+w*.5+8+ATV*6
+        x2,y2=x,y+w*.5+8+ATV*6
     end
     if self._image then
         gc_setColor(1,1,1)
