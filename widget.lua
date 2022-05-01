@@ -345,6 +345,7 @@ Widgets.checkBox=setmetatable({
     image=false,
     alignX='center',alignY='center',
     labelPos='left',
+    labelDistance=10,
     sound_on=false,sound_off=false,
 
     disp=false,-- function return a boolean
@@ -359,6 +360,7 @@ Widgets.checkBox=setmetatable({
         'x','y','w',
 
         'labelPos',
+        'labelDistance',
         'color','text',
         'fontSize','fontType',
         'widthLimit',
@@ -424,13 +426,13 @@ function Widgets.checkBox:draw()
     -- Drawable
     local x2,y2
     if self.labelPos=='left' then
-        x2,y2=x-w*.5-10-ATV*6,y
+        x2,y2=x-w*.5-self.labelDistance-ATV*6,y
     elseif self.labelPos=='right' then
-        x2,y2=x+w*.5+10+ATV*6,y
+        x2,y2=x+w*.5+self.labelDistance+ATV*6,y
     elseif self.labelPos=='up' then
-        x2,y2=x,y-w*.5-8-ATV*6
+        x2,y2=x,y-w*.5-self.labelDistance-ATV*6
     elseif self.labelPos=='down' then
-        x2,y2=x,y+w*.5+8+ATV*6
+        x2,y2=x,y+w*.5+self.labelDistance+ATV*6
     end
     if self._image then
         gc_setColor(1,1,1)
@@ -453,6 +455,7 @@ Widgets.slider=setmetatable({
     text=false,
     image=false,
     labelPos='left',
+    labelDistance=8,
     valueShow=nil,
 
     disp=false,-- function return the displaying _value
@@ -478,6 +481,7 @@ Widgets.slider=setmetatable({
 
         'axis','smooth',
         'labelPos',
+        'labelDistance',
         'color','text',
         'fontSize','fontType',
         'widthLimit',
@@ -548,6 +552,7 @@ function Widgets.slider:reset()
         self.alignX='left'
     elseif self.labelPos=='down' then
         self.alignY='up'
+        self.labelDistance=max(self.labelDistance,20)
     else
         error("[slider].labelPos must be 'left', 'right', or 'down'")
     end
@@ -613,11 +618,11 @@ function Widgets.slider:draw()
     if self._text then
         gc_setColor(.97,.97,.97)
         if self.labelPos=='left' then
-            alignDraw(self,self._text,x-8-ATV*6,y)
+            alignDraw(self,self._text,x-self.labelDistance-ATV*6,y)
         elseif self.labelPos=='right' then
-            alignDraw(self,self._text,x+self.w+8+ATV*6,y)
+            alignDraw(self,self._text,x+self.w+self.labelDistance+ATV*6,y)
         elseif self.labelPos=='down' then
-            alignDraw(self,self._text,x+self.w*.5,y+20)
+            alignDraw(self,self._text,x+self.w*.5,y+self.labelDistance)
         end
     end
 end
@@ -675,6 +680,7 @@ Widgets.slider_fill=setmetatable({
     text=false,
     image=false,
     labelPos='left',
+    labelDistance=8,
 
     disp=false,-- function return the displaying _value
     code=NULL,
@@ -693,6 +699,7 @@ Widgets.slider_fill=setmetatable({
 
         'axis',
         'labelPos',
+        'labelDistance',
         'color','text',
         'fontSize','fontType',
         'widthLimit',
@@ -726,6 +733,7 @@ function Widgets.slider_fill:reset()
         self.alignX='left'
     elseif self.labelPos=='down' then
         self.alignY='up'
+        self.labelDistance=max(self.labelDistance,20)
     else
         error("[slider_fill].labelPos must be 'left','right' or 'down'")
     end
@@ -775,11 +783,11 @@ function Widgets.slider_fill:draw()
         gc_setColor(COLOR.L)
         local x2,y2
         if self.labelPos=='left' then
-            x2,y2=x-8-ATV*6,y
+            x2,y2=x-self.labelDistance-ATV*6,y
         elseif self.labelPos=='right' then
-            x2,y2=x+w+8+ATV*6,y
+            x2,y2=x+w+self.labelDistance+ATV*6,y
         elseif self.labelPos=='down' then
-            x2,y2=x+w*.5,y+20
+            x2,y2=x+w*.5,y-self.labelDistance
         end
         alignDraw(self,self._text,x2,y2)
     end
@@ -966,6 +974,8 @@ Widgets.inputBox=setmetatable({
     secret=false,
     regex=false,
     labelPos='left',
+    labelDistance=10,
+
     maxInputLength=1e99,
     sound_input=false,sound_bksp=false,sound_del=false,sound_clear=false,
 
@@ -981,6 +991,7 @@ Widgets.inputBox=setmetatable({
         'secret',
         'regex',
         'labelPos',
+        'labelDistance',
         'maxInputLength',
         'sound_input','sound_bksp','sound_del','sound_clear',
 
