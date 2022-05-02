@@ -475,9 +475,13 @@ function love.gamepadpressed(_,key)
         end
     end
 end
-function love.gamepadreleased(_,i)
+function love.gamepadreleased(_,key)
     if SCN.swapping then return end
-    if SCN.gamepadUp then SCN.gamepadUp(i) end
+    if SCN.gamepadUp then
+        SCN.gamepadUp(key)
+    elseif SCN.keyUp then
+        SCN.keyUp(dPadToKey[key] or key)
+    end
 end
 
 function love.filedropped(file)
