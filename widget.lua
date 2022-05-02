@@ -848,17 +848,14 @@ function Widgets.selector:reset()
         error("[selector].labelPos must be 'left','right','down' or 'up'")
     end
 
-    local V,L=self.disp(),self.list
-    self._select,self._selText=false,false
-    for i=1,#L do
-        if L[i]==V then
+    local V=self.disp()
+    self._selText=V
+    self._select=false
+    for i=1,#self.list do
+        if self.list[i]==V then
             self._select=i
-            self._selText=self.list[i]
             break
         end
-    end
-    if not self._select then
-        MES.new('error',"Selector "..(self.name or '[NULL]').." dead, disp= "..tostring(V))
     end
 end
 function Widgets.selector:isAbove(x,y)
