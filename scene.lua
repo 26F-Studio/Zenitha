@@ -103,24 +103,21 @@ local swap={
     fade={
         duration=.5,changeTime=.25,
         draw=function(t)
-            t=t>.25 and 2-t*4 or t*4
-            gc.setColor(0,0,0,t)
+            gc.setColor(.1,.1,.1,t>.25 and 2-t*4 or t*4)
             gc.rectangle('fill',0,0,SCR.w,SCR.h)
         end
     },
-    fade_togame={
-        duration=2,changeTime=.5,
+    fastFade={
+        duration=.1,changeTime=.05,
         draw=function(t)
-            t=t>.5 and (2-t)/1.5 or t*.5
-            gc.setColor(0,0,0,t)
+            gc.setColor(.1,.1,.1,t>.05 and 2-t*20 or t*20)
             gc.rectangle('fill',0,0,SCR.w,SCR.h)
         end
     },
     slowFade={
         duration=3,changeTime=1.5,
         draw=function(t)
-            t=t>1.5 and (3-t)/1.5 or t/1.5
-            gc.setColor(0,0,0,t)
+            gc.setColor(.1,.1,.1,t>1.5 and (3-t)/1.5 or t/1.5)
             gc.rectangle('fill',0,0,SCR.w,SCR.h)
         end
     },
