@@ -15,8 +15,7 @@ local history,hisPtr={"?"},false
 local sumode=false
 
 local commands={} do
-    --[[
-        format of elements in table 'commands':
+    --[[ format of table 'commands':
         key: the command name
         value: a table containing the following two elements:
             code: code to run when call

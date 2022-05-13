@@ -95,19 +95,18 @@ function TEXT:clear()
     self._texts={}
 end
 
---[[
-    data:
-        text="Example Text",
-        x=0,y=0,
-        r=1,g=1,b=1,a=1,
-        fontSize=40,
-        fontType=nil,
-        duration=1,
-        inPoint=0.2,
-        outPoint=0.2,
+--[[ data:
+    text="Example Text",
+    x=0,y=0,
+    r=1,g=1,b=1,a=1,
+    fontSize=40,
+    fontType=nil,
+    duration=1,
+    inPoint=0.2,
+    outPoint=0.2,
 
-        style='appear',
-        _sytleArgs=...
+    style='appear',
+    _sytleArgs=...
 ]]
 function TEXT:add(data)
     local T={
