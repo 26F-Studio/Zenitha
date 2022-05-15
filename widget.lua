@@ -17,7 +17,9 @@ local sub,ins,rem=string.sub,table.insert,table.remove
 
 local SCN,SCR,xOy=SCN,SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
-local mStr,GC_stc_setComp,GC_stc_rect,GC_stc_stop=GC.mStr,GC.stc_setComp,GC.stc_rect,GC.stc_stop
+local mStr=GC.mStr
+local GC_stc_reset,GC_stc_setComp,GC_stc_stop=GC.stc_reset,GC.stc_setComp,GC.stc_stop
+local GC_stc_circ,GC_stc_rect=GC.stc_circ,GC.stc_rect
 local approach=MATH.expApproach
 
 local leftAngle=GC.load{20,20,
@@ -755,28 +757,28 @@ function Widgets.slider_fill:draw()
     -- Capsule
     gc_setColor(1,1,1,.6+ATV*.26)
     gc_setLineWidth(1+ATV)
-    gc_rectangle('line',x,y-r,w,h,r)
+    gc_rectangle('line',x-_rcr_small,y-r-_rcr_small,w+2*_rcr_small,h+2*_rcr_small,r+_rcr_small)
     if ATV>0 then
         gc_setColor(1,1,1,ATV*.12)
-        gc_rectangle('fill',x,y-r,w,h,r)
+        gc_rectangle('fill',x-_rcr_small,y-r-_rcr_small,w+2*_rcr_small,h+2*_rcr_small,r+_rcr_small)
     end
 
     -- Stenciled capsule and text
-    GC.stc_reset()
-    GC.stc_rect(x+r,y-r,w-h,h)
-    GC.stc_circ(x+r,y,r)
-    GC.stc_circ(x+w-r,y,r)
+    GC_stc_reset()
+    GC_stc_rect(x+r,y-r,w-h,h)
+    GC_stc_circ(x+r,y,r)
+    GC_stc_circ(x+w-r,y,r)
 
     setFont(30)
-    gc_setColor(1,1,1,.9)
+    gc_setColor(1,1,1,.75+ATV*.26)
     mStr(num,x+w*.5,y-21)
     gc_rectangle('fill',x,y-r,w*rate,h)
 
-    GC.stc_reset()
-    GC.stc_rect(x,y-r,w*rate,h)
+    GC_stc_reset()
+    GC_stc_rect(x,y-r,w*rate,h)
     gc_setColor(0,0,0,.9)
     mStr(num,x+w*.5,y-21)
-    GC.stc_stop()
+    GC_stc_stop()
 
     -- Drawable
     if self._text then
