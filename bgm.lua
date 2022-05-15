@@ -213,6 +213,7 @@ function BGM.play(bgms,args)
             source:setLooping(not STRING.sArg(args,'-noloop'))
             source:setPitch(1)
             source:seek(0)
+            source:setFilter()
             if STRING.sArg(args,'-sdin') then
                 obj.vol=1
                 source:setVolume(volume)
