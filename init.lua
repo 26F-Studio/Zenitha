@@ -86,7 +86,6 @@ JSON=       require'Zenitha.json'
 -- Pure lua modules (complex)
 REQUIRE=    require'Zenitha.require'
 TASK=       require'Zenitha.task'
-WS=         require'Zenitha.websocket'
 LANG=       require'Zenitha.languages'
 PROFILE=    require'Zenitha.profile'
 
@@ -632,7 +631,6 @@ function love.run()
     local BG=BG
     local SCN_swapUpdate=SCN.swapUpdate
     local MES_update,MES_draw=MES.update,MES.draw
-    local WS_update=WS.update
     local TASK_update=TASK.update
     local SYSFX_update,SYSFX_draw=SYSFX.update,SYSFX.draw
     local WIDGET_update,WIDGET_draw=WIDGET.update,WIDGET.draw
@@ -698,7 +696,6 @@ function love.run()
             BG.update(updateDT)
             TEXT:update(updateDT)
             MES_update(updateDT)
-            WS_update(updateDT)
             TASK_update(updateDT)
             SYSFX_update(updateDT)
             if SCN.update then SCN.update(updateDT) end
