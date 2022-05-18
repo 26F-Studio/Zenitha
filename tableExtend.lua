@@ -250,6 +250,12 @@ function TABLE.reIndex(org)
     end
 end
 
+-- Get element count of table
+function TABLE.getSize(t)
+    local size=0
+    for _ in next,t do size=size+1 end
+    return size
+end
 --------------------------------------------------------------
 
 -- Copy a rotated matrix table
