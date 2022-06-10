@@ -1536,7 +1536,7 @@ function scene.enter()
     freshClipboard()
 
     if type(rainbowShader)=='string' then rainbowShader=gc.newShader(rainbowShader) end
-    if type(comboKeyName[1].name)=='string' then
+    if comboKeyName[1] and type(comboKeyName[1].name)=='string' then
         for i=1,#comboKeyName do
             comboKeyName[i].label=gc.newText(FONT.get(15,'_codePixel'),comboKeyName[i].text)
         end

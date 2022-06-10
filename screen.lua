@@ -13,15 +13,15 @@ local SCR={
 
     -- Screen transformation objects
     origin=love.math.newTransform(),
-    xOy=love.math.newTransform(),
-    xOy_m=love.math.newTransform(),
+    xOy=   love.math.newTransform(),
+    xOy_m= love.math.newTransform(),
     xOy_ul=love.math.newTransform(),
-    xOy_u=love.math.newTransform(),
+    xOy_u= love.math.newTransform(),
     xOy_ur=love.math.newTransform(),
-    xOy_l=love.math.newTransform(),
-    xOy_r=love.math.newTransform(),
+    xOy_l= love.math.newTransform(),
+    xOy_r= love.math.newTransform(),
     xOy_dl=love.math.newTransform(),
-    xOy_d=love.math.newTransform(),
+    xOy_d= love.math.newTransform(),
     xOy_dr=love.math.newTransform(),
 }
 function SCR.setSize(w,h)
@@ -43,18 +43,20 @@ function SCR.resize(w,h)
     end
     SCR.cx,SCR.cy=SCR.w/2,SCR.h/2
     SCR.ex,SCR.ey=SCR.w-SCR.x,SCR.h-SCR.y
-    SCR.safeX,SCR.safeY,SCR.safeW,SCR.safeH=love.window.getSafeArea()
+    if love.window.getSafeArea then
+        SCR.safeX,SCR.safeY,SCR.safeW,SCR.safeH=love.window.getSafeArea()
+    end
 
     SCR.origin:setTransformation(0,0)
-    SCR.xOy:setTransformation(SCR.x,SCR.y,0,SCR.k)
-    SCR.xOy_m:setTransformation(w/2,h/2,0,SCR.k)
+    SCR.xOy:   setTransformation(SCR.x,SCR.y,0,SCR.k)
+    SCR.xOy_m: setTransformation(w/2,h/2,0,SCR.k)
     SCR.xOy_ul:setTransformation(0,0,0,SCR.k)
-    SCR.xOy_u:setTransformation(w/2,0,0,SCR.k)
+    SCR.xOy_u: setTransformation(w/2,0,0,SCR.k)
     SCR.xOy_ur:setTransformation(w,0,0,SCR.k)
-    SCR.xOy_l:setTransformation(0,h/2,0,SCR.k)
-    SCR.xOy_r:setTransformation(w,h/2,0,SCR.k)
+    SCR.xOy_l: setTransformation(0,h/2,0,SCR.k)
+    SCR.xOy_r: setTransformation(w,h/2,0,SCR.k)
     SCR.xOy_dl:setTransformation(0,h,0,SCR.k)
-    SCR.xOy_d:setTransformation(w/2,h,0,SCR.k)
+    SCR.xOy_d: setTransformation(w/2,h,0,SCR.k)
     SCR.xOy_dr:setTransformation(w,h,0,SCR.k)
 end
 function SCR.info()
