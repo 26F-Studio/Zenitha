@@ -482,7 +482,7 @@ function Page:indent(args)
         local pos
 
         -- Cut head
-        pos=string.find(self[startY],'%S') or #self[startY]
+        pos=string.find(self[startY],'%S') or #self[startY]+1
         if pos>1 then
             startX=max(startX-4,pos-5,0)
             self[startY]=self[startY]:sub(min(pos,5))
@@ -491,16 +491,19 @@ function Page:indent(args)
         if endY>startY then
             -- Cut body
             for l=startY+1,endY-1 do
-                pos=string.find(self[l],'%S') or #self[l]
-                if pos>1 then self[l]=self[l]:sub(min(pos,5)) end
+                pos=string.find(self[l],'%S') or #self[l]+1
+                if pos>0 then self[l]=self[l]:sub(min(pos,5)) end
             end
 
             -- Cut tail
-            pos=string.find(self[endY],'%S') or #self[endY]
-            if pos>1 then
+            pos=string.find(self[endY],'%S') or #self[endY]+1
+            if pos>0 then
                 endX=max(endX-4,pos-5,0)
                 self[endY]=self[endY]:sub(min(pos,5))
             end
+        else
+            startX=max(startX-4,pos-5,0)
+            endX=max(endX-4,pos-5,0)
         end
         if self.selY==endY then
             self.curX,self.selX=startX,self.selX and endX
@@ -1116,11 +1119,11 @@ function Menu:update(dt)
                 self.list[j]:update(dt)
             end
             if self.expandState<1 then
-                self.expandState=min(self.expandState+6.26*dt,1)
+                self.expandState=min(self.expandState+10*dt,1)
             end
         else
             if self.expandState>0 then
-                self.expandState=max(self.expandState-6.26*dt,0)
+                self.expandState=max(self.expandState-10*dt,0)
             end
         end
     end
