@@ -498,17 +498,6 @@ local commands={} do
             "Usage: test",
         },
     }
-    commands.editor={
-        code=function()
-            SCN.go('_editor','none')
-        end,
-        description="Enter editor scene",
-        details={
-            "Go to an editor scene",
-            "",
-            "Usage: editor",
-        },
-    }
     do-- app
         local APPs={
             {

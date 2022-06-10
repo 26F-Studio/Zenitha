@@ -912,6 +912,5 @@ end
 
 SCN.add('_quit',{enter=function() onQuit() love.event.quit() end})
 SCN.add('_console',require'Zenitha/scene/console')
-SCN.add('_editor',require'Zenitha/scene/editor')
 SCN.add('_zenitha',require'Zenitha/scene/demo')
 SCN.add('_test',require'Zenitha/scene/test')
