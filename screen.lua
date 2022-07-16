@@ -24,6 +24,8 @@ local SCR={
     xOy_d= love.math.newTransform(),
     xOy_dr=love.math.newTransform(),
 }
+if love.graphics then SCR.w0,SCR.h0=love.graphics.getDimensions() end
+
 function SCR.setSize(w,h)
     SCR.w0,SCR.h0=w,h
 end
