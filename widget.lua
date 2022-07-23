@@ -1160,8 +1160,8 @@ Widgets.textBox=setmetatable({
 },{__index=baseWidget,__metatable=true})
 function Widgets.textBox:reset()
     baseWidget.reset(self)
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
+    assert(self.w and type(self.w)=='number','[textBox].w must be number')
+    assert(self.h and type(self.h)=='number','[textBox].h must be number')
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
     assert(type(self.yOffset)=='number',"[textBox].yOffset must be number")
 
@@ -1310,11 +1310,11 @@ Widgets.listBox=setmetatable({
 },{__index=baseWidget,__metatable=true})
 function Widgets.listBox:reset()
     baseWidget.reset(self)
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
+    assert(self.w and type(self.w)=='number','[listBox].w must be number')
+    assert(self.h and type(self.h)=='number','[listBox].h must be number')
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
 
-    assert(type(self.drawFunc)=='function',"[textBox].drawFunc must be function")
+    assert(type(self.drawFunc)=='function',"[listBox].drawFunc must be function")
     if not self._list then self._list={} end
     self._capacity=ceil((self.h-10)/self.lineHeight)
 end
@@ -1524,6 +1524,12 @@ function WIDGET.press(x,y,k)
         end
     end
 end
+function WIDGET.release(x,y)
+    local W=WIDGET.sel
+    if W and W.release then
+        W:release(x,y+SCN.curScroll)
+    end
+end
 function WIDGET.drag(x,y,dx,dy)
     local W=WIDGET.sel
     if W and W.drag then
@@ -1538,12 +1544,6 @@ function WIDGET.scroll(dx,dy)
         W:scroll(dx,dy)
     else
         SCN.curScroll=MATH.clamp(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
-    end
-end
-function WIDGET.release(x,y)
-    local W=WIDGET.sel
-    if W and W.release then
-        W:release(x,y+SCN.curScroll)
     end
 end
 function WIDGET.textinput(texts)
