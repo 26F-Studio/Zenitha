@@ -338,5 +338,15 @@ end
 function BGM.isPlaying()
     return #nowPlay>0 and nowPlay[1].source:isPlaying()
 end
+function BGM.tell()
+    if nowPlay[1] then
+        return nowPlay[1].source:tell()
+    end
+end
+function BGM.getDuration()
+    if nowPlay[1] then
+        return nowPlay[1].source:getDuration()
+    end
+end
 
 return BGM
