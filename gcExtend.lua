@@ -21,6 +21,10 @@ end
 function GC.safePrintf(...)
     return pcall(printf,...)
 end
+
+---@param shadeCount
+---| 4
+---| 8
 function GC.outDraw(obj,x,y,a,k,d,shadeCount)
     local w,h=obj:getWidth()*.5,obj:getHeight()*.5
     if shadeCount==4 then
@@ -37,8 +41,18 @@ function GC.outDraw(obj,x,y,a,k,d,shadeCount)
         draw(obj,x+d,y,a,k,nil,w,h)
         draw(obj,x,y-d,a,k,nil,w,h)
         draw(obj,x,y+d,a,k,nil,w,h)
+    else
+        error('shadeCount(7th arg) must be 4 or 8')
     end
 end
+
+---@param mode
+---| 'center'
+---| 'right'
+---| 'left'
+---@param shadeCount
+---| 4
+---| 8
 function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
     local w=1280
     if mode=='center' then
@@ -68,6 +82,10 @@ function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
     setColor(c2 or COLOR.L)
     printf(str,x,y,w,mode)
 end
+
+---@param mode
+---| 'fill'
+---| 'line'
 function GC.regPolygon(mode,x,y,R,segments,phase)
     local l={}
     local ang=phase or 0
@@ -79,6 +97,10 @@ function GC.regPolygon(mode,x,y,R,segments,phase)
     end
     polygon(mode,l)
 end
+
+---@param mode
+---| 'fill'
+---| 'line'
 function GC.regRoundPolygon(mode,x,y,R,segments,r,phase)
     local X,Y={},{}
     local ang=phase or 0
@@ -128,6 +150,7 @@ function GC.regRoundPolygon(mode,x,y,R,segments,r,phase)
         error("Draw mode should be 'line' or 'fill'")
     end
 end
+
 do-- function GC.getScreenShot()
     local capturedImage
     local function _captureScreenshotFunc(imageData) capturedImage=gc.newImage(imageData) end

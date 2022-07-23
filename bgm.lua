@@ -245,6 +245,14 @@ function BGM.stop(time)
         lastPlay=NONE
     end
 end
+
+---@param mode
+---| 'volume'
+---| 'lowgain'
+---| 'highgain'
+---| 'volume'
+---| 'pitch'
+---| 'seek'
 function BGM.set(bgms,mode,...)
     if type(bgms)=='string' then
         if bgms=='all' then
