@@ -462,7 +462,6 @@ Widgets.slider=setmetatable({
 
     disp=false,-- function return the displaying _value
     code=NULL,
-    change=nil,-- function trigger when value change
 
     _floatWheel=0,
     _text=nil,
@@ -490,7 +489,6 @@ Widgets.slider=setmetatable({
 
         'valueShow',
         'disp','code',
-        'change',
         'visibleFunc',
     },
 },{__index=baseWidget,__metatable=true})
@@ -645,14 +643,6 @@ function Widgets.slider:drag(x)
     if newVal~=self.disp() then
         self.code(newVal)
     end
-    if self.change and timer()-self.lastTime>.5 then
-        self.lastTime=timer()
-        self.change()
-    end
-end
-function Widgets.slider:release(x)
-    self:drag(x)
-    self.lastTime=0
 end
 function Widgets.slider:scroll(dx,dy)
     local n=updateWheel(self,(dx+dy)*self._rangeWidth/(self._unit or .01)/20)
@@ -662,10 +652,6 @@ function Widgets.slider:scroll(dx,dy)
         local P=MATH.clamp(p+u*n,self._rangeL,self._rangeR)
         if p==P or not P then return end
         self.code(P)
-        if self.change and timer()-self.lastTime>.18 then
-            self.lastTime=timer()
-            self.change()
-        end
     end
 end
 function Widgets.slider:arrowKey(k)
