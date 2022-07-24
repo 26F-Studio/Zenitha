@@ -3,7 +3,7 @@ local gc_translate,gc_replaceTransform=gc.translate,gc.replaceTransform
 local gc_push,gc_pop=gc.push,gc.pop
 local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
 local gc_draw,gc_line=gc.draw,gc.line
-local gc_rectangle=gc.rectangle
+local gc_rectangle,gc_circle=gc.rectangle,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
 
 local kb=love.keyboard
@@ -283,12 +283,12 @@ function Widgets.button:draw()
     local c=self.color
 
     -- Background
-    gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.1+.2*self._activeTime/self._activeTimeMax+math.max(.7*((self._lastClickTime-timer()+.26)*2.6),0)))
+    gc_setColor(c[1],c[2],c[3],.1+.2*self._activeTime/self._activeTimeMax+math.max(.7*((self._lastClickTime-timer()+.26)*2.6),0))
     gc_rectangle('fill',x,y,w,h,_rcr_big)
 
     -- Frame
     gc_setLineWidth(2)
-    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
+    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.7)
     gc_rectangle('line',x,y,w,h,_rcr_big)
 
     -- Drawable
@@ -413,12 +413,12 @@ function Widgets.checkBox:draw()
 
     if self.disp then
         -- Background
-        gc_setColor(c[1],c[2],c[3],(c[4] or 1)*(.3*ATV))
+        gc_setColor(c[1],c[2],c[3],.3*ATV)
         gc_rectangle('fill',x-w*.5,y-w*.5,w,w,_rcr_small+1)
 
         -- Frame
         gc_setLineWidth(2)
-        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
+        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.7)
         gc_rectangle('line',x-w*.5,y-w*.5,w,w,_rcr_small+1)
         if self.disp() then
             gc_rectangle('fill',x-w*.3,y-w*.3,w*.6,w*.6,_rcr_small)
@@ -457,6 +457,7 @@ Widgets.switch=setmetatable({
     labelPos='left',
     labelDistance=10,
     sound_on=false,sound_off=false,
+    fillColor=COLOR.lS,
 
     disp=false,-- function return a boolean
     code=NULL,
@@ -484,6 +485,8 @@ Widgets.switch=setmetatable({
 },{__index=Widgets.checkBox,__metatable=true})
 function Widgets.switch:reset()
     baseWidget.reset(self)
+    assert(type(self.fillColor)=='table','[switch].fillColor must be table')
+
     self._slideTime=0
     if self.labelPos=='left' then
         self.alignX='right'
@@ -520,20 +523,17 @@ function Widgets.switch:draw()
 
     if self.disp then
         -- Background
-        if self.disp() then
-            gc_setColor(.4,.95,.4,(c[4] or 1)*(.6+.2*ATV))
-        else
-            gc_setColor(1,1,1,(c[4] or 1)*(.3*ATV))
-        end
-        gc_rectangle('fill',x-h,y-h*.5,h*2,h,_rcr_big+1)
+        gc_setColor(self.fillColor[1],self.fillColor[2],self.fillColor[3],self._slideTime/self._activeTimeMax+.5)
+        gc_rectangle('fill',x-h,y-h*.5,h*2,h,h*.5)
 
         -- Frame
         gc_setLineWidth(2)
-        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
-        gc_rectangle('line',x-h,y-h*.5,h*2,h,_rcr_big+1)
+        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*ATV)
+        gc_rectangle('line',x-h,y-h*.5,h*2,h,h*.5)
 
         -- Axis
-        gc_rectangle('fill',x+h*(-.3+self._slideTime/self._activeTimeMax),y-h*.3,h*.6,h*.6,_rcr_big)
+        gc_setColor(1,1,1,.8+.2*ATV)
+        gc_circle('fill',x+h*(self._slideTime/self._activeTimeMax),y,h*(.35+ATV*.05))
     end
 
     -- Drawable
@@ -868,13 +868,13 @@ function Widgets.slider_fill:draw()
 
     setFont(30)
     gc_setColor(1,1,1,.75+ATV*.26)
-    mStr(num,x+w*.5,y-21)
+    mStr(num,x+w*.5,y-18)
     gc_rectangle('fill',x,y-r,w*rate,h)
 
     GC_stc_reset()
     GC_stc_rect(x,y-r,w*rate,h)
     gc_setColor(0,0,0,.9)
-    mStr(num,x+w*.5,y-21)
+    mStr(num,x+w*.5,y-18)
     GC_stc_stop()
 
     -- Drawable
