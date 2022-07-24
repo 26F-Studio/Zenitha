@@ -305,7 +305,7 @@ end
 -- Button_fill
 Widgets.button_fill=setmetatable({
     type='button_fill',
-},{__index=Widgets.button})
+},{__index=Widgets.button,__metatable=true})
 function Widgets.button_fill:draw()
     local x,y=self._x,self._y
     local w,h=self.w,self.h
@@ -435,6 +435,117 @@ function Widgets.checkBox:draw()
         x2,y2=x,y-w*.5-self.labelDistance-ATV*6
     elseif self.labelPos=='down' then
         x2,y2=x,y+w*.5+self.labelDistance+ATV*6
+    end
+    if self._image then
+        gc_setColor(1,1,1)
+        alignDraw(self,self._image,x2,y2)
+    end
+    if self._text then
+        gc_setColor(self.color)
+        alignDraw(self,self._text,x2,y2)
+    end
+end
+
+-- Switch
+Widgets.switch=setmetatable({
+    type='checkBox',
+    h=30,
+
+    text=false,
+    image=false,
+    alignX='center',alignY='center',
+    labelPos='left',
+    labelDistance=10,
+    sound_on=false,sound_off=false,
+
+    disp=false,-- function return a boolean
+    code=NULL,
+
+    _text=nil,
+    _image=nil,
+
+    _slideTime=nil,
+
+    buildArgs={
+        'name',
+        'pos',
+        'x','y','h',
+
+        'labelPos',
+        'labelDistance',
+        'color','text',
+        'fontSize','fontType',
+        'widthLimit',
+        'sound_on','sound_off',
+
+        'disp','code',
+        'visibleFunc',
+    },
+},{__index=Widgets.checkBox,__metatable=true})
+function Widgets.switch:reset()
+    baseWidget.reset(self)
+    self._slideTime=0
+    if self.labelPos=='left' then
+        self.alignX='right'
+    elseif self.labelPos=='right' then
+        self.alignX='left'
+    elseif self.labelPos=='up' then
+        self.alignY='down'
+    elseif self.labelPos=='down' then
+        self.alignY='up'
+    else
+        error("[switch].labelPos must be 'left', 'right', 'up', or 'down'")
+    end
+end
+function Widgets.switch:isAbove(x,y)
+    return
+        self.disp and
+        abs(x-self._x)<self.h and
+        abs(y-self._y)<self.h*.5
+end
+function Widgets.switch:update(dt)
+    baseWidget.update(self,dt)
+    if self.disp() then
+        self._slideTime=min(self._slideTime+dt,self._activeTimeMax/2)
+    else
+        self._slideTime=max(self._slideTime-dt,-self._activeTimeMax/2)
+    end
+end
+function Widgets.switch:draw()
+    local x,y=self._x,self._y
+    local h=self.h
+    local ATV=self._activeTime/self._activeTimeMax
+
+    local c=self.color
+
+    if self.disp then
+        -- Background
+        if self.disp() then
+            gc_setColor(.4,.95,.4,(c[4] or 1)*(.6+.2*ATV))
+        else
+            gc_setColor(1,1,1,(c[4] or 1)*(.3*ATV))
+        end
+        gc_rectangle('fill',x-h,y-h*.5,h*2,h,_rcr_big+1)
+
+        -- Frame
+        gc_setLineWidth(2)
+        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,(c[4] or 1)*.7)
+        gc_rectangle('line',x-h,y-h*.5,h*2,h,_rcr_big+1)
+
+        -- Axis
+        gc_rectangle('fill',x+h*(-.3+self._slideTime/self._activeTimeMax),y-h*.3,h*.6,h*.6,_rcr_big)
+    end
+
+    -- Drawable
+    local x2,y2
+    if self.labelPos=='left' then
+        x2,y2=x-h-self.labelDistance-ATV*6,y
+    elseif self.labelPos=='right' then
+        x2,y2=x+h+self.labelDistance+ATV*6,y
+    elseif self.labelPos=='up' then
+        x2,y2=x,y-h*.5-self.labelDistance-ATV*6
+    elseif self.labelPos=='down' then
+        x2,y2=x,y+h*.5+self.labelDistance+ATV*6
     end
     if self._image then
         gc_setColor(1,1,1)
@@ -695,7 +806,7 @@ Widgets.slider_fill=setmetatable({
         'disp','code',
         'visibleFunc',
     },
-},{__index=Widgets.slider})
+},{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_fill:reset()
     baseWidget.reset(self)
 
