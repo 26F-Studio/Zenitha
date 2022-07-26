@@ -1,5 +1,5 @@
 local gc=love.graphics
-local gc_translate,gc_replaceTransform=gc.translate,gc.replaceTransform
+local gc_translate,gc_scale,gc_replaceTransform=gc.translate,gc.scale,gc.replaceTransform
 local gc_push,gc_pop=gc.push,gc.pop
 local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
 local gc_draw,gc_line=gc.draw,gc.line
@@ -40,8 +40,6 @@ local indexMeta={
         end
     end
 }
-local _rcr_big=10
-local _rcr_small=3
 local onChange=NULL
 local widgetCanvas
 
@@ -68,14 +66,17 @@ local Widgets={}
 
 --------------------------------------------------------------
 
+WIDGET._prototype=Widgets
+
 -- Base widget (not used by user)
-local baseWidget={
+Widgets.base={
     type='null',
     name=false,
     keepFocus=false,
     x=0,y=0,
 
-    color=COLOR.L,
+    color='L',
+    color_fill='lS',
     pos=false,
     fontSize=30,fontType=false,
     widthLimit=1e99,
@@ -83,24 +84,29 @@ local baseWidget={
     isAbove=NULL,
     visibleFunc=false,-- function return a boolean
 
-    _activeTime=0,
-    _activeTimeMax=.1,
+    _hoverTime=0,
+    _hoverTimeMax=.1,
+    _pressed=false,
+    _pressTime=0,
+    _pressTimeMax=.05,
     _visible=nil,
 }
-function baseWidget:getInfo()
+function Widgets.base:getInfo()
     local str=''
     for _,v in next,self.buildArgs do
         str=str..v..'='..tostring(self[v])..'\n'
     end
     return str
 end
-function baseWidget:reset()
+function Widgets.base:reset()
     assert(not self.name or type(self.name)=='string','[widget].name can only be a string')
 
     assert(type(self.x)=='number','[widget].x must be number')
     assert(type(self.y)=='number','[widget].y must be number')
     if type(self.color)=='string' then self.color=COLOR[self.color] end
     assert(type(self.color)=='table','[widget].color must be table')
+    if type(self.color_fill)=='string' then self.color_fill=COLOR[self.color_fill] end
+    assert(type(self.color_fill)=='table','[switch].color_fill must be table')
 
     if self.pos then
         assert(
@@ -143,7 +149,7 @@ function baseWidget:reset()
         end
     end
 
-    self._activeTime=0
+    self._hoverTime=0
 
     if self.visibleFunc then
         self._visible=self.visibleFunc()
@@ -151,16 +157,25 @@ function baseWidget:reset()
         self._visible=true
     end
 end
-function baseWidget:setVisible(bool)
+function Widgets.base:setVisible(bool)
     self._visible=bool and true or false
 end
-function baseWidget:update(dt)
-    if WIDGET.sel==self then
-        self._activeTime=min(self._activeTime+dt,self._activeTimeMax)
+function Widgets.base:update(dt)
+    if self._pressed then
+        self._pressTime=min(self._pressTime+dt,self._pressTimeMax)
     else
-        self._activeTime=max(self._activeTime-dt,0)
+        self._pressTime=max(self._pressTime-dt,0)
+    end
+    if WIDGET.sel==self then
+        self._hoverTime=min(self._hoverTime+dt,self._hoverTimeMax)
+    else
+        self._hoverTime=max(self._hoverTime-dt,0)
     end
 end
+function Widgets.base.press()   end
+function Widgets.base.release() end
+function Widgets.base.drag()    end
+function Widgets.base.scroll()  end
 
 
 -- Text
@@ -185,9 +200,9 @@ Widgets.text=setmetatable({
 
         'visibleFunc',
     }
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 function Widgets.text:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
 end
 function Widgets.text:draw()
     if self._text then
@@ -218,7 +233,7 @@ Widgets.image=setmetatable({
 
         'visibleFunc',
     },
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
@@ -235,29 +250,31 @@ Widgets.button=setmetatable({
     text=false,
     image=false,
     alignX='center',alignY='center',
+    cornerR=10,
     sound=false,
 
     code=NULL,
 
     _text=nil,
     _image=nil,
-    _lastClickTime=-1e99,
+    _pressed=false,
 
     buildArgs={
         'name',
         'pos',
-        'x','y','w','h',
+        'x','y','w','h','cornerR',
         'alignX','alignY',
-        'color','text','image',
+        'text','image',
+        'color','color_fill',
         'fontSize','fontType',
         'sound',
 
         'code',
         'visibleFunc',
     },
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 function Widgets.button:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
     assert(self.h and type(self.h)=='number','[inputBox].h must be number')
@@ -268,38 +285,54 @@ function Widgets.button:isAbove(x,y)
         abs(x-self._x)<self.w*.5 and
         abs(y-self._y)<self.h*.5
 end
-function Widgets.button:press(_,_,k)
-    self.code(k)
-    if self.sound then
-        SFX.play(self.sound)
+function Widgets.button:press()
+    self._pressed=true
+end
+function Widgets.button:release(x,y,k)
+    self._pressed=false
+    if self:isAbove(x,y) then
+        if self.sound then
+            SFX.play(self.sound)
+        end
+        self.code(k)
     end
-    self._lastClickTime=timer()
+end
+function Widgets.button:drag(x,y)
+    if not self:isAbove(x,y) and self==WIDGET.sel then
+        WIDGET.unFocus()
+        self._pressed=false
+    end
 end
 function Widgets.button:draw()
-    local x,y=self._x,self._y
+    gc_push('transform')
+    gc_translate(self._x,self._y)
+
+    if self._pressTime>0 then
+        gc_scale(1-self._pressTime/self._pressTimeMax*.0626)
+    end
     local w,h=self.w,self.h
-    x,y=x-w*.5,y-h*.5
 
     local c=self.color
 
     -- Background
-    gc_setColor(c[1],c[2],c[3],.1+.2*self._activeTime/self._activeTimeMax+math.max(.7*((self._lastClickTime-timer()+.26)*2.6),0))
-    gc_rectangle('fill',x,y,w,h,_rcr_big)
+    gc_setColor(c[1],c[2],c[3],.1+.2*self._hoverTime/self._hoverTimeMax)
+    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
 
     -- Frame
     gc_setLineWidth(2)
     gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.7)
-    gc_rectangle('line',x,y,w,h,_rcr_big)
+    gc_rectangle('line',-w*.5,-h*.5,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,x+w*.5,y+h*.5)
+        alignDraw(self,self._image)
     end
     if self._text then
         gc_setColor(self.color)
-        alignDraw(self,self._text,x+w*.5,y+h*.5)
+        alignDraw(self,self._text)
     end
+    gc_pop()
 end
 
 -- Button_fill
@@ -307,34 +340,33 @@ Widgets.button_fill=setmetatable({
     type='button_fill',
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_fill:draw()
-    local x,y=self._x,self._y
+    gc_push('transform')
+    gc_translate(self._x,self._y)
+
+    if self._pressTime>0 then
+        gc_scale(1-self._pressTime/self._pressTimeMax*.0626)
+    end
+
     local w,h=self.w,self.h
-    local ATV=self._activeTime/self._activeTimeMax
-    x,y=x-w*.5,y-h*.5
+    local HOV=self._hoverTime/self._hoverTimeMax
 
     local c=self.color
     local r,g,b=c[1],c[2],c[3]
 
     -- Rectangle
-    gc_setColor(.15+r*.7,.15+g*.7,.15+b*.7,.9)
-    gc_rectangle('fill',x,y,w,h,_rcr_big)
-    if self._lastClickTime>timer()-.26 then
-        gc_setColor(1,1,1,math.max((self._lastClickTime-timer()+.26)*2.6,0))
-        gc_rectangle('fill',x,y,w,h,_rcr_big)
-    end
-    gc_setLineWidth(2)
-    gc_setColor(1,1,1,ATV)
-    gc_rectangle('line',x-1,y-1,w+2,h+2,_rcr_big*1.2)
+    gc_setColor(.15+r*.7*(1-HOV*.26),.15+g*.7*(1-HOV*.26),.15+b*.7*(1-HOV*.26),.9)
+    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,x+w*.5,y+h*.5)
+        alignDraw(self,self._image,w*.5,h*.5)
     end
     if self._text then
         gc_setColor(r*.5,g*.5,b*.5)
-        alignDraw(self,self._text,x+w*.5,y+h*.5)
+        alignDraw(self,self._text,w*.5,h*.5)
     end
+    gc_pop()
 end
 
 
@@ -348,6 +380,7 @@ Widgets.checkBox=setmetatable({
     alignX='center',alignY='center',
     labelPos='left',
     labelDistance=10,
+    cornerR=3,
     sound_on=false,sound_off=false,
 
     disp=false,-- function return a boolean
@@ -359,7 +392,7 @@ Widgets.checkBox=setmetatable({
     buildArgs={
         'name',
         'pos',
-        'x','y','w',
+        'x','y','w','cornerR',
 
         'labelPos',
         'labelDistance',
@@ -371,9 +404,9 @@ Widgets.checkBox=setmetatable({
         'disp','code',
         'visibleFunc',
     },
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 function Widgets.checkBox:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
     if self.labelPos=='left' then
         self.alignX='right'
     elseif self.labelPos=='right' then
@@ -405,36 +438,37 @@ function Widgets.checkBox:press(_,_,k)
     end
 end
 function Widgets.checkBox:draw()
-    local x,y=self._x,self._y
+    gc_push('transform')
+    gc_translate(self._x,self._y)
     local w=self.w
-    local ATV=self._activeTime/self._activeTimeMax
+    local HOV=self._hoverTime/self._hoverTimeMax
 
     local c=self.color
 
     if self.disp then
         -- Background
-        gc_setColor(c[1],c[2],c[3],.3*ATV)
-        gc_rectangle('fill',x-w*.5,y-w*.5,w,w,_rcr_small+1)
+        gc_setColor(c[1],c[2],c[3],.3*HOV)
+        gc_rectangle('fill',-w*.5,-w*.5,w,w,self.cornerR)
 
         -- Frame
         gc_setLineWidth(2)
         gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.7)
-        gc_rectangle('line',x-w*.5,y-w*.5,w,w,_rcr_small+1)
+        gc_rectangle('line',-w*.5,-w*.5,w,w,self.cornerR)
         if self.disp() then
-            gc_rectangle('fill',x-w*.3,y-w*.3,w*.6,w*.6,_rcr_small)
+            gc_rectangle('fill',-w*.3,-w*.3,w*.6,w*.6,self.cornerR-2)
         end
     end
 
     -- Drawable
-    local x2,y2
+    local x2,y2=0,0
     if self.labelPos=='left' then
-        x2,y2=x-w*.5-self.labelDistance-ATV*6,y
+        x2=-w*.5-self.labelDistance-HOV*6
     elseif self.labelPos=='right' then
-        x2,y2=x+w*.5+self.labelDistance+ATV*6,y
+        x2=w*.5+self.labelDistance+HOV*6
     elseif self.labelPos=='up' then
-        x2,y2=x,y-w*.5-self.labelDistance-ATV*6
+        y2=-w*.5-self.labelDistance-HOV*6
     elseif self.labelPos=='down' then
-        x2,y2=x,y+w*.5+self.labelDistance+ATV*6
+        y2=w*.5+self.labelDistance+HOV*6
     end
     if self._image then
         gc_setColor(1,1,1)
@@ -444,6 +478,7 @@ function Widgets.checkBox:draw()
         gc_setColor(self.color)
         alignDraw(self,self._text,x2,y2)
     end
+    gc_pop()
 end
 
 -- Switch
@@ -457,7 +492,6 @@ Widgets.switch=setmetatable({
     labelPos='left',
     labelDistance=10,
     sound_on=false,sound_off=false,
-    fillColor=COLOR.lS,
 
     disp=false,-- function return a boolean
     code=NULL,
@@ -474,8 +508,8 @@ Widgets.switch=setmetatable({
 
         'labelPos',
         'labelDistance',
-        'color','text',
-        'fontSize','fontType',
+        'color','color_fill',
+        'text','fontSize','fontType',
         'widthLimit',
         'sound_on','sound_off',
 
@@ -484,8 +518,7 @@ Widgets.switch=setmetatable({
     },
 },{__index=Widgets.checkBox,__metatable=true})
 function Widgets.switch:reset()
-    baseWidget.reset(self)
-    assert(type(self.fillColor)=='table','[switch].fillColor must be table')
+    Widgets.base.reset(self)
 
     self._slideTime=0
     if self.labelPos=='left' then
@@ -507,45 +540,46 @@ function Widgets.switch:isAbove(x,y)
         abs(y-self._y)<self.h*.5
 end
 function Widgets.switch:update(dt)
-    baseWidget.update(self,dt)
+    Widgets.base.update(self,dt)
     if self.disp() then
-        self._slideTime=min(self._slideTime+dt,self._activeTimeMax/2)
+        self._slideTime=min(self._slideTime+dt,self._hoverTimeMax/2)
     else
-        self._slideTime=max(self._slideTime-dt,-self._activeTimeMax/2)
+        self._slideTime=max(self._slideTime-dt,-self._hoverTimeMax/2)
     end
 end
 function Widgets.switch:draw()
-    local x,y=self._x,self._y
+    gc_push('transform')
+    gc_translate(self._x,self._y)
     local h=self.h
-    local ATV=self._activeTime/self._activeTimeMax
+    local HOV=self._hoverTime/self._hoverTimeMax
 
     local c=self.color
 
     if self.disp then
         -- Background
-        gc_setColor(self.fillColor[1],self.fillColor[2],self.fillColor[3],self._slideTime/self._activeTimeMax+.5)
-        gc_rectangle('fill',x-h,y-h*.5,h*2,h,h*.5)
+        gc_setColor(self.color_fill[1],self.color_fill[2],self.color_fill[3],self._slideTime/self._hoverTimeMax+.5)
+        gc_rectangle('fill',-h,-h*.5,h*2,h,h*.5)
 
         -- Frame
         gc_setLineWidth(2)
-        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*ATV)
-        gc_rectangle('line',x-h,y-h*.5,h*2,h,h*.5)
+        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*HOV)
+        gc_rectangle('line',-h,-h*.5,h*2,h,h*.5)
 
         -- Axis
-        gc_setColor(1,1,1,.8+.2*ATV)
-        gc_circle('fill',x+h*(self._slideTime/self._activeTimeMax),y,h*(.35+ATV*.05))
+        gc_setColor(1,1,1,.8+.2*HOV)
+        gc_circle('fill',h*(self._slideTime/self._hoverTimeMax),0,h*(.35+HOV*.05))
     end
 
     -- Drawable
-    local x2,y2
+    local x2,y2=0,0
     if self.labelPos=='left' then
-        x2,y2=x-h-self.labelDistance-ATV*6,y
+        x2=-h-self.labelDistance-HOV*6
     elseif self.labelPos=='right' then
-        x2,y2=x+h+self.labelDistance+ATV*6,y
+        x2=h+self.labelDistance+HOV*6
     elseif self.labelPos=='up' then
-        x2,y2=x,y-h*.5-self.labelDistance-ATV*6
+        y2=-h*.5-self.labelDistance-HOV*6
     elseif self.labelPos=='down' then
-        x2,y2=x,y+h*.5+self.labelDistance+ATV*6
+        y2=h*.5+self.labelDistance+HOV*6
     end
     if self._image then
         gc_setColor(1,1,1)
@@ -555,6 +589,7 @@ function Widgets.switch:draw()
         gc_setColor(self.color)
         alignDraw(self,self._text,x2,y2)
     end
+    gc_pop()
 end
 
 
@@ -569,6 +604,7 @@ Widgets.slider=setmetatable({
     image=false,
     labelPos='left',
     labelDistance=8,
+    cornerR=3,
     valueShow=nil,
 
     disp=false,-- function return the displaying _value
@@ -589,7 +625,7 @@ Widgets.slider=setmetatable({
     buildArgs={
         'name',
         'pos',
-        'x','y','w',
+        'x','y','w','cornerR',
 
         'axis','smooth',
         'labelPos',
@@ -602,7 +638,7 @@ Widgets.slider=setmetatable({
         'disp','code',
         'visibleFunc',
     },
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 local sliderShowFunc={
     null=function()
         return ''
@@ -618,7 +654,7 @@ local sliderShowFunc={
     end,
 }
 function Widgets.slider:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
 
     assert(type(self.disp)=='function','[slider].disp must be function')
 
@@ -675,7 +711,7 @@ function Widgets.slider:isAbove(x,y)
         abs(y-self._y)<25
 end
 function Widgets.slider:update(dt)
-    baseWidget.update(self,dt)
+    Widgets.base.update(self,dt)
     if self._visible then
         self._pos=approach(self._pos,self.disp(),dt*26)
     end
@@ -686,10 +722,10 @@ function Widgets.slider:update(dt)
 end
 function Widgets.slider:draw()
     local x,y=self._x,self._y
-    local ATV=self._activeTime/self._activeTimeMax
+    local HOV=self._hoverTime/self._hoverTimeMax
     local x2=x+self.w
 
-    gc_setColor(1,1,1,.5+ATV*.36)
+    gc_setColor(1,1,1,.5+HOV*.36)
 
     -- Units
     if not self._smooth then
@@ -706,16 +742,16 @@ function Widgets.slider:draw()
 
     -- Block
     local cx=x+(x2-x)*(self._pos-self._rangeL)/self._rangeWidth
-    local bx,by=cx-10-ATV*2,y-16-ATV*5
-    local bw,bh=20+ATV*4,32+ATV*10
+    local bx,by=cx-10-HOV*2,y-16-HOV*5
+    local bw,bh=20+HOV*4,32+HOV*10
     gc_setColor(.8,.8,.8)
-    gc_rectangle('fill',bx,by,bw,bh,_rcr_small)
+    gc_rectangle('fill',bx,by,bw,bh,self.cornerR)
 
     -- Glow
-    if ATV>0 then
+    if HOV>0 then
         gc_setLineWidth(2)
-        gc_setColor(.97,.97,.97,ATV)
-        gc_rectangle('line',bx+1,by+1,bw-2,bh-2,_rcr_small)
+        gc_setColor(.97,.97,.97,HOV)
+        gc_rectangle('line',bx+1,by+1,bw-2,bh-2,self.cornerR)
     end
 
     -- Float text
@@ -729,9 +765,9 @@ function Widgets.slider:draw()
     if self._text then
         gc_setColor(.97,.97,.97)
         if self.labelPos=='left' then
-            alignDraw(self,self._text,x-self.labelDistance-ATV*6,y)
+            alignDraw(self,self._text,x-self.labelDistance-HOV*6,y)
         elseif self.labelPos=='right' then
-            alignDraw(self,self._text,x+self.w+self.labelDistance+ATV*6,y)
+            alignDraw(self,self._text,x+self.w+self.labelDistance+HOV*6,y)
         elseif self.labelPos=='down' then
             alignDraw(self,self._text,x+self.w*.5,y+self.labelDistance)
         end
@@ -780,6 +816,7 @@ Widgets.slider_fill=setmetatable({
     image=false,
     labelPos='left',
     labelDistance=8,
+    lineDist=3,
 
     disp=false,-- function return the displaying _value
     code=NULL,
@@ -799,8 +836,8 @@ Widgets.slider_fill=setmetatable({
         'axis',
         'labelPos',
         'labelDistance',
-        'color','text',
-        'fontSize','fontType',
+        'lineDist',
+        'text','fontSize','fontType',
         'widthLimit',
 
         'disp','code',
@@ -808,7 +845,7 @@ Widgets.slider_fill=setmetatable({
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_fill:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
 
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
     assert(self.h and type(self.h)=='number','[inputBox].h must be number')
@@ -847,17 +884,17 @@ function Widgets.slider_fill:draw()
     local x,y=self._x,self._y
     local w,h=self.w,self.h
     local r=h*.5
-    local ATV=self._activeTime/self._activeTimeMax
+    local HOV=self._hoverTime/self._hoverTimeMax
     local rate=(self._pos-self._rangeL)/self._rangeWidth
     local num=floor((self.disp()-self._rangeL)/self._rangeWidth*100+.5)..'%'
 
     -- Capsule
-    gc_setColor(1,1,1,.6+ATV*.26)
-    gc_setLineWidth(1+ATV)
-    gc_rectangle('line',x-_rcr_small,y-r-_rcr_small,w+2*_rcr_small,h+2*_rcr_small,r+_rcr_small)
-    if ATV>0 then
-        gc_setColor(1,1,1,ATV*.12)
-        gc_rectangle('fill',x-_rcr_small,y-r-_rcr_small,w+2*_rcr_small,h+2*_rcr_small,r+_rcr_small)
+    gc_setColor(1,1,1,.6+HOV*.26)
+    gc_setLineWidth(1+HOV)
+    gc_rectangle('line',x-self.lineDist,y-r-self.lineDist,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
+    if HOV>0 then
+        gc_setColor(1,1,1,HOV*.12)
+        gc_rectangle('fill',x-self.lineDist,y-r-self.lineDist,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     end
 
     -- Stenciled capsule and text
@@ -867,7 +904,7 @@ function Widgets.slider_fill:draw()
     GC_stc_circ(x+w-r,y,r)
 
     setFont(30)
-    gc_setColor(1,1,1,.75+ATV*.26)
+    gc_setColor(1,1,1,.75+HOV*.26)
     mStr(num,x+w*.5,y-18)
     gc_rectangle('fill',x,y-r,w*rate,h)
 
@@ -882,9 +919,9 @@ function Widgets.slider_fill:draw()
         gc_setColor(COLOR.L)
         local x2,y2
         if self.labelPos=='left' then
-            x2,y2=x-self.labelDistance-ATV*6,y
+            x2,y2=x-self.labelDistance-HOV*6,y
         elseif self.labelPos=='right' then
-            x2,y2=x+w+self.labelDistance+ATV*6,y
+            x2,y2=x+w+self.labelDistance+HOV*6,y
         elseif self.labelPos=='down' then
             x2,y2=x+w*.5,y-self.labelDistance
         end
@@ -928,9 +965,9 @@ Widgets.selector=setmetatable({
         'disp','code',
         'visibleFunc',
     },
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 function Widgets.selector:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
 
     assert(self.w and type(self.w)=='number','[selector].w must be number')
     assert(type(self.disp)=='function','[selector].disp must be function')
@@ -965,24 +1002,24 @@ end
 function Widgets.selector:draw()
     local x,y=self._x,self._y
     local w=self.w
-    local ATV=self._activeTime/self._activeTimeMax
+    local HOV=self._hoverTime/self._hoverTimeMax
 
     -- Arrow
     if self._select then
-        gc_setColor(1,1,1,.6+ATV*.26)
+        gc_setColor(1,1,1,.6+HOV*.26)
         local t=(timer()%.5)^.5
         if self._select>1 then
             gc_draw(leftAngle,x-w*.5,y-10)
-            if ATV>0 then
-                gc_setColor(1,1,1,ATV*1.5*(.5-t))
+            if HOV>0 then
+                gc_setColor(1,1,1,HOV*1.5*(.5-t))
                 gc_draw(leftAngle,x-w*.5-t*40,y-10)
-                gc_setColor(1,1,1,.6+ATV*.26)
+                gc_setColor(1,1,1,.6+HOV*.26)
             end
         end
         if self._select<#self.list then
             gc_draw(rightAngle,x+w*.5-20,y-10)
-            if ATV>0 then
-                gc_setColor(1,1,1,ATV*1.5*(.5-t))
+            if HOV>0 then
+                gc_setColor(1,1,1,HOV*1.5*(.5-t))
                 gc_draw(rightAngle,x+w*.5-20+t*40,y-10)
             end
         end
@@ -1071,6 +1108,7 @@ Widgets.inputBox=setmetatable({
     regex=false,
     labelPos='left',
     labelDistance=10,
+    cornerR=3,
 
     maxInputLength=1e99,
     sound_input=false,sound_bksp=false,sound_del=false,sound_clear=false,
@@ -1082,12 +1120,12 @@ Widgets.inputBox=setmetatable({
         'pos',
         'x','y','w','h',
 
-        'color','text',
-        'fontSize','fontType',
+        'text','fontSize','fontType',
         'secret',
         'regex',
         'labelPos',
         'labelDistance',
+        'cornerR',
         'maxInputLength',
         'sound_input','sound_bksp','sound_del','sound_clear',
 
@@ -1095,9 +1133,9 @@ Widgets.inputBox=setmetatable({
         'disp','code',
         'visibleFunc',
     },
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 function Widgets.inputBox:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
     assert(self.h and type(self.h)=='number','[inputBox].h must be number')
     assert(not self.inputSound or type(self.inputSound)=='string','[inputBox].inputSound can only be a string')
@@ -1148,20 +1186,20 @@ function Widgets.inputBox:isAbove(x,y)
 end
 function Widgets.inputBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
-    local ATV=self._activeTime/self._activeTimeMax
+    local HOV=self._hoverTime/self._hoverTimeMax
 
     -- Background
     gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y,w,h,_rcr_small)
+    gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Highlight
-    gc_setColor(1,1,1,ATV*.2*(math.sin(timer()*6.26)*.25+.75))
-    gc_rectangle('fill',x,y,w,h,_rcr_small)
+    gc_setColor(1,1,1,HOV*.2*(math.sin(timer()*6.26)*.25+.75))
+    gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
     gc_setColor(1,1,1)
     gc_setLineWidth(3)
-    gc_rectangle('line',x,y,w,h,_rcr_small)
+    gc_rectangle('line',x,y,w,h,self.cornerR)
 
     -- Drawable
     if self._text then
@@ -1232,6 +1270,7 @@ Widgets.textBox=setmetatable({
     scrollBarPos='left',
     lineHeight=30,
     yOffset=-2,
+    cornerR=3,
     fixContent=true,
     sound_clear=false,
 
@@ -1249,14 +1288,15 @@ Widgets.textBox=setmetatable({
         'scrollBarPos',
         'lineHeight',
         'yOffset',
+        'cornerR',
         'fixContent',
         'sound_clear',
 
         'visibleFunc',
     },
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 function Widgets.textBox:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
     assert(self.w and type(self.w)=='number','[textBox].w must be number')
     assert(self.h and type(self.h)=='number','[textBox].h must be number')
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
@@ -1327,12 +1367,12 @@ function Widgets.textBox:draw()
 
     -- Background
     gc_setColor(0,0,0,.3)
-    gc_rectangle('fill',x,y,w,h,_rcr_small)
+    gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
     gc_setLineWidth(2)
     gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
-    gc_rectangle('line',x,y,w,h,_rcr_small)
+    gc_rectangle('line',x,y,w,h,self.cornerR)
 
     -- Texts
     gc_push('transform')
@@ -1343,15 +1383,15 @@ function Widgets.textBox:draw()
         if #texts>self._capacity then
             local len=h*h/(#texts*lineH)
             if self.scrollBarPos=='left' then
-                gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,_rcr_small)
+                gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,self.cornerR)
             elseif self.scrollBarPos=='right' then
-                gc_rectangle('fill',w+5,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,_rcr_small)
+                gc_rectangle('fill',w+5,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,self.cornerR)
             end
         end
 
         -- Clear button
         if not self.fixContent then
-            gc_rectangle('line',w-40,0,40,40,_rcr_small)
+            gc_rectangle('line',w-40,0,40,40,self.cornerR)
             if self._sure==0 then
                 gc_rectangle('fill',w-40+16,5,8,3)
                 gc_rectangle('fill',w-40+8,8,24,3)
@@ -1385,6 +1425,7 @@ Widgets.listBox=setmetatable({
 
     scrollBarPos='left',
     lineHeight=30,
+    cornerR=3,
     drawFunc=false,-- function that draw options. Input: option,id,ifSelected
 
     _floatWheel=0,
@@ -1400,13 +1441,14 @@ Widgets.listBox=setmetatable({
 
         'scrollBarPos',
         'lineHeight',
+        'cornerR',
         'drawFunc',
 
         'visibleFunc',
     },
-},{__index=baseWidget,__metatable=true})
+},{__index=Widgets.base,__metatable=true})
 function Widgets.listBox:reset()
-    baseWidget.reset(self)
+    Widgets.base.reset(self)
     assert(self.w and type(self.w)=='number','[listBox].w must be number')
     assert(self.h and type(self.h)=='number','[listBox].h must be number')
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
@@ -1510,18 +1552,18 @@ function Widgets.listBox:draw()
 
         -- Background
         gc_setColor(0,0,0,.4)
-        gc_rectangle('fill',0,0,w,h,_rcr_small)
+        gc_rectangle('fill',0,0,w,h,self.cornerR)
 
         -- Frame
         gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
         gc_setLineWidth(2)
-        gc_rectangle('line',0,0,w,h,_rcr_small)
+        gc_rectangle('line',0,0,w,h,self.cornerR)
 
         -- Slider
         if #list>cap then
             gc_setColor(1,1,1)
             local len=h*h/(#list*lineH)
-            gc_rectangle('fill',-15,(h-len)*scroll/((#list-cap)*lineH),12,len,_rcr_small)
+            gc_rectangle('fill',-15,(h-len)*scroll/((#list-cap)*lineH),12,len,self.cornerR)
         end
 
         -- List
@@ -1622,14 +1664,13 @@ function WIDGET.press(x,y,k)
     end
 end
 function WIDGET.release(x,y)
-    local W=WIDGET.sel
-    if W and W.release then
-        W:release(x,y+SCN.curScroll)
+    if WIDGET.sel then
+        WIDGET.sel:release(x,y+SCN.curScroll)
     end
 end
 function WIDGET.drag(x,y,dx,dy)
     local W=WIDGET.sel
-    if W and W.drag then
+    if W then
         W:drag(x,y+SCN.curScroll,dx,dy)
     else
         SCN.curScroll=MATH.clamp(SCN.curScroll-dy,0,SCN.maxScroll)
@@ -1637,7 +1678,7 @@ function WIDGET.drag(x,y,dx,dy)
 end
 function WIDGET.scroll(dx,dy)
     local W=WIDGET.sel
-    if W and W.scroll then
+    if W then
         W:scroll(dx,dy)
     else
         SCN.curScroll=MATH.clamp(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
@@ -1681,10 +1722,6 @@ function WIDGET.draw()
     gc_replaceTransform(SCR.xOy)
 end
 
-function WIDGET.setRoundCornerRadius(rcr_s,rcr_b)
-    assert(type(rcr_s)=='number' and rcr_s>=0 and type(rcr_b)=='number' and rcr_b>=0,"WIDGET.setRoundCornerRadius(rcr_s,rcr_b): rcr must be two positive number")
-    _rcr_big,_rcr_small=rcr_b,rcr_s
-end
 function WIDGET.setDefaultButtonSound(sound)
     assert(type(sound)=='string',"WIDGET.setDefaultButtonSound(sound): sound must be string")
     Widgets.button.sound=sound
