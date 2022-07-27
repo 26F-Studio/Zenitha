@@ -1472,7 +1472,10 @@ end
 function Widgets.listBox:getLen()
     return #self._list
 end
-function Widgets.listBox:getSel()
+function Widgets.listBox:getSelect()
+    return self._selected
+end
+function Widgets.listBox:getItem()
     return self._list[self._selected]
 end
 function Widgets.listBox:isAbove(x,y)
@@ -1513,32 +1516,32 @@ function Widgets.listBox:press(x,y)
         end
     end
 end
+function Widgets.listBox:_moveScroll(dy)
+    self._scrollPos=MATH.clamp(self._scrollPos+dy,0,(#self._list-self._capacity)*self.lineHeight)
+end
 function Widgets.listBox:drag(_,_,_,dy)
-    self._scrollPos=max(0,min(self._scrollPos-dy,(#self._list-self._capacity)*self.lineHeight))
+    self:_moveScroll(-dy)
 end
 function Widgets.listBox:scroll(dx,dy)
-    self._scrollPos=max(0,min(self._scrollPos-(dx+dy)*self.lineHeight,(#self._list-self._capacity)*self.lineHeight))
+    self:_moveScroll((-dx-dy)*self.lineHeight)
 end
 function Widgets.listBox:arrowKey(dir)
     if dir=='up' then
         self._selected=max(self._selected-1,1)
-        if self._selected<floor(self._scrollPos/self.lineHeight)+2 then
-            self:drag(nil,nil,nil,self.lineHeight)
-        end
     elseif dir=='down' then
         self._selected=min(self._selected+1,#self._list)
-        if self._selected>floor(self._scrollPos/self.lineHeight)+self._capacity-1 then
-            self:drag(nil,nil,nil,-self.lineHeight)
-        end
+    elseif dir~='autofresh' then
+        return
     end
+    self._scrollPos=MATH.clamp(self._scrollPos,
+        (self._selected+1)*self.lineHeight-self.h,
+        (self._selected-2)*self.lineHeight
+    )
+    self:_moveScroll(0)
 end
 function Widgets.listBox:select(i)
     self._selected=i
-    if self._selected<floor(self._scrollPos/self.lineHeight)+2 then
-        self:drag(nil,nil,nil,1e99)
-    elseif self._selected>floor(self._scrollPos/self.lineHeight)+self._capacity-1 then
-        self:drag(nil,nil,nil,-1e99)
-    end
+    self:arrowKey('autofresh')
 end
 function Widgets.listBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
