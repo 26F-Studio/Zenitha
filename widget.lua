@@ -360,11 +360,11 @@ function Widgets.button_fill:draw()
     -- Drawable
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,w*.5,h*.5)
+        alignDraw(self,self._image)
     end
     if self._text then
         gc_setColor(r*.5,g*.5,b*.5)
-        alignDraw(self,self._text,w*.5,h*.5)
+        alignDraw(self,self._text)
     end
     gc_pop()
 end

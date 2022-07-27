@@ -258,6 +258,7 @@ function love.touchpressed(id,x,y)
         kb.setTextInput(false)
     end
     WIDGET.cursorMove(x,y)
+    WIDGET.press(x,y,1)
     if SCN.touchDown then SCN.touchDown(x,y,id) end
 end
 function love.touchmoved(id,x,y,dx,dy)
@@ -270,7 +271,6 @@ function love.touchreleased(id,x,y)
     if SCN.swapping then return end
     x,y=ITP(xOy,x,y)
     if id==SCN.mainTouchID then
-        WIDGET.press(x,y,1)
         WIDGET.release(x,y)
         WIDGET.cursorMove(x,y)
         WIDGET.unFocus()
@@ -282,6 +282,11 @@ function love.touchreleased(id,x,y)
         if showClickFX then SYSFX.new('tap',3,x,y) end
     end
 end
+
+-- Touch control test
+-- function love.mousepressed(x,y,k) if k==1 then love.touchpressed(1,x,y) end end
+-- function love.mousereleased(x,y,k) if k==1 then love.touchreleased(1,x,y) end end
+-- function love.mousemoved(x,y,dx,dy) if ms.isDown(1) then love.touchmoved(1,x,y,dx,dy) end end
 
 local function noDevkeyPressed(key)
     if key=='f1' then      devFnKey[1]()
