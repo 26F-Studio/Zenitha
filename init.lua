@@ -168,6 +168,7 @@ local function _triggerMouseDown(x,y,k)
     if SCN.swapping then return end
     if SCN.mouseDown then SCN.mouseDown(x,y,k) end
     WIDGET.press(x,y,k)
+    WIDGET.release(x,y,k)
     lastX,lastY=x,y
     if showClickFX then SYSFX.new('tap',3,x,y) end
 end
