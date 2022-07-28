@@ -363,7 +363,7 @@ function Widgets.button_fill:draw()
         alignDraw(self,self._image)
     end
     if self._text then
-        gc_setColor(r*.5,g*.5,b*.5)
+        gc_setColor(r*.26,g*.26,b*.26)
         alignDraw(self,self._text)
     end
     gc_pop()
