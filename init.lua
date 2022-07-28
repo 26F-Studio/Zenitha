@@ -168,7 +168,6 @@ local function _triggerMouseDown(x,y,k)
     if SCN.swapping then return end
     if SCN.mouseDown then SCN.mouseDown(x,y,k) end
     WIDGET.press(x,y,k)
-    WIDGET.release(x,y,k)
     lastX,lastY=x,y
     if showClickFX then SYSFX.new('tap',3,x,y) end
 end
@@ -348,6 +347,7 @@ function love.keypressed(key,_,isRep)
                 if not isRep then
                     if showClickFX then SYSFX.new('tap',3,mx,my) end
                     _triggerMouseDown(mx,my,1)
+                    WIDGET.release(mx,my,1)
                 end
             end
         end
@@ -472,6 +472,7 @@ function love.gamepadpressed(_,key)
                 mouseShow=true
                 if showClickFX then SYSFX.new('tap',3,mx,my) end
                 _triggerMouseDown(mx,my,1)
+                WIDGET.release(mx,my,1)
             else
                 if W and W.keypress then
                     W:keypress(key)
