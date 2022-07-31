@@ -1,4 +1,3 @@
-local gc=love.graphics
 local testVal_1={false,false,false}
 local testVal_2={18,260,.26}
 local testVal_3={'medium','large','ex-large'}
@@ -13,12 +12,12 @@ local function _sceneDraw()
 end
 local scene={
     draw=function()
-        gc.setColor(.97,.97,.97,.626)
+        GC.setColor(.97,.97,.97,.626)
         _sceneDraw()
 
         GC.stc_reset()
         GC.stc_circ(400+100*math.cos(love.timer.getTime()*1.26),240+100*math.sin(love.timer.getTime()*1.26),126)
-        gc.setColor(COLOR.rainbow_light(love.timer.getTime()))
+        GC.setColor(COLOR.rainbow_light(love.timer.getTime()))
         _sceneDraw()
         GC.stc_stop()
     end,
@@ -42,12 +41,12 @@ local scene={
         WIDGET.new{type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
         WIDGET.new{type='listBox',     name='listBox',   x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
             FONT.set(30)
-            gc.setColor(COLOR.L)
-            gc.print(id,10,-6)
-            gc.print(opt.name,70,-6)
+            GC.setColor(COLOR.L)
+            GC.print(id,10,-6)
+            GC.print(opt.name,70,-6)
             if sel then
-                gc.setColor(1,1,1,.2)
-                gc.rectangle('fill',0,0,600,30)
+                GC.setColor(1,1,1,.2)
+                GC.rectangle('fill',0,0,600,30)
             end
         end},
     }

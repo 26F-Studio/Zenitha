@@ -5,13 +5,19 @@ local sin,cos=math.sin,math.cos
 local pcall=pcall
 local NULL=NULL
 
-local GC={}
+local GC=setmetatable({},{
+    __index=gc,
+    __metatable=true
+})
+
+--------------------------------------------------------------
+
 function GC.mStr(obj,x,y) printf(obj,x-626,y,1252,'center') end-- Printf a string with 'center'
-function GC.simpX(obj,x,y) draw(obj,x-obj:getWidth()*.5,y) end-- Simply draw an obj with x=obj:getWidth()/2
-function GC.simpY(obj,x,y) draw(obj,x,y-obj:getHeight()*.5) end-- Simply draw an obj with y=obj:getWidth()/2
-function GC.X(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end-- Draw an obj with x=obj:getWidth()/2
-function GC.Y(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end-- Draw an obj with y=obj:getWidth()/2
-function GC.draw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end-- Draw an obj with both middle X & Y
+function GC.mDrawSimpX(obj,x,y) draw(obj,x-obj:getWidth()*.5,y) end-- Simply draw an obj with x=obj:getWidth()/2
+function GC.mDrawSimpY(obj,x,y) draw(obj,x,y-obj:getHeight()*.5) end-- Simply draw an obj with y=obj:getWidth()/2
+function GC.mDrawX(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end-- Draw an obj with x=obj:getWidth()/2
+function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end-- Draw an obj with y=obj:getWidth()/2
+function GC.mDraw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end-- Draw an obj with both middle X & Y
 
 --------------------------------------------------------------
 
@@ -206,39 +212,40 @@ end
 
 do-- function GC.load(L), GC.execute(t)
     local cmds={
-        push=     gc.push,
-        pop=      gc.pop,
+        push=     'push',
+        pop=      'pop',
 
-        repT=     gc.replaceTransform,
-        appT=     gc.applyTransform,
-        invT=     gc.inverseTransformPoint,
+        repT=     'replaceTransform',
+        appT=     'applyTransform',
+        invT=     'inverseTransformPoint',
 
-        origin=   gc.origin,
-        move=     gc.translate,
-        scale=    gc.scale,
-        rotate=   gc.rotate,
-        shear=    gc.shear,
-        clear=    gc.clear,
+        origin=   'origin',
+        move=     'translate',
+        scale=    'scale',
+        rotate=   'rotate',
+        shear=    'shear',
+        clear=    'clear',
 
-        setCL=    gc.setColor,
-        setCM=    gc.setColorMask,
-        setLW=    gc.setLineWidth,
-        setLS=    gc.setLineStyle,
-        setLJ=    gc.setLineJoin,
-        setBM=    gc.setBlendMode,
-        setSD=    gc.setShader,
+        setCL=    'setColor',
+        setCM=    'setColorMask',
+        setLW=    'setLineWidth',
+        setLS=    'setLineStyle',
+        setLJ=    'setLineJoin',
+        setBM=    'setBlendMode',
+        setSD=    'setShader',
 
-        print=    gc.print,
+        print=    'print',
         rawFT=    function(...) FONT.rawset(...) end,
         setFT=    function(...) FONT.set(...) end,
-        mText=    GC.mStr,
-        mDraw=    GC.draw,
-        mDrawX=   GC.X,
-        mDrawY=   GC.Y,
-        mOutDraw= GC.outDraw,
+        mStr=     'mStr',
+        mDrawX=   'mDrawX',
+        mDrawY=   'mDrawY',
+        mDraw=    'mDraw',
+        outDraw=  'outDraw',
+        sdPrint=  'shadedPrint',
 
-        draw=     gc.draw,
-        line=     line,
+        draw=     'draw',
+        line=     'line',
         fRect=function(...) gc.rectangle('fill',...) end,
         dRect=function(...) gc.rectangle('line',...) end,
         fCirc=function(...) gc.circle('fill',...) end,
@@ -260,6 +267,11 @@ do-- function GC.load(L), GC.execute(t)
         fRRPol=function(...) GC.regRoundPolygon('fill',...) end,
         dRRPol=function(...) GC.regRoundPolygon('line',...) end,
     }
+    for k,v in next,cmds do
+        if type(v)=='string' then
+            cmds[k]=GC[v]
+        end
+    end
 
     local function GC_execute(t)
         if type(t[1])=='string' then

@@ -1,4 +1,3 @@
-local gc=love.graphics
 local ins,rem=table.insert,table.remove
 
 local scene={}
@@ -91,12 +90,12 @@ function scene.update(dt)
 end
 
 function scene.draw()
-    gc.replaceTransform(SCR.xOy_ul)
+    GC.replaceTransform(SCR.xOy_ul)
     FONT.set(15,'_basic')
     local l=#list
     for i=1,l do
-        gc.setColor(1,1,1,list[i][2]/30)
-        gc.print(list[i][1],20,20*(l-i+1))
+        GC.setColor(1,1,1,list[i][2]/30)
+        GC.print(list[i][1],20,20*(l-i+1))
     end
 end
 

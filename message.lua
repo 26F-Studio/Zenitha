@@ -1,5 +1,4 @@
-local gc=love.graphics
-local gc_setColor,gc_draw=gc.setColor,gc.draw
+local gc_setColor,gc_draw=GC.setColor,GC.draw
 
 local ins,rem=table.insert,table.remove
 local max=math.max
@@ -78,7 +77,7 @@ function MES.new(icon,str,time)
         backColor=backColors[icon] or backColor
         icon=mesIcon[icon]
     end
-    local t=gc.newText(FONT.get(30),str)
+    local t=GC.newText(FONT.get(30),str)
     local w=math.max(t:getWidth()+(icon and 45 or 5),200)+15
     local h=math.max(t:getHeight(),46)+2
     local L={w,h,

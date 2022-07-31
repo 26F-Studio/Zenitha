@@ -1,4 +1,3 @@
-local gc=love.graphics
 local kb=love.keyboard
 local ins,rem=table.insert,table.remove
 
@@ -392,8 +391,8 @@ local commands={} do
     commands.wireframe={
         code=function(bool)
             if bool=="on" or bool=="off" then
-                gc.setWireframe(bool=="on")
-                log("Wireframe: "..(gc.isWireframe() and "on" or "off"))
+                GC.setWireframe(bool=="on")
+                log("Wireframe: "..(GC.isWireframe() and "on" or "off"))
             else
                 log{COLOR.I,"Usage: wireframe <on|off>"}
             end
@@ -409,7 +408,7 @@ local commands={} do
         code=function(bool)
             if bool=="on" or bool=="off" then
                 love['_setGammaCorrect'](bool=="on")
-                log("GammaCorrect: "..(gc.isGammaCorrect() and "on" or "off"))
+                log("GammaCorrect: "..(GC.isGammaCorrect() and "on" or "off"))
             else
                 log{COLOR.I,"Usage: gammacorrect <on|off>"}
             end

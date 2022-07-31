@@ -1,10 +1,9 @@
-local gc=love.graphics
-local setColor=gc.setColor
+local setColor=GC.setColor
+local draw=GC.draw
 
 local floor,rnd=math.floor,math.random
 local max,min=math.max,math.min
 local ins,rem=table.insert,table.remove
-local draw=gc.draw
 
 local textFX={}
 function textFX.appear(T)
@@ -111,7 +110,7 @@ end
 function TEXT:add(data)
     local T={
         _t=0,-- Timer
-        text=gc.newText(FONT.get(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),
+        text=GC.newText(FONT.get(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),
         x=data.x or 0,y=data.y or 0,
         r=data.r,g=data.g,b=data.b,a=data.a,
         duration=data.duration or 1,

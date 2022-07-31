@@ -1,10 +1,9 @@
-local gc=love.graphics
-local gc_translate,gc_scale,gc_replaceTransform=gc.translate,gc.scale,gc.replaceTransform
-local gc_push,gc_pop=gc.push,gc.pop
-local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
-local gc_draw,gc_line=gc.draw,gc.line
-local gc_rectangle,gc_circle=gc.rectangle,gc.circle
-local gc_print,gc_printf=gc.print,gc.printf
+local gc_translate,gc_scale,gc_replaceTransform=GC.translate,GC.scale,GC.replaceTransform
+local gc_push,gc_pop=GC.push,GC.pop
+local gc_setColor,gc_setLineWidth=GC.setColor,GC.setLineWidth
+local gc_draw,gc_line=GC.draw,GC.line
+local gc_rectangle,gc_circle=GC.rectangle,GC.circle
+local gc_print,gc_printf=GC.print,GC.printf
 
 local kb=love.keyboard
 local timer=love.timer.getTime
@@ -135,7 +134,7 @@ function Widgets.base:reset()
         else
             assert(type(self._text)=='string','[widget].text must be string or function return a string')
         end
-        self._text=gc.newText(getFont(self.fontSize,self.fontType),self._text)
+        self._text=GC.newText(getFont(self.fontSize,self.fontType),self._text)
     else
         self._text=PAPER
     end
@@ -1712,7 +1711,7 @@ function WIDGET.update(dt)
 end
 function WIDGET.resize(w,h)
     if widgetCanvas then widgetCanvas:release() end
-    widgetCanvas=gc.newCanvas(w,h)
+    widgetCanvas=GC.newCanvas(w,h)
     _resetAllWidgets()
 end
 function WIDGET.draw()
