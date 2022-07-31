@@ -1,7 +1,6 @@
-local gc=love.graphics
-local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
-local gc_draw,gc_line=gc.draw,gc.line
-local gc_rectangle,gc_circle=gc.rectangle,gc.circle
+local gc_setColor,gc_setLineWidth=GC.setColor,GC.setLineWidth
+local gc_draw,gc_line=GC.draw,GC.line
+local gc_rectangle,gc_circle=GC.rectangle,GC.circle
 
 local rnd=math.random
 local max,min=math.max,math.min

@@ -59,13 +59,10 @@ local function alignDraw(self,drawable,x,y,ang,image_k)
     gc_draw(drawable,x,y,ang,k,1,ox,oy)
 end
 
-local WIDGET={}
 local Widgets={}
-
+local WIDGET={_prototype=Widgets}
 
 --------------------------------------------------------------
-
-WIDGET._prototype=Widgets
 
 -- Base widget (not used by user)
 Widgets.base={
