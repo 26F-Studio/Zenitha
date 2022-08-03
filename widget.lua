@@ -19,16 +19,6 @@ local setFont,getFont=FONT.set,FONT.get
 local mStr=GC.mStr
 local GC_stc_reset,GC_stc_setComp,GC_stc_stop=GC.stc_reset,GC.stc_setComp,GC.stc_stop
 local GC_stc_circ,GC_stc_rect=GC.stc_circ,GC.stc_rect
-local approach=MATH.expApproach
-
-local leftAngle=GC.load{20,20,
-    {'setLW',5},
-    {'line',18,2,1,10,18,18},
-}
-local rightAngle=GC.load{20,20,
-    {'setLW',5},
-    {'line',2,2,19,10,2,18},
-}
 
 local indexMeta={
     __index=function(L,k)
@@ -374,8 +364,8 @@ Widgets.checkBox=setmetatable({
     text=false,
     image=false,
     alignX='center',alignY='center',
-    labelPos='left',
-    labelDistance=10,
+    labelPos='right',
+    labelDistance=20,
     cornerR=3,
     sound_on=false,sound_off=false,
 
@@ -477,6 +467,7 @@ function Widgets.checkBox:draw()
     gc_pop()
 end
 
+
 -- Switch
 Widgets.switch=setmetatable({
     type='checkBox',
@@ -485,8 +476,8 @@ Widgets.switch=setmetatable({
     text=false,
     image=false,
     alignX='center',alignY='center',
-    labelPos='left',
-    labelDistance=10,
+    labelPos='right',
+    labelDistance=20,
     sound_on=false,sound_off=false,
 
     disp=false,-- function return a boolean
@@ -709,7 +700,7 @@ end
 function Widgets.slider:update(dt)
     Widgets.base.update(self,dt)
     if self._visible then
-        self._pos=approach(self._pos,self.disp(),dt*26)
+        self._pos=MATH.expApproach(self._pos,self.disp(),dt*26)
     end
     if WIDGET.sel==self then
         self._textShowTime=2
@@ -927,12 +918,20 @@ end
 
 
 -- Selector
+local leftAngle=GC.load{20,20,
+    {'setLW',5},
+    {'line',18,2,1,10,18,18},
+}
+local rightAngle=GC.load{20,20,
+    {'setLW',5},
+    {'line',2,2,19,10,2,18},
+}
 Widgets.selector=setmetatable({
     type='selector',
 
     w=100,
     labelPos='left',
-    labelDistance=10,
+    labelDistance=20,
     sound=false,
 
     disp=false,-- function return a boolean
@@ -1103,7 +1102,7 @@ Widgets.inputBox=setmetatable({
     secret=false,
     regex=false,
     labelPos='left',
-    labelDistance=10,
+    labelDistance=20,
     cornerR=3,
 
     maxInputLength=1e99,
@@ -1804,5 +1803,17 @@ do-- function WIDGET.c_pressKey(k)
     end
 end
 --------------------------------------------------------------
+
+function WIDGET.newClass(name,parent)
+    assert(type(name)=='string',"WIDGET.newClass(name,parent): name must be string")
+    assert(not Widgets[name],"Widget class "..name.." already exists")
+    if not parent then parent='base' end
+    assert(type(parent)=='string',"WIDGET.newClass(name,parent): name must be string")
+    assert(Widgets[parent],"Parent widget class "..parent.." does not exist")
+    Widgets[name]=setmetatable({
+        type=name,
+    },{__index=Widgets[parent],__metatable=true})
+    return Widgets[name]
+end
 
 return WIDGET
