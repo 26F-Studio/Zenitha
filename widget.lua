@@ -64,6 +64,7 @@ Widgets.base={
     color='L',
     color_fill='lS',
     pos=false,
+    lineWidth=4,
     fontSize=30,fontType=false,
     widthLimit=1e99,
 
@@ -248,7 +249,8 @@ Widgets.button=setmetatable({
     buildArgs={
         'name',
         'pos',
-        'x','y','w','h','cornerR',
+        'x','y','w','h',
+        'lineWidth','cornerR',
         'alignX','alignY',
         'text','image',
         'color','color_fill',
@@ -305,8 +307,8 @@ function Widgets.button:draw()
     gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
 
     -- Frame
-    gc_setLineWidth(2)
-    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.7)
+    gc_setLineWidth(self.lineWidth)
+    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.95)
     gc_rectangle('line',-w*.5,-h*.5,w,h,self.cornerR)
 
     -- Drawable
@@ -378,7 +380,8 @@ Widgets.checkBox=setmetatable({
     buildArgs={
         'name',
         'pos',
-        'x','y','w','cornerR',
+        'x','y','w',
+        'lineWidth','cornerR',
 
         'labelPos',
         'labelDistance',
@@ -437,11 +440,14 @@ function Widgets.checkBox:draw()
         gc_rectangle('fill',-w*.5,-w*.5,w,w,self.cornerR)
 
         -- Frame
-        gc_setLineWidth(2)
-        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.7)
+        gc_setLineWidth(self.lineWidth)
+        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8)
         gc_rectangle('line',-w*.5,-w*.5,w,w,self.cornerR)
         if self.disp() then
-            gc_rectangle('fill',-w*.3,-w*.3,w*.6,w*.6,self.cornerR-2)
+            gc_scale(.5*w)
+            gc_setLineWidth(self.lineWidth*2/w)
+            gc_line(-.7,.05,-.2,.5,.7,-.55)
+            gc_scale(2/w)
         end
     end
 
@@ -497,7 +503,7 @@ Widgets.switch=setmetatable({
         'labelDistance',
         'color','color_fill',
         'text','fontSize','fontType',
-        'widthLimit',
+        'lineWidth','widthLimit',
         'sound_on','sound_off',
 
         'disp','code',
@@ -548,7 +554,7 @@ function Widgets.switch:draw()
         gc_rectangle('fill',-h,-h*.5,h*2,h,h*.5)
 
         -- Frame
-        gc_setLineWidth(2)
+        gc_setLineWidth(self.lineWidth)
         gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*HOV)
         gc_rectangle('line',-h,-h*.5,h*2,h,h*.5)
 
@@ -590,7 +596,7 @@ Widgets.slider=setmetatable({
     text=false,
     image=false,
     labelPos='left',
-    labelDistance=8,
+    labelDistance=20,
     cornerR=3,
     valueShow=nil,
 
@@ -612,7 +618,8 @@ Widgets.slider=setmetatable({
     buildArgs={
         'name',
         'pos',
-        'x','y','w','cornerR',
+        'x','y','w',
+        'lineWidth','cornerR',
 
         'axis','smooth',
         'labelPos',
@@ -716,7 +723,7 @@ function Widgets.slider:draw()
 
     -- Units
     if not self._smooth then
-        gc_setLineWidth(2)
+        gc_setLineWidth(self.lineWidth)
         for p=self._rangeL,self._rangeR,self._unit do
             local X=x+(x2-x)*(p-self._rangeL)/self._rangeWidth
             gc_line(X,y+7,X,y-7)
@@ -724,7 +731,7 @@ function Widgets.slider:draw()
     end
 
     -- Axis
-    gc_setLineWidth(4)
+    gc_setLineWidth(self.lineWidth*2)
     gc_line(x,y,x2,y)
 
     -- Block
@@ -736,7 +743,7 @@ function Widgets.slider:draw()
 
     -- Glow
     if HOV>0 then
-        gc_setLineWidth(2)
+        gc_setLineWidth(self.lineWidth)
         gc_setColor(.97,.97,.97,HOV)
         gc_rectangle('line',bx+1,by+1,bw-2,bh-2,self.cornerR)
     end
@@ -802,7 +809,7 @@ Widgets.slider_fill=setmetatable({
     text=false,
     image=false,
     labelPos='left',
-    labelDistance=8,
+    labelDistance=20,
     lineDist=3,
 
     disp=false,-- function return the displaying _value
@@ -823,7 +830,7 @@ Widgets.slider_fill=setmetatable({
         'axis',
         'labelPos',
         'labelDistance',
-        'lineDist',
+        'lineWidth','lineDist',
         'text','fontSize','fontType',
         'widthLimit',
 
@@ -877,7 +884,7 @@ function Widgets.slider_fill:draw()
 
     -- Capsule
     gc_setColor(1,1,1,.6+HOV*.26)
-    gc_setLineWidth(1+HOV)
+    gc_setLineWidth(self.lineWidth+HOV)
     gc_rectangle('line',x-self.lineDist,y-r-self.lineDist,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     if HOV>0 then
         gc_setColor(1,1,1,HOV*.12)
@@ -1120,7 +1127,7 @@ Widgets.inputBox=setmetatable({
         'regex',
         'labelPos',
         'labelDistance',
-        'cornerR',
+        'lineWidth','cornerR',
         'maxInputLength',
         'sound_input','sound_bksp','sound_del','sound_clear',
 
@@ -1193,7 +1200,7 @@ function Widgets.inputBox:draw()
 
     -- Frame
     gc_setColor(1,1,1)
-    gc_setLineWidth(3)
+    gc_setLineWidth(self.lineWidth)
     gc_rectangle('line',x,y,w,h,self.cornerR)
 
     -- Drawable
@@ -1283,7 +1290,7 @@ Widgets.textBox=setmetatable({
         'scrollBarPos',
         'lineHeight',
         'yOffset',
-        'cornerR',
+        'lineWidth','cornerR',
         'fixContent',
         'sound_clear',
 
@@ -1365,7 +1372,7 @@ function Widgets.textBox:draw()
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
-    gc_setLineWidth(2)
+    gc_setLineWidth(self.lineWidth)
     gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
     gc_rectangle('line',x,y,w,h,self.cornerR)
 
@@ -1436,7 +1443,7 @@ Widgets.listBox=setmetatable({
 
         'scrollBarPos',
         'lineHeight',
-        'cornerR',
+        'lineWidth','cornerR',
         'drawFunc',
 
         'visibleFunc',
@@ -1554,7 +1561,7 @@ function Widgets.listBox:draw()
 
         -- Frame
         gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
-        gc_setLineWidth(2)
+        gc_setLineWidth(self.lineWidth)
         gc_rectangle('line',0,0,w,h,self.cornerR)
 
         -- Slider
