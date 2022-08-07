@@ -253,7 +253,7 @@ Widgets.button=setmetatable({
         'lineWidth','cornerR',
         'alignX','alignY',
         'text','image',
-        'color','color_fill',
+        'color',
         'fontSize','fontType',
         'sound',
 
@@ -326,6 +326,8 @@ end
 -- Button_fill
 Widgets.button_fill=setmetatable({
     type='button_fill',
+    color_text=TABLE.shift(COLOR.L),
+    buildArgs=TABLE.combine(Widgets.button.buildArgs,{'color_text'}),
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_fill:draw()
     gc_push('transform')
@@ -351,7 +353,7 @@ function Widgets.button_fill:draw()
         alignDraw(self,self._image)
     end
     if self._text then
-        gc_setColor(r*.26,g*.26,b*.26)
+        gc_setColor(self.color_text)
         alignDraw(self,self._text)
     end
     gc_pop()
