@@ -2,8 +2,10 @@ local MATH={} for k,v in next,math do MATH[k]=v end
 
 local floor,ceil=math.floor,math.ceil
 local rnd=math.random
+local exp=math.exp
 
 MATH.tau=2*math.pi
+MATH.phi=(1+math.sqrt(5))/2
 MATH.inf=1/0
 MATH.nan=0/0
 
@@ -50,7 +52,7 @@ do-- function MATH.listMix(list,t)
 end
 
 function MATH.expApproach(a,b,k)
-    return b+(a-b)*2.718281828459045^-k
+    return b+(a-b)*exp(-k)
 end
 
 function MATH.distance(x1,y1,x2,y2)
