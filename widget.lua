@@ -1431,12 +1431,15 @@ Widgets.listBox=setmetatable({
     lineHeight=30,
     cornerR=3,
     drawFunc=false,-- function that draw options. Input: option,id,ifSelected
+    releaseDist=10,
 
     _floatWheel=0,
     _list=false,
     _capacity=0,
     _scrollPos=0,
     _selected=0,
+    _pressX=false,
+    _pressY=false,
 
     buildArgs={
         'name',
@@ -1447,6 +1450,8 @@ Widgets.listBox=setmetatable({
         'lineHeight',
         'lineWidth','cornerR',
         'drawFunc',
+        'code',
+        'releaseDist',
 
         'visibleFunc',
     },
@@ -1508,22 +1513,35 @@ function Widgets.listBox:remove()
     end
 end
 function Widgets.listBox:press(x,y)
+    self._pressX=x
+    self._pressY=y
+end
+function Widgets.listBox:release(x,y)
     if not (x and y) then return end
-    x,y=x-self._x,y-self._y
-    if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
-    self:drag(0,0,0,0)
-    y=floor((y+self._scrollPos)/self.lineHeight)+1
-    if self._list[y] then
-        if self._selected~=y then
-            self._selected=y
-            SFX.play('selector',.8,0,12)
+    if self._pressX then
+        self._pressX=false
+        self._pressY=false
+        x,y=x-self._x,y-self._y
+        if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
+        y=floor((y+self._scrollPos)/self.lineHeight)+1
+        if self._list[y] then
+            if self._selected~=y then
+                self._selected=y
+                SFX.play('selector',.8,0,12)
+            else
+                self:code(self:getSelect(),self:getItem())
+            end
         end
+        self:drag(0,0,0,0)
     end
 end
 function Widgets.listBox:_moveScroll(dy)
     self._scrollPos=MATH.clamp(self._scrollPos+dy,0,(#self._list-self._capacity)*self.lineHeight)
 end
-function Widgets.listBox:drag(_,_,_,dy)
+function Widgets.listBox:drag(x,y,_,dy)
+    if self._pressX and MATH.distance(x,y,self._pressX,self._pressY)>self.releaseDist then
+        self._pressX,self._pressY=false,false
+    end
     self:_moveScroll(-dy)
 end
 function Widgets.listBox:scroll(dx,dy)
