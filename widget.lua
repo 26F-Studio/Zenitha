@@ -1527,16 +1527,22 @@ function Widgets.listBox:release(x,y)
         if self._list[y] then
             if self._selected~=y then
                 self._selected=y
+                self:drag(0,0,0,0)
                 SFX.play('selector',.8,0,12)
             else
                 self:code(self:getSelect(),self:getItem())
             end
         end
-        self:drag(0,0,0,0)
     end
 end
 function Widgets.listBox:_moveScroll(dy)
-    self._scrollPos=MATH.clamp(self._scrollPos+dy,0,(#self._list-self._capacity)*self.lineHeight)
+    self._scrollPos=MATH.clamp(
+        MATH.clamp(self._scrollPos+dy,
+            (self._selected+1)*self.lineHeight-self.h,
+            (self._selected-2)*self.lineHeight
+        ),
+        0,(#self._list-self._capacity)*self.lineHeight
+    )
 end
 function Widgets.listBox:drag(x,y,_,dy)
     if self._pressX and MATH.distance(x,y,self._pressX,self._pressY)>self.releaseDist then
@@ -1555,10 +1561,6 @@ function Widgets.listBox:arrowKey(dir)
     elseif dir~='autofresh' then
         return
     end
-    self._scrollPos=MATH.clamp(self._scrollPos,
-        (self._selected+1)*self.lineHeight-self.h,
-        (self._selected-2)*self.lineHeight
-    )
     self:_moveScroll(0)
 end
 function Widgets.listBox:select(i)
