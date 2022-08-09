@@ -456,13 +456,13 @@ function Widgets.checkBox:draw()
     -- Drawable
     local x2,y2=0,0
     if self.labelPos=='left' then
-        x2=-w*.5-self.labelDistance-HOV*6
+        x2=-w*.5-self.labelDistance
     elseif self.labelPos=='right' then
-        x2=w*.5+self.labelDistance+HOV*6
+        x2=w*.5+self.labelDistance
     elseif self.labelPos=='up' then
-        y2=-w*.5-self.labelDistance-HOV*6
+        y2=-w*.5-self.labelDistance
     elseif self.labelPos=='down' then
-        y2=w*.5+self.labelDistance+HOV*6
+        y2=w*.5+self.labelDistance
     end
     if self._image then
         gc_setColor(1,1,1)
@@ -568,13 +568,13 @@ function Widgets.switch:draw()
     -- Drawable
     local x2,y2=0,0
     if self.labelPos=='left' then
-        x2=-h-self.labelDistance-HOV*6
+        x2=-h-self.labelDistance
     elseif self.labelPos=='right' then
-        x2=h+self.labelDistance+HOV*6
+        x2=h+self.labelDistance
     elseif self.labelPos=='up' then
-        y2=-h*.5-self.labelDistance-HOV*6
+        y2=-h*.5-self.labelDistance
     elseif self.labelPos=='down' then
-        y2=h*.5+self.labelDistance+HOV*6
+        y2=h*.5+self.labelDistance
     end
     if self._image then
         gc_setColor(1,1,1)
@@ -761,9 +761,9 @@ function Widgets.slider:draw()
     if self._text then
         gc_setColor(.97,.97,.97)
         if self.labelPos=='left' then
-            alignDraw(self,self._text,x-self.labelDistance-HOV*6,y)
+            alignDraw(self,self._text,x-self.labelDistance,y)
         elseif self.labelPos=='right' then
-            alignDraw(self,self._text,x+self.w+self.labelDistance+HOV*6,y)
+            alignDraw(self,self._text,x+self.w+self.labelDistance,y)
         elseif self.labelPos=='down' then
             alignDraw(self,self._text,x+self.w*.5,y+self.labelDistance)
         end
@@ -915,9 +915,9 @@ function Widgets.slider_fill:draw()
         gc_setColor(COLOR.L)
         local x2,y2
         if self.labelPos=='left' then
-            x2,y2=x-self.labelDistance-HOV*6,y
+            x2,y2=x-self.labelDistance,y
         elseif self.labelPos=='right' then
-            x2,y2=x+w+self.labelDistance+HOV*6,y
+            x2,y2=x+w+self.labelDistance,y
         elseif self.labelPos=='down' then
             x2,y2=x+w*.5,y-self.labelDistance
         end
@@ -1015,9 +1015,9 @@ function Widgets.slider_progress:draw()
         gc_setColor(COLOR.L)
         local x2,y2
         if self.labelPos=='left' then
-            x2,y2=x-self.labelDistance-HOV*6,y
+            x2,y2=x-self.labelDistance,y
         elseif self.labelPos=='right' then
-            x2,y2=x+w+self.labelDistance+HOV*6,y
+            x2,y2=x+w+self.labelDistance,y
         elseif self.labelPos=='down' then
             x2,y2=x+w*.5,y-self.labelDistance
         end
