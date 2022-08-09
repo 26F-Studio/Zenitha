@@ -54,7 +54,7 @@ local WIDGET={_prototype=Widgets}
 
 --------------------------------------------------------------
 
--- Base widget (not used by user)
+-- base (not used by user)
 Widgets.base={
     type='null',
     name=false,
@@ -165,7 +165,7 @@ function Widgets.base.drag()    end
 function Widgets.base.scroll()  end
 
 
--- Text
+-- text
 Widgets.text=setmetatable({
     type='text',
 
@@ -199,7 +199,7 @@ function Widgets.text:draw()
 end
 
 
--- Image
+-- image
 Widgets.image=setmetatable({
     type='image',
     ang=0,k=1,
@@ -229,7 +229,7 @@ function Widgets.image:draw()
 end
 
 
--- Button
+-- button
 Widgets.button=setmetatable({
     type='button',
     w=40,h=false,
@@ -323,7 +323,7 @@ function Widgets.button:draw()
     gc_pop()
 end
 
--- Button_fill
+-- button_fill
 Widgets.button_fill=setmetatable({
     type='button_fill',
     color_text=TABLE.shift(COLOR.L),
@@ -476,7 +476,7 @@ function Widgets.checkBox:draw()
 end
 
 
--- Switch
+-- switch
 Widgets.switch=setmetatable({
     type='checkBox',
     h=30,
@@ -588,7 +588,7 @@ function Widgets.switch:draw()
 end
 
 
--- Slider
+-- slider
 Widgets.slider=setmetatable({
     type='slider',
     w=100,
@@ -802,7 +802,7 @@ function Widgets.slider:arrowKey(k)
 end
 
 
--- Slider_fill
+-- slider_fill
 Widgets.slider_fill=setmetatable({
     type='slider_fill',
     w=100,h=40,
@@ -874,7 +874,7 @@ function Widgets.slider_fill:isAbove(x,y)
     return
         x>self._x and
         x<self._x+self.w and
-        abs(y-self._y)<25
+        abs(y-self._y)<self.h*.5
 end
 function Widgets.slider_fill:draw()
     local x,y=self._x,self._y
@@ -926,7 +926,107 @@ function Widgets.slider_fill:draw()
 end
 
 
--- Selector
+-- slider_progress
+Widgets.slider_progress=setmetatable({
+    type='slider_progress',
+    w=100,h=10,
+
+    text=false,
+    image=false,
+    labelPos='left',
+    labelDistance=20,
+    lineDist=3,
+
+    disp=false,-- function return the displaying _value
+    code=NULL,
+
+    _text=nil,
+    _image=nil,
+    _pos=nil,
+    _rangeL=nil,
+    _rangeR=nil,
+    _rangeWidth=nil,-- just _rangeR-_rangeL, for convenience
+
+    buildArgs={
+        'name',
+        'pos',
+        'x','y','w','h',
+
+        'labelPos',
+        'labelDistance',
+        'lineWidth',
+        'text','fontSize','fontType',
+        'widthLimit',
+
+        'disp','code',
+        'visibleFunc',
+    },
+},{__index=Widgets.slider,__metatable=true})
+function Widgets.slider_progress:reset()
+    Widgets.base.reset(self)
+
+    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
+    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
+    assert(type(self.disp)=='function','[slider].disp must be function')
+
+    assert(
+        type(self.axis)=='table' and #self.axis==2 and
+        type(self.axis[1])=='number' and
+        type(self.axis[2])=='number',
+        "[slider].axis must be {number,number}"
+    )
+    self._rangeL=self.axis[1]
+    self._rangeR=self.axis[2]
+    self._rangeWidth=self._rangeR-self._rangeL
+    self._pos=self._rangeL
+    self._textShowTime=3
+
+    if self.labelPos=='left' then
+        self.alignX='right'
+    elseif self.labelPos=='right' then
+        self.alignX='left'
+    elseif self.labelPos=='down' then
+        self.alignY='up'
+        self.labelDistance=max(self.labelDistance,20)
+    else
+        error("[slider_progress].labelPos must be 'left','right' or 'down'")
+    end
+end
+function Widgets.slider_progress:isAbove(x,y)
+    return
+        x>self._x and
+        x<self._x+self.w and
+        abs(y-self._y)<self.h*2
+end
+function Widgets.slider_progress:draw()
+    local x,y=self._x,self._y
+    local w,h=self.w,self.h
+    local HOV=self._hoverTime/self._hoverTimeMax
+
+    h=h*(1+HOV)
+
+    gc_setColor(.5,.5,.5,.4+.1*HOV)
+    gc_rectangle('fill',x,y-h*.5,w,h,h*.5)
+    gc_setColor(COLOR.L)
+    gc_rectangle('fill',x,y-h*.5,w*self._pos,h,h*.5)
+
+    -- Drawable
+    if self._text then
+        gc_setColor(COLOR.L)
+        local x2,y2
+        if self.labelPos=='left' then
+            x2,y2=x-self.labelDistance-HOV*6,y
+        elseif self.labelPos=='right' then
+            x2,y2=x+w+self.labelDistance+HOV*6,y
+        elseif self.labelPos=='down' then
+            x2,y2=x+w*.5,y-self.labelDistance
+        end
+        alignDraw(self,self._text,x2,y2)
+    end
+end
+
+
+-- selector
 local leftAngle=GC.load{20,20,
     {'setLW',5},
     {'line',18,2,1,10,18,18},
@@ -1100,7 +1200,7 @@ function Widgets.selector:arrowKey(k)
 end
 
 
--- Inputbox
+-- inputBox
 Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
@@ -1264,6 +1364,7 @@ function Widgets.inputBox:keypress(k)
 end
 
 
+-- textBox
 Widgets.textBox=setmetatable({
     type='textBox',
     keepFocus=true,
@@ -1307,7 +1408,7 @@ function Widgets.textBox:reset()
     assert(type(self.yOffset)=='number',"[textBox].yOffset must be number")
 
     if not self._texts then self._texts={} end
-    self._capacity=ceil((self.h-10)/self.lineHeight)
+    self._capacity=ceil(self.h/self.lineHeight)
 end
 function Widgets.textBox:replaceTexts(newList)
     self._texts=newList
@@ -1421,6 +1522,7 @@ function Widgets.textBox:draw()
 end
 
 
+-- listBox
 Widgets.listBox=setmetatable({
     type='listBox',
     keepFocus=true,
@@ -1509,7 +1611,7 @@ function Widgets.listBox:remove()
         if not self._list[self._selected] then
             self:arrowKey('up')
         end
-        self:drag(0,0,0,0)
+        self:_moveScroll(0,false)
     end
 end
 function Widgets.listBox:press(x,y)
@@ -1527,7 +1629,7 @@ function Widgets.listBox:release(x,y)
         if self._list[y] then
             if self._selected~=y then
                 self._selected=y
-                self:drag(0,0,0,0)
+                self:_moveScroll(0,true)
                 SFX.play('selector',.8,0,12)
             else
                 self:code(self:getSelect(),self:getItem())
@@ -1535,23 +1637,24 @@ function Widgets.listBox:release(x,y)
         end
     end
 end
-function Widgets.listBox:_moveScroll(dy)
+function Widgets.listBox:_moveScroll(dy,selInSight)
     self._scrollPos=MATH.clamp(
+        not selInSight and self._scrollPos+dy or
         MATH.clamp(self._scrollPos+dy,
             (self._selected+1)*self.lineHeight-self.h,
             (self._selected-2)*self.lineHeight
         ),
-        0,(#self._list-self._capacity)*self.lineHeight
+        0,#self._list*self.lineHeight-self.h
     )
 end
 function Widgets.listBox:drag(x,y,_,dy)
     if self._pressX and MATH.distance(x,y,self._pressX,self._pressY)>self.releaseDist then
         self._pressX,self._pressY=false,false
     end
-    self:_moveScroll(-dy)
+    self:_moveScroll(-dy,false)
 end
 function Widgets.listBox:scroll(dx,dy)
-    self:_moveScroll((-dx-dy)*self.lineHeight)
+    self:_moveScroll((-dx-dy)*self.lineHeight,false)
 end
 function Widgets.listBox:arrowKey(dir)
     if dir=='up' then
@@ -1561,7 +1664,7 @@ function Widgets.listBox:arrowKey(dir)
     elseif dir~='autofresh' then
         return
     end
-    self:_moveScroll(0)
+    self:_moveScroll(0,true)
 end
 function Widgets.listBox:select(i)
     self._selected=i
@@ -1583,8 +1686,9 @@ function Widgets.listBox:draw()
 
         -- Frame
         gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
-        gc_setLineWidth(self.lineWidth)
-        gc_rectangle('line',0,0,w,h,self.cornerR)
+        local lw=self.lineWidth
+        gc_setLineWidth(lw)
+        gc_rectangle('line',-lw*.5,-lw*.5,w+lw,h+lw,self.cornerR)
 
         -- Slider
         if #list>cap then
