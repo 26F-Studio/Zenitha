@@ -317,7 +317,7 @@ function Widgets.button:draw()
         alignDraw(self,self._image)
     end
     if self._text then
-        gc_setColor(self.color)
+        gc_setColor(c)
         alignDraw(self,self._text)
     end
     gc_pop()
@@ -354,6 +354,41 @@ function Widgets.button_fill:draw()
     end
     if self._text then
         gc_setColor(self.color_text)
+        alignDraw(self,self._text)
+    end
+    gc_pop()
+end
+
+-- button_invis
+Widgets.button_invis=setmetatable({
+    type='button_invis',
+},{__index=Widgets.button,__metatable=true})
+function Widgets.button:release(x,y,k)
+    self._pressed=false
+    if self:isAbove(x,y) then
+        self.code(k)
+    end
+end
+function Widgets.button_invis:draw()
+    gc_push('transform')
+    gc_translate(self._x,self._y)
+
+    local w,h=self.w,self.h
+    local HOV=self._hoverTime/self._hoverTimeMax
+
+    local c=self.color
+
+    -- Rectangle
+    gc_setColor(c[1],c[2],c[3],HOV*.16)
+    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
+
+    -- Drawable
+    if self._image then
+        gc_setColor(1,1,1)
+        alignDraw(self,self._image)
+    end
+    if self._text then
+        gc_setColor(c)
         alignDraw(self,self._text)
     end
     gc_pop()
@@ -469,7 +504,7 @@ function Widgets.checkBox:draw()
         alignDraw(self,self._image,x2,y2)
     end
     if self._text then
-        gc_setColor(self.color)
+        gc_setColor(c)
         alignDraw(self,self._text,x2,y2)
     end
     gc_pop()
@@ -581,7 +616,7 @@ function Widgets.switch:draw()
         alignDraw(self,self._image,x2,y2)
     end
     if self._text then
-        gc_setColor(self.color)
+        gc_setColor(c)
         alignDraw(self,self._text,x2,y2)
     end
     gc_pop()
@@ -1566,9 +1601,9 @@ Widgets.listBox=setmetatable({
         'lineWidth','cornerR',
         'activeColor','idleColor',
         'drawFunc',
-        'code',
         'releaseDist',
 
+        'code',
         'visibleFunc',
     },
 },{__index=Widgets.base,__metatable=true})
@@ -1848,9 +1883,18 @@ end
 function WIDGET.update(dt)
     for _,W in next,WIDGET.active do
         if W.visibleFunc then
-            W._visible=W.visibleFunc()
-            if not W._visible and W==WIDGET.sel then
-                WIDGET.unFocus(true)
+            local v=W.visibleFunc()
+            if W._visible~=v then
+                W._visible=v
+                if v then
+                    if W:isAbove(SCR.xOy:inverseTransformPoint(love.mouse.getPosition())) then
+                        WIDGET.focus(W)
+                    end
+                else
+                    if W==WIDGET.sel then
+                        WIDGET.unFocus(true)
+                    end
+                end
             end
         end
         if W.update then W:update(dt) end
