@@ -746,20 +746,20 @@ function Widgets.slider:draw()
     -- Glow
     if HOV>0 then
         gc_setLineWidth(self.lineWidth)
-        gc_setColor(.97,.97,.97,HOV)
+        gc_setColor(1,1,1,HOV)
         gc_rectangle('line',bx+1,by+1,bw-2,bh-2,self.cornerR)
     end
 
     -- Float text
     if self._textShowTime>0 then
         setFont(25)
-        gc_setColor(.97,.97,.97,min(self._textShowTime/2,1))
+        gc_setColor(1,1,1,min(self._textShowTime/2,1))
         mStr(self:_showFunc(),cx,by-30)
     end
 
     -- Drawable
     if self._text then
-        gc_setColor(.97,.97,.97)
+        gc_setColor(COLOR.L)
         if self.labelPos=='left' then
             alignDraw(self,self._text,x-self.labelDistance,y)
         elseif self.labelPos=='right' then
@@ -1301,7 +1301,7 @@ function Widgets.inputBox:draw()
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
-    gc_setColor(1,1,1)
+    gc_setColor(COLOR.L)
     gc_setLineWidth(self.lineWidth)
     gc_rectangle('line',x,y,w,h,self.cornerR)
 
@@ -1376,6 +1376,8 @@ Widgets.textBox=setmetatable({
     lineHeight=30,
     yOffset=-2,
     cornerR=3,
+    activeColor=TABLE.shift(COLOR.LY),
+    idleColor=TABLE.shift(COLOR.L),
     fixContent=true,
     sound_clear=false,
 
@@ -1394,6 +1396,7 @@ Widgets.textBox=setmetatable({
         'lineHeight',
         'yOffset',
         'lineWidth','cornerR',
+        'activeColor','idleColor',
         'fixContent',
         'sound_clear',
 
@@ -1404,6 +1407,11 @@ function Widgets.textBox:reset()
     Widgets.base.reset(self)
     assert(self.w and type(self.w)=='number','[textBox].w must be number')
     assert(self.h and type(self.h)=='number','[textBox].h must be number')
+    for _,v in next,{'activeColor','idleColor'} do
+        if type(self[v])=='string' then self[v]=COLOR[self[v]] end
+        assert(type(self[v])=='table','[textBox].'..v..' must be table')
+    end
+
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
     assert(type(self.yOffset)=='number',"[textBox].yOffset must be number")
 
@@ -1475,16 +1483,17 @@ function Widgets.textBox:draw()
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
-    gc_setLineWidth(self.lineWidth)
-    gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
-    gc_rectangle('line',x,y,w,h,self.cornerR)
+    gc_setColor(WIDGET.sel==self and self.activeColor or self.idleColor)
+    local lw=self.lineWidth
+    gc_setLineWidth(lw)
+    gc_rectangle('line',-lw*.5,-lw*.5,w+lw,h+lw,self.cornerR)
 
     -- Texts
     gc_push('transform')
         gc_translate(x,y)
 
         -- Slider
-        gc_setColor(1,1,1)
+        gc_setColor(COLOR.L)
         if #texts>self._capacity then
             local len=h*h/(#texts*lineH)
             if self.scrollBarPos=='left' then
@@ -1525,13 +1534,14 @@ end
 -- listBox
 Widgets.listBox=setmetatable({
     type='listBox',
-    keepFocus=true,
     w=100,
     h=40,
 
     scrollBarPos='left',
     lineHeight=30,
     cornerR=3,
+    activeColor=TABLE.shift(COLOR.LI),
+    idleColor=TABLE.shift(COLOR.L),
     drawFunc=false,-- function that draw options. Input: option,id,ifSelected
     releaseDist=10,
 
@@ -1551,6 +1561,7 @@ Widgets.listBox=setmetatable({
         'scrollBarPos',
         'lineHeight',
         'lineWidth','cornerR',
+        'activeColor','idleColor',
         'drawFunc',
         'code',
         'releaseDist',
@@ -1562,11 +1573,15 @@ function Widgets.listBox:reset()
     Widgets.base.reset(self)
     assert(self.w and type(self.w)=='number','[listBox].w must be number')
     assert(self.h and type(self.h)=='number','[listBox].h must be number')
-    assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
+    for _,v in next,{'activeColor','idleColor'} do
+        if type(self[v])=='string' then self[v]=COLOR[self[v]] end
+        assert(type(self[v])=='table','[listBox].'..v..' must be table')
+    end
+    assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[listBox].scrollBarPos must be 'left' or 'right'")
 
     assert(type(self.drawFunc)=='function',"[listBox].drawFunc must be function")
     if not self._list then self._list={} end
-    self._capacity=ceil((self.h-10)/self.lineHeight)
+    self._capacity=ceil(self.h/self.lineHeight)
 end
 function Widgets.listBox:clear()
     self._list={}
@@ -1673,9 +1688,9 @@ end
 function Widgets.listBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
     local list=self._list
-    local scroll=self._scrollPos
-    local cap=self._capacity
     local lineH=self.lineHeight
+    local H=#list*lineH
+    local scroll=self._scrollPos
 
     gc_push('transform')
         gc_translate(x,y)
@@ -1685,16 +1700,16 @@ function Widgets.listBox:draw()
         gc_rectangle('fill',0,0,w,h,self.cornerR)
 
         -- Frame
-        gc_setColor(WIDGET.sel==self and COLOR.lI or COLOR.L)
+        gc_setColor(WIDGET.sel==self and self.activeColor or self.idleColor)
         local lw=self.lineWidth
         gc_setLineWidth(lw)
         gc_rectangle('line',-lw*.5,-lw*.5,w+lw,h+lw,self.cornerR)
 
         -- Slider
-        if #list>cap then
-            gc_setColor(1,1,1)
-            local len=h*h/(#list*lineH)
-            gc_rectangle('fill',-15,(h-len)*scroll/((#list-cap)*lineH),12,len,self.cornerR)
+        if h<H then
+            local len=h*h/H
+            gc_setColor(COLOR.L)
+            gc_rectangle('fill',-15,(h-len)*scroll/(H-h),12,len,self.cornerR)
         end
 
         -- List
@@ -1702,7 +1717,7 @@ function Widgets.listBox:draw()
         GC_stc_setComp()
         local pos=floor(scroll/lineH)
         gc_translate(0,-(scroll%lineH))
-        for i=pos+1,min(pos+cap+1,#list) do
+        for i=pos+1,min(pos+self._capacity+1,#list) do
             self.drawFunc(list[i],i,i==self._selected)
             gc_translate(0,lineH)
         end
