@@ -720,14 +720,15 @@ function Widgets.slider:draw()
     local x,y=self._x,self._y
     local HOV=self._hoverTime/self._hoverTimeMax
     local x2=x+self.w
+    local rangeL,rangeR=self._rangeL,self._rangeR
 
     gc_setColor(1,1,1,.5+HOV*.36)
 
     -- Units
     if not self._smooth then
         gc_setLineWidth(self.lineWidth)
-        for p=self._rangeL,self._rangeR,self._unit do
-            local X=x+(x2-x)*(p-self._rangeL)/self._rangeWidth
+        for p=rangeL,rangeR,self._unit do
+            local X=x+(x2-x)*(p-rangeL)/self._rangeWidth
             gc_line(X,y+7,X,y-7)
         end
     end
@@ -737,16 +738,17 @@ function Widgets.slider:draw()
     gc_line(x,y,x2,y)
 
     -- Block
-    local cx=x+(x2-x)*(self._pos-self._rangeL)/self._rangeWidth
+    local pos=MATH.clamp(self._pos,rangeL,rangeR)
+    local cx=x+(x2-x)*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
-    gc_setColor(.8,.8,.8)
+    gc_setColor(pos==self._pos and COLOR.DL or COLOR.lR)
     gc_rectangle('fill',bx,by,bw,bh,self.cornerR)
 
     -- Glow
     if HOV>0 then
-        gc_setLineWidth(self.lineWidth)
-        gc_setColor(1,1,1,HOV)
+        gc_setLineWidth(self.lineWidth*.5)
+        gc_setColor(1,1,1,HOV*.8)
         gc_rectangle('line',bx+1,by+1,bw-2,bh-2,self.cornerR)
     end
 
