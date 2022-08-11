@@ -1422,6 +1422,7 @@ Widgets.textBox=setmetatable({
     _floatWheel=0,
     _texts=false,
     _scrollPos=0,-- Scroll-down-distance
+    _scrollPos1=0,
     _sure=0,-- Sure-timer for clear history
 
     buildArgs={
@@ -1455,6 +1456,7 @@ function Widgets.textBox:reset()
 
     if not self._texts then self._texts={} end
     self._capacity=ceil(self.h/self.lineHeight)
+    self._scrollPos1=-2*self.h
 end
 function Widgets.textBox:replaceTexts(newList)
     self._texts=newList
@@ -1485,11 +1487,6 @@ function Widgets.textBox:isAbove(x,y)
         x<self._x+self.w and
         y<self._y+self.h
 end
-function Widgets.textBox:update(dt)
-    if self._sure>0 then
-        self._sure=max(self._sure-dt,0)
-    end
-end
 function Widgets.textBox:press(x,y)
     if not (x and y) then return end
     self:drag(0,0,0,0)
@@ -1511,10 +1508,19 @@ end
 function Widgets.textBox:arrowKey(k)
     self:scroll(0,k =='up' and -1 or k=='down' and 1 or 0)
 end
+function Widgets.textBox:update(dt)
+    if self._sure>0 then
+        self._sure=max(self._sure-dt,0)
+    end
+    if self._visible then
+        self._scrollPos1=MATH.expApproach(self._scrollPos1,self._scrollPos,dt*26)
+    end
+end
 function Widgets.textBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
     local texts=self._texts
     local lineH=self.lineHeight
+    local scroll=self._scrollPos1
 
     -- Background
     gc_setColor(0,0,0,.3)
@@ -1535,9 +1541,9 @@ function Widgets.textBox:draw()
         if #texts>self._capacity then
             local len=h*h/(#texts*lineH)
             if self.scrollBarPos=='left' then
-                gc_rectangle('fill',-15,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,self.cornerR)
+                gc_rectangle('fill',-15,(h-len)*scroll/((#texts-self._capacity)*lineH),10,len,self.cornerR)
             elseif self.scrollBarPos=='right' then
-                gc_rectangle('fill',w+5,(h-len)*self._scrollPos/((#texts-self._capacity)*lineH),10,len,self.cornerR)
+                gc_rectangle('fill',w+5,(h-len)*scroll/((#texts-self._capacity)*lineH),10,len,self.cornerR)
             end
         end
 
@@ -1558,10 +1564,13 @@ function Widgets.textBox:draw()
         setFont(self.fontSize,self.fontType)
         GC_stc_rect(0,0,w,h)
         GC_stc_setComp()
-        gc_translate(0,-(self._scrollPos%lineH))
-        local pos=floor(self._scrollPos/lineH)
-        for i=pos+1,min(pos+self._capacity+1,#texts) do
-            gc_printf(texts[i],10,self.yOffset,w-16)
+        gc_translate(0,-(scroll%lineH))
+        local pos=floor(scroll/lineH)
+        for i=1,self._capacity+1 do
+            i=pos+i
+            if texts[i] then
+                gc_printf(texts[i],10,self.yOffset,w-16)
+            end
             gc_translate(0,lineH)
         end
         GC_stc_stop()
@@ -1587,6 +1596,7 @@ Widgets.listBox=setmetatable({
     _list=false,
     _capacity=0,
     _scrollPos=0,
+    _scrollPos1=0,
     _selected=0,
     _pressX=false,
     _pressY=false,
@@ -1620,6 +1630,7 @@ function Widgets.listBox:reset()
     assert(type(self.drawFunc)=='function',"[listBox].drawFunc must be function")
     if not self._list then self._list={} end
     self._capacity=ceil(self.h/self.lineHeight)
+    self._scrollPos1=-2*self.h
 end
 function Widgets.listBox:clear()
     self._list={}
@@ -1678,7 +1689,7 @@ function Widgets.listBox:release(x,y)
         self._pressY=false
         x,y=x-self._x,y-self._y
         if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
-        y=floor((y+self._scrollPos)/self.lineHeight)+1
+        y=floor((y+self._scrollPos1)/self.lineHeight)+1
         if self._list[y] then
             if self._selected~=y then
                 self._selected=y
@@ -1723,12 +1734,17 @@ function Widgets.listBox:select(i)
     self._selected=i
     self:arrowKey('autofresh')
 end
+function Widgets.listBox:update(dt)
+    if self._visible then
+        self._scrollPos1=MATH.expApproach(self._scrollPos1,self._scrollPos,dt*26)
+    end
+end
 function Widgets.listBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
     local list=self._list
     local lineH=self.lineHeight
     local H=#list*lineH
-    local scroll=self._scrollPos
+    local scroll=self._scrollPos1
 
     gc_push('transform')
         gc_translate(x,y)
@@ -1747,7 +1763,7 @@ function Widgets.listBox:draw()
         if h<H then
             local len=h*h/H
             gc_setColor(COLOR.L)
-            gc_rectangle('fill',-15,(h-len)*scroll/(H-h),12,len,self.cornerR)
+            gc_rectangle('fill',-15,max((h-len)*scroll/(H-h),0),12,len,self.cornerR)
         end
 
         -- List
@@ -1755,8 +1771,11 @@ function Widgets.listBox:draw()
         GC_stc_setComp()
         local pos=floor(scroll/lineH)
         gc_translate(0,-(scroll%lineH))
-        for i=pos+1,min(pos+self._capacity+1,#list) do
-            self.drawFunc(list[i],i,i==self._selected)
+        for i=1,self._capacity+1 do
+            i=pos+i
+            if list[i]~=nil then
+                self.drawFunc(list[i],i,i==self._selected)
+            end
             gc_translate(0,lineH)
         end
         GC_stc_stop()
