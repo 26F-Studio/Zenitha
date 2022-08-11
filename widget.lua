@@ -1045,7 +1045,7 @@ function Widgets.slider_progress:draw()
     gc_setColor(.5,.5,.5,.4+.1*HOV)
     gc_rectangle('fill',x,y-h*.5,w,h,h*.5)
     gc_setColor(COLOR.L)
-    if self._pos>0 then
+    if w*self._pos>=1 then
         gc_rectangle('fill',x,y-h*.5,w*self._pos,h,h*.5)
     end
 
