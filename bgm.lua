@@ -2,7 +2,7 @@ local audio=love.audio
 local effectsSupported=audio.isEffectsSupported()
 
 local nameList={}
-local srcLib={}-- Stored bgm objects: {name='foo',source=bar}
+local srcLib={}-- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
 local lastLoadNames={}
 local nowPlay={}
 local lastPlay=NONE-- Directly stored last played bgm name(s)
@@ -13,16 +13,12 @@ local volume=1
 
 local function _updateSources()
     local n=#lastLoadNames
-    while #lastLoadNames>maxLoadedCount do
+    while #lastLoadNames>maxLoadedCount and n>0 do
         local name=lastLoadNames[n]
-        if srcLib[name].source:isPlaying() then
-            n=n-1
-            if n<=0 then return end
-        else
+        if srcLib[name].source and not srcLib[name].source:isPlaying() then
             srcLib[name].source=srcLib[name].source:release() and nil
-            table.remove(lastLoadNames,n)
-            return
         end
+        n=n-1
     end
 end
 local function _addFile(name,path)
@@ -46,7 +42,6 @@ local function _tryLoad(name)
             obj.source=audio.newSource(obj.path,'stream')
             obj.source:setLooping(true)
             table.insert(lastLoadNames,1,name)
-            _updateSources()
             return true
         else
             LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
@@ -227,6 +222,7 @@ function BGM.play(bgms,args)
             table.insert(nowPlay,obj)
         end
     end
+    _updateSources()
 end
 function BGM.stop(time)
     if #nowPlay>0 then
