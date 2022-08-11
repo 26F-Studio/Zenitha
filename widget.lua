@@ -363,7 +363,7 @@ end
 Widgets.button_invis=setmetatable({
     type='button_invis',
 },{__index=Widgets.button,__metatable=true})
-function Widgets.button:release(x,y,k)
+function Widgets.button_invis:release(x,y,k)
     self._pressed=false
     if self:isAbove(x,y) then
         self.code(k)
