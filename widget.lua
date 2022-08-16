@@ -1530,7 +1530,7 @@ function Widgets.textBox:draw()
     gc_setColor(WIDGET.sel==self and self.activeColor or self.idleColor)
     local lw=self.lineWidth
     gc_setLineWidth(lw)
-    gc_rectangle('line',-lw*.5,-lw*.5,w+lw,h+lw,self.cornerR)
+    gc_rectangle('line',x-lw*.5,y-lw*.5,w+lw,h+lw,self.cornerR)
 
     -- Texts
     gc_push('transform')
