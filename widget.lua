@@ -1696,7 +1696,9 @@ function Widgets.listBox:release(x,y)
                 self:_moveScroll(0,true)
                 SFX.play('selector',.8,0,12)
             else
-                self:code(self:getSelect(),self:getItem())
+                if self.code then
+                    self:code(self:getSelect(),self:getItem())
+                end
             end
         end
     end
