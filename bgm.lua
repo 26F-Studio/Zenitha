@@ -11,46 +11,6 @@ local defaultBGM=false
 local maxLoadedCount=3
 local volume=1
 
-local function _updateSources()
-    local n=#lastLoadNames
-    while #lastLoadNames>maxLoadedCount and n>0 do
-        local name=lastLoadNames[n]
-        if srcLib[name].source and not srcLib[name].source:isPlaying() then
-            srcLib[name].source=srcLib[name].source:release() and nil
-        end
-        n=n-1
-    end
-end
-local function _addFile(name,path)
-    if not srcLib[name] then
-        table.insert(nameList,name)
-        srcLib[name]={
-            name=name,path=path,source=false,
-            vol=0,volChanging=false,
-            pitch=1,pitchChanging=false,
-            lowgain=1,lowgainChanging=false,
-            highgain=1,highgainChanging=false,
-        }
-    end
-end
-local function _tryLoad(name)
-    if srcLib[name] then
-        local obj=srcLib[name]
-        if obj.source then
-            return true
-        elseif love.filesystem.getInfo(obj.path) then
-            obj.source=audio.newSource(obj.path,'stream')
-            obj.source:setLooping(true)
-            table.insert(lastLoadNames,1,name)
-            return true
-        else
-            LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
-        end
-    elseif name then
-        LOG("No BGM: "..name,5)
-    end
-end
-
 local function task_setVolume(obj,ve,time,stop)
     local vs=obj.vol
     local t=0
@@ -122,6 +82,47 @@ local function _clearTask(obj,mode)
     TASK.removeTask_iterate(function(task)
         return task.args[1]==obj and (taskFunc=='any' or task.code==taskFunc)
     end,obj)
+end
+
+local function _updateSources()
+    local n=#lastLoadNames
+    while #lastLoadNames>maxLoadedCount and n>0 do
+        local name=lastLoadNames[n]
+        if srcLib[name].source and not srcLib[name].source:isPlaying() then
+            srcLib[name].source=srcLib[name].source:release() and nil
+            _clearTask(srcLib[name],'any')
+        end
+        n=n-1
+    end
+end
+local function _addFile(name,path)
+    if not srcLib[name] then
+        table.insert(nameList,name)
+        srcLib[name]={
+            name=name,path=path,source=false,
+            vol=0,volChanging=false,
+            pitch=1,pitchChanging=false,
+            lowgain=1,lowgainChanging=false,
+            highgain=1,highgainChanging=false,
+        }
+    end
+end
+local function _tryLoad(name)
+    if srcLib[name] then
+        local obj=srcLib[name]
+        if obj.source then
+            return true
+        elseif love.filesystem.getInfo(obj.path) then
+            obj.source=audio.newSource(obj.path,'stream')
+            obj.source:setLooping(true)
+            table.insert(lastLoadNames,1,name)
+            return true
+        else
+            LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
+        end
+    elseif name then
+        LOG("No BGM: "..name,5)
+    end
 end
 
 local BGM={}
