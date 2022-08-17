@@ -1082,6 +1082,7 @@ Widgets.selector=setmetatable({
     sound=false,
 
     disp=false,-- function return a boolean
+    show=function(v) return v end,
     code=NULL,
 
     _floatWheel=0,
@@ -1103,8 +1104,8 @@ Widgets.selector=setmetatable({
         'labelDistance',
         'sound',
 
-        'list',
-        'disp','code',
+        'list','disp','show',
+        'code',
         'visibleFunc',
     },
 },{__index=Widgets.base,__metatable=true})
@@ -1112,7 +1113,9 @@ function Widgets.selector:reset()
     Widgets.base.reset(self)
 
     assert(self.w and type(self.w)=='number','[selector].w must be number')
+    assert(type(self.list)=='table','[selector].list must be table')
     assert(type(self.disp)=='function','[selector].disp must be function')
+    assert(type(self.show)=='function','[selector].show must be function')
 
     if self.labelPos=='left' then
         self.alignX='right'
@@ -1127,7 +1130,7 @@ function Widgets.selector:reset()
     end
 
     local V=self.disp()
-    self._selText=V
+    self._selText=self.show(V)
     self._select=false
     for i=1,#self.list do
         if self.list[i]==V then
@@ -1207,7 +1210,7 @@ function Widgets.selector:press(x)
         if self._select~=s then
             self.code(self.list[s])
             self._select=s
-            self._selText=self.list[s]
+            self._selText=self.show(self.list[s])
             if self.sound then
                 SFX.play(self.sound)
             end
@@ -1227,7 +1230,7 @@ function Widgets.selector:scroll(dx,dy)
         end
         self.code(self.list[s])
         self._select=s
-        self._selText=self.list[s]
+        self._selText=self.show(self.list[s])
         if self.sound then
             SFX.play(self.sound)
         end
