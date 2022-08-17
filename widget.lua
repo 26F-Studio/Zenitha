@@ -1090,6 +1090,7 @@ Widgets.selector=setmetatable({
     _image=nil,
     _select=false,-- Selected item ID
     _selText=false,-- Selected item name
+    selFontSize=30,selFontType=false,
     alignX='center',alignY='center',-- Force text alignment
 
     buildArgs={
@@ -1098,6 +1099,8 @@ Widgets.selector=setmetatable({
         'x','y','w',
 
         'color','text',
+        'fontSize','fontType',
+        'selFontSize','selFontType',
         'widthLimit',
 
         'labelPos',
@@ -1130,7 +1133,7 @@ function Widgets.selector:reset()
     end
 
     local V=self.disp()
-    self._selText=self.show(V)
+    self._selText=GC.newText(getFont(self.selFontSize,self.selFontType),self.show(V))
     self._select=false
     for i=1,#self.list do
         if self.list[i]==V then
@@ -1191,8 +1194,7 @@ function Widgets.selector:draw()
         alignDraw(self,self._text,x2,y2)
     end
     if self._selText then
-        setFont(30)
-        mStr(self._selText,x,y-21)
+        GC.mDraw(self._selText,x,y)
     end
 end
 function Widgets.selector:press(x)
@@ -1210,7 +1212,7 @@ function Widgets.selector:press(x)
         if self._select~=s then
             self.code(self.list[s])
             self._select=s
-            self._selText=self.show(self.list[s])
+            self._selText:set(self.show(self.list[s]))
             if self.sound then
                 SFX.play(self.sound)
             end
@@ -1230,7 +1232,7 @@ function Widgets.selector:scroll(dx,dy)
         end
         self.code(self.list[s])
         self._select=s
-        self._selText=self.show(self.list[s])
+        self._selText:set(self.show(self.list[s]))
         if self.sound then
             SFX.play(self.sound)
         end
