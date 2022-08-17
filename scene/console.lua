@@ -26,7 +26,7 @@ local commands={} do
 
     -- Basic
     commands.help={
-        code=function(arg)-- Initial version by user670
+        code=function(arg) -- Initial version by user670
             if #arg>0 then
                 -- help [command]
                 if commands[arg] then
