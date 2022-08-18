@@ -521,7 +521,6 @@ Widgets.switch=setmetatable({
     alignX='center',alignY='center',
     labelPos='right',
     labelDistance=20,
-    sound_on=false,sound_off=false,
 
     disp=false,-- function return a boolean
     code=NULL,
