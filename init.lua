@@ -166,10 +166,13 @@ local function _triggerMouseDown(x,y,k)
         ))
     end
     if SCN.swapping then return end
-    if SCN.mouseDown then SCN.mouseDown(x,y,k) end
-    WIDGET.press(x,y,k)
-    lastX,lastY=x,y
-    if showClickFX then SYSFX.new('tap',3,x,y) end
+    if WIDGET.sel then
+        WIDGET.press(x,y,k)
+    else
+        if SCN.mouseDown then SCN.mouseDown(x,y,k) end
+        lastX,lastY=x,y
+        if showClickFX then SYSFX.new('tap',3,x,y) end
+    end
 end
 local function mouse_update(dt)
     if not KBisDown('lctrl','rctrl') and KBisDown('up','down','left','right') then
@@ -225,10 +228,10 @@ end
 function love.mousereleased(x,y,k,touch)
     if touch or SCN.swapping then return end
     mx,my=ITP(xOy,x,y)
-    if SCN.mouseUp then SCN.mouseUp(mx,my,k) end
     if WIDGET.sel then
         WIDGET.release(mx,my)
     else
+        if SCN.mouseUp then SCN.mouseUp(mx,my,k) end
         if lastX and SCN.mouseClick and (mx-lastX)^2+(my-lastY)^2<62 then
             SCN.mouseClick(mx,my,k)
         end
