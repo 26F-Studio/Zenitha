@@ -309,7 +309,7 @@ end
 do-- function TABLE.dumpDeflate(L,t)
     local function dump(L)
         if type(L)~='table' then return end
-        local s='return{'
+        local s='{'
         local count=1
         for k,v in next,L do
             local T=type(k)
@@ -356,12 +356,9 @@ do-- function TABLE.dump(L,t)
         return self[k]
     end})
     local function dump(L,t)
-        local s
-        if t then
-            s='{\n'
-        else
+        local s='{\n'
+        if not t then
             s='return{\n'
-            t=1
             if type(L)~='table' then
                 return
             end
