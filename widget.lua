@@ -403,7 +403,7 @@ Widgets.checkBox=setmetatable({
     text=false,
     image=false,
     alignX='center',alignY='center',
-    labelPos='right',
+    labelPos='left',
     labelDistance=20,
     cornerR=3,
     sound_on=false,sound_off=false,
@@ -519,7 +519,7 @@ Widgets.switch=setmetatable({
     text=false,
     image=false,
     alignX='center',alignY='center',
-    labelPos='right',
+    labelPos='left',
     labelDistance=20,
 
     disp=false,-- function return a boolean
