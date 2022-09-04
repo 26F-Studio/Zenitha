@@ -4,6 +4,9 @@ local gc_setColor,gc_setLineWidth=GC.setColor,GC.setLineWidth
 local gc_draw,gc_line=GC.draw,GC.line
 local gc_rectangle,gc_circle=GC.rectangle,GC.circle
 local gc_print,gc_printf=GC.print,GC.printf
+local gc_mStr=GC.mStr
+local gc_stc_reset,gc_stc_setComp,gc_stc_stop=GC.stc_reset,GC.stc_setComp,GC.stc_stop
+local gc_stc_circ,gc_stc_rect=GC.stc_circ,GC.stc_rect
 
 local kb=love.keyboard
 local timer=love.timer.getTime
@@ -16,9 +19,6 @@ local sub,ins,rem=string.sub,table.insert,table.remove
 
 local SCN,SCR,xOy=SCN,SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
-local mStr=GC.mStr
-local GC_stc_reset,GC_stc_setComp,GC_stc_stop=GC.stc_reset,GC.stc_setComp,GC.stc_stop
-local GC_stc_circ,GC_stc_rect=GC.stc_circ,GC.stc_rect
 
 local indexMeta={
     __index=function(L,k)
@@ -790,7 +790,7 @@ function Widgets.slider:draw()
     if self._textShowTime>0 then
         setFont(25)
         gc_setColor(1,1,1,min(self._textShowTime/2,1))
-        mStr(self:_showFunc(),cx,by-30)
+        gc_mStr(self:_showFunc(),cx,by-30)
     end
 
     -- Drawable
@@ -930,21 +930,21 @@ function Widgets.slider_fill:draw()
     end
 
     -- Stenciled capsule and text
-    GC_stc_reset()
-    GC_stc_rect(x+r,y-r,w-h,h)
-    GC_stc_circ(x+r,y,r)
-    GC_stc_circ(x+w-r,y,r)
+    gc_stc_reset()
+    gc_stc_rect(x+r,y-r,w-h,h)
+    gc_stc_circ(x+r,y,r)
+    gc_stc_circ(x+w-r,y,r)
 
     setFont(30)
     gc_setColor(1,1,1,.75+HOV*.26)
-    mStr(num,x+w*.5,y-18)
+    gc_mStr(num,x+w*.5,y-18)
     gc_rectangle('fill',x,y-r,w*rate,h)
 
-    GC_stc_reset()
-    GC_stc_rect(x,y-r,w*rate,h)
+    gc_stc_reset()
+    gc_stc_rect(x,y-r,w*rate,h)
     gc_setColor(0,0,0,.9)
-    mStr(num,x+w*.5,y-18)
-    GC_stc_stop()
+    gc_mStr(num,x+w*.5,y-18)
+    gc_stc_stop()
 
     -- Drawable
     if self._text then
@@ -1560,14 +1560,14 @@ function Widgets.textBox:draw()
                 gc_rectangle('fill',w-40+11,14,18,21)
             else
                 setFont(40,'_basic')
-                mStr('?',w-40+21,-8)
+                gc_mStr('?',w-40+21,-8)
             end
         end
 
         -- Texts
         setFont(self.fontSize,self.fontType)
-        GC_stc_rect(0,0,w,h)
-        GC_stc_setComp()
+        gc_stc_rect(0,0,w,h)
+        gc_stc_setComp()
         gc_translate(0,-(scroll%lineH))
         local pos=floor(scroll/lineH)
         for i=1,self._capacity+1 do
@@ -1577,7 +1577,7 @@ function Widgets.textBox:draw()
             end
             gc_translate(0,lineH)
         end
-        GC_stc_stop()
+        gc_stc_stop()
     gc_pop()
 end
 
@@ -1773,8 +1773,8 @@ function Widgets.listBox:draw()
         end
 
         -- List
-        GC_stc_rect(0,0,w,h)
-        GC_stc_setComp()
+        gc_stc_rect(0,0,w,h)
+        gc_stc_setComp()
         local pos=floor(scroll/lineH)
         gc_translate(0,-(scroll%lineH))
         for i=1,self._capacity+1 do
@@ -1784,7 +1784,7 @@ function Widgets.listBox:draw()
             end
             gc_translate(0,lineH)
         end
-        GC_stc_stop()
+        gc_stc_stop()
     gc_pop()
 end
 
@@ -1804,7 +1804,7 @@ function WIDGET.setWidgetList(list)
     WIDGET.active=list or NONE
 
     if list then
-        WIDGET.cursorMove(SCR.xOy:inverseTransformPoint(love.mouse.getPosition()))
+        WIDGET.cursorMove(xOy:inverseTransformPoint(love.mouse.getPosition()))
 
         -- Set metatable for new widget lists
         if getmetatable(list)~=indexMeta then
@@ -1912,7 +1912,7 @@ function WIDGET.update(dt)
             if W._visible~=v then
                 W._visible=v
                 if v then
-                    if W:isAbove(SCR.xOy:inverseTransformPoint(love.mouse.getPosition())) then
+                    if W:isAbove(xOy:inverseTransformPoint(love.mouse.getPosition())) then
                         WIDGET.focus(W)
                     end
                 else
@@ -1937,7 +1937,7 @@ function WIDGET.draw()
     end
     gc_setColor(1,1,1)
     gc_draw(widgetCanvas)
-    gc_replaceTransform(SCR.xOy)
+    gc_replaceTransform(xOy)
 end
 
 function WIDGET.setDefaultButtonSound(sound)
