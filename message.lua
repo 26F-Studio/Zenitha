@@ -1,5 +1,3 @@
-local gc_setColor,gc_draw=GC.setColor,GC.draw
-
 local ins,rem=table.insert,table.remove
 local max=math.max
 
@@ -70,35 +68,28 @@ local backColors={
     warn={.4,.4,.2,.9},
     error={.4,.2,.2,.9},
     music={.2,.4,.4,.9},
+    other={.5,.5,.5,.7},
 }
 function MES.new(icon,str,time)
-    local backColor={.5,.5,.5,.7}
+    local color=backColors.other
     if type(icon)=='string' then
-        backColor=backColors[icon] or backColor
+        color=TABLE.shift(backColors[icon] or color)
         icon=mesIcon[icon]
     end
-    local t=GC.newText(FONT.get(30),str)
-    local w=math.max(t:getWidth()+(icon and 45 or 5),200)+15
-    local h=math.max(t:getHeight(),46)+2
-    local L={w,h,
-        {'clear',backColor},
-        {'setCL',.7,.7,.7},
-        {'setLW',2},
-        {'dRect',1,1,w-2,h-2},
-        {'setCL',1,1,1},
-    }
-    if icon then
-        ins(L,{'draw',icon,4,4,nil,40/icon:getWidth(),40/icon:getHeight()})
-    end
-    ins(L,{'mDrawY',t,icon and 50 or 10,h/2})
+    local text=GC.newText(FONT.get(30),str)
+    local w=math.max(text:getWidth()+(icon and 45 or 5),200)+15
+    local h=math.max(text:getHeight(),46)+2
+    local k=h>400 and 1/math.min(h/400,2.6) or 1
 
-    ins(mesList,{
-        startTime=.5,
-        endTime=.5,
+    ins(mesList,1,{
+        startTime=.26,
+        endTime=.26,
         time=time or 3,
-        canvas=GC.load(L),
-        width=w,height=h,
-        scale=h>400 and 1/math.min(h/400,2.6) or 1
+
+        color=color,
+        text=text,icon=icon,
+        w=w,h=h,k=k,
+        y=-h,
     })
 end
 
@@ -114,17 +105,36 @@ function MES.update(dt)
         else
             rem(mesList,i)
         end
+        if i>1 then
+            local _m=mesList[i-1]
+            ty=_m.y+_m.h*_m.k
+            m.y=MATH.expApproach(m.y,ty+3,dt*26)
+        else
+            m.y=MATH.expApproach(m.y,3,dt*26)
+        end
     end
 end
 
 function MES.draw()
     if #mesList>0 then
-        local y=0
+        GC.setLineWidth(2)
         for i=1,#mesList do
             local m=mesList[i]
-            gc_setColor(1,1,1,2*(m.endTime-m.startTime))
-            gc_draw(m.canvas,SCR.safeX+40-80*(m.endTime+m.startTime),y,nil,m.scale)
-            y=y+m.height*m.scale+2
+            local a=3.846*(m.endTime-m.startTime)
+            GC.push('transform')
+            GC.translate(3+SCR.safeX,m.y)
+            GC.scale(m.k)
+
+            GC.setColor(m.color[1],m.color[2],m.color[3],m.color[4]*a)
+            GC.rectangle('fill',0,0,m.w,m.h,m.h/12.6+4)
+            GC.setColor(.62,.62,.62,a*.626)
+            GC.rectangle('line',1,1,m.w-2,m.h-2,m.h/12.6)
+            GC.setColor(1,1,1,a)
+            if m.icon then
+                GC.draw(m.icon,4,4,nil,40/m.icon:getWidth(),40/m.icon:getHeight())
+            end
+            GC.mDrawY(m.text,m.icon and 50 or 10,m.h/2)
+            GC.pop()
         end
     end
 end
