@@ -93,7 +93,7 @@ function Widgets.base:reset()
     if type(self.color)=='string' then self.color=COLOR[self.color] end
     assert(type(self.color)=='table','[widget].color must be table')
     if type(self.color_fill)=='string' then self.color_fill=COLOR[self.color_fill] end
-    assert(type(self.color_fill)=='table','[switch].color_fill must be table')
+    assert(type(self.color_fill)=='table','[widget].color_fill must be table')
 
     if self.pos then
         assert(
@@ -513,7 +513,7 @@ end
 
 -- switch
 Widgets.switch=setmetatable({
-    type='checkBox',
+    type='switch',
     h=30,
 
     text=false,
