@@ -531,7 +531,7 @@ function love.errorhandler(msg)
     if type(msg)~='string' then
         msg="Unknown error"
     elseif msg:find("Invalid UTF-8") then
-        msg="[Invalid UTF-8] If you are on Windows, try downloading win32 or win64 (different from what you are using now)."
+        msg="[Invalid UTF-8] If you are on Windows, try downloading win32 or win64\n(different from what you are using now)."
     end
 
     -- Generate error message
@@ -599,20 +599,21 @@ function love.errorhandler(msg)
                 end
             end
             gc_clear(.3,.5,.9)
-            gc_push('transform')
-            gc_replaceTransform(SCR.xOy)
+            GC.push('transform')
+            GC.replaceTransform(SCR.origin)
+            local k=math.min(SCR.h/720,1)
+            GC.scale(k)
             setFont(100,'_basic') gc_print(":(",100,0,0,1.2)
-            setFont(40,'_basic') gc.printf(errorMsg,100,160,SCR.w0-200)
-            setFont(25,'_basic')
-            gc.printf(err[1],100,400,SCR.w0-200)
+            setFont(40,'_basic') gc.printf(errorMsg,100,160,SCR.w/k-200)
+            setFont(25,'_basic') gc.printf(err[1],100,380,SCR.w/k-200)
             setFont(20,'_basic')
-            gc_print(love.system.getOS().."-"..versionText.."                          scene:"..(SCN and SCN.cur or "NULL"),100,660)
-            gc_print("TRACEBACK",100,450)
+            GC.print(love.system.getOS().."-"..versionText.."                          scene:"..(SCN and SCN.cur or "NULL"),100,640)
+            GC.print("TRACEBACK",100,430)
             for i=4,#err-2 do
-                gc_print(err[i],100,400+20*i)
+                gc_print(err[i],100,380+20*i)
             end
-            gc_pop()
-            gc_present()
+            GC.pop()
+            GC.present()
             love.timer.sleep(.26)
         end
     end
