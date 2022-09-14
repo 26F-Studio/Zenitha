@@ -1794,7 +1794,7 @@ end
 -- Widget module
 WIDGET.active={}-- Table contains all active widgets
 WIDGET.sel=false-- Selected widget
-local function _resetAllWidgets()
+function WIDGET._reset()
     for i=1,#WIDGET.active do
         WIDGET.active[i]:reset()
     end
@@ -1811,7 +1811,7 @@ function WIDGET.setWidgetList(list)
             setmetatable(list,indexMeta)
         end
 
-        _resetAllWidgets()
+        WIDGET._reset()
     end
     onChange()
 end
@@ -1928,7 +1928,7 @@ end
 function WIDGET.resize(w,h)
     if widgetCanvas then widgetCanvas:release() end
     widgetCanvas=GC.newCanvas(w,h)
-    _resetAllWidgets()
+    WIDGET._reset()
 end
 function WIDGET.draw()
     gc_translate(0,-SCN.curScroll)
