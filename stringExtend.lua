@@ -8,7 +8,9 @@ local char,byte=string.char,string.byte
 local STRING={}
 
 function STRING.install()-- Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
-    STRING.install=nil
+    function STRING.install()
+        error("attempt to install stringExtend library multiple times")
+    end
     for k,v in next,STRING do
         string[k]=v
     end
