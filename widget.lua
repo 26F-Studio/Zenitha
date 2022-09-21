@@ -1872,7 +1872,7 @@ function WIDGET.press(x,y,k)
         end
     end
 end
-function WIDGET.release(x,y)
+function WIDGET.release(x,y,k)
     if WIDGET.sel then
         WIDGET.sel:release(x,y+SCN.curScroll)
     end
