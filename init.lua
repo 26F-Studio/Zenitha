@@ -12,7 +12,7 @@ local KBisDown=kb.isDown
 
 local gc=love.graphics
 local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
-local gc_push,gc_pop,gc_clear,gc_discard=gc.push,gc.pop,gc.clear,gc.discard
+local gc_clear,gc_discard=gc.clear,gc.discard
 local gc_setColor,gc_circle=gc.setColor,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
 

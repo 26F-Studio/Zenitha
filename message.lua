@@ -107,7 +107,7 @@ function MES.update(dt)
         end
         if i>1 then
             local _m=mesList[i-1]
-            ty=_m.y+_m.h*_m.k
+            local ty=_m.y+_m.h*_m.k
             m.y=MATH.expApproach(m.y,ty+3,dt*26)
         else
             m.y=MATH.expApproach(m.y,3,dt*26)
