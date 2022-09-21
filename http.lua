@@ -5,6 +5,7 @@ local threads={}
 local threadCount=0
 local threadCode=[[
     local id=...
+
     local http=require'socket.http'
     local ltn12=require'ltn12'
 
@@ -51,18 +52,17 @@ local HTTP={
     _msgCount=0,
     _trigTime=0,
     _trigInterval=.626,
-    _hosts={},
+    _host=false,
 }
 
 local function addThread(num)
     for i=1,26 do
+        if num<=0 then break end
         if not threads[i] then
             threads[i]=love.thread.newThread(threadCode)
             threads[i]:start(i)
             threadCount=threadCount+1
-
             num=num-1
-            if num==0 then break end
         end
     end
 end
@@ -71,10 +71,9 @@ function HTTP.request(arg)
     arg.method=arg.method or arg.body and 'POST' or 'GET'
     if arg.url then
         assert(type(arg.url)=='string',"Field 'url' need string, get "..type(arg.url))
-        if not arg.url:sub(1,7)=='http://' then arg.url='http://'..arg.url end
+        if arg.url:sub(1,7)~='http://' then arg.url='http://'..arg.url end
     else
-        assert(HTTP._hosts[arg.host],"HTTP(arg): need url=<string> or host[add with HTTP.addHost]")
-        arg.url=HTTP._hosts[arg.host]
+        arg.url=HTTP._host or error("Need url=<string> or set default host with HTTP.setHost")
     end
     if arg.path then
         assert(type(arg.path)=='string',"Field 'path' need string, get "..type(arg.path))
@@ -86,10 +85,11 @@ function HTTP.request(arg)
         if arg.body~=nil then
             assert(type(arg.body)=='table',"Field 'body' need table, get "..type(arg.body))
             arg.body=JSON.encode(arg.body)
-            local headers={
+            if not arg.headers then arg.headers={} end
+            TABLE.cover({
                 ['Content-Type']="application/json",
                 ['Content-Length']=#arg.body,
-            } if arg.headers then TABLE.cover(arg.headers,headers) end
+            },arg.headers)
         end
     end
 
@@ -121,11 +121,11 @@ function HTTP.getThreadCount()
 end
 function HTTP.setInterval(interval)
     if interval<=0 then interval=1e99 end
-    assert(type(interval)=='number',"HTTP.setInterval(interval): interval must be number")
+    assert(type(interval)=='number',"Interval must be number")
     HTTP._trigInterval=interval
 end
 function HTTP.pollMsg(pool)
-    if not (type(pool)=='nil' or type(pool)=='string') then error("function HTTP.pollMsg(pool): pool must be nil or string") end
+    if not (type(pool)=='nil' or type(pool)=='string') then error("Pool must be nil or string") end
     HTTP.update()
     local p=msgPool[pool or '_default']
     if #p>0 then
@@ -133,11 +133,10 @@ function HTTP.pollMsg(pool)
         return table.remove(p)
     end
 end
-function HTTP.addHost(name,host)
-    assert(type(name)=='string' or type(name)=='number',"function HTTP.addHost(name,host): name must be string or number")
-    assert(type(host)=='string',"function HTTP.addHost(name,host): host must be string")
-    if not host:sub(1,7)=='http://' then host='http://'..host end
-    HTTP._hosts[name]=host
+function HTTP.setHost(host)
+    assert(type(host)=='string',"Host must be string")
+    if host:sub(1,7)~='http://' then host='http://'..host end
+    HTTP._host=host
 end
 
 function HTTP.update(dt)
