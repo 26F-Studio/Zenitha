@@ -28,6 +28,7 @@ local threadCode=[[
             method=arg.method,
             url=arg.url,
             headers=arg.headers,
+            source=ltn12.source.string(arg.body),
 
             sink=ltn12.sink.table(data),
         }
