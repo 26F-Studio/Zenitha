@@ -15,13 +15,7 @@ local threadCode=[[
     while true do
         local arg=sendCHN:demand()
 
-        if arg._destroy then
-            recvCHN:push{
-                destroy=true,
-                id=id,
-            }
-            break
-        end
+        if arg._destroy then break end
 
         local data={}
         local _,code,detail=http.request{
@@ -40,6 +34,11 @@ local threadCode=[[
             detail
         }
     end
+
+    recvCHN:push{
+        destroy=true,
+        id=id,
+    }
 ]]
 
 local msgPool=setmetatable({},{
@@ -166,7 +165,7 @@ function HTTP.update(dt)
 end
 
 setmetatable(HTTP,{__call=function(self,arg)
-    return self.request(arg)
+    self.request(arg)
 end,__metatable=true})
 
 HTTP.reset()
