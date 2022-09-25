@@ -121,6 +121,7 @@ GC=         require'Zenitha.gcExtend'
 FONT=       require'Zenitha.font'
 TEXT=       require'Zenitha.text'
 SYSFX=      require'Zenitha.sysFX'
+WAIT=       require'Zenitha.wait'
 MES=        require'Zenitha.message'
 BG=         require'Zenitha.background'
 WIDGET=     require'Zenitha.widget'
@@ -132,7 +133,7 @@ VOC=        require'Zenitha.voice'
 
 --------------------------------------------------------------
 
-local WIDGET,SCR,SCN=WIDGET,SCR,SCN
+local WIDGET,SCR,SCN,WAIT=WIDGET,SCR,SCN,WAIT
 local xOy=SCR.xOy
 local ITP=xOy.inverseTransformPoint
 local setFont=FONT.set
@@ -148,7 +149,7 @@ FONT.setDefaultFallback('_basic')
 --------------------------------------------------------------
 
 local function _updateMousePos(x,y,dx,dy)
-    if SCN.swapping then return end
+    if SCN.swapping or WAIT.state then return end
     dx,dy=dx/SCR.k,dy/SCR.k
     if SCN.mouseMove then SCN.mouseMove(x,y,dx,dy) end
     if ms.isDown(1) then
@@ -215,7 +216,7 @@ local function gp_update(js,dt)
     end
 end
 function love.mousepressed(x,y,k,touch)
-    if touch then return end
+    if touch or WAIT.state then return end
     mouseShow=true
     mx,my=ITP(xOy,x,y)
     _triggerMouseDown(mx,my,k)
@@ -227,7 +228,7 @@ function love.mousemoved(x,y,dx,dy,touch)
     _updateMousePos(mx,my,dx,dy)
 end
 function love.mousereleased(x,y,k,touch)
-    if touch or SCN.swapping then return end
+    if touch or WAIT.state or SCN.swapping then return end
     mx,my=ITP(xOy,x,y)
     if WIDGET.sel then
         WIDGET.release(mx,my)
@@ -239,7 +240,7 @@ function love.mousereleased(x,y,k,touch)
     end
 end
 function love.wheelmoved(dx,dy)
-    if SCN.swapping then return end
+    if WAIT.state or SCN.swapping then return end
     if SCN.wheelMoved then
         SCN.wheelMoved(dx,dy)
     else
@@ -249,7 +250,7 @@ end
 
 function love.touchpressed(id,x,y)
     mouseShow=false
-    if SCN.swapping then return end
+    if WAIT.state or SCN.swapping then return end
     if not SCN.mainTouchID then
         SCN.mainTouchID=id
         WIDGET.unFocus(true)
@@ -266,13 +267,13 @@ function love.touchpressed(id,x,y)
     if SCN.touchDown then SCN.touchDown(x,y,id) end
 end
 function love.touchmoved(id,x,y,dx,dy)
-    if SCN.swapping then return end
+    if WAIT.state or SCN.swapping then return end
     x,y=ITP(xOy,x,y)
     if SCN.touchMove then SCN.touchMove(x,y,dx/SCR.k,dy/SCR.k,id) end
     WIDGET.drag(x,y,dx/SCR.k,dy/SCR.k)
 end
 function love.touchreleased(id,x,y)
-    if SCN.swapping then return end
+    if WAIT.state or SCN.swapping then return end
     x,y=ITP(xOy,x,y)
     if id==SCN.mainTouchID then
         WIDGET.release(x,y)
@@ -334,7 +335,12 @@ function love.keypressed(key,_,isRep)
         -- Do nothing
     elseif globalKey[key] then
         globalKey[key]()
-    elseif not SCN.swapping then
+    else
+        if SCN.swapping then return end
+        if WAIT.state then
+            if key=='escape' and WAIT.arg.escapable then WAIT.interrupt() end
+            return
+        end
         if EDITING=="" and (not SCN.keyDown or SCN.keyDown(key,isRep)) then
             local W=WIDGET.sel
             if key=='escape' and not isRep then
@@ -358,7 +364,7 @@ function love.keypressed(key,_,isRep)
     end
 end
 function love.keyreleased(i)
-    if SCN.swapping then return end
+    if WAIT.state or SCN.swapping then return end
     if SCN.keyUp then SCN.keyUp(i) end
 end
 
@@ -454,39 +460,38 @@ function love.gamepadaxis(JS,axis,val)
 end
 function love.gamepadpressed(_,key)
     mouseShow=false
-    if not SCN.swapping then
-        local cursorCtrl
-        if SCN.gamepadDown then
-            cursorCtrl=SCN.gamepadDown(key)
-        elseif SCN.keyDown then
-            cursorCtrl=SCN.keyDown(dPadToKey[key] or key)
-        else
-            cursorCtrl=true
-        end
-        if cursorCtrl then
-            key=dPadToKey[key] or key
+    if SCN.swapping then return end
+    local cursorCtrl
+    if SCN.gamepadDown then
+        cursorCtrl=SCN.gamepadDown(key)
+    elseif SCN.keyDown then
+        cursorCtrl=SCN.keyDown(dPadToKey[key] or key)
+    else
+        cursorCtrl=true
+    end
+    if cursorCtrl then
+        key=dPadToKey[key] or key
+        mouseShow=true
+        local W=WIDGET.sel
+        if key=='back' then
+            SCN.back()
+        elseif key=='up' or key=='down' or key=='left' or key=='right' then
             mouseShow=true
-            local W=WIDGET.sel
-            if key=='back' then
-                SCN.back()
-            elseif key=='up' or key=='down' or key=='left' or key=='right' then
-                mouseShow=true
-                if W and W.arrowKey then W:arrowKey(key) end
-            elseif key=='return' then
-                mouseShow=true
-                if showClickFX then SYSFX.new('tap',3,mx,my) end
-                _triggerMouseDown(mx,my,1)
-                WIDGET.release(mx,my,1)
-            else
-                if W and W.keypress then
-                    W:keypress(key)
-                end
+            if W and W.arrowKey then W:arrowKey(key) end
+        elseif key=='return' then
+            mouseShow=true
+            if showClickFX then SYSFX.new('tap',3,mx,my) end
+            _triggerMouseDown(mx,my,1)
+            WIDGET.release(mx,my,1)
+        else
+            if W and W.keypress then
+                W:keypress(key)
             end
         end
     end
 end
 function love.gamepadreleased(_,key)
-    if SCN.swapping then return end
+    if WAIT.state or SCN.swapping then return end
     if SCN.gamepadUp then
         SCN.gamepadUp(key)
     elseif SCN.keyUp then
@@ -495,9 +500,11 @@ function love.gamepadreleased(_,key)
 end
 
 function love.filedropped(file)
+    if WAIT.state or SCN.swapping then return end
     if SCN.fileDropped then SCN.fileDropped(file) end
 end
 function love.directorydropped(dir)
+    if WAIT.state or SCN.swapping then return end
     if SCN.directoryDropped then SCN.directoryDropped(dir) end
 end
 
@@ -640,14 +647,14 @@ function love.run()
 
     local love=love
 
-    local BG=BG
+    local BG,WAIT=BG,WAIT
     local SCN_swapUpdate=SCN.swapUpdate
     local MES_update,MES_draw=MES.update,MES.draw
     local HTTP_update=HTTP.update
     local TASK_update=TASK.update
     local SYSFX_update,SYSFX_draw=SYSFX.update,SYSFX.draw
     local WIDGET_update,WIDGET_draw=WIDGET.update,WIDGET.draw
-    local STEP,WAIT=love.timer.step,love.timer.sleep
+    local STEP,SLEEP=love.timer.step,love.timer.sleep
     local FPS,MINI=love.timer.getFPS,love.window.isMinimized
     local PUMP,POLL=love.event.pump,love.event.poll
 
@@ -709,6 +716,7 @@ function love.run()
             BG.update(updateDT)
             TEXT:update(updateDT)
             MES_update(updateDT)
+            WAIT.update(updateDT)
             HTTP_update(updateDT)
             TASK_update(updateDT)
             SYSFX_update(updateDT)
@@ -791,6 +799,8 @@ function love.run()
                             gc_setColor(COLOR.L)
                             gc_print(t,x+2,y)
                     end
+                gc_replaceTransform(SCR.origin)
+                    WAIT.draw()
                 gc_present()
 
                 -- SPEED UPUP! (probably not that obvious)
@@ -806,14 +816,14 @@ function love.run()
         -- Slow devmode
         if devMode then
             if devMode==3 then
-                WAIT(.1)
+                SLEEP(.1)
             elseif devMode==4 then
-                WAIT(.5)
+                SLEEP(.5)
             end
         end
 
         local curFrameInterval=timer()-lastLoopTime
-        if curFrameInterval<sleepInterval*.9626 then WAIT(sleepInterval*.9626-curFrameInterval) end
+        if curFrameInterval<sleepInterval*.9626 then SLEEP(sleepInterval*.9626-curFrameInterval) end
         while timer()-lastLoopTime<sleepInterval do end
     end
 end
