@@ -221,6 +221,7 @@ function BGM.play(bgms,args)
             source:play()
 
             table.insert(nowPlay,obj)
+            return true
         end
     end
     _updateSources()
