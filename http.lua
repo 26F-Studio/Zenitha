@@ -15,7 +15,13 @@ local threadCode=[[
     while true do
         local arg=sendCHN:demand()
 
-        if arg._destroy then break end
+        if arg._destroy then
+            recvCHN:push{
+                destroy=true,
+                id=id,
+            }
+            break
+        end
 
         local data={}
         local _,code,detail=http.request{
@@ -28,17 +34,13 @@ local threadCode=[[
         }
 
         recvCHN:push{
-            arg.pool or '_default',
+            arg.pool,
+            arg.poolPtr,
             code,
             table.concat(data),
             detail
         }
     end
-
-    recvCHN:push{
-        destroy=true,
-        id=id,
-    }
 ]]
 
 local msgPool=setmetatable({},{
@@ -51,7 +53,7 @@ local msgPool=setmetatable({},{
 local HTTP={
     _msgCount=0,
     _trigTime=0,
-    _trigInterval=.626,
+    _trigInterval=.26,
     _host=false,
 }
 
@@ -93,6 +95,9 @@ function HTTP.request(arg)
         end
     end
 
+    if arg.pool==nil then arg.pool='_default' end
+    arg.poolPtr=tostring(msgPool[arg.pool])
+
     sendCHN:push(arg)
 end
 
@@ -124,6 +129,18 @@ function HTTP.setInterval(interval)
     assert(type(interval)=='number',"Interval must be number")
     HTTP._trigInterval=interval
 end
+function HTTP.clearPool(pool)
+    if pool==nil then pool='_default' end
+    assert(type(pool)=='string',"Pool must be nil or string")
+    HTTP._msgCount=HTTP._msgCount-#msgPool[pool]
+    msgPool[pool]={}
+end
+function HTTP.deletePool(pool)
+    assert(type(pool)=='string',"Pool must be nil or string")
+    assert(pool~='_default',"Cannot delete _default pool. What are you doing?")
+    HTTP._msgCount=HTTP._msgCount-#msgPool[pool]
+    msgPool[pool]=nil
+end
 function HTTP.pollMsg(pool)
     if not (type(pool)=='nil' or type(pool)=='string') then error("Pool must be nil or string") end
     HTTP.update()
@@ -153,11 +170,11 @@ function HTTP.update(dt)
         if m.destroy then
             threads[m.id]:release()
             threads[m.id]=false
-        else
+        elseif tostring(msgPool[m[1]]==m[2]) then -- If pool were cleared, discard this datapack
             table.insert(msgPool[m[1]],{
-                code=m[2],
-                body=m[3],
-                detail=m[4],
+                code=m[3],
+                body=m[4],
+                detail=m[5],
             })
             HTTP._msgCount=HTTP._msgCount+1
         end
@@ -165,7 +182,7 @@ function HTTP.update(dt)
 end
 
 setmetatable(HTTP,{__call=function(self,arg)
-    self.request(arg)
+    return self.request(arg)
 end,__metatable=true})
 
 HTTP.reset()

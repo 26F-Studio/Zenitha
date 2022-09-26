@@ -110,13 +110,13 @@ do-- Add pcall & MES for JSON lib
     end
 end
 
--- Love-based modules (data)
+-- Love-based modules (simple)
 FILE=       require'Zenitha.file'
 WHEELMOV=   require'Zenitha.wheelToArrow'
 SCR=        require'Zenitha.screen'
 SCN=        require'Zenitha.scene'
 
--- Love-based modules (media)
+-- Love-based modules (complex)
 GC=         require'Zenitha.gcExtend'
 FONT=       require'Zenitha.font'
 TEXT=       require'Zenitha.text'
