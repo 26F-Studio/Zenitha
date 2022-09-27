@@ -1,8 +1,38 @@
 local rem=table.remove
 local assert,resume,status=assert,coroutine.resume,coroutine.status
-local tasks={}
+local rawset=rawset
+local timer=love.timer.getTime
 
 local TASK={}
+
+-- Locks
+local locks=setmetatable({},{
+    __index=function(self,k)rawset(self,k,-1e99)return -1e99 end,
+    __newindex=function(self,k)rawset(self,k,-1e99)end,
+})
+function TASK.lock(name,T)
+    if timer()>=locks[name]then
+        locks[name]=timer()+(T or 1e99)
+        return true
+    else
+        return false
+    end
+end
+function TASK.unlock(name)
+    locks[name]=-1e99
+end
+function TASK.getLock(name)
+    return timer()<locks[name]
+end
+function TASK.clearLock()
+    for k in next,locks do
+        locks[k]=nil
+    end
+end
+
+
+local tasks={}
+
 function TASK.getCount()
     return #tasks
 end
@@ -44,4 +74,5 @@ end
 function TASK.clear()
     TABLE.cut(tasks)
 end
+
 return TASK
