@@ -85,7 +85,7 @@ JSON=       require'Zenitha.json'
 
 -- Pure lua modules (complex)
 REQUIRE=    require'Zenitha.require'
-HTTP=       require'Zenitha.http'
+HASH=       require'Zenitha.sha2'
 TASK=       require'Zenitha.task'
 LANG=       require'Zenitha.languages'
 PROFILE=    require'Zenitha.profile'
@@ -111,23 +111,24 @@ do-- Add pcall & MES for JSON lib
 end
 
 -- Love-based modules (simple)
-FILE=       require'Zenitha.file'
+VIB=        require'Zenitha.vibrate'
 WHEELMOV=   require'Zenitha.wheelToArrow'
+FONT=       require'Zenitha.font'
+IMG=        require'Zenitha.image'
+FILE=       require'Zenitha.file'
 SCR=        require'Zenitha.screen'
-SCN=        require'Zenitha.scene'
+GC=         require'Zenitha.gcExtend'
 
 -- Love-based modules (complex)
-GC=         require'Zenitha.gcExtend'
-FONT=       require'Zenitha.font'
+HTTP=       require'Zenitha.http'
+SCN=        require'Zenitha.scene'
 TEXT=       require'Zenitha.text'
 SYSFX=      require'Zenitha.sysFX'
 WAIT=       require'Zenitha.wait'
 MES=        require'Zenitha.message'
 BG=         require'Zenitha.background'
 WIDGET=     require'Zenitha.widget'
-VIB=        require'Zenitha.vibrate'
 SFX=        require'Zenitha.sfx'
-IMG=        require'Zenitha.image'
 BGM=        require'Zenitha.bgm'
 VOC=        require'Zenitha.voice'
 
