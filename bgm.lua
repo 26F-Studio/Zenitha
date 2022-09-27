@@ -221,10 +221,10 @@ function BGM.play(bgms,args)
             source:play()
 
             table.insert(nowPlay,obj)
-            return true
         end
     end
     _updateSources()
+    return true
 end
 function BGM.stop(time)
     if #nowPlay>0 then
