@@ -23,6 +23,7 @@ local threadCode=[[
             break
         end
 
+        -- print("\n------SEND------") for k,v in next,arg do print(k,v)end
         local data={}
         local _,code,detail=http.request{
             method=arg.method,
@@ -33,13 +34,15 @@ local threadCode=[[
             sink=ltn12.sink.table(data),
         }
 
-        recvCHN:push{
-            arg.pool,
-            arg.poolPtr,
-            code,
-            table.concat(data),
-            detail
+        local result={
+            pool=arg.pool,
+            poolPtr=arg.poolPtr,
+            code=code,
+            body=table.concat(data),
+            detail=detail,
         }
+        -- print("\n------RECV------") for k,v in next,result do print(k,v)end
+        recvCHN:push(result)
     end
 ]]
 
@@ -83,16 +86,14 @@ function HTTP.request(arg)
     end
     assert(arg.headers==nil or type(arg.headers)=='table',"Field 'headers' need table, get "..type(arg.headers))
 
-    if arg.method=='POST' then
-        if arg.body~=nil then
-            assert(type(arg.body)=='table',"Field 'body' need table, get "..type(arg.body))
-            arg.body=JSON.encode(arg.body)
-            if not arg.headers then arg.headers={} end
-            TABLE.cover({
-                ['Content-Type']="application/json",
-                ['Content-Length']=#arg.body,
-            },arg.headers)
-        end
+    if arg.body~=nil then
+        assert(type(arg.body)=='table',"Field 'body' need table, get "..type(arg.body))
+        arg.body=JSON.encode(arg.body)
+        if not arg.headers then arg.headers={} end
+        TABLE.cover({
+            ['Content-Type']="application/json",
+            ['Content-Length']=#arg.body,
+        },arg.headers)
     end
 
     if arg.pool==nil then arg.pool='_default' end
@@ -170,11 +171,11 @@ function HTTP.update(dt)
         if m.destroy then
             threads[m.id]:release()
             threads[m.id]=false
-        elseif tostring(msgPool[m[1]]==m[2]) then -- If pool were cleared, discard this datapack
-            table.insert(msgPool[m[1]],{
-                code=m[3],
-                body=m[4],
-                detail=m[5],
+        elseif tostring(msgPool[m.pool])==m.poolPtr then -- If pool were cleared, discard this datapack
+            table.insert(msgPool[m.pool],{
+                code=m.code,
+                body=m.body,
+                detail=m.detail,
             })
             HTTP._msgCount=HTTP._msgCount+1
         end
