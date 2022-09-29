@@ -60,7 +60,7 @@ function FILE.save(data,name,args)
             if STRING.sArg(args,'-expand') then
                 data=TABLE.dump(data)
             else
-                data=TABLE.dumpDeflate(data)
+                data='return'..TABLE.dumpDeflate(data)
             end
             if not data then
                 error('encode error')
