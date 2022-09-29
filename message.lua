@@ -1,7 +1,6 @@
 local ins,rem=table.insert,table.remove
 local max=math.max
 
-local mesList={}
 local mesIcon={
     check=GC.load{40,40,
         {'setLW',10},
@@ -61,6 +60,9 @@ local mesIcon={
     },
 }
 
+local mesList={}
+local startY=0
+
 local MES={}
 local backColors={
     check={.3,.6,.3,.7},
@@ -92,6 +94,21 @@ function MES.new(icon,str,time)
         y=-h,
     })
 end
+function MES.setSafeY(y)
+    assert(type(y)=='number' and y>=0,"startY must be nonnegative number")
+    startY=y
+end
+function MES.traceback()
+    local mes=
+        debug.traceback('',1)
+        :gsub(': in function',', in')
+        :gsub(':',' ')
+        :gsub('\t','')
+    MES.new('error',mes:sub(
+        mes:find("\n",2)+1,
+        mes:find("\n%[C%], in 'xpcall'")
+    ),5)
+end
 
 function MES.update(dt)
     for i=#mesList,1,-1 do
@@ -117,6 +134,7 @@ end
 
 function MES.draw()
     if #mesList>0 then
+        GC.translate(0,startY)
         GC.setLineWidth(2)
         for i=1,#mesList do
             local m=mesList[i]
@@ -136,19 +154,8 @@ function MES.draw()
             GC.mDrawY(m.text,m.icon and 50 or 10,m.h/2)
             GC.pop()
         end
+        GC.translate(0,-startY)
     end
-end
-
-function MES.traceback()
-    local mes=
-        debug.traceback('',1)
-        :gsub(': in function',', in')
-        :gsub(':',' ')
-        :gsub('\t','')
-    MES.new('error',mes:sub(
-        mes:find("\n",2)+1,
-        mes:find("\n%[C%], in 'xpcall'")
-    ),5)
 end
 
 return MES
