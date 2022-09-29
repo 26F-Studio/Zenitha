@@ -1306,16 +1306,14 @@ function Widgets.inputBox:getText()
     return self._value
 end
 function Widgets.inputBox:setText(str)
-    if type(str)=='string' then
-        self._value=str
-    end
+    if not str then str="" end
+    assert(type(str)=='string',"Arg #1 must be string")
+    self._value=str
 end
 function Widgets.inputBox:addText(str)
-    if type(str)=='string' then
-        self._value=self._value..str
-    else
-        MES.new('error',"inputBox "..self.name.." dead, addText("..type(str)..")")
-    end
+    if not str then str="" end
+    assert(type(str)=='string',"Arg #1 must be string")
+    self._value=self._value..str
 end
 function Widgets.inputBox:clear()
     self._value=''
@@ -1466,9 +1464,10 @@ function Widgets.textBox:replaceTexts(newList)
     self._texts=newList
     self._scrollPos=0
 end
-function Widgets.textBox:setTexts(newList)
+function Widgets.textBox:setTexts(t)
+    assert(type(t)=='table',"Arg #1 must be table")
     TABLE.clear(self._texts)
-    TABLE.connect(self._texts,newList)
+    TABLE.connect(self._texts,t)
     self._scrollPos=0
 end
 function Widgets.textBox:push(t)
@@ -1641,6 +1640,7 @@ function Widgets.listBox:clear()
     self._scrollPos=0
 end
 function Widgets.listBox:setList(t)
+    assert(type(t)=='table',"Arg #1 must be table")
     self._list=t
     self._selected=1
     self._scrollPos=0
