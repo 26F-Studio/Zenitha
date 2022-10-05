@@ -65,7 +65,6 @@ function FILE.save(data,name,args)
             if not data then
                 error('encode error')
             end
-            data='return '..data
         else
             data=JSON.encode(data)
             if not data then
