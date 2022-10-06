@@ -598,7 +598,7 @@ function love.errorhandler(msg)
         )
 
         -- Get screencapture
-        errData[#errData].shot=GC.getScreenShot()
+        GC.getScreenShot(errData[#errData],'shot')
         gc.present()
 
         -- Create a new mainLoop thread to keep game alive

@@ -158,11 +158,13 @@ function GC.regRoundPolygon(mode,x,y,R,segments,r,phase)
 end
 
 do-- function GC.getScreenShot()
-    local capturedImage
-    local function _captureScreenshotFunc(imageData) capturedImage=gc.newImage(imageData) end
-    function GC.getScreenShot()
+    local _table,_key
+    local function _captureScreenshotFunc(imageData)
+        _table[_key]=gc.newImage(imageData)
+    end
+    function GC.getScreenShot(t,k)
+        _table,_key=t,k
         gc.captureScreenshot(_captureScreenshotFunc)
-        return capturedImage
     end
 end
 
