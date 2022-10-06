@@ -61,8 +61,8 @@ function WAIT.update(dt)
         elseif WAIT.state=='leave' then
             WAIT.timer=WAIT.timer-dt
             if WAIT.timer<=0 then
-                if WAIT.arg.quit then WAIT.arg.quit() end
                 WAIT.state=false
+                if WAIT.arg.quit then WAIT.arg.quit() end
             end
         end
     end
