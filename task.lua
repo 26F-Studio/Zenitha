@@ -22,7 +22,8 @@ function TASK.unlock(name)
     locks[name]=-1e99
 end
 function TASK.getLock(name)
-    return timer()<locks[name]
+    local v=locks[name]-timer()
+    return v>0 and v
 end
 function TASK.clearLock()
     for k in next,locks do
