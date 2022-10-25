@@ -15,7 +15,6 @@ local eventNames={
 
 local SCN={
     mainTouchID=nil,     -- First touching ID(userdata)
-    cur='NULL',          -- Current scene name
     maxScroll=0,
     curScroll=0,
 
@@ -53,7 +52,6 @@ function SCN.swapUpdate(dt)
     S.time=S.time-dt
     if S.time<S.changeTime and S.time+dt>=S.changeTime then
         -- Scene swapped this frame
-        SCN.prev=SCN.cur
         SCN.load(S.tar)
         SCN.mainTouchID=nil
     end
@@ -65,8 +63,6 @@ end
 function SCN.load(s)
     love.keyboard.setTextInput(false)
 
-    SCN.cur=s
-
     local S=scenes[s]
     SCN.maxScroll=S.scrollHeight or 0
     SCN.curScroll=0
@@ -77,15 +73,10 @@ function SCN.load(s)
 
     if S.enter then S.enter() end
 end
-function SCN.push(tar,style)
-    if not SCN.swapping then
-        local m=#SCN.stack
-        SCN.stack[m+1]=tar or SCN.cur
-        SCN.stack[m+2]=style or 'fade'
-    end
+function SCN.push(tar)
+    table.insert(SCN.stack,tar or SCN.stack[#SCN.stack-1])
 end
 function SCN.pop()
-    table.remove(SCN.stack)
     table.remove(SCN.stack)
 end
 
@@ -149,8 +140,10 @@ local swap={
 }-- Scene swapping animations
 function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
     if scenes[tar] then
-        if not SCN.swapping and tar~=SCN.cur then
+        if not SCN.swapping then
             style=style or 'fade'
+            SCN.prev=SCN.stack[#SCN.stack]
+            SCN.stack[#SCN.stack]=tar
             SCN.swapping=true
             SCN.args={...}
             local S=SCN.state
@@ -165,26 +158,45 @@ function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
 end
 function SCN.go(tar,style,...)-- Normal scene swapping, can back
     if scenes[tar] then
-        SCN.push()
-        SCN.swapTo(tar,style,...)
+        if not SCN.swapping then
+            SCN.push(SCN.stack[#SCN.stack] or '_')
+            SCN.swapTo(tar,style,...)
+        end
     else
         MES.new('warn',"No Scene: "..tar)
     end
 end
-function SCN.back(...)
+function SCN.back(style,...)
     if SCN.swapping then return end
 
     local m=#SCN.stack
-    if m>0 then
+    if m>1 then
         -- Leave scene
         if SCN.leave then SCN.leave() end
 
         -- Poll&Back to previous Scene
-        SCN.swapTo(SCN.stack[m-1],SCN.stack[m],...)
-        table.remove(SCN.stack)
-        table.remove(SCN.stack)
+        SCN.pop()
+        SCN.swapTo(SCN.stack[#SCN.stack],style,...)
     else
         Zenitha._quit()
     end
 end
+function SCN.backTo(tar,style,...)
+    if SCN.swapping then return end
+
+    -- Leave scene
+    if SCN.sceneBack then
+        SCN.sceneBack()
+    end
+
+    -- Poll&Back to previous Scene
+    while SCN.stack[#SCN.stack-1]~=tar and #SCN.stack>1 do
+        SCN.pop()
+    end
+    SCN.swapTo(SCN.stack[#SCN.stack],style,...)
+end
+function SCN.printStack()
+    for i=1,#SCN.stack do print(SCN.stack[i]) end
+end
+
 return SCN
