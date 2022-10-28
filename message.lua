@@ -144,9 +144,9 @@ function MES.draw()
             GC.scale(m.k)
 
             GC.setColor(m.color[1],m.color[2],m.color[3],m.color[4]*a)
-            GC.rectangle('fill',0,0,m.w,m.h,m.h/12.6+4)
+            GC.rectangle('fill',0,0,m.w,m.h,8)
             GC.setColor(.62,.62,.62,a*.626)
-            GC.rectangle('line',1,1,m.w-2,m.h-2,m.h/12.6)
+            GC.rectangle('line',1,1,m.w-2,m.h-2,4)
             GC.setColor(1,1,1,a)
             if m.icon then
                 GC.draw(m.icon,4,4,nil,40/m.icon:getWidth(),40/m.icon:getHeight())
