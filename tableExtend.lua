@@ -358,7 +358,7 @@ do-- function TABLE.dump(L,t)
     local function dump(L,t)
         local s='{\n'
         if not t then
-            s='return{\n'
+            s='return {\n'
             t=1
             if type(L)~='table' then
                 return
