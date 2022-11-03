@@ -157,14 +157,14 @@ function GC.regRoundPolygon(mode,x,y,R,segments,r,phase)
     end
 end
 
-do-- function GC.getScreenShot()
-    local _table,_key
-    local function _captureScreenshotFunc(imageData)
-        _table[_key]=gc.newImage(imageData)
+do-- function GC.getScreenShot(table,key)-- Save screenshot as image object to a table
+    local _t,_k
+    local function _captureFunc(imageData)-- Actually triggered by engine a bit later after calling GC.getScreenShot, because love2d's capture function doesn't effect instantly
+        _t[_k]=gc.newImage(imageData)
     end
     function GC.getScreenShot(t,k)
-        _table,_key=t,k
-        gc.captureScreenshot(_captureScreenshotFunc)
+        _t,_k=t,k
+        gc.captureScreenshot(_captureFunc)
     end
 end
 

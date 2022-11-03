@@ -585,15 +585,15 @@ function love.errorhandler(msg)
     BGM.stop()
     gc.reset()
 
+    local sceneStack=SCN and table.concat(SCN.stack,"/") or "NULL"
     if mainLoopStarted and #errData<3 and SCN.scenes['error'] then
         BG.set('none')
-        local scn=SCN and SCN.stack[#SCN.stack-1] or "NULL"
-        table.insert(errData,{mes=err,scene=scn})
+        table.insert(errData,{mes=err,scene=sceneStack})
 
         -- Write messages to log file
         love.filesystem.append('conf/error.log',
             os.date("%Y/%m/%d %A %H:%M:%S\n")..
-            #errData.." crash(es) "..love.system.getOS().."-"..versionText.."  scene: "..scn.."\n"..
+            #errData.." crash(es) "..love.system.getOS().."-"..versionText.."  scene: "..sceneStack.."\n"..
             table.concat(err,"\n",1,c-2).."\n\n"
         )
 
@@ -637,7 +637,7 @@ function love.errorhandler(msg)
             setFont(40,'_basic') gc.printf(errorMsg,100,160,SCR.w/k-200)
             setFont(25,'_basic') gc.printf(err[1],100,380,SCR.w/k-200)
             setFont(20,'_basic')
-            GC.print(love.system.getOS().."-"..versionText.."                          scene:"..(SCN and SCN.stack[#SCN.stack-1] or "NULL"),100,640)
+            GC.print(love.system.getOS().."-"..versionText.."\nScene stack:"..sceneStack,100,640)
             GC.print("TRACEBACK",100,430)
             for i=4,#err-2 do
                 gc_print(err[i],100,380+20*i)
