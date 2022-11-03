@@ -53,9 +53,9 @@ function SCN.swapUpdate(dt)
     S.time=S.time-dt
     if S.time<S.changeTime and S.time+dt>=S.changeTime then
         -- Actually load scene at this moment
-        SCN.load(S.tar)
         SCN.stack[#SCN.stack]=S.tar
         SCN.cur=S.tar
+        SCN.load(S.tar)
         SCN.mainTouchID=nil
     end
     if S.time<0 then
