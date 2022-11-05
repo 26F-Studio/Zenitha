@@ -52,8 +52,8 @@ local scene={
     }
 }
 scene.scrollHeight=626
-function scene.init()
-    scene.widgetList.textBox:setTexts({"5.textBox","line 2","line 3","line 4","line 5","line 6","line 7"},true)
+function scene.enter()
+    scene.widgetList.textBox:setTexts({"4.textBox","line 2","line 3","line 4","line 5","line 6","line 7"},true)
     scene.widgetList.listBox:setList(testVal_4)
 end
 

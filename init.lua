@@ -155,7 +155,7 @@ VOC=        require'Zenitha.voice'
 
 --------------------------------------------------------------
 
-local WIDGET,SCR,SCN,WAIT=WIDGET,SCR,SCN,WAIT
+local WIDGET,SCR,SCN,BG,WAIT=WIDGET,SCR,SCN,BG,WAIT
 local xOy=SCR.xOy
 local ITP=xOy.inverseTransformPoint
 local setFont=FONT.set
@@ -669,7 +669,6 @@ function love.run()
 
     local love=love
 
-    local BG,WAIT=BG,WAIT
     local SCN_swapUpdate=SCN.swapUpdate
     local MES_update,MES_draw=MES.update,MES.draw
     local HTTP_update=HTTP.update
@@ -703,7 +702,7 @@ function love.run()
         if firstScene then
             MES.new('error',"No scene named '"..firstScene.."'")
         end
-        SCN.load('_zenitha')
+        SCN.go('_zenitha')
     end
 
     return function()
