@@ -1,6 +1,3 @@
-local ins,rem=table.insert,table.remove
-local max=math.max
-
 local mesIcon={
     check=GC.load{40,40,
         {'setLW',10},
@@ -83,7 +80,7 @@ function MES.new(icon,str,time)
     local h=math.max(text:getHeight(),46)+2
     local k=h>400 and 1/math.min(h/400,2.6) or 1
 
-    ins(mesList,1,{
+    table.insert(mesList,1,{
         startTime=.26,
         endTime=.26,
         time=time or 3,
@@ -114,13 +111,13 @@ function MES.update(dt)
     for i=#mesList,1,-1 do
         local m=mesList[i]
         if m.startTime>0 then
-            m.startTime=max(m.startTime-dt,0)
+            m.startTime=math.max(m.startTime-dt,0)
         elseif m.time>0 then
-            m.time=max(m.time-dt,0)
+            m.time=math.max(m.time-dt,0)
         elseif m.endTime>0 then
             m.endTime=m.endTime-dt
         else
-            rem(mesList,i)
+            table.remove(mesList,i)
         end
         if i>1 then
             local _m=mesList[i-1]
