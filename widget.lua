@@ -1472,8 +1472,8 @@ function Widgets.textBox:setTexts(t)
 end
 function Widgets.textBox:push(t)
     ins(self._texts,t)
-    if self._scrollPos==(#self._texts-1-self._capacity)*self.lineHeight then-- minus 1 for the new message
-        self._scrollPos=min(self._scrollPos+self.lineHeight,(#self._texts-self._capacity)*self.lineHeight)
+    if self._scrollPos==(#self._texts-1)*self.lineHeight-self.h then-- minus 1 for the new message
+        self._scrollPos=min(self._scrollPos+self.lineHeight,#self._texts*self.lineHeight-self.h)
     end
 end
 function Widgets.textBox:clear()
@@ -1503,10 +1503,10 @@ function Widgets.textBox:press(x,y)
     end
 end
 function Widgets.textBox:drag(_,_,_,dy)
-    self._scrollPos=max(0,min(self._scrollPos-dy,(#self._texts-self._capacity)*self.lineHeight))
+    self._scrollPos=max(0,min(self._scrollPos-dy,#self._texts*self.lineHeight-self.h))
 end
 function Widgets.textBox:scroll(dx,dy)
-    self._scrollPos=max(0,min(self._scrollPos-(dx+dy)*self.lineHeight,(#self._texts-self._capacity)*self.lineHeight))
+    self._scrollPos=max(0,min(self._scrollPos-(dx+dy)*self.lineHeight,#self._texts*self.lineHeight-self.h))
 end
 function Widgets.textBox:arrowKey(k)
     self:scroll(0,k =='up' and -1 or k=='down' and 1 or 0)
@@ -1521,8 +1521,9 @@ function Widgets.textBox:update(dt)
 end
 function Widgets.textBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
-    local texts=self._texts
+    local list=self._texts
     local lineH=self.lineHeight
+    local H=#list*lineH
     local scroll=self._scrollPos1
 
     -- Background
@@ -1541,12 +1542,12 @@ function Widgets.textBox:draw()
 
         -- Slider
         gc_setColor(COLOR.L)
-        if #texts>self._capacity then
-            local len=h*h/(#texts*lineH)
+        if #list>self._capacity then
+            local len=h*h/H
             if self.scrollBarPos=='left' then
-                gc_rectangle('fill',-15,(h-len)*scroll/((#texts-self._capacity)*lineH),10,len,self.cornerR)
+                gc_rectangle('fill',-15,(h-len)*scroll/(H-h),10,len,self.cornerR)
             elseif self.scrollBarPos=='right' then
-                gc_rectangle('fill',w+5,(h-len)*scroll/((#texts-self._capacity)*lineH),10,len,self.cornerR)
+                gc_rectangle('fill',w+5,(h-len)*scroll/(H-h),10,len,self.cornerR)
             end
         end
 
@@ -1571,8 +1572,8 @@ function Widgets.textBox:draw()
         local pos=floor(scroll/lineH)
         for i=1,self._capacity+1 do
             i=pos+i
-            if texts[i] then
-                gc_printf(texts[i],10,self.yOffset,w-16)
+            if list[i] then
+                gc_printf(list[i],10,self.yOffset,w-16)
             end
             gc_translate(0,lineH)
         end
