@@ -322,18 +322,12 @@ local commands={} do
     }
     commands.mes={
         code=function(arg)
-            if
-                arg=='check' or
-                arg=='info' or
-                arg=='broadcast' or
-                arg=='warn' or
-                arg=='error'
-            then
+            if arg:match("^[a-z]+$") and ("<info|check|warn|error|other>"):find(arg) then
                 MES.new(arg,"Test message",6)
             else
                 log{COLOR.I,"Show a message on the up-left corner"}
                 log""
-                log{COLOR.I,"Usage: mes <check|info|broadcast|warn|error>"}
+                log{COLOR.I,"Usage: mes <info|check|warn|error|other>"}
             end
         end,
         description="Show a message",

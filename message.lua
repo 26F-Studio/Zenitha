@@ -1,59 +1,29 @@
 local mesIcon={
-    check=GC.load{40,40,
-        {'setLW',10},
-        {'setCL',0,0,0},
-        {'line',4,19,15,30,36,9},
-        {'setLW',6},
-        {'setCL',.7,1,.6},
-        {'line',5,20,15,30,35,10},
-    },
     info=GC.load{40,40,
-        {'setCL',.2,.25,.85},
-        {'fCirc',20,20,15},
         {'setCL',1,1,1},
         {'setLW',2},
-        {'dCirc',20,20,15},
-        {'fRect',18,11,4,4},
-        {'fRect',18,17,4,12},
+        {'dCirc',20,20,19},
+        {'fRect',17,7,6,6},
+        {'fRect',17,16,6,17},
     },
-    broadcast=GC.load{40,40,
+    check=GC.load{40,40,
+        {'setLW',6},
         {'setCL',1,1,1},
-        {'fRect',2,4,36,26,3},
-        {'fPoly',2,27,2,37,14,25},
-        {'setCL',.5,.5,.5},
-        {'fRect',6,11,4,4,1},{'fRect',14,11,19,4,1},
-        {'fRect',6,19,4,4,1},{'fRect',14,19,19,4,1},
+        {'line',5,20,15,30,35,10},
     },
     warn=GC.load{40,40,
-        {'setCL',.95,.83,.4},
-        {'fPoly',20.5,1,0,38,40,38},
-        {'setCL',0,0,0},
+        {'setCL',1,1,1},
+        {'setLW',3},
         {'dPoly',20.5,1,0,38,40,38},
-        {'fRect',17,10,7,18,2},
-        {'fRect',17,29,7,7,2},
         {'setCL',1,1,1},
         {'fRect',18,11,5,16,2},
         {'fRect',18,30,5,5,2},
     },
     error=GC.load{40,40,
-        {'setCL',.95,.3,.3},
-        {'fCirc',20,20,19},
-        {'setCL',0,0,0},
-        {'dCirc',20,20,19},
         {'setLW',6},
-        {'line',10.2,10.2,29.8,29.8},
-        {'line',10.2,29.8,29.8,10.2},
-        {'setLW',4},
         {'setCL',1,1,1},
-        {'line',11,11,29,29},
-        {'line',11,29,29,11},
-    },
-    music=GC.load{40,40,
-        {'setLW',2},
-        {'dRect',1,3,38,34,3},
-        {'setLW',4},
-        {'line',21,26,21,10,28,10},
-        {'fElps',17,26,6,5},
+        {'line',8,8,32,32},
+        {'line',8,32,31,8},
     },
 }
 
@@ -62,12 +32,11 @@ local startY=0
 
 local MES={}
 local backColors={
-    check={.3,.6,.3,.7},
-    broadcast={.3,.3,.6,.8},
-    warn={.4,.4,.2,.9},
-    error={.4,.2,.2,.9},
-    music={.2,.4,.4,.9},
-    other={.5,.5,.5,.7},
+    info= {COLOR.hex"3575F0"},
+    check={COLOR.hex"4FB666"},
+    warn= {COLOR.hex"D2A100"},
+    error={COLOR.hex"CF4949"},
+    other={COLOR.hex"787878"},
 }
 function MES.new(icon,str,time)
     local color=backColors.other
@@ -77,7 +46,7 @@ function MES.new(icon,str,time)
     end
     local text=GC.newText(FONT.get(30),str)
     local w=math.max(text:getWidth()+(icon and 45 or 5),200)+15
-    local h=math.max(text:getHeight(),46)+2
+    local h=math.max(text:getHeight()+2,50)
     local k=h>400 and 1/math.min(h/400,2.6) or 1
 
     table.insert(mesList,1,{
@@ -140,15 +109,19 @@ function MES.draw()
             GC.translate(3+SCR.safeX,m.y)
             GC.scale(m.k)
 
-            GC.setColor(m.color[1],m.color[2],m.color[3],m.color[4]*a)
+            GC.setColor(m.color[1]*1.26,m.color[2]*1.26,m.color[3]*1.26,a*.042)
+            GC.setLineWidth(15)GC.rectangle('line',0,0,m.w,m.h,8)
+            GC.setLineWidth(10)GC.rectangle('line',0,0,m.w,m.h,8)
+            GC.setLineWidth(6) GC.rectangle('line',0,0,m.w,m.h,8)
+            GC.setColor(m.color[1],m.color[2],m.color[3],a)
             GC.rectangle('fill',0,0,m.w,m.h,8)
-            GC.setColor(.62,.62,.62,a*.626)
-            GC.rectangle('line',1,1,m.w-2,m.h-2,4)
             GC.setColor(1,1,1,a)
+            local x=10
             if m.icon then
-                GC.draw(m.icon,4,4,nil,40/m.icon:getWidth(),40/m.icon:getHeight())
+                GC.mDraw(m.icon,24,24,nil,.8)
+                x=x+40
             end
-            GC.mDrawY(m.text,m.icon and 50 or 10,m.h/2)
+            GC.draw(m.text,x,6)
             GC.pop()
         end
         GC.translate(0,-startY)

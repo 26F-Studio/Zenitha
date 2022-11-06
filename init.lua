@@ -757,12 +757,12 @@ function love.run()
 
                 gc_replaceTransform(SCR.origin)
                     BG.draw()
-                gc_replaceTransform(SCR.xOy)
+                gc_replaceTransform(xOy)
                     if SCN.draw then
                         gc_translate(0,-SCN.curScroll)
                         SCN.draw()
                     end
-                gc_replaceTransform(SCR.xOy)
+                gc_replaceTransform(xOy)
                     WIDGET_draw()
                     SYSFX_draw()
                     TEXT:draw()
@@ -808,7 +808,7 @@ function love.run()
 
                         -- Cursor pos disp
                         gc_replaceTransform(SCR.origin)
-                            local x,y=SCR.xOy:transformPoint(mx,my)
+                            local x,y=xOy:transformPoint(mx,my)
                             gc.setLineWidth(1)
                             gc.line(x,0,x,SCR.h)
                             gc.line(0,y,SCR.w,y)
