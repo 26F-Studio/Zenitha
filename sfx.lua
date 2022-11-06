@@ -59,8 +59,7 @@ function SFX.load(path)
             missing=missing+1
         end
     end
-    LOG(c.."/"..#sfxList.." SFX files loaded")
-    LOG(missing.." SFX files missing")
+    LOG(("%d/%d SFX files loaded (%d missing)"):format(c,#sfxList,missing))
     if missing>0 then
         MES.new('info',missing.." SFX files missing")
     end
