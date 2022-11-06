@@ -1,5 +1,5 @@
 local gc=love.graphics
-local setColor,prints,printf,draw=gc.setColor,gc.print,gc.printf,gc.draw
+local setColor,prints,printf,draw,drawL=gc.setColor,gc.print,gc.printf,gc.draw,gc.drawLayer
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
 local sin,cos=math.sin,math.cos
 local pcall=pcall
@@ -12,12 +12,15 @@ local GC=setmetatable({},{
 
 --------------------------------------------------------------
 
-function GC.mStr(obj,x,y) printf(obj,x-626,y,1252,'center') end-- Printf a string with 'center'
-function GC.mDrawSimpX(obj,x,y) draw(obj,x-obj:getWidth()*.5,y) end-- Simply draw an obj with x=obj:getWidth()/2
-function GC.mDrawSimpY(obj,x,y) draw(obj,x,y-obj:getHeight()*.5) end-- Simply draw an obj with y=obj:getWidth()/2
+function GC.mStr(obj,x,y)       printf(obj,x-626,y,1252,'center') end-- Printf a string with 'center'
 function GC.mDrawX(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end-- Draw an obj with x=obj:getWidth()/2
 function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end-- Draw an obj with y=obj:getWidth()/2
-function GC.mDraw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end-- Draw an obj with both middle X & Y
+function GC.mDraw(obj,x,y,a,k)  draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end-- Draw an obj with both middle X & Y
+
+-- arrayImage version
+function GC.mDrawLX(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,obj:getWidth()*.5,0) end
+function GC.mDrawLY(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,0,obj:getHeight()*.5) end
+function GC.mDrawL(obj,l,x,y,a,k)  drawL(obj,l,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
 
 --------------------------------------------------------------
 
