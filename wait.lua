@@ -9,11 +9,16 @@ local WAIT={
     coverColor={.1,.1,.1},
     coverAlpha=.6,
 
+    defaultInit=NULL,
+    defaultUpdate=NULL,
+    defaultDraw=NULL,
+    defaultQuit=NULL,
+
     arg=false,
 }
 
 local arcAlpha={1,.6,.4,.3}
-local function defaultDraw(a,t)
+function WAIT.defaultDraw(a,t)
     GC.setLineWidth(SCR.h/26)
     t=t*2.6
     for i=1,4 do
@@ -31,6 +36,7 @@ function WAIT.new(arg)
     assert(arg.quit==nil      or type(arg.quit)      =='function',"Field 'leave' must be function")
     assert(arg.draw==nil      or type(arg.draw)      =='function',"Field 'draw' must be function")
     assert(arg.escapable==nil or type(arg.escapable) =='boolean', "Field 'escapable' must be boolean")
+    WAIT.defaultInit()
     if arg.init then arg.init() end
 
     WAIT.arg=arg
@@ -49,6 +55,7 @@ end
 function WAIT.update(dt)
     if WAIT.state then
         WAIT.totalTimer=WAIT.totalTimer+dt
+        WAIT.defaultUpdate()
         if WAIT.arg.update then WAIT.arg.update(dt) end
 
         if WAIT.state~='leave' and WAIT.totalTimer>=(WAIT.arg.timeout or WAIT.timeout) then
@@ -62,6 +69,7 @@ function WAIT.update(dt)
             WAIT.timer=WAIT.timer-dt
             if WAIT.timer<=0 then
                 WAIT.state=false
+                WAIT.defaultQuit()
                 if WAIT.arg.quit then WAIT.arg.quit() end
             end
         end
@@ -83,7 +91,10 @@ function WAIT.draw()
         )
         GC.rectangle('fill',0,0,SCR.w,SCR.h);
 
-        (WAIT.arg.draw or defaultDraw)(alpha,WAIT.totalTimer)
+        WAIT.defaultDraw(alpha,WAIT.totalTimer)
+        if WAIT.arg.draw then
+            WAIT.arg.draw(alpha,WAIT.totalTimer)
+        end
     end
 end
 
@@ -115,10 +126,23 @@ function WAIT.setCoverColor(r,g,b)
 end
 function WAIT.setCoverAlpha(a)
     assert(type(a)=='number',"Arg #1 must be number between 0~1")
+    WAIT.coverAlpha=a
+end
+function WAIT.setDefaultInit(f)
+    assert(type(f)=='function',"Arg #1 must be function")
+    WAIT.defaultInit=f
+end
+function WAIT.setDefaultUpdate(f)
+    assert(type(f)=='function',"Arg #1 must be function")
+    WAIT.defaultUpdate=f
 end
 function WAIT.setDefaultDraw(f)
     assert(type(f)=='function',"Arg #1 must be function")
-    defaultDraw=f
+    WAIT.defaultDraw=f
+end
+function WAIT.setDefaultQuit(f)
+    assert(type(f)=='function',"Arg #1 must be function")
+    WAIT.defaultQuit=f
 end
 
 setmetatable(WAIT,{__call=function(self,arg)
