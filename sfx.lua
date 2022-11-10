@@ -126,7 +126,7 @@ function SFX.playSample(pack,...)-- vol-1, sampSet1, vol-2, sampSet2
 end
 function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
-    if vol==0 then return end
+    if vol<=0 then return end
 
     local S=Sources[name]-- Source list
     if not S then return end
