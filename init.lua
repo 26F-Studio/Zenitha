@@ -591,7 +591,7 @@ function love.errorhandler(msg)
         table.insert(errData,{mes=err,scene=sceneStack})
 
         -- Write messages to log file
-        love.filesystem.append('conf/error.log',
+        love.filesystem.append('error.log',
             os.date("%Y/%m/%d %A %H:%M:%S\n")..
             #errData.." crash(es) "..love.system.getOS().."-"..versionText.."  scene: "..sceneStack.."\n"..
             table.concat(err,"\n",1,c-2).."\n\n"
