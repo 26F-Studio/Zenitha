@@ -1503,10 +1503,16 @@ function Widgets.textBox:press(x,y)
     end
 end
 function Widgets.textBox:drag(_,_,_,dy)
-    self._scrollPos=max(0,min(self._scrollPos-dy,#self._texts*self.lineHeight-self.h))
+    self._scrollPos=MATH.clamp(
+        self._scrollPos-dy,
+        0,max(#self._texts*self.lineHeight-self.h,0)
+    )
 end
 function Widgets.textBox:scroll(dx,dy)
-    self._scrollPos=max(0,min(self._scrollPos-(dx+dy)*self.lineHeight,#self._texts*self.lineHeight-self.h))
+    self._scrollPos=MATH.clamp(
+        self._scrollPos-(dx+dy)*self.lineHeight,
+        0,max(#self._texts*self.lineHeight-self.h,0)
+    )
 end
 function Widgets.textBox:arrowKey(k)
     self:scroll(0,k =='up' and -1 or k=='down' and 1 or 0)
@@ -1715,7 +1721,7 @@ function Widgets.listBox:_moveScroll(dy,selInSight)
             (self._selected+1)*self.lineHeight-self.h,
             (self._selected-2)*self.lineHeight
         ),
-        0,#self._list*self.lineHeight-self.h
+        0,max(#self._list*self.lineHeight-self.h,0)
     )
 end
 function Widgets.listBox:drag(x,y,_,dy)
