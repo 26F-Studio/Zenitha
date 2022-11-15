@@ -181,7 +181,7 @@ function SCN.back(style,...)
         SCN.pop()
         SCN.swapTo(SCN.stack[#SCN.stack],style,...)
     else
-        Zenitha._quit()
+        Zenitha._quit(style)
     end
 end
 function SCN.backTo(tar,style,...)

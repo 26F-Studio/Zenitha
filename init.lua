@@ -854,9 +854,9 @@ end
 -- Zenitha framework & methods
 Zenitha={}
 
-function Zenitha._quit()
+function Zenitha._quit(style)
     onQuit()
-    SCN.swapTo('_quit','slowFade')
+    SCN.swapTo('_quit',style or 'slowFade')
 end
 
 function Zenitha.setAppName(name)
