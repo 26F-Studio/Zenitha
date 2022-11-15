@@ -1307,12 +1307,12 @@ function Widgets.inputBox:getText()
 end
 function Widgets.inputBox:setText(str)
     if not str then str="" end
-    assert(type(str)=='string',"Arg #1 must be string")
+    assert(type(str)=='string',"Arg must be string")
     self._value=str
 end
 function Widgets.inputBox:addText(str)
     if not str then str="" end
-    assert(type(str)=='string',"Arg #1 must be string")
+    assert(type(str)=='string',"Arg must be string")
     self._value=self._value..str
 end
 function Widgets.inputBox:clear()
@@ -1465,7 +1465,7 @@ function Widgets.textBox:replaceTexts(newList)
     self._scrollPos=0
 end
 function Widgets.textBox:setTexts(t)
-    assert(type(t)=='table',"Arg #1 must be table")
+    assert(type(t)=='table',"Arg must be table")
     TABLE.clear(self._texts)
     TABLE.connect(self._texts,t)
     self._scrollPos=0
@@ -1647,7 +1647,7 @@ function Widgets.listBox:clear()
     self._scrollPos=0
 end
 function Widgets.listBox:setList(t)
-    assert(type(t)=='table',"Arg #1 must be table")
+    assert(type(t)=='table',"Arg must be table")
     self._list=t
     self._selected=1
     self._scrollPos=0

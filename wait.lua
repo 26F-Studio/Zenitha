@@ -83,13 +83,15 @@ function WAIT.draw()
             WAIT.state=='wait' and 1 or
             WAIT.state=='leave' and WAIT.timer/WAIT.leaveTime
         )
-        GC.setColor(
-            WAIT.coverColor[1],
-            WAIT.coverColor[2],
-            WAIT.coverColor[3],
-            alpha*WAIT.coverAlpha
-        )
-        GC.rectangle('fill',0,0,SCR.w,SCR.h);
+        if WAIT.coverAlpha>0 then
+            GC.setColor(
+                WAIT.coverColor[1],
+                WAIT.coverColor[2],
+                WAIT.coverColor[3],
+                alpha*WAIT.coverAlpha
+            )
+            GC.rectangle('fill',0,0,SCR.w,SCR.h);
+        end
 
         WAIT.defaultDraw(alpha,WAIT.totalTimer)
         if WAIT.arg.draw then
@@ -99,15 +101,15 @@ function WAIT.draw()
 end
 
 function WAIT.setEnterTime(t)
-    assert(type(t)=='number' and t>0,"Arg #1 must be number larger then 0")
+    assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.enterTime=t
 end
 function WAIT.setLeaveTime(t)
-    assert(type(t)=='number' and t>0,"Arg #1 must be number larger then 0")
+    assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.leaveTime=t
 end
 function WAIT.setTimeout(t)
-    assert(type(t)=='number' and t>0,"Arg #1 must be number larger then 0")
+    assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.timeout=t
 end
 function WAIT.setCoverColor(r,g,b)
@@ -125,23 +127,23 @@ function WAIT.setCoverColor(r,g,b)
     end
 end
 function WAIT.setCoverAlpha(a)
-    assert(type(a)=='number',"Arg #1 must be number between 0~1")
+    assert(type(a)=='number',"Arg must be number between 0~1")
     WAIT.coverAlpha=a
 end
 function WAIT.setDefaultInit(f)
-    assert(type(f)=='function',"Arg #1 must be function")
+    assert(type(f)=='function',"Arg must be function")
     WAIT.defaultInit=f
 end
 function WAIT.setDefaultUpdate(f)
-    assert(type(f)=='function',"Arg #1 must be function")
+    assert(type(f)=='function',"Arg must be function")
     WAIT.defaultUpdate=f
 end
 function WAIT.setDefaultDraw(f)
-    assert(type(f)=='function',"Arg #1 must be function")
+    assert(type(f)=='function',"Arg must be function")
     WAIT.defaultDraw=f
 end
 function WAIT.setDefaultQuit(f)
-    assert(type(f)=='function',"Arg #1 must be function")
+    assert(type(f)=='function',"Arg must be function")
     WAIT.defaultQuit=f
 end
 
