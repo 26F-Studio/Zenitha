@@ -77,7 +77,7 @@ local commands={} do
         },
     }
     commands.exit={
-        code=WIDGET.c_backScn,
+        code=WIDGET.c_backScn(),
         description="Return to the last menu",
         details={
             "Return to the last menu.",
