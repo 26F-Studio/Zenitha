@@ -75,6 +75,9 @@ function MES.traceback()
         mes:find("\n%[C%], in 'xpcall'")
     ),5)
 end
+function MES.clear()
+    TABLE.cut(mesList)
+end
 
 function MES.update(dt)
     for i=#mesList,1,-1 do
