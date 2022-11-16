@@ -362,13 +362,8 @@ end
 -- button_invis
 Widgets.button_invis=setmetatable({
     type='button_invis',
+    sound=false,
 },{__index=Widgets.button,__metatable=true})
-function Widgets.button_invis:release(x,y,k)
-    self._pressed=false
-    if self:isAbove(x,y) then
-        self.code(k)
-    end
-end
 function Widgets.button_invis:draw()
     gc_push('transform')
     gc_translate(self._x,self._y)
