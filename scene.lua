@@ -157,6 +157,10 @@ function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
             SCN.prev=SCN.stack[#SCN.stack]
 
             style=style or 'fade'
+            if not swap[style] then
+                MES.new('error',"No swap style named '"..style.."'")
+                style='fade'
+            end
             SCN.swapping=true
             SCN.args={...}
             local S=SCN.state

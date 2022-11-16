@@ -39,7 +39,7 @@ local commands={} do
                         log{COLOR.Y,("No details for command '%s'"):format(arg)}
                     end
                 else
-                    log{COLOR.Y,("No command called '%s'"):format(arg)}
+                    log{COLOR.Y,("No command named '%s'"):format(arg)}
                 end
             else
                 -- help
@@ -205,7 +205,7 @@ local commands={} do
                             log("Unknown item type: %s (%s)"):format(name,info.type)
                         end
                     else
-                        log{COLOR.R,("No file called '%s'"):format(name)}
+                        log{COLOR.R,("No file named '%s'"):format(name)}
                     end
                 else
                     log{COLOR.I,"Usage: del [filename|dirname]"}
@@ -296,7 +296,7 @@ local commands={} do
                         log{COLOR.R,("Unprintable item: %s (%s)"):format(name,info.type)}
                     end
                 else
-                    log{COLOR.R,("No file called '%s'"):format(name)}
+                    log{COLOR.R,("No file named '%s'"):format(name)}
                 end
             else
                 log{COLOR.I,"Usage: print [filename]"}
@@ -837,7 +837,7 @@ function scene.keyDown(key,isRep)
             if commands[cmd] then
                 commands[cmd].code(arg)
             else
-                log{COLOR.R,"No command called "..cmd}
+                log{COLOR.R,"No command named "..cmd}
             end
         end
         inputBox:clear()
