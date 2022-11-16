@@ -1999,7 +1999,16 @@ function WIDGET.setOnChange(func)
 end
 
 -- Widget function shortcuts
-function WIDGET.c_backScn()SCN.back() end
+do-- function WIDGET.c_backScn(style)
+    local cache={}
+    function WIDGET.c_backScn(style)
+        if not style then style='fade' end
+        if not cache[style] then
+            cache[style]=function() SCN.back(style) end
+        end
+        return cache[style]
+    end
+end
 do-- function WIDGET.c_goScn(name,style)
     local cache={}
     function WIDGET.c_goScn(name,style)

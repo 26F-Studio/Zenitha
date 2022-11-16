@@ -33,6 +33,65 @@ local SCN={
 
     scenes=scenes,
 }
+-- Scene swapping animations
+local swap={
+    none={
+        duration=0,changeTime=0,
+        draw=function() end,
+    },
+    flash={
+        duration=.16,changeTime=.08,
+        draw=function() GC.clear(1,1,1) end,
+    },
+    fade={
+        duration=.5,changeTime=.25,
+        draw=function(t)
+            GC.setColor(.1,.1,.1,t>.25 and 2-t*4 or t*4)
+            GC.rectangle('fill',0,0,SCR.w,SCR.h)
+        end,
+    },
+    fastFade={
+        duration=.2,changeTime=.1,
+        draw=function(t)
+            GC.setColor(.1,.1,.1,t>.1 and 1-t*10 or t*10)
+            GC.rectangle('fill',0,0,SCR.w,SCR.h)
+        end,
+    },
+    slowFade={
+        duration=3,changeTime=1.5,
+        draw=function(t)
+            GC.setColor(.1,.1,.1,t>1.5 and (3-t)/1.5 or t/1.5)
+            GC.rectangle('fill',0,0,SCR.w,SCR.h)
+        end,
+    },
+    swipeL={
+        duration=.5,changeTime=.25,
+        draw=function(t)
+        t=t*2
+            GC.setColor(.1,.1,.1,1-math.abs(t-.5))
+            t=t*t*(3-2*t)*2-1
+            GC.rectangle('fill',t*SCR.w,0,SCR.w,SCR.h)
+        end,
+    },
+    swipeR={
+        duration=.5,changeTime=.25,
+        draw=function(t)
+            t=t*2
+            GC.setColor(.1,.1,.1,1-math.abs(t-.5))
+            t=t*t*(2*t-3)*2+1
+            GC.rectangle('fill',t*SCR.w,0,SCR.w,SCR.h)
+        end,
+    },
+    swipeD={
+        duration=.5,changeTime=.25,
+        draw=function(t)
+            t=t*2
+            GC.setColor(.1,.1,.1,1-math.abs(t-.5))
+            t=t*t*(2*t-3)*2+1
+            GC.rectangle('fill',0,t*SCR.h,SCR.w,SCR.h)
+        end,
+    },
+}
 
 function SCN.add(name,scene)
     assert(not scene.scrollHeight or type(scene.scrollHeight)=='number',"[scene].scrollHeight must be number")
@@ -42,6 +101,15 @@ function SCN.add(name,scene)
     if not scene.widgetList then scene.widgetList={} end
     setmetatable(scene.widgetList,WIDGET.indexMeta)
     scenes[name]=scene
+end
+function SCN.addSwap(name,swp)
+    assert(type(name)=='string',"Arg name must be string")
+    assert(not swap[name],"Swap '"..name.."' already exist")
+    assert(type(swp)=='table',"Arg swp must be table")
+    assert(type(swp.duration)=='number' and swp.duration>=0,"swp.duration must be nonnegative number")
+    assert(type(swp.changeTime)=='number' and swp.changeTime>=0,"swp.changeTime must be nonnegative number")
+    assert(type(swp.draw)=='function',"swp.draw must be function")
+    swap[name]=swp
 end
 function SCN.setScroll(height)
     SCN.maxScroll=height or 0
@@ -83,64 +151,6 @@ function SCN.pop()
     table.remove(SCN.stack)
 end
 
-local swap={
-    none={
-        duration=0,changeTime=0,
-        draw=function() end
-    },
-    flash={
-        duration=.16,changeTime=.08,
-        draw=function() GC.clear(1,1,1) end
-    },
-    fade={
-        duration=.5,changeTime=.25,
-        draw=function(t)
-            GC.setColor(.1,.1,.1,t>.25 and 2-t*4 or t*4)
-            GC.rectangle('fill',0,0,SCR.w,SCR.h)
-        end
-    },
-    fastFade={
-        duration=.2,changeTime=.1,
-        draw=function(t)
-            GC.setColor(.1,.1,.1,t>.1 and 1-t*10 or t*10)
-            GC.rectangle('fill',0,0,SCR.w,SCR.h)
-        end
-    },
-    slowFade={
-        duration=3,changeTime=1.5,
-        draw=function(t)
-            GC.setColor(.1,.1,.1,t>1.5 and (3-t)/1.5 or t/1.5)
-            GC.rectangle('fill',0,0,SCR.w,SCR.h)
-        end
-    },
-    swipeL={
-        duration=.5,changeTime=.25,
-        draw=function(t)
-        t=t*2
-            GC.setColor(.1,.1,.1,1-math.abs(t-.5))
-            t=t*t*(3-2*t)*2-1
-            GC.rectangle('fill',t*SCR.w,0,SCR.w,SCR.h)
-        end
-    },
-    swipeR={
-        duration=.5,changeTime=.25,
-        draw=function(t)
-            t=t*2
-            GC.setColor(.1,.1,.1,1-math.abs(t-.5))
-            t=t*t*(2*t-3)*2+1
-            GC.rectangle('fill',t*SCR.w,0,SCR.w,SCR.h)
-        end
-    },
-    swipeD={
-        duration=.5,changeTime=.25,
-        draw=function(t)
-            t=t*2
-            GC.setColor(.1,.1,.1,1-math.abs(t-.5))
-            t=t*t*(2*t-3)*2+1
-            GC.rectangle('fill',0,t*SCR.h,SCR.w,SCR.h)
-        end
-    },
-}-- Scene swapping animations
 function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
     if scenes[tar] then
         if not SCN.swapping then
