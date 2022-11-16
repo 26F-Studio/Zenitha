@@ -31,12 +31,17 @@ function WAIT.new(arg)
     if WAIT.state then return end
 
     assert(type(arg)=='table',"arg must be table")
-    assert(arg.init==nil      or type(arg.init)      =='function',"Field 'enter' must be function")
-    assert(arg.update==nil    or type(arg.update)    =='function',"Field 'update' must be function")
-    assert(arg.quit==nil      or type(arg.quit)      =='function',"Field 'leave' must be function")
-    assert(arg.draw==nil      or type(arg.draw)      =='function',"Field 'draw' must be function")
-    assert(arg.escapable==nil or type(arg.escapable) =='boolean', "Field 'escapable' must be boolean")
-    WAIT.defaultInit()
+    assert(arg.init==nil            or type(arg.init)            =='function',"Field 'enter' must be function")
+    assert(arg.update==nil          or type(arg.update)          =='function',"Field 'update' must be function")
+    assert(arg.quit==nil            or type(arg.quit)            =='function',"Field 'leave' must be function")
+    assert(arg.draw==nil            or type(arg.draw)            =='function',"Field 'draw' must be function")
+    assert(arg.escapable==nil       or type(arg.escapable)       =='boolean', "Field 'escapable' must be boolean")
+    assert(arg.coverAlpha==nil      or type(arg.coverAlpha)      =='number',  "Field 'coverAlpha' must be number")
+    assert(arg.noDefaultInit==nil   or type(arg.noDefaultInit)   =='boolean', "Field 'noDefaultInit' must be boolean")
+    assert(arg.noDefaultUpdate==nil or type(arg.noDefaultUpdate) =='boolean', "Field 'noDefaultUpdate' must be boolean")
+    assert(arg.noDefaultDraw==nil   or type(arg.noDefaultDraw)   =='boolean', "Field 'noDefaultDraw' must be boolean")
+    assert(arg.noDefaultQuit==nil   or type(arg.noDefaultQuit)   =='boolean', "Field 'noDefaultQuit' must be boolean")
+    if not arg.noDefaultInit then WAIT.defaultInit() end
     if arg.init then arg.init() end
 
     WAIT.arg=arg
@@ -55,8 +60,8 @@ end
 function WAIT.update(dt)
     if WAIT.state then
         WAIT.totalTimer=WAIT.totalTimer+dt
-        WAIT.defaultUpdate()
-        if WAIT.arg.update then WAIT.arg.update(dt) end
+        if not WAIT.arg.noDefaultUpdate then WAIT.defaultUpdate(dt,WAIT.totalTimer) end
+        if WAIT.arg.update then WAIT.arg.update(dt,WAIT.totalTimer) end
 
         if WAIT.state~='leave' and WAIT.totalTimer>=(WAIT.arg.timeout or WAIT.timeout) then
             WAIT.interrupt()
@@ -69,7 +74,7 @@ function WAIT.update(dt)
             WAIT.timer=WAIT.timer-dt
             if WAIT.timer<=0 then
                 WAIT.state=false
-                WAIT.defaultQuit()
+                if not WAIT.arg.noDefaultQuit then WAIT.defaultQuit() end
                 if WAIT.arg.quit then WAIT.arg.quit() end
             end
         end
@@ -83,20 +88,18 @@ function WAIT.draw()
             WAIT.state=='wait' and 1 or
             WAIT.state=='leave' and WAIT.timer/WAIT.leaveTime
         )
-        if WAIT.coverAlpha>0 then
+        if (WAIT.arg.coverAlpha or WAIT.coverAlpha)>0 then
             GC.setColor(
                 WAIT.coverColor[1],
                 WAIT.coverColor[2],
                 WAIT.coverColor[3],
-                alpha*WAIT.coverAlpha
+                alpha*(WAIT.arg.coverAlpha or WAIT.coverAlpha)
             )
             GC.rectangle('fill',0,0,SCR.w,SCR.h);
         end
 
-        WAIT.defaultDraw(alpha,WAIT.totalTimer)
-        if WAIT.arg.draw then
-            WAIT.arg.draw(alpha,WAIT.totalTimer)
-        end
+        if not WAIT.arg.noDefaultDraw then WAIT.defaultDraw(alpha,WAIT.totalTimer) end
+        if WAIT.arg.draw then WAIT.arg.draw(alpha,WAIT.totalTimer) end
     end
 end
 
