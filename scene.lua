@@ -53,7 +53,7 @@ local swap={
     fastFade={
         duration=.2,changeTime=.1,
         draw=function(t)
-            GC.setColor(.1,.1,.1,t>.1 and 1-t*10 or t*10)
+            GC.setColor(.1,.1,.1,t>.1 and 2-t*10 or t*10)
             GC.rectangle('fill',0,0,SCR.w,SCR.h)
         end,
     },
