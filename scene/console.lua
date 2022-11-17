@@ -649,13 +649,13 @@ local commands={} do
             elseif arg=="really" then
                 BGM.stop()
                 WIDGET.unFocus(true)
-                inputBox._visible=false
+                inputBox:setVisible(false)
                 table.remove(WIDGET.active,TABLE.find(WIDGET.active,inputBox))
                 commands.cls.code()
                 outputBox:clear()
                 outputBox.h=SCR.h0-140
                 local button=WIDGET.new{type='button',name='bye',text=Zenitha.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,code=function()
-                    WIDGET.active.bye._visible=false
+                    WIDGET.active.bye:setVisible(false)
                     outputBox.h=SCR.h0-20
                     TASK.new(function()
                         DEBUG.yieldT(0.5)
@@ -663,7 +663,7 @@ local commands={} do
                             log{COLOR.R,STRING.repD("Deleting all data in $1...",i)}
                             DEBUG.yieldT(1)
                         end
-                        outputBox._visible=false
+                        outputBox:setVisible(false)
                         DEBUG.yieldT(0.26)
                         FILE.clear_s('')
                         love.event.quit()
