@@ -282,6 +282,15 @@ function TABLE.rotate(cb,dir)
                 icb[y][x]=cb[#cb-y+1][#cb[1]-x+1]
             end
         end
+    elseif dir=='0' then-- Not rotate, just simple copy
+        for y=1,#cb do
+            icb[y]={}
+            for x=1,#cb[1] do
+                icb[y][x]=cb[y][x]
+            end
+        end
+    else
+        error("Invalid rotate direction: "..tostring(dir))
     end
     return icb
 end
