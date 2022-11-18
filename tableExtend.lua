@@ -45,8 +45,6 @@ function TABLE.combine(L1,L2)
     return l
 end
 
---------------------------------------------------------------
-
 -- Get a full copy of a table, depth = how many layers will be recreate, default to inf
 function TABLE.copy(org,depth)
     if not depth then depth=1e99 end
@@ -145,8 +143,6 @@ function TABLE.clear(G)
     end
 end
 
---------------------------------------------------------------
-
 -- Remove duplicated value of [1~#]
 function TABLE.trimDuplicate(org)
     local cache={}
@@ -171,14 +167,49 @@ function TABLE.remDuplicate(org)
     end
 end
 
---------------------------------------------------------------
-
 -- Reverse [1~#]
 function TABLE.reverse(org)
     local l=#org
     for i=1,math.floor(l/2) do
         org[i],org[l+1-i]=org[l+1-i],org[i]
     end
+end
+
+-- Copy a rotated matrix table
+function TABLE.rotate(cb,dir)
+    local icb={}
+    if dir=='R' then-- Rotate CW
+        for y=1,#cb[1] do
+            icb[y]={}
+            for x=1,#cb do
+                icb[y][x]=cb[x][#cb[1]-y+1]
+            end
+        end
+    elseif dir=='L' then-- Rotate CCW
+        for y=1,#cb[1] do
+            icb[y]={}
+            for x=1,#cb do
+                icb[y][x]=cb[#cb-x+1][y]
+            end
+        end
+    elseif dir=='F' then-- Rotate 180 degree
+        for y=1,#cb do
+            icb[y]={}
+            for x=1,#cb[1] do
+                icb[y][x]=cb[#cb-y+1][#cb[1]-x+1]
+            end
+        end
+    elseif dir=='0' then-- Not rotate, just simple copy
+        for y=1,#cb do
+            icb[y]={}
+            for x=1,#cb[1] do
+                icb[y][x]=cb[y][x]
+            end
+        end
+    else
+        error("Invalid rotate direction: "..tostring(dir))
+    end
+    return icb
 end
 
 --------------------------------------------------------------
@@ -255,44 +286,6 @@ function TABLE.getSize(t)
     local size=0
     for _ in next,t do size=size+1 end
     return size
-end
---------------------------------------------------------------
-
--- Copy a rotated matrix table
-function TABLE.rotate(cb,dir)
-    local icb={}
-    if dir=='R' then-- Rotate CW
-        for y=1,#cb[1] do
-            icb[y]={}
-            for x=1,#cb do
-                icb[y][x]=cb[x][#cb[1]-y+1]
-            end
-        end
-    elseif dir=='L' then-- Rotate CCW
-        for y=1,#cb[1] do
-            icb[y]={}
-            for x=1,#cb do
-                icb[y][x]=cb[#cb-x+1][y]
-            end
-        end
-    elseif dir=='F' then-- Rotate 180 degree
-        for y=1,#cb do
-            icb[y]={}
-            for x=1,#cb[1] do
-                icb[y][x]=cb[#cb-y+1][#cb[1]-x+1]
-            end
-        end
-    elseif dir=='0' then-- Not rotate, just simple copy
-        for y=1,#cb do
-            icb[y]={}
-            for x=1,#cb[1] do
-                icb[y][x]=cb[y][x]
-            end
-        end
-    else
-        error("Invalid rotate direction: "..tostring(dir))
-    end
-    return icb
 end
 
 --------------------------------------------------------------
