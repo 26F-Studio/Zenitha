@@ -12,7 +12,7 @@ local GC=setmetatable({},{
 
 --------------------------------------------------------------
 
-function GC.mStr(obj,x,y)       printf(obj,x-626,y,1252,'center') end-- Printf a string with 'center'
+function GC.mStr(obj,x,y)       printf(obj,x-1260,y,2520,'center') end-- Printf a string with 'center'
 function GC.mDrawX(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end-- Draw an obj with x=obj:getWidth()/2
 function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end-- Draw an obj with y=obj:getWidth()/2
 function GC.mDraw(obj,x,y,a,k)  draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end-- Draw an obj with both middle X & Y
