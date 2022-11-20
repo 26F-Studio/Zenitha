@@ -43,12 +43,13 @@ local bigCanvases=setmetatable({},{__index=function(self,k)
     self[k]=gc.newCanvas()
     return self[k]
 end})
+local function defaultClickFX(x,y) SYSFX.new('tap',3,x,y) end
 
 -- User-changeable values
 local appName='Zenitha'
 local versionText='V0.1'
 local firstScene=false
-local showClickFX=true
+local clickFX=defaultClickFX
 local discardCanvas=false
 local updateFreq=100
 local drawFreq=100
@@ -195,7 +196,7 @@ local function _triggerMouseDown(x,y,k)
     else
         if SCN.mouseDown then SCN.mouseDown(x,y,k) end
         lastX,lastY=x,y
-        if showClickFX then SYSFX.new('tap',3,x,y) end
+        clickFX(x,y)
     end
 end
 local function mouse_update(dt)
@@ -306,7 +307,7 @@ function love.touchreleased(id,x,y)
     if SCN.touchUp then SCN.touchUp(x,y,id) end
     if (x-lastX)^2+(y-lastY)^2<62 then
         if SCN.touchClick then SCN.touchClick(x,y) end
-        if showClickFX then SYSFX.new('tap',3,x,y) end
+        clickFX(x,y)
     end
 end
 
@@ -377,7 +378,7 @@ function love.keypressed(key,_,isRep)
             elseif key=='space' or key=='return' then
                 mouseShow=true
                 if not isRep then
-                    if showClickFX then SYSFX.new('tap',3,mx,my) end
+                    if clickFX then clickFX(mx,my) end
                     _triggerMouseDown(mx,my,1)
                     WIDGET.release(mx,my,1)
                 end
@@ -502,7 +503,7 @@ function love.gamepadpressed(_,key)
             if W and W.arrowKey then W:arrowKey(key) end
         elseif key=='return' then
             mouseShow=true
-            if showClickFX then SYSFX.new('tap',3,mx,my) end
+            if clickFX then clickFX(mx,my) end
             _triggerMouseDown(mx,my,1)
             WIDGET.release(mx,my,1)
         else
@@ -910,9 +911,11 @@ function Zenitha.setMaxFPS(fps)
     assert(type(fps)=='number' and fps>0,"Zenitha.setMaxFPS(fps): fps must be positive number")
     sleepInterval=1/fps
 end
-function Zenitha.setClickFX(b)
-    assert(type(b)=='boolean',"Zenitha.setClickFX(b): b must be boolean")
-    showClickFX=b
+function Zenitha.setClickFX(fx)
+    assert(type(fx)=='boolean' or type(fx)=='function',"Zenitha.setClickFX(fx): fx must be boolean or function")
+    if fx==false then fx=NULL end
+    if fx==true then fx=defaultClickFX end
+    clickFX=fx
 end
 
 function Zenitha.setOnGlobalKey(key,func)
