@@ -5,6 +5,7 @@ local gc_rectangle,gc_circle=GC.rectangle,GC.circle
 local rnd=math.random
 local max,min=math.max,math.min
 local ins,rem=table.insert,table.remove
+local cos=math.cos
 
 local FXlist={}
 local FX={}
@@ -73,6 +74,26 @@ function FX.tap.new(rate,x,y)
         rate=rate,
         x=x,y=y,
     },{__index=FX.tap})
+end
+
+
+FX.glow=setmetatable({
+    type='glow',
+    t=0,
+},{__index=baseFX})
+function FX.glow:draw()
+    local t=self.t
+    gc_setLineWidth(2)
+    for i=1,self.r,2 do
+        gc_setColor(1,1,1,(1-t)*cos((i-1)/self.r*1.5708))
+        gc_circle('line',self.x,self.y,i)
+    end
+end
+function FX.glow.new(rate,x,y,r)
+    return setmetatable({
+        rate=rate,
+        x=x,y=y,r=r or 10,
+    },{__index=FX.glow})
 end
 
 
