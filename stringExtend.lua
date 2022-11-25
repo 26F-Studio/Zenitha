@@ -271,6 +271,12 @@ function STRING.readChars(str,n)-- Return [n characters], [the rest of the strin
     return sub(str,1,n),sub(str,n+1)
 end
 
+function STRING.simplifyPath(path,len)
+    local l=STRING.split(path,'/')
+    for i=1,#l-1 do l[i]=l[i]:sub(1,len or 1) end
+    return table.concat(l,'/')
+end
+
 function STRING.packBin(str)-- Zlib+Base64
     return data.encode('string','base64',data.compress('string','zlib',str))
 end

@@ -18,7 +18,7 @@ function FILE.load(name,args)
             (s:sub(1,1)=='[' and s:sub(-1)==']' or s:sub(1,1)=='{' and s:sub(-1)=='}') and 'json' or
             'string'
         if mode=='luaon' then
-            local func,err_mes=loadstring(s)
+            local func,err_mes=loadstring("--"..STRING.simplifyPath(name)..'\n'..s)
             if func then
                 setfenv(func,{})
                 local res=func()
@@ -27,7 +27,7 @@ function FILE.load(name,args)
                 error('decode error: '..err_mes)
             end
         elseif mode=='lua' then
-            local func,err_mes=loadstring(s)
+            local func,err_mes=loadstring("--"..STRING.simplifyPath(name)..'\n'..s)
             if func then
                 local res=func()
                 return assert(res,'run error')
