@@ -63,4 +63,30 @@ function MATH.interpolate(x,x1,y1,x2,y2)
     return y1+(x-x1)*(y2-y1)/(x2-x1)
 end
 
+-- By Pedro Gimeno,donated to the public domain
+function MATH.pointInPolygon(x,y,poly,evenOddRule)
+    local x1,y1,x2,y2
+    local len=#poly
+    x2,y2=poly[len-1],poly[len]
+    local wn=0
+    for idx=1,len,2 do
+        x1,y1=x2,y2
+        x2,y2=poly[idx],poly[idx+1]
+        if y1>y then
+            if y2<=y and (x1-x)*(y2-y)<(x2-x)*(y1-y) then
+                wn=wn+1
+            end
+        else
+            if y2>y and (x1-x)*(y2-y)>(x2-x)*(y1-y) then
+                wn=wn-1
+            end
+        end
+    end
+    if evenOddRule then
+        return wn%2~=0
+    else-- non-zero winding rule
+        return wn~=0
+    end
+end
+
 return MATH
