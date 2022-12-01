@@ -684,9 +684,9 @@ function love.run()
 
     local frameTimeList={}
     local lastLoopTime=timer()
-    local lastUpdateTime=timer()
-    local lastDrawTime=timer()
-    local lastScreenCheckTime=timer()
+    local lastUpdateTime=lastLoopTime
+    local lastDrawTime=lastLoopTime
+    local lastScreenCheckTime=lastLoopTime
 
     -- counters range from 0 to 99, trigger at 100
     -- start at 100 to guarantee trigger both of them at first frame
@@ -695,7 +695,7 @@ function love.run()
 
     love.resize(gc.getWidth(),gc.getHeight())
     if #errData>0 then
-        SCN.load('error','none')
+        SCN.load('error')
     elseif SCN.scenes[firstScene] then
         SCN.go(firstScene,'none')
         SCN.scenes._zenitha=nil
@@ -710,7 +710,7 @@ function love.run()
         local time=timer()
         STEP()
 
-        local loopDT=time-lastLoopTime
+        -- local loopDT=time-lastLoopTime
         lastLoopTime=time
 
         -- EVENT
@@ -831,8 +831,9 @@ function love.run()
         end
 
         -- Check screen size
-        if time-lastScreenCheckTime>1.26 and gc.getWidth()~=SCR.w or gc.getHeight()~=SCR.h then
+        if time-lastScreenCheckTime>1.26 and (gc.getWidth()~=SCR.w or gc.getHeight()~=SCR.h) then
             love.resize(gc.getWidth(),gc.getHeight())
+            lastScreenCheckTime=time
         end
 
         -- Slow devmode
