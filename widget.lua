@@ -771,7 +771,7 @@ function Widgets.slider:draw()
     local cx=x+(x2-x)*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
-    gc_setColor(pos==self._pos and COLOR.DL or COLOR.lR)
+    gc_setColor(pos==self.disp() and COLOR.DL or COLOR.lR)
     gc_rectangle('fill',bx,by,bw,bh,self.cornerR)
 
     -- Glow
