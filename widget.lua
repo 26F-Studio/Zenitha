@@ -639,6 +639,7 @@ Widgets.slider=setmetatable({
     _image=nil,
     _showFunc=nil,
     _pos=nil,
+    _pos0=nil,
     _rangeL=nil,
     _rangeR=nil,
     _rangeWidth=nil,
@@ -669,13 +670,13 @@ local sliderShowFunc={
         return ''
     end,
     int=function(S)
-        return S.disp()
+        return S._pos0
     end,
     float=function(S)
-        return floor(S.disp()*100+.5)*.01
+        return floor(S._pos0*100+.5)*.01
     end,
     percent=function(S)
-        return floor(S.disp()*100+.5)..'%'
+        return floor(S._pos0*100+.5)..'%'
     end,
 }
 function Widgets.slider:reset()
@@ -700,6 +701,7 @@ function Widgets.slider:reset()
         self._smooth=not self.axis[3]
     end
     self._pos=self._rangeL
+    self._pos0=self._rangeL
     self._textShowTime=3
 
     if self.valueShow then
@@ -738,7 +740,8 @@ end
 function Widgets.slider:update(dt)
     Widgets.base.update(self,dt)
     if self._visible then
-        self._pos=MATH.expApproach(self._pos,self.disp(),dt*26)
+        self._pos0=self.disp()
+        self._pos=MATH.expApproach(self._pos,self._pos0,dt*26)
     end
     if WIDGET.sel==self then
         self._textShowTime=2
@@ -771,7 +774,7 @@ function Widgets.slider:draw()
     local cx=x+(x2-x)*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
-    gc_setColor(pos==self.disp() and COLOR.DL or COLOR.lR)
+    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or COLOR.DL)
     gc_rectangle('fill',bx,by,bw,bh,self.cornerR)
 
     -- Glow
@@ -821,7 +824,7 @@ end
 function Widgets.slider:scroll(dx,dy)
     local n=updateWheel(self,(dx+dy)*self._rangeWidth/(self._unit or .01)/20)
     if n then
-        local p=self.disp()
+        local p=self._pos0
         local u=self._unit or .01
         local P=MATH.clamp(p+u*n,self._rangeL,self._rangeR)
         if p==P or not P then return end
@@ -913,7 +916,7 @@ function Widgets.slider_fill:draw()
     local r=h*.5
     local HOV=self._hoverTime/self._hoverTimeMax
     local rate=(self._pos-self._rangeL)/self._rangeWidth
-    local num=floor((self.disp()-self._rangeL)/self._rangeWidth*100+.5)..'%'
+    local num=floor((self._pos0-self._rangeL)/self._rangeWidth*100+.5)..'%'
 
     -- Capsule
     gc_setColor(1,1,1,.6+HOV*.26)
