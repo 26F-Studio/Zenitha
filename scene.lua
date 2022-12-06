@@ -94,10 +94,23 @@ local swap={
 }
 
 function SCN.add(name,scene)
-    assert(not scene.scrollHeight or type(scene.scrollHeight)=='number',"[scene].scrollHeight must be number")
-    assert(not scene.widgetList or type(scene.widgetList)=='table',"[scene].widgetList must be table")
     assert(not scenes[name],STRING.repD("SCN.add(name,scene): scene '$1' already exists",name))
+    assert(type(scene)=='table',"SCN.add(name,scene): Scene object must be table")
+
+    -- Check each field in scene object
+    for k,v in next,scene do
+        if k=='widgetList' then
+            assert(type(scene.widgetList)=='table',"[scene].widgetList must be table")
+        elseif k=='scrollHeight' then
+            assert(type(scene.scrollHeight)=='number' and scene.scrollHeight>0,"[scene].scrollHeight must be positive number")
+        elseif TABLE.find(eventNames,k) then
+            assert(type(v)=='function',"Scene '"..name.."'."..k.." must be function")
+        else
+            error("Invalid key '"..k.."' in scene '"..name.."'")
+        end
+    end
     for i=1,#eventNames do assert(not scene[eventNames[i]] or type(scene[eventNames[i]])=='function',"[scene]."..eventNames[i].." must be function") end
+
     if not scene.widgetList then scene.widgetList={} end
     setmetatable(scene.widgetList,WIDGET.indexMeta)
     scenes[name]=scene
