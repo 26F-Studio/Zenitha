@@ -82,7 +82,7 @@ end
 function textFX.score(T)-- popH
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
-        T.text,T.x,T.y-0-T._t^.2*T.popH,
+        T.text,T.x,T.y-0-T._t^.2*(T.popH or 30),
         nil,
         nil,nil,
         T._ox,T._oy
