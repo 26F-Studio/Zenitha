@@ -239,6 +239,7 @@ Widgets.button=setmetatable({
     alignX='center',alignY='center',
     cornerR=10,
     sound=false,
+    sound_press=false,sound_hover=false,
 
     code=NULL,
 
@@ -256,6 +257,7 @@ Widgets.button=setmetatable({
         'color',
         'fontSize','fontType',
         'sound',
+        'sound_press','sound_hover',
 
         'code',
         'visibleFunc',
@@ -276,14 +278,12 @@ end
 function Widgets.button:press()
     self._pressed=true
 end
-function Widgets.button:release(x,y,k)
+function Widgets.button:release(_,_,k)
     self._pressed=false
-    if self:isAbove(x,y) then
-        if self.sound then
-            SFX.play(self.sound)
-        end
-        self.code(k)
+    if self.sound then
+        SFX.play(self.sound)
     end
+    self.code(k)
 end
 function Widgets.button:drag(x,y)
     if not self:isAbove(x,y) and self==WIDGET.sel then
@@ -363,6 +363,7 @@ end
 Widgets.button_invis=setmetatable({
     type='button_invis',
     sound=false,
+    sound_press=false,sound_hover=false,
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_invis:draw()
     gc_push('transform')
@@ -402,6 +403,7 @@ Widgets.checkBox=setmetatable({
     labelDistance=20,
     cornerR=3,
     sound_on=false,sound_off=false,
+    sound_press=false,sound_hover=false,
 
     disp=false,-- function return a boolean
     code=NULL,
@@ -421,6 +423,7 @@ Widgets.checkBox=setmetatable({
         'fontSize','fontType',
         'widthLimit',
         'sound_on','sound_off',
+        'sound_press','sound_hover',
 
         'disp','code',
         'visibleFunc',
@@ -536,6 +539,7 @@ Widgets.switch=setmetatable({
         'text','fontSize','fontType',
         'lineWidth','widthLimit',
         'sound_on','sound_off',
+        'sound_press','sound_hover',
 
         'disp','code',
         'visibleFunc',
@@ -1077,6 +1081,7 @@ Widgets.selector=setmetatable({
     labelPos='left',
     labelDistance=20,
     sound=false,
+    sound_press=false,sound_hover=false,
 
     disp=false,-- function return a boolean
     show=function(v) return v end,
@@ -1103,6 +1108,7 @@ Widgets.selector=setmetatable({
         'labelPos',
         'labelDistance',
         'sound',
+        'sound_press','sound_hover',
 
         'list','disp','show',
         'code',
@@ -1256,6 +1262,7 @@ Widgets.inputBox=setmetatable({
 
     maxInputLength=1e99,
     sound_input=false,sound_bksp=false,sound_del=false,sound_clear=false,
+    sound_press=false,sound_hover=false,
 
     _value='',-- Text contained
 
@@ -1272,6 +1279,7 @@ Widgets.inputBox=setmetatable({
         'lineWidth','cornerR',
         'maxInputLength',
         'sound_input','sound_bksp','sound_del','sound_clear',
+        'sound_press','sound_hover',
 
         'list',
         'disp','code',
@@ -1832,6 +1840,9 @@ function WIDGET.isFocus(W)
 end
 function WIDGET.focus(W)
     if WIDGET.sel==W then return end
+    if W.sound_hover then
+        SFX.play(W.sound_hover)
+    end
     if WIDGET.sel and WIDGET.sel.type=='inputBox' then
         kb.setTextInput(false)
         EDITING=''
@@ -1873,6 +1884,9 @@ function WIDGET.press(x,y,k)
             WIDGET.unFocus(true)
         else
             W:press(x,y and y+SCN.curScroll,k)
+            if W.sound_press then
+                SFX.play(W.sound_press)
+            end
             if not W._visible then WIDGET.unFocus() end
         end
     end
@@ -1945,30 +1959,6 @@ function WIDGET.draw()
     gc_replaceTransform(xOy)
 end
 
-function WIDGET.setDefaultButtonSound(sound)
-    assert(type(sound)=='string',"WIDGET.setDefaultButtonSound(sound): sound must be string")
-    Widgets.button.sound=sound
-end
-function WIDGET.setDefaultCheckBoxSound(sound_on,sound_off)
-    assert(type(sound_on)=='string' and type(sound_off)=='string',"WIDGET.setDefaultCheckBoxSound(sound_on,sound_off): sounds must be string")
-    Widgets.checkBox.sound_on=sound_on
-    Widgets.checkBox.sound_off=sound_off
-end
-function WIDGET.setDefaultSelectorSound(sound)
-    assert(type(sound)=='string',"WIDGET.setDefaultSelectorSound(sound): sound must be string")
-    Widgets.selector.sound=sound
-end
-function WIDGET.setDefaultTypeSound(sound_input,sound_bksp,sound_del)
-    assert(type(sound_input)=='string' and type(sound_del)=='string',"WIDGET.setDefaultTypeSound(sound_input,sound_del): sounds must be string")
-    Widgets.inputBox.sound_input=sound_input
-    Widgets.inputBox.sound_bksp=sound_bksp
-    Widgets.inputBox.sound_del=sound_del
-end
-function WIDGET.setDefaultClearSound(sound_clear)
-    assert(type(sound_clear)=='string',"WIDGET.setDefaultClearSound(sound_clear): sound_clear must be string")
-    Widgets.inputBox.sound_clear=sound_clear
-    Widgets.textBox.sound_clear=sound_clear
-end
 function WIDGET.new(args)
     local t=args.type
     args.type=nil
