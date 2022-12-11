@@ -12,7 +12,6 @@ local KBisDown=kb.isDown
 
 local gc=love.graphics
 local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
-local gc_clear,gc_discard=gc.clear,gc.discard
 local gc_setColor,gc_circle=gc.setColor,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
 
@@ -585,6 +584,7 @@ function love.errorhandler(msg)
     love.audio.stop()
     BGM.stop()
     gc.reset()
+    SCR.resize(gc.getWidth(),gc.getHeight())
 
     local sceneStack=SCN and table.concat(SCN.stack,"/") or "NULL"
     if mainLoopStarted and #errData<3 and SCN.scenes['error'] then
@@ -629,7 +629,7 @@ function love.errorhandler(msg)
                     SCR.resize(a,b)
                 end
             end
-            gc_clear(.3,.5,.9)
+            GC.clear(.3,.5,.9)
             GC.push('transform')
             GC.replaceTransform(SCR.origin)
             local k=math.min(SCR.h/720,1)
@@ -826,7 +826,7 @@ function love.run()
                 gc_present()
 
                 -- SPEED UPUP! (probably not that obvious)
-                if discardCanvas then gc_discard() end
+                if discardCanvas then GC.discard() end
             end
         end
 
