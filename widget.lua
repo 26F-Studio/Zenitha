@@ -67,6 +67,8 @@ Widgets.base={
     lineWidth=4,
     fontSize=30,fontType=false,
     widthLimit=1e99,
+    alignX='center',alignY='center',
+    sound_press=false,sound_hover=false,
 
     isAbove=NULL,
     visibleFunc=false,-- function return a boolean
@@ -86,7 +88,7 @@ function Widgets.base:getInfo()
     return str
 end
 function Widgets.base:reset()
-    assert(not self.name or type(self.name)=='string','[widget].name can only be a string')
+    assert(not self.name or type(self.name)=='string','[widget].name must be string')
 
     assert(type(self.x)=='number','[widget].x must be number')
     assert(type(self.y)=='number','[widget].y must be number')
@@ -112,7 +114,11 @@ function Widgets.base:reset()
     assert(type(self.fontSize)=='number','[widget].fontSize must be number')
     assert(type(self.fontType)=='string' or self.fontType==false,'[widget].fontType must be string')
     assert(type(self.widthLimit)=='number','[widget].widthLimit must be number')
-    assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc can only be a function')
+    assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc must be function')
+
+    assert(not self.sound or type(self.sound)=='string','[widget].sound must be string')
+    assert(not self.sound_press or type(self.sound_press)=='string','[widget].sound_press must be string')
+    assert(not self.sound_hover or type(self.sound_hover)=='string','[widget].sound_hover must be string')
 
     self._text=self.text or self.name and ('['..self.name..']')
     if self._text then
@@ -170,7 +176,6 @@ Widgets.text=setmetatable({
     type='text',
 
     text=false,
-    alignX='center',alignY='center',
 
     _text=nil,
 
@@ -205,7 +210,6 @@ Widgets.image=setmetatable({
     ang=0,k=1,
 
     image=false,
-    alignX='center',alignY='center',
 
     _image=nil,
 
@@ -236,10 +240,8 @@ Widgets.button=setmetatable({
 
     text=false,
     image=false,
-    alignX='center',alignY='center',
     cornerR=10,
     sound=false,
-    sound_press=false,sound_hover=false,
 
     code=NULL,
 
@@ -363,7 +365,6 @@ end
 Widgets.button_invis=setmetatable({
     type='button_invis',
     sound=false,
-    sound_press=false,sound_hover=false,
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_invis:draw()
     gc_push('transform')
@@ -398,12 +399,10 @@ Widgets.checkBox=setmetatable({
 
     text=false,
     image=false,
-    alignX='center',alignY='center',
     labelPos='left',
     labelDistance=20,
     cornerR=3,
     sound_on=false,sound_off=false,
-    sound_press=false,sound_hover=false,
 
     disp=false,-- function return a boolean
     code=NULL,
@@ -516,7 +515,6 @@ Widgets.switch=setmetatable({
 
     text=false,
     image=false,
-    alignX='center',alignY='center',
     labelPos='left',
     labelDistance=20,
 
@@ -646,7 +644,7 @@ Widgets.slider=setmetatable({
     _pos0=nil,
     _rangeL=nil,
     _rangeR=nil,
-    _rangeWidth=nil,
+    _rangeWidth=nil,-- just _rangeR-_rangeL, for convenience
     _unit=nil,
     _smooth=nil,
     _textShowTime=nil,
@@ -852,7 +850,7 @@ Widgets.slider_fill=setmetatable({
     labelDistance=20,
     lineDist=3,
 
-    disp=false,-- function return the displaying _value
+    disp=false,
     code=NULL,
 
     _text=nil,
@@ -975,7 +973,7 @@ Widgets.slider_progress=setmetatable({
     labelDistance=20,
     lineDist=3,
 
-    disp=false,-- function return the displaying _value
+    disp=false,
     code=NULL,
 
     _text=nil,
@@ -983,7 +981,7 @@ Widgets.slider_progress=setmetatable({
     _pos=nil,
     _rangeL=nil,
     _rangeR=nil,
-    _rangeWidth=nil,-- just _rangeR-_rangeL, for convenience
+    _rangeWidth=nil,
 
     buildArgs={
         'name',
@@ -1081,7 +1079,6 @@ Widgets.selector=setmetatable({
     labelPos='left',
     labelDistance=20,
     sound=false,
-    sound_press=false,sound_hover=false,
 
     disp=false,-- function return a boolean
     show=function(v) return v end,
@@ -1093,7 +1090,6 @@ Widgets.selector=setmetatable({
     _select=false,-- Selected item ID
     _selText=false,-- Selected item name
     selFontSize=30,selFontType=false,
-    alignX='center',alignY='center',-- Force text alignment
 
     buildArgs={
         'name',
@@ -1261,8 +1257,7 @@ Widgets.inputBox=setmetatable({
     cornerR=3,
 
     maxInputLength=1e99,
-    sound_input=false,sound_bksp=false,sound_del=false,sound_clear=false,
-    sound_press=false,sound_hover=false,
+    sound_input=false,sound_bksp=false,sound_delete=false,sound_clear=false,
 
     _value='',-- Text contained
 
@@ -1278,7 +1273,7 @@ Widgets.inputBox=setmetatable({
         'labelDistance',
         'lineWidth','cornerR',
         'maxInputLength',
-        'sound_input','sound_bksp','sound_del','sound_clear',
+        'sound_input','sound_bksp','sound_delete','sound_clear',
         'sound_press','sound_hover',
 
         'list',
@@ -1290,9 +1285,9 @@ function Widgets.inputBox:reset()
     Widgets.base.reset(self)
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
     assert(self.h and type(self.h)=='number','[inputBox].h must be number')
-    assert(not self.inputSound or type(self.inputSound)=='string','[inputBox].inputSound can only be a string')
-    assert(not self.delSound or type(self.delSound)=='string','[inputBox].delSound can only be a string')
-    assert(not self.clearSound or type(self.clearSound)=='string','[inputBox].clearSound can only be a string')
+    assert(not self.sound_input or type(self.sound_input)=='string','[inputBox].sound_input must be string')
+    assert(not self.sound_delete or type(self.sound_delete)=='string','[inputBox].sound_delete must be string')
+    assert(not self.sound_clear or type(self.sound_clear)=='string','[inputBox].sound_clear must be string')
     if self.labelPos=='left' then
         self.alignX,self.alignY='right','center'
     elseif self.labelPos=='right' then
@@ -1401,8 +1396,8 @@ function Widgets.inputBox:keypress(k)
             end
         elseif k=='delete' then
             t=''
-            if self.sound_del then
-                SFX.play(self.sound_del)
+            if self.sound_delete then
+                SFX.play(self.sound_delete)
             end
         end
         self._value=t
