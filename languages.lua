@@ -12,7 +12,12 @@ setmetatable(langLib,{
         self[k]=lang
         table.insert(langLoaded,k)
         if #langLoaded>maxLangLoaded then
-            langLib[table.remove(langLoaded,1)]=nil
+            for i=1,#langLoaded do
+                if langLoaded[i]~=defaultLang then
+                    langLib[table.remove(langLoaded,i)]=nil
+                    break
+                end
+            end
         end
         return self[k]
     end,
