@@ -578,7 +578,7 @@ function love.errorhandler(msg)
             c=3
         end
     end
-    print(table.concat(err,"\n",1,c-2))
+    print("\n"..table.concat(err,"\n",1,c-2))
 
     -- Reset something
     love.audio.stop()
