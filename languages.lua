@@ -34,7 +34,9 @@ function LANG.setDefault(name)
     assert(type(name)=='string','Invalid language name')
     defaultLang=name
     for k,v in next,langLib do
-        setmetatable(v,{__index=langLib[k~=defaultLang and defaultLang]})
+        if k~=false then
+            setmetatable(v,{__index=langLib[k~=defaultLang and defaultLang]})
+        end
     end
 end
 function LANG.setMaxLoaded(n)
@@ -53,7 +55,7 @@ end
 
 local textSrc=langLib[false]
 function LANG.setTextFuncSrc(newSrc)
-    assert(type(newSrc)=='table','LANG.setTextFuncPool(newPool): newPool must be table')
+    assert(type(newSrc)=='table','LANG.setTextFuncSrc(newPool): newPool must be table')
     textSrc=newSrc
 end
 local keyCache=setmetatable({},{
@@ -62,8 +64,8 @@ local keyCache=setmetatable({},{
         return self[k]
     end,
 })
-function LANG.getText(_,key)
+function LANG.getText(key)
     return keyCache[key]
 end
-setmetatable(LANG,{__call=LANG.getText,__metatable=true})
+setmetatable(LANG,{__call=function(_,key) return keyCache[key] end,__metatable=true})
 return LANG
