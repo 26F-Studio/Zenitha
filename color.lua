@@ -66,8 +66,7 @@ do
         COLOR['L'..name:sub(1,1)]=COLOR[name][5]
     end
 
-    -- Create [1]~[5] color lists (COLOR[1]={red={...}, ...}, ...)
-    for i=1,5 do
+    for i=1,5 do-- Create 1~5 Brightness level shortcut
         COLOR[i]={}
         for j=1,#colorNames do
             local name=colorNames[j]
@@ -85,9 +84,10 @@ end,__metatable=true})
 do-- Random generators
     local rnd=math.random
     local colors={'R','F','O','Y','A','K','G','J','C','I','S','B','P','V','M','W'}
-    function COLOR.random(t)
-        if type(t)~='number' or not COLOR[t] then error("COLOR.random(t): t must be 1~5 (brightness)") end
-        return COLOR[t][colors[rnd(#colors)]]
+    local keys={true,true,true,true,true}
+    function COLOR.random(brightness)
+        if not keys[brightness] then error("COLOR.random(t): t must be 1~5 (brightness)") end
+        return COLOR[brightness][colors[rnd(#colors)]]
     end
 end
 
