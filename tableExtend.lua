@@ -81,7 +81,7 @@ end
 function TABLE.subtract(org,sub)
     for _,v in next,sub do
         while true do
-            local p=TABLE.search(org,v)
+            local p=TABLE.findAll(org,v)
             if p then
                 rem(org,p)
             else
@@ -241,8 +241,13 @@ function TABLE.find(t,val,start)
     for i=start or 1,#t do if t[i]==val then return i end end
 end
 
+-- Find value in whole table
+function TABLE.findAll(t,val)
+    for k,v in next,t do if v==val then return k end end
+end
+
 -- Replace value in [1~#], like string.gsub
-function TABLE.gsub(t,v_old,v_new,count,start)
+function TABLE.replace(t,v_old,v_new,count,start)
     if not start then start=1 end
     if not count then count=1e99 end
     while t[start] and count>0 do
@@ -253,23 +258,40 @@ function TABLE.gsub(t,v_old,v_new,count,start)
     end
 end
 
--- Return next value of [1~#] (by value)
-function TABLE.next(t,val)
-    for i=1,#t do if t[i]==val then return t[i%#t+1] end end
-end
-
--- Find value in whole table
-function TABLE.search(t,val)
-    for k,v in next,t do if v==val then return k end end
-end
-
--- Replace all value in t
-function TABLE.replace(t,v_old,v_new)
+-- Replace all value
+function TABLE.replaceAll(t,v_old,v_new)
     for k,v in next,t do
         if v==v_old then
             t[k]=v_new
         end
     end
+end
+
+-- Count value in [1~#]
+function TABLE.count(t,val)
+    local count=0
+    for i=1,#t do
+        if t[i]==val then
+            count=count+1
+        end
+    end
+    return count
+end
+
+-- Count value
+function TABLE.countAll(t,val)
+    local count=0
+    for _,v in next,t do
+        if v==val then
+            count=count+1
+        end
+    end
+    return count
+end
+
+-- Return next value of [1~#] (by value)
+function TABLE.next(t,val)
+    for i=1,#t do if t[i]==val then return t[i%#t+1] end end
 end
 
 -- Re-index string value of a table
