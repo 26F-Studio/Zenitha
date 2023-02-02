@@ -129,10 +129,10 @@ do-- function STRING.base64(num)-- Convert one number to base64
             return self[k]
         end,
         __index=function()
-            error('function STRING.base64(num): num must be 1~64')
+            error("function STRING.base64(num): num must be 1~64")
         end,
         __newindex=function()
-            error('STRING.base64 is read-only')
+            error("STRING.base64 is read-only")
         end,
         __metatable=true,
     })

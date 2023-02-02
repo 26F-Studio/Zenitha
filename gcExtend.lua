@@ -51,7 +51,7 @@ function GC.outDraw(obj,x,y,a,k,d,shadeCount)
         draw(obj,x,y-d,a,k,nil,w,h)
         draw(obj,x,y+d,a,k,nil,w,h)
     else
-        error('shadeCount(7th arg) must be 4 or 8')
+        error("shadeCount(7th arg) must be 4 or 8")
     end
 end
 
@@ -86,7 +86,7 @@ function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
         printf(str,x,y-d,w,mode)
         printf(str,x,y+d,w,mode)
     else
-        error('shadeCount(6th arg) must be 4 or 8')
+        error("shadeCount(6th arg) must be 4 or 8")
     end
     setColor(c2 or COLOR.L)
     printf(str,x,y,w,mode)
@@ -288,7 +288,7 @@ do-- function GC.load(L), GC.execute(t)
         elseif type(t[1])=='function' then
             t[1](unpack(t,2))
         else
-            error('Wrong type of [1]')
+            error("Wrong type of [1]")
         end
     end
     GC.execute=GC_execute

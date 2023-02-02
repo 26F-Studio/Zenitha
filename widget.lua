@@ -1966,7 +1966,7 @@ function WIDGET.new(args)
         if TABLE.find(W.buildArgs,k) then
             w[k]=v
         else
-            error('Illegal argument '..k..' for widget '..t)
+            error("Illegal argument "..k.." for widget "..t)
         end
     end
     w:reset()

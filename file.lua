@@ -24,7 +24,7 @@ function FILE.load(name,args)
                 local res=func()
                 return assert(res,'decode error')
             else
-                error('decode error: '..err_mes)
+                error("decode error: "..err_mes)
             end
         elseif mode=='lua' then
             local func,err_mes=loadstring("--[["..STRING.simplifyPath(name)..']]'..s)
@@ -32,27 +32,27 @@ function FILE.load(name,args)
                 local res=func()
                 return assert(res,'run error')
             else
-                error('compile error: '..err_mes)
+                error("compile error: "..err_mes)
             end
         elseif mode=='json' then
             local res=JSON.decode(s)
             if res then
                 return res
             end
-            error('decode error')
+            error("decode error")
         elseif mode=='string' then
             return s
         else
-            error('unknown mode')
+            error("unknown mode")
         end
     elseif not STRING.sArg(args,'-canskip') then
-        error('no file')
+        error("no file")
     end
 end
 function FILE.save(data,name,args)
     if not args then args='' end
     if STRING.sArg(args,'-d') and fs.getInfo(name) then
-        error('duplicate')
+        error("duplicate")
     end
 
     if type(data)=='table' then
@@ -63,12 +63,12 @@ function FILE.save(data,name,args)
                 data='return'..TABLE.dumpDeflate(data)
             end
             if not data then
-                error('encode error')
+                error("encode error")
             end
         else
             data=JSON.encode(data)
             if not data then
-                error('encode error')
+                error("encode error")
             end
         end
     else

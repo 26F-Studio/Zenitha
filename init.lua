@@ -22,7 +22,7 @@ kb.setKeyRepeat(true)
 --------------------------------------------------------------
 
 -- Useful global values/variables
-NONE=setmetatable({},{__newindex=function() error('Attempt to modify a constant table') end,__metatable=true})
+NONE=setmetatable({},{__newindex=function() error("Attempt to modify a constant table") end,__metatable=true})
 NULL=function(...) end
 PAPER=love.graphics.newCanvas(1,1)
 
