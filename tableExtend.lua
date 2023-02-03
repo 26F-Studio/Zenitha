@@ -247,18 +247,15 @@ function TABLE.findAll(t,val)
 end
 
 -- Replace value in [1~#], like string.gsub
-function TABLE.replace(t,v_old,v_new,count,start)
-    if not start then start=1 end
-    if not count then count=1e99 end
-    while t[start] and count>0 do
-        if t[start]==v_old then
-            t[start]=v_new
-            count=count-1
+function TABLE.replace(t,v_old,v_new,start)
+    for i=start or 1,#t do
+        if t[i]==v_old then
+            t[i]=v_new
         end
     end
 end
 
--- Replace all value
+-- Replace value in whole table
 function TABLE.replaceAll(t,v_old,v_new)
     for k,v in next,t do
         if v==v_old then
