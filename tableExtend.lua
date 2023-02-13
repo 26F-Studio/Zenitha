@@ -286,9 +286,32 @@ function TABLE.countAll(t,val)
     return count
 end
 
+-- Sum table in [1~#]
+function TABLE.sum(t)
+    local s=0
+    for i=1,#t do
+        s=s+t[i]
+    end
+    return s
+end
+
+-- Sum table
+function TABLE.sumAll(t)
+    local s=0
+    for _,v in next,t do s=s+v end
+    return s
+end
+
 -- Return next value of [1~#] (by value)
 function TABLE.next(t,val)
     for i=1,#t do if t[i]==val then return t[i%#t+1] end end
+end
+
+-- Get element count of table
+function TABLE.getSize(t)
+    local size=0
+    for _ in next,t do size=size+1 end
+    return size
 end
 
 -- Re-index string value of a table
@@ -298,13 +321,6 @@ function TABLE.reIndex(org)
             org[k]=org[v]
         end
     end
-end
-
--- Get element count of table
-function TABLE.getSize(t)
-    local size=0
-    for _ in next,t do size=size+1 end
-    return size
 end
 
 --------------------------------------------------------------
