@@ -695,6 +695,7 @@ function love.run()
 
     love.resize(gc.getWidth(),gc.getHeight())
     if #errData>0 then
+        SCN.stack={'error'}
         SCN.load('error')
     elseif SCN.scenes[firstScene] then
         SCN.go(firstScene,'none')
