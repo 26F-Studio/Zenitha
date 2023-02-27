@@ -1,6 +1,6 @@
+local resume,status=coroutine.resume,coroutine.status
+local assert,rawset=assert,rawset
 local rem=table.remove
-local assert,resume,status=assert,coroutine.resume,coroutine.status
-local rawset=rawset
 local timer=love.timer.getTime
 
 local TASK={}
@@ -11,7 +11,7 @@ local locks=setmetatable({},{
     __newindex=function(self,k)rawset(self,k,-1e99)end,
 })
 function TASK.lock(name,T)
-    if timer()>=locks[name]then
+    if timer()>=locks[name] then
         locks[name]=timer()+(T or 1e99)
         return true
     else
