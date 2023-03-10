@@ -63,8 +63,14 @@ function MATH.distance(x1,y1,x2,y2)
     return ((x1-x2)^2+(y1-y2)^2)^.5
 end
 
-function MATH.interpolate(x,x1,y1,x2,y2)
-    return y1+(x-x1)*(y2-y1)/(x2-x1)
+-- Attention, this lerp has no [0,1] limitation
+function MATH.lerp(t,v1,v2)
+    return (1-t)*v1+t*v2
+end
+
+-- Works like lerp(), return y value of x, on the line which pass (x1,y1) and (x2,y2)
+function MATH.interpolate(t,x1,y1,x2,y2)
+    return y1+(t-x1)*(y2-y1)/(x2-x1)
 end
 
 -- By Pedro Gimeno,donated to the public domain
