@@ -91,7 +91,7 @@ end
 
 function scene.draw()
     GC.replaceTransform(SCR.xOy_ul)
-    FONT.set(15,'_basic')
+    FONT.set(15,'_norm')
     local l=#list
     for i=1,l do
         GC.setColor(1,1,1,list[i][2]/30)

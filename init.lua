@@ -162,11 +162,11 @@ local setFont=FONT.set
 
 -- Set default font
 FONT.load({
-    _basic='Zenitha/basic.otf',
-    _codePixel='Zenitha/codePixel.ttf',
+    _norm='Zenitha/norm.ttf',
+    _mono='Zenitha/mono.ttf',
 })
-FONT.setDefaultFont('_basic')
-FONT.setDefaultFallback('_basic')
+FONT.setDefaultFont('_norm')
+FONT.setDefaultFallback('_norm')
 
 --------------------------------------------------------------
 
@@ -634,10 +634,10 @@ function love.errorhandler(msg)
             GC.replaceTransform(SCR.origin)
             local k=math.min(SCR.h/720,1)
             GC.scale(k)
-            setFont(100,'_basic') gc_print(":(",100,0,0,1.2)
-            setFont(40,'_basic') gc.printf(errorMsg,100,160,SCR.w/k-200)
-            setFont(25,'_basic') gc.printf(err[1],100,380,SCR.w/k-200)
-            setFont(20,'_basic')
+            setFont(100,'_norm') gc_print(":(",100,0,0,1.2)
+            setFont(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
+            setFont(25,'_norm') gc.printf(err[1],100,380,SCR.w/k-200)
+            setFont(20,'_norm')
             GC.print(love.system.getOS().."-"..versionText.."\nScene stack:"..sceneStack,100,640)
             GC.print("TRACEBACK",100,430)
             for i=4,#err-2 do
@@ -780,13 +780,13 @@ function love.run()
                 gc_replaceTransform(SCR.xOy_d)
                     -- Draw Version string
                     gc_setColor(.9,.9,.9,.42)
-                    setFont(20,'_basic')
+                    setFont(20,'_norm')
                     gc_printf(versionText,-2600,-30,5200,'center')
                 gc_replaceTransform(SCR.xOy_dl)
                     local safeX=SCR.safeX/SCR.k
 
                     -- Draw FPS
-                    setFont(15,'_basic')
+                    setFont(15,'_norm')
                     gc_setColor(COLOR.L)
                     gc_print(FPS(),safeX+5,-20)
 

@@ -3,11 +3,11 @@ local testVal_2={18,260,.26}
 local testVal_3={'medium','large','ex-large'}
 local testVal_4={} for i=1,9 do table.insert(testVal_4,{name='user'..i}) end
 local function _sceneDraw()
-    FONT.set(150,'_basic')
+    FONT.set(150,'_norm')
     GC.mStr("Zenitha",400,40)
-    FONT.set(60,'_basic')
+    FONT.set(60,'_norm')
     GC.mStr("Demo Scene",400,200)
-    FONT.set(20,'_basic')
+    FONT.set(20,'_norm')
     GC.mStr("Powered by LÖVE",400,280)
 end
 local scene={

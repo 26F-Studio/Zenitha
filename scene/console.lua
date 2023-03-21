@@ -1,8 +1,8 @@
 local kb=love.keyboard
 local ins,rem=table.insert,table.remove
 
-local outputBox=WIDGET.new{type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_basic',lineHeight=25,fixContent=true}
-local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_basic'}
+local outputBox=WIDGET.new{type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25,fixContent=true}
+local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
 
 local function log(str)outputBox:push(str) end
 

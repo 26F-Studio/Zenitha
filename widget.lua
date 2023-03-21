@@ -630,6 +630,7 @@ Widgets.slider=setmetatable({
     image=false,
     labelPos='left',
     labelDistance=20,
+    numFontSize=25,numFontType='_norm',
     cornerR=3,
     valueShow=nil,
 
@@ -788,9 +789,9 @@ function Widgets.slider:draw()
 
     -- Float text
     if self._textShowTime>0 then
-        setFont(25)
+        setFont(self.numFontSize,self.numFontType)
         gc_setColor(1,1,1,min(self._textShowTime/2,1))
-        gc_mStr(self:_showFunc(),cx,by-30)
+        gc_mStr(self:_showFunc(),cx,by-self.numFontSize-10)
     end
 
     -- Drawable
@@ -848,6 +849,7 @@ Widgets.slider_fill=setmetatable({
     image=false,
     labelPos='left',
     labelDistance=20,
+    numFontSize=30,numFontType='_norm',
     lineDist=3,
 
     disp=false,
@@ -935,15 +937,15 @@ function Widgets.slider_fill:draw()
     gc_stc_circ(x+r,y,r)
     gc_stc_circ(x+w-r,y,r)
 
-    setFont(30)
+    setFont(self.numFontSize,self.numFontType)
     gc_setColor(1,1,1,.75+HOV*.26)
-    gc_mStr(num,x+w*.5,y-18)
+    gc_mStr(num,x+w*.5,y-self.numFontSize*.7)
     gc_rectangle('fill',x,y-r,w*rate,h)
 
     gc_stc_reset()
     gc_stc_rect(x,y-r,w*rate,h)
     gc_setColor(0,0,0,.9)
-    gc_mStr(num,x+w*.5,y-18)
+    gc_mStr(num,x+w*.5,y-self.numFontSize*.7)
     gc_stc_stop()
 
     -- Drawable
@@ -1566,7 +1568,7 @@ function Widgets.textBox:draw()
                 gc_rectangle('fill',w-40+8,8,24,3)
                 gc_rectangle('fill',w-40+11,14,18,21)
             else
-                setFont(40,'_basic')
+                setFont(40,'_norm')
                 gc_mStr('?',w-40+21,-8)
             end
         end
