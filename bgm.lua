@@ -1,5 +1,6 @@
 local audio=love.audio
 local effectsSupported=audio.isEffectsSupported()
+local ins=table.insert
 
 local nameList={}
 local srcLib={}-- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
@@ -97,7 +98,7 @@ local function _updateSources()
 end
 local function _addFile(name,path)
     if not srcLib[name] then
-        table.insert(nameList,name)
+        ins(nameList,name)
         srcLib[name]={
             name=name,path=path,source=false,
             vol=0,volChanging=false,
@@ -115,7 +116,7 @@ local function _tryLoad(name)
         elseif love.filesystem.getInfo(obj.path) then
             obj.source=audio.newSource(obj.path,'stream')
             obj.source:setLooping(true)
-            table.insert(lastLoadNames,1,name)
+            ins(lastLoadNames,1,name)
             return true
         else
             LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
@@ -189,11 +190,16 @@ function BGM.play(bgms,args)
         lastPlay=bgms
     end
 
-    for i=1,#bgms do
-        local bgm=bgms[i]
+    local bgmWillPlay={}
+    for _,bgm in next,bgms do
         assert(type(bgm)=='string',"BGM list can only be list of string")
-        if _tryLoad(bgm) and not STRING.sArg(args,'-preLoad') then
-            local obj=srcLib[bgms[i]]
+        if _tryLoad(bgm) then
+            ins(bgmWillPlay,bgm)
+        end
+    end
+    if not STRING.sArg(args,'-preLoad') then
+        for _,bgm in next,bgmWillPlay do
+            local obj=srcLib[bgm]
             obj.vol=0
             obj.pitch=1
             obj.lowgain=1
@@ -220,7 +226,7 @@ function BGM.play(bgms,args)
             end
             source:play()
 
-            table.insert(nowPlay,obj)
+            ins(nowPlay,obj)
         end
     end
     _updateSources()
