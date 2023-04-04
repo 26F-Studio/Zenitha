@@ -1,4 +1,4 @@
-package.cpath=package.cpath..';'..love.filesystem.getSaveDirectory()..'/lib/lib?.so;'..'?.dylib'
+package.cpath=package.cpath..';'..love.filesystem.getSaveDirectory()..'/lib/lib?.so;./?.so;?.dylib'
 
 local _androidPlatform
 if love.system.getOS()=='Android' then
