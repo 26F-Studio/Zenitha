@@ -190,45 +190,51 @@ function BGM.play(bgms,args)
         lastPlay=bgms
     end
 
-    local bgmWillPlay={}
-    for _,bgm in next,bgms do
-        assert(type(bgm)=='string',"BGM list can only be list of string")
-        if _tryLoad(bgm) then
-            ins(bgmWillPlay,bgm)
+    if STRING.sArg(args,'-preLoad') then
+        for _,bgm in next,bgms do
+            assert(type(bgm)=='string',"BGM list can only be list of string")
+            _tryLoad(bgm)
         end
-    end
-    if not STRING.sArg(args,'-preLoad') then
-        for _,bgm in next,bgmWillPlay do
-            local obj=srcLib[bgm]
-            obj.vol=0
-            obj.pitch=1
-            obj.lowgain=1
-            obj.highgain=1
-            obj.volChanging=false
-            obj.pitchChanging=false
-            obj.lowgainChanging=false
-            obj.highgainChanging=false
+    else
+        local sourceReadyToPlay={}
+        for _,bgm in next,bgms do
+            assert(type(bgm)=='string',"BGM list can only be list of string")
+            if _tryLoad(bgm) then
+                local obj=srcLib[bgm]
+                obj.vol=0
+                obj.pitch=1
+                obj.lowgain=1
+                obj.highgain=1
+                obj.volChanging=false
+                obj.pitchChanging=false
+                obj.lowgainChanging=false
+                obj.highgainChanging=false
 
-            _clearTask(obj)
+                _clearTask(obj)
 
-            local source=obj.source
-            source:setLooping(not STRING.sArg(args,'-noloop'))
-            source:setPitch(1)
-            source:seek(0)
-            source:setFilter()
-            if STRING.sArg(args,'-sdin') then
-                obj.vol=1
-                source:setVolume(volume)
-                BGM.set(bgm,'volume',1,0)
-            else
-                source:setVolume(0)
-                BGM.set(bgm,'volume',1,.626)
+                local source=obj.source
+                source:setLooping(not STRING.sArg(args,'-noloop'))
+                source:setPitch(1)
+                source:seek(0)
+                source:setFilter()
+                if STRING.sArg(args,'-sdin') then
+                    obj.vol=1
+                    source:setVolume(volume)
+                    BGM.set(bgm,'volume',1,0)
+                else
+                    source:setVolume(0)
+                    BGM.set(bgm,'volume',1,.626)
+                end
+                ins(sourceReadyToPlay,source)
+
+                table.insert(nowPlay,obj)
             end
-            source:play()
-
-            ins(nowPlay,obj)
+        end
+        for i=1,#sourceReadyToPlay do
+            sourceReadyToPlay[i]:play()
         end
     end
+
     _updateSources()
     return true
 end
