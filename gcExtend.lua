@@ -1,5 +1,5 @@
 local gc=love.graphics
-local setColor,prints,printf,draw,drawL=gc.setColor,gc.print,gc.printf,gc.draw,gc.drawLayer
+local getColor,setColor,prints,printf,draw,drawL=gc.getColor,gc.setColor,gc.print,gc.printf,gc.draw,gc.drawLayer
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
 local sin,cos=math.sin,math.cos
 local pcall=pcall
@@ -23,6 +23,17 @@ function GC.mDrawLY(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,0,obj:getHeight()*.5)
 function GC.mDrawL(obj,l,x,y,a,k)  drawL(obj,l,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
 
 --------------------------------------------------------------
+
+---@param a number
+function GC.setAlpha(a)
+    local r,g,b=getColor()
+    setColor(r,g,b,a)
+end
+---@param k number
+function GC.mulAlpha(k)
+    local r,g,b,a=getColor()
+    setColor(r,g,b,a*k)
+end
 
 function GC.safePrint(...)
     return pcall(prints,...)
@@ -165,6 +176,8 @@ do-- function GC.getScreenShot(table,key)-- Save screenshot as image object to a
     local function _captureFunc(imageData)-- Actually triggered by engine a bit later after calling GC.getScreenShot, because love2d's capture function doesn't effect instantly
         _t[_k]=gc.newImage(imageData)
     end
+    ---@param t table
+    ---@param k any
     function GC.getScreenShot(t,k)
         _t,_k=t,k
         gc.captureScreenshot(_captureFunc)
