@@ -228,6 +228,58 @@ end
 
 --------------------------------------------------------------
 
+
+local Camera={}
+function Camera:move(dx,dy)
+    self.x0=self.x0+dx
+    self.y0=self.y0+dy
+    if self.maxDist then
+        local dist=MATH.distance(0,0,self.x0,self.y0)/self.k0
+        if dist>self.maxDist then
+            local angle=math.atan2(self.y0,self.x0)
+            self.x0=self.maxDist*math.cos(angle)*self.k0
+            self.y0=self.maxDist*math.sin(angle)*self.k0
+        end
+    end
+end
+function Camera:rotate(da)
+    self.a0=self.a0+da
+end
+function Camera:scale(dk)
+    local k0=self.k0
+    self.k0=MATH.clamp(self.k0*dk,self.minK or 0,self.maxK or 1e99)
+    dk=self.k0/k0
+    self.x0,self.y0=self.x0*dk,self.y0*dk
+end
+function Camera:update(dt)
+    self.x=MATH.expApproach(self.x,self.x0,dt*self.moveSpeed)
+    self.y=MATH.expApproach(self.y,self.y0,dt*self.moveSpeed)
+    self.k=MATH.expApproach(self.k,self.k0,dt*self.moveSpeed)
+    self.a=MATH.expApproach(self.a,self.a0+(self.swing and self.swing*math.sin(love.timer.getTime()/1.26) or 0),dt*self.rotateSpeed)
+    self.transform:setTransformation(self.x,self.y,self.a,self.k)
+end
+local applyTransform=gc.applyTransform
+function Camera:apply()
+    applyTransform(self.transform)
+end
+
+function GC.newCamera()
+    local c={
+        x0=0,y0=0,k0=1,a0=0,
+        x=0,y=0,k=1,a=0,
+        moveSpeed=26,
+        rotateSpeed=6.26,
+        swing=false,
+
+        maxDist=false,
+        minK=false,maxK=false,
+        transform=love.math.newTransform(),
+    }
+    return setmetatable(c,{__index=Camera})
+end
+
+--------------------------------------------------------------
+
 do-- function GC.load(L), GC.execute(t)
     local cmds={
         push=     'push',
