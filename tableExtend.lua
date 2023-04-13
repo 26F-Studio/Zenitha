@@ -13,6 +13,14 @@ function TABLE.new(val,count)
     return L
 end
 
+-- Get a new table with __index metatable
+function TABLE.newPool(indexFunc)
+    return setmetatable({},{
+        __call=function(self,k) return self[k] end,
+        __index=indexFunc,
+    })
+end
+
 -- Get a copy of [1~#] elements
 function TABLE.shift(org,depth)
     if not depth then depth=1e99 end
