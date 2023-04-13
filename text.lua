@@ -18,18 +18,18 @@ end
 function textFX.fly(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
-        T.text,T.x+(T._t-.5)^3*300,T.y,
+        T.text,T.x+(T._t-.5)^3*(T.arg or 300),T.y,
         nil,
         nil,nil,
         T._ox,T._oy
     )
 end
-function textFX.stretch(T)-- stretchK
+function textFX.stretch(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
         nil,
-        max(1-T._t/T.inPoint,0)*(T.stretchK or 1)+1 or 1,1,
+        max(1-T._t/T.inPoint,0)*(T.arg or 1)+1 or 1,1,
         T._ox,T._oy
     )
 end
@@ -43,11 +43,11 @@ function textFX.drive(T)
         (max(1-T._t/T.inPoint,0)*(T.driveX or 2)) or 0,0
     )
 end
-function textFX.spin(T)-- spinA
+function textFX.spin(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
-        (max(1-T._t/T.inPoint,0)^2-max(1-(1-T._t)/T.outPoint,0)^2)*(T.spinA or .4),
+        (max(1-T._t/T.inPoint,0)^2-max(1-(1-T._t)/T.outPoint,0)^2)*(T.arg or .4),
         nil,nil,
         T._ox,T._oy
     )
@@ -66,23 +66,23 @@ function textFX.zoomout(T)
     draw(
         T.text,T.x,T.y,
         nil,
-        T._t^.5*.1+1,nil,
+        T._t^.5*(T.arg or .1)+1,nil,
         T._ox,T._oy
     )
 end
-function textFX.beat(T)-- exSize
+function textFX.beat(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
         nil,
-        1+(T.exSize or .5)*max(1-T._t/T.inPoint,0)^.6,nil,
+        1+(T.arg or .5)*max(1-T._t/T.inPoint,0)^.6,nil,
         T._ox,T._oy
     )
 end
-function textFX.score(T)-- popH
+function textFX.score(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
-        T.text,T.x,T.y-0-T._t^.2*(T.popH or 30),
+        T.text,T.x,T.y-0-T._t^.2*(T.arg or 30),
         nil,
         nil,nil,
         T._ox,T._oy
@@ -105,7 +105,7 @@ end
     outPoint=0.2,
 
     style='appear',
-    _sytleArgs=...
+    styleArg=...,
 ]]
 function TEXT:add(data)
     local T={
@@ -118,10 +118,7 @@ function TEXT:add(data)
         outPoint=data.outPoint or 0.2,
 
         draw=assert(textFX[data.style or 'appear'],"No text type:"..tostring(data.style)),
-        stretchK=   data.stretchK,
-        spinA=      data.spinA,
-        exSize=     data.exSize,
-        popH=       data.popH,
+        arg=data.styleArg,
     }
     T._ox,T._oy=T.text:getWidth()*.5,T.text:getHeight()*.5
     if type(data.color)=='string' then data.color=COLOR[data.color] end
