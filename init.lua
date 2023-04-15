@@ -547,7 +547,7 @@ function love.resize(w,h)
     end
     if BG.resize then BG.resize(w,h) end
     if SCN.resize then SCN.resize(w,h) end
-    WIDGET.resize(w,h)
+    WIDGET._reset()
     onResize(w,h)
 end
 

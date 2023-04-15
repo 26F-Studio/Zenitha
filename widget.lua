@@ -30,7 +30,6 @@ local indexMeta={
     end
 }
 local onChange=NULL
-local widgetCanvas
 
 local function updateWheel(self,d)
     self._floatWheel=self._floatWheel+(d or 0)
@@ -1941,19 +1940,17 @@ function WIDGET.update(dt)
         if W.update then W:update(dt) end
     end
 end
-function WIDGET.resize(w,h)
-    if widgetCanvas then widgetCanvas:release() end
-    widgetCanvas=GC.newCanvas(w,h)
-    WIDGET._reset()
-end
 function WIDGET.draw()
     gc_translate(0,-SCN.curScroll)
     for _,W in next,WIDGET.active do
         if W._visible then W:draw() end
     end
-    gc_setColor(1,1,1)
-    gc_draw(widgetCanvas)
-    gc_replaceTransform(xOy)
+end
+function WIDGET._draw(widgetList,scroll)
+    gc_translate(0,-(scroll or 0))
+    for _,W in next,widgetList do
+        if W._visible then W:draw() end
+    end
 end
 
 function WIDGET.new(args)
