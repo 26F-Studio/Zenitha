@@ -253,6 +253,7 @@ Widgets.button=setmetatable({
         'pos',
         'x','y','w','h',
         'lineWidth','cornerR',
+
         'alignX','alignY',
         'text','image',
         'color',
@@ -1247,10 +1248,10 @@ end
 Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
-
     w=100,
     h=40,
 
+    color_fill={0,0,0,.3},
     secret=false,
     regex=false,
     labelPos='left',
@@ -1266,13 +1267,13 @@ Widgets.inputBox=setmetatable({
         'name',
         'pos',
         'x','y','w','h',
+        'lineWidth','cornerR',
 
         'text','fontSize','fontType',
         'secret',
         'regex',
         'labelPos',
         'labelDistance',
-        'lineWidth','cornerR',
         'maxInputLength',
         'sound_input','sound_bksp','sound_delete','sound_clear',
         'sound_press','sound_hover',
@@ -1335,7 +1336,7 @@ function Widgets.inputBox:draw()
     local HOV=self._hoverTime/self._hoverTimeMax
 
     -- Background
-    gc_setColor(0,0,0,.3)
+    gc_setColor(self.color_fill)
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Highlight
@@ -1410,11 +1411,14 @@ end
 Widgets.textBox=setmetatable({
     type='textBox',
     keepFocus=true,
-
     w=100,
     h=40,
 
+    color_fill={0,0,0,.3},
     scrollBarPos='left',
+    scrollBarWidth=8,
+    scrollBarDist=3,
+    scrollBarColor=TABLE.shift(COLOR.L),
     lineHeight=30,
     yOffset=-2,
     cornerR=3,
@@ -1433,12 +1437,13 @@ Widgets.textBox=setmetatable({
         'name',
         'pos',
         'x','y','w','h',
+        'lineWidth','cornerR',
 
+        'color_fill',
         'fontSize','fontType',
-        'scrollBarPos',
+        'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
         'lineHeight',
         'yOffset',
-        'lineWidth','cornerR',
         'activeColor','idleColor',
         'fixContent',
         'sound_clear',
@@ -1535,7 +1540,7 @@ function Widgets.textBox:draw()
     local scroll=self._scrollPos1
 
     -- Background
-    gc_setColor(0,0,0,.3)
+    gc_setColor(self.color_fill)
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
@@ -1549,15 +1554,17 @@ function Widgets.textBox:draw()
         gc_translate(x,y)
 
         -- Slider
-        gc_setColor(COLOR.L)
         if #list>self._capacity then
+            gc_setColor(self.scrollBarColor)
             local len=h*h/H
             if self.scrollBarPos=='left' then
-                gc_rectangle('fill',-15,(h-len)*scroll/(H-h),10,len,self.cornerR)
+                gc_rectangle('fill',-self.scrollBarWidth-self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
             elseif self.scrollBarPos=='right' then
-                gc_rectangle('fill',w+5,(h-len)*scroll/(H-h),10,len,self.cornerR)
+                gc_rectangle('fill',w+self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
             end
         end
+
+        gc_setColor(COLOR.L)
 
         -- Clear button
         if not self.fixContent then
@@ -1596,7 +1603,11 @@ Widgets.listBox=setmetatable({
     w=100,
     h=40,
 
+    color_fill={0,0,0,.3},
     scrollBarPos='left',
+    scrollBarWidth=8,
+    scrollBarDist=3,
+    scrollBarColor=TABLE.shift(COLOR.L),
     lineHeight=30,
     cornerR=3,
     activeColor=TABLE.shift(COLOR.LI),
@@ -1617,10 +1628,11 @@ Widgets.listBox=setmetatable({
         'name',
         'pos',
         'x','y','w','h',
-
-        'scrollBarPos',
-        'lineHeight',
         'lineWidth','cornerR',
+
+        'color_fill',
+        'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
+        'lineHeight',
         'activeColor','idleColor',
         'drawFunc',
         'releaseDist',
@@ -1765,7 +1777,7 @@ function Widgets.listBox:draw()
         gc_translate(x,y)
 
         -- Background
-        gc_setColor(0,0,0,.4)
+        gc_setColor(self.color_fill)
         gc_rectangle('fill',0,0,w,h,self.cornerR)
 
         -- Frame
@@ -1777,8 +1789,12 @@ function Widgets.listBox:draw()
         -- Slider
         if h<H then
             local len=h*h/H
-            gc_setColor(COLOR.L)
-            gc_rectangle('fill',-15,max((h-len)*scroll/(H-h),0),12,len,self.cornerR)
+            gc_setColor(self.scrollBarColor)
+            if self.scrollBarPos=='left' then
+                gc_rectangle('fill',-self.scrollBarWidth-self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
+            elseif self.scrollBarPos=='right' then
+                gc_rectangle('fill',w+self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
+            end
         end
 
         -- List
