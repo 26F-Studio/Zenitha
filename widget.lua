@@ -1581,8 +1581,8 @@ function Widgets.textBox:draw()
 
         -- Texts
         setFont(self.fontSize,self.fontType)
+        gc_stc_reset()
         gc_stc_rect(0,0,w,h)
-        gc_stc_setComp()
         gc_translate(0,-(scroll%lineH))
         local pos=floor(scroll/lineH)
         for i=1,self._capacity+1 do
@@ -1798,8 +1798,8 @@ function Widgets.listBox:draw()
         end
 
         -- List
+        gc_stc_reset()
         gc_stc_rect(0,0,w,h)
-        gc_stc_setComp()
         local pos=floor(scroll/lineH)
         gc_translate(0,-(scroll%lineH))
         for i=1,self._capacity+1 do
