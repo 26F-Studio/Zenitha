@@ -14,7 +14,7 @@ local timer=love.timer.getTime
 local assert,next=assert,next
 local floor,ceil=math.floor,math.ceil
 local max,min=math.max,math.min
-local abs=math.abs
+local abs,clamp=math.abs,MATH.clamp
 local sub,ins,rem=string.sub,table.insert,table.remove
 
 local SCN,SCR,xOy=SCN,SCR,SCR.xOy
@@ -773,7 +773,7 @@ function Widgets.slider:draw()
     gc_line(x,y,x2,y)
 
     -- Block
-    local pos=MATH.clamp(self._pos,rangeL,rangeR)
+    local pos=clamp(self._pos,rangeL,rangeR)
     local cx=x+(x2-x)*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
@@ -812,7 +812,7 @@ end
 function Widgets.slider:drag(x)
     if not x then return end
     x=x-self._x
-    local newPos=MATH.clamp(x/self.w,0,1)
+    local newPos=clamp(x/self.w,0,1)
     local newVal
     if not self._unit then
         newVal=(1-newPos)*self._rangeL+newPos*self._rangeR
@@ -829,7 +829,7 @@ function Widgets.slider:scroll(dx,dy)
     if n then
         local p=self._pos0
         local u=self._unit or .01
-        local P=MATH.clamp(p+u*n,self._rangeL,self._rangeR)
+        local P=clamp(p+u*n,self._rangeL,self._rangeR)
         if p==P or not P then return end
         self.code(P)
     end
@@ -1510,13 +1510,13 @@ function Widgets.textBox:press(x,y)
     end
 end
 function Widgets.textBox:drag(_,_,_,dy)
-    self._scrollPos=MATH.clamp(
+    self._scrollPos=clamp(
         self._scrollPos-dy,
         0,max(#self._texts*self.lineHeight-self.h,0)
     )
 end
 function Widgets.textBox:scroll(dx,dy)
-    self._scrollPos=MATH.clamp(
+    self._scrollPos=clamp(
         self._scrollPos-(dx+dy)*self.lineHeight,
         0,max(#self._texts*self.lineHeight-self.h,0)
     )
@@ -1729,9 +1729,9 @@ function Widgets.listBox:release(x,y)
     end
 end
 function Widgets.listBox:_moveScroll(dy,selInSight)
-    self._scrollPos=MATH.clamp(
+    self._scrollPos=clamp(
         not selInSight and self._scrollPos+dy or
-        MATH.clamp(self._scrollPos+dy,
+        clamp(self._scrollPos+dy,
             (self._selected+1)*self.lineHeight-self.h,
             (self._selected-2)*self.lineHeight
         ),
@@ -1758,7 +1758,7 @@ function Widgets.listBox:arrowKey(dir)
     self:_moveScroll(0,true)
 end
 function Widgets.listBox:select(i)
-    self._selected=i
+    self._selected=clamp(i,1,#self._list)
     self:arrowKey('autofresh')
 end
 function Widgets.listBox:update(dt)
@@ -1913,7 +1913,7 @@ function WIDGET.drag(x,y,dx,dy)
     if W then
         W:drag(x,y+SCN.curScroll,dx,dy)
     else
-        SCN.curScroll=MATH.clamp(SCN.curScroll-dy,0,SCN.maxScroll)
+        SCN.curScroll=clamp(SCN.curScroll-dy,0,SCN.maxScroll)
     end
 end
 function WIDGET.scroll(dx,dy)
@@ -1921,7 +1921,7 @@ function WIDGET.scroll(dx,dy)
     if W then
         W:scroll(dx,dy)
     else
-        SCN.curScroll=MATH.clamp(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
+        SCN.curScroll=clamp(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
     end
 end
 function WIDGET.textinput(texts)
