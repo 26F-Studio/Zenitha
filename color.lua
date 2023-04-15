@@ -1,8 +1,7 @@
 local abs=math.abs
 local function hex(str)
     assert(type(str)=='string',"COLOR.hex(str): str must be string")
-    str=str:match('#?%x%x?%x?%x?%x?%x?%x?%x?#?') or '000000'
-    assert(#str<=8,"COLOR.hex(str): length of str must <= 8 (except #)")
+    str=str:match('#?(%x%x?%x?%x?%x?%x?%x?%x?)') or '000000'
     local r=(tonumber(str:sub(1,2),16) or 0)/255
     local g=(tonumber(str:sub(3,4),16) or 0)/255
     local b=(tonumber(str:sub(5,6),16) or 0)/255
