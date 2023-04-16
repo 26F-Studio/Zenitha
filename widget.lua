@@ -62,6 +62,9 @@ Widgets.base={
 
     color='L',
     fillColor='lS',
+    frameColor='L',
+    activeColor='LY',
+    idleColor='L',
     pos=false,
     lineWidth=4,
     fontSize=30,fontType=false,
@@ -93,8 +96,14 @@ function Widgets.base:reset()
     assert(type(self.y)=='number','[widget].y must be number')
     if type(self.color)=='string' then self.color=COLOR[self.color] end
     assert(type(self.color)=='table','[widget].color must be table')
+    if type(self.frameColor)=='string' then self.frameColor=COLOR[self.frameColor] end
+    assert(type(self.frameColor)=='table','[widget].frameColor must be table')
     if type(self.fillColor)=='string' then self.fillColor=COLOR[self.fillColor] end
     assert(type(self.fillColor)=='table','[widget].fillColor must be table')
+    if type(self.activeColor)=='string' then self.activeColor=COLOR[self.activeColor] end
+    assert(type(self.activeColor)=='table','[widget].activeColor must be table')
+    if type(self.idleColor)=='string' then self.idleColor=COLOR[self.idleColor] end
+    assert(type(self.idleColor)=='table','[widget].idleColor must be table')
 
     if self.pos then
         assert(
@@ -1251,7 +1260,7 @@ Widgets.inputBox=setmetatable({
     w=100,
     h=40,
 
-    frameColor=TABLE.shift(COLOR.L),
+    frameColor='L',
     fillColor={0,0,0,.3},
     secret=false,
     regex=false,
@@ -1260,7 +1269,7 @@ Widgets.inputBox=setmetatable({
     cornerR=3,
 
     maxInputLength=1e99,
-    sound_input=false,sound_bksp=false,sound_delete=false,sound_clear=false,
+    sound_input=false,sound_bksp=false,sound_clear=false,sound_fail=false,
 
     _value='',-- Text contained
 
@@ -1277,7 +1286,7 @@ Widgets.inputBox=setmetatable({
         'labelPos',
         'labelDistance',
         'maxInputLength',
-        'sound_input','sound_bksp','sound_delete','sound_clear',
+        'sound_input','sound_bksp','sound_clear','sound_fail',
         'sound_press','sound_hover',
 
         'list',
@@ -1290,8 +1299,9 @@ function Widgets.inputBox:reset()
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
     assert(self.h and type(self.h)=='number','[inputBox].h must be number')
     assert(not self.sound_input or type(self.sound_input)=='string','[inputBox].sound_input must be string')
-    assert(not self.sound_delete or type(self.sound_delete)=='string','[inputBox].sound_delete must be string')
+    assert(not self.sound_bksp or type(self.sound_bksp)=='string','[inputBox].sound_bksp must be string')
     assert(not self.sound_clear or type(self.sound_clear)=='string','[inputBox].sound_clear must be string')
+    assert(not self.sound_fail or type(self.sound_fail)=='string','[inputBox].sound_fail must be string')
     if self.labelPos=='left' then
         self.alignX,self.alignY='right','center'
     elseif self.labelPos=='right' then
@@ -1346,7 +1356,7 @@ function Widgets.inputBox:draw()
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
-    gc_setColor(COLOR.L)
+    gc_setColor(self.frameColor)
     gc_setLineWidth(self.lineWidth)
     gc_rectangle('line',x,y,w,h,self.cornerR)
 
@@ -1400,8 +1410,8 @@ function Widgets.inputBox:keypress(k)
             end
         elseif k=='delete' then
             t=''
-            if self.sound_delete then
-                SFX.play(self.sound_delete)
+            if self.sound_clear then
+                SFX.play(self.sound_clear)
             end
         end
         self._value=t
@@ -1420,12 +1430,12 @@ Widgets.textBox=setmetatable({
     scrollBarPos='left',
     scrollBarWidth=8,
     scrollBarDist=3,
-    scrollBarColor=TABLE.shift(COLOR.L),
+    scrollBarColor='L',
     lineHeight=30,
     yOffset=-2,
     cornerR=3,
-    activeColor=TABLE.shift(COLOR.LY),
-    idleColor=TABLE.shift(COLOR.L),
+    activeColor='LY',
+    idleColor='L',
     fixContent=true,
     sound_clear=false,
 
@@ -1609,11 +1619,11 @@ Widgets.listBox=setmetatable({
     scrollBarPos='left',
     scrollBarWidth=8,
     scrollBarDist=3,
-    scrollBarColor=TABLE.shift(COLOR.L),
+    scrollBarColor='L',
     lineHeight=30,
     cornerR=3,
-    activeColor=TABLE.shift(COLOR.LI),
-    idleColor=TABLE.shift(COLOR.L),
+    activeColor='LI',
+    idleColor='L',
     drawFunc=false,-- function that draw options. Input: option,id,ifSelected
     releaseDist=10,
     sound_click=false,
@@ -1934,9 +1944,9 @@ function WIDGET.textinput(texts)
     if W and W.type=='inputBox' then
         if (not W.regex or texts:match(W.regex)) and (not W.limit or #(WIDGET.sel._value..texts)<=W.limit) then
             WIDGET.sel._value=WIDGET.sel._value..texts
-            SFX.play(Widgets.inputBox.sound_input)
+            SFX.play(W.sound_input)
         else
-            SFX.play('drop_cancel')
+            SFX.play(W.sound_fail)
         end
     end
 end
