@@ -1614,6 +1614,8 @@ Widgets.listBox=setmetatable({
     idleColor=TABLE.shift(COLOR.L),
     drawFunc=false,-- function that draw options. Input: option,id,ifSelected
     releaseDist=10,
+    sound_click=false,
+    sound_select=false,
 
     _floatWheel=0,
     _list=false,
@@ -1636,7 +1638,7 @@ Widgets.listBox=setmetatable({
         'activeColor','idleColor',
         'drawFunc',
         'releaseDist',
-
+        'sound_click','sound_select',
         'code',
         'visibleFunc',
     },
@@ -1719,10 +1721,11 @@ function Widgets.listBox:release(x,y)
             if self._selected~=y then
                 self._selected=y
                 self:_moveScroll(0,true)
-                SFX.play('selector',.8,0,12)
+                SFX.play(self.sound_select)
             else
                 if self.code then
                     self:code(self:getSelect(),self:getItem())
+                    SFX.play(self.sound_click)
                 end
             end
         end
