@@ -61,7 +61,7 @@ Widgets.base={
     x=0,y=0,
 
     color='L',
-    color_fill='lS',
+    fillColor='lS',
     pos=false,
     lineWidth=4,
     fontSize=30,fontType=false,
@@ -93,8 +93,8 @@ function Widgets.base:reset()
     assert(type(self.y)=='number','[widget].y must be number')
     if type(self.color)=='string' then self.color=COLOR[self.color] end
     assert(type(self.color)=='table','[widget].color must be table')
-    if type(self.color_fill)=='string' then self.color_fill=COLOR[self.color_fill] end
-    assert(type(self.color_fill)=='table','[widget].color_fill must be table')
+    if type(self.fillColor)=='string' then self.fillColor=COLOR[self.fillColor] end
+    assert(type(self.fillColor)=='table','[widget].fillColor must be table')
 
     if self.pos then
         assert(
@@ -533,7 +533,7 @@ Widgets.switch=setmetatable({
 
         'labelPos',
         'labelDistance',
-        'color','color_fill',
+        'color','fillColor',
         'text','fontSize','fontType',
         'lineWidth','widthLimit',
         'sound_on','sound_off',
@@ -583,7 +583,7 @@ function Widgets.switch:draw()
 
     if self.disp then
         -- Background
-        gc_setColor(self.color_fill[1],self.color_fill[2],self.color_fill[3],self._slideTime/self._hoverTimeMax+.5)
+        gc_setColor(self.fillColor[1],self.fillColor[2],self.fillColor[3],self._slideTime/self._hoverTimeMax+.5)
         gc_rectangle('fill',-h,-h*.5,h*2,h,h*.5)
 
         -- Frame
@@ -1251,7 +1251,8 @@ Widgets.inputBox=setmetatable({
     w=100,
     h=40,
 
-    color_fill={0,0,0,.3},
+    frameColor=TABLE.shift(COLOR.L),
+    fillColor={0,0,0,.3},
     secret=false,
     regex=false,
     labelPos='left',
@@ -1268,6 +1269,7 @@ Widgets.inputBox=setmetatable({
         'pos',
         'x','y','w','h',
         'lineWidth','cornerR',
+        'frameColor','fillColor',
 
         'text','fontSize','fontType',
         'secret',
@@ -1336,7 +1338,7 @@ function Widgets.inputBox:draw()
     local HOV=self._hoverTime/self._hoverTimeMax
 
     -- Background
-    gc_setColor(self.color_fill)
+    gc_setColor(self.fillColor)
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Highlight
@@ -1414,7 +1416,7 @@ Widgets.textBox=setmetatable({
     w=100,
     h=40,
 
-    color_fill={0,0,0,.3},
+    fillColor={0,0,0,.3},
     scrollBarPos='left',
     scrollBarWidth=8,
     scrollBarDist=3,
@@ -1439,7 +1441,7 @@ Widgets.textBox=setmetatable({
         'x','y','w','h',
         'lineWidth','cornerR',
 
-        'color_fill',
+        'fillColor',
         'fontSize','fontType',
         'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
         'lineHeight',
@@ -1540,7 +1542,7 @@ function Widgets.textBox:draw()
     local scroll=self._scrollPos1
 
     -- Background
-    gc_setColor(self.color_fill)
+    gc_setColor(self.fillColor)
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
@@ -1603,7 +1605,7 @@ Widgets.listBox=setmetatable({
     w=100,
     h=40,
 
-    color_fill={0,0,0,.3},
+    fillColor={0,0,0,.3},
     scrollBarPos='left',
     scrollBarWidth=8,
     scrollBarDist=3,
@@ -1632,7 +1634,7 @@ Widgets.listBox=setmetatable({
         'x','y','w','h',
         'lineWidth','cornerR',
 
-        'color_fill',
+        'fillColor',
         'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
         'lineHeight',
         'activeColor','idleColor',
@@ -1780,7 +1782,7 @@ function Widgets.listBox:draw()
         gc_translate(x,y)
 
         -- Background
-        gc_setColor(self.color_fill)
+        gc_setColor(self.fillColor)
         gc_rectangle('fill',0,0,w,h,self.cornerR)
 
         -- Frame
