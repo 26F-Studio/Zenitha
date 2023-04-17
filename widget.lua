@@ -1465,6 +1465,8 @@ Widgets.textBox=setmetatable({
 },{__index=Widgets.base,__metatable=true})
 function Widgets.textBox:reset()
     Widgets.base.reset(self)
+    if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
+    assert(type(self.scrollBarColor)=='table','[textBox].scrollBarColor must be table')
     assert(self.w and type(self.w)=='number','[textBox].w must be number')
     assert(self.h and type(self.h)=='number','[textBox].h must be number')
     for _,v in next,{'activeColor','idleColor'} do
@@ -1657,6 +1659,8 @@ Widgets.listBox=setmetatable({
 },{__index=Widgets.base,__metatable=true})
 function Widgets.listBox:reset()
     Widgets.base.reset(self)
+    if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
+    assert(type(self.scrollBarColor)=='table','[listBox].scrollBarColor must be table')
     assert(self.w and type(self.w)=='number','[listBox].w must be number')
     assert(self.h and type(self.h)=='number','[listBox].h must be number')
     for _,v in next,{'activeColor','idleColor'} do
