@@ -739,10 +739,10 @@ function love.run()
             BG.update(updateDT)
             TEXT:update(updateDT)
             MES_update(updateDT)
+            SYSFX_update(updateDT)
             WAIT.update(updateDT)
             HTTP_update(updateDT)
             TASK_update(updateDT)
-            SYSFX_update(updateDT)
             if SCN.update then SCN.update(updateDT) end
             if SCN.swapping then SCN_swapUpdate(updateDT) end
             WIDGET_update(updateDT)
