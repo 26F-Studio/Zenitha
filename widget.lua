@@ -1,11 +1,11 @@
-local gc_translate,gc_scale,gc_replaceTransform=GC.translate,GC.scale,GC.replaceTransform
+local gc_translate,gc_scale=GC.translate,GC.scale
 local gc_push,gc_pop=GC.push,GC.pop
 local gc_setColor,gc_setLineWidth=GC.setColor,GC.setLineWidth
 local gc_draw,gc_line=GC.draw,GC.line
 local gc_rectangle,gc_circle=GC.rectangle,GC.circle
 local gc_print,gc_printf=GC.print,GC.printf
 local gc_mStr=GC.mStr
-local gc_stc_reset,gc_stc_setComp,gc_stc_stop=GC.stc_reset,GC.stc_setComp,GC.stc_stop
+local gc_stc_reset,gc_stc_stop=GC.stc_reset,GC.stc_stop
 local gc_stc_circ,gc_stc_rect=GC.stc_circ,GC.stc_rect
 
 local kb=love.keyboard
@@ -1628,6 +1628,7 @@ Widgets.listBox=setmetatable({
     idleColor='L',
     drawFunc=false,-- function that draw options. Input: option,id,ifSelected
     releaseDist=10,
+    stencilMode='total',
     sound_click=false,
     sound_select=false,
 
@@ -1652,6 +1653,7 @@ Widgets.listBox=setmetatable({
         'activeColor','idleColor',
         'drawFunc',
         'releaseDist',
+        'stencilMode',
         'sound_click','sound_select',
         'code',
         'visibleFunc',
@@ -1670,6 +1672,8 @@ function Widgets.listBox:reset()
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[listBox].scrollBarPos must be 'left' or 'right'")
 
     assert(type(self.drawFunc)=='function',"[listBox].drawFunc must be function")
+    assert(type(self.releaseDist)=='number' and self.releaseDist>=0,"[listBox].drawFunc must >=0")
+    assert(self.stencilMode=='total' or self.stencilMode=='single' or self.stencilMode==false,"[listBox].stencilMode must be 'total' or 'single' or false")
     if not self._list then self._list={} end
     self._capacity=ceil(self.h/self.lineHeight)
     self._scrollPos1=-2*self.h
@@ -1817,16 +1821,42 @@ function Widgets.listBox:draw()
         end
 
         -- List
-        gc_stc_reset()
-        gc_stc_rect(0,0,w,h)
         local pos=floor(scroll/lineH)
-        gc_translate(0,-(scroll%lineH))
-        for i=1,self._capacity+1 do
-            i=pos+i
-            if list[i]~=nil then
-                self.drawFunc(list[i],i,i==self._selected)
+        local cap=self._capacity
+        local sel=self._selected
+        ---@type function
+        local drawFunc=self.drawFunc
+        if self.stencilMode=='single' then
+            local modH=scroll%lineH
+            gc_translate(0,-modH)
+            for i=1,cap+1 do
+                gc_stc_reset()
+                if i==1 then
+                    gc_stc_rect(0,modH,w,lineH-modH)
+                elseif i==cap+1 then
+                    gc_stc_rect(0,0,w,modH)
+                else
+                    gc_stc_rect(0,0,w,lineH)
+                end
+                i=pos+i
+                if list[i]~=nil then
+                    drawFunc(list[i],i,i==sel)
+                end
+                gc_translate(0,lineH)
             end
-            gc_translate(0,lineH)
+        else
+            if self.stencilMode then
+                gc_stc_reset()
+                gc_stc_rect(0,0,w,h)
+            end
+            gc_translate(0,-(scroll%lineH))
+            for i=1,cap+1 do
+                i=pos+i
+                if list[i]~=nil then
+                    drawFunc(list[i],i,i==sel)
+                end
+                gc_translate(0,lineH)
+            end
         end
         gc_stc_stop()
     gc_pop()
