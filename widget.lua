@@ -439,6 +439,9 @@ Widgets.checkBox=setmetatable({
 },{__index=Widgets.base,__metatable=true})
 function Widgets.checkBox:reset()
     Widgets.base.reset(self)
+
+    assert(type(self.disp)=='function','[checkBox].disp must be function')
+
     if self.labelPos=='left' then
         self.alignX='right'
     elseif self.labelPos=='right' then
@@ -453,7 +456,6 @@ function Widgets.checkBox:reset()
 end
 function Widgets.checkBox:isAbove(x,y)
     return
-        self.disp and
         abs(x-self._x)<self.w*.5 and
         abs(y-self._y)<self.w*.5
 end
@@ -477,21 +479,19 @@ function Widgets.checkBox:draw()
 
     local c=self.color
 
-    if self.disp then
-        -- Background
-        gc_setColor(c[1],c[2],c[3],.3*HOV)
-        gc_rectangle('fill',-w*.5,-w*.5,w,w,self.cornerR)
+    -- Background
+    gc_setColor(c[1],c[2],c[3],.3*HOV)
+    gc_rectangle('fill',-w*.5,-w*.5,w,w,self.cornerR)
 
-        -- Frame
-        gc_setLineWidth(self.lineWidth)
-        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8)
-        gc_rectangle('line',-w*.5,-w*.5,w,w,self.cornerR)
-        if self.disp() then
-            gc_scale(.5*w)
-            gc_setLineWidth(self.lineWidth*2/w)
-            gc_line(-.7,.05,-.2,.5,.7,-.55)
-            gc_scale(2/w)
-        end
+    -- Frame
+    gc_setLineWidth(self.lineWidth)
+    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8)
+    gc_rectangle('line',-w*.5,-w*.5,w,w,self.cornerR)
+    if self.disp() then
+        gc_scale(.5*w)
+        gc_setLineWidth(self.lineWidth*2/w)
+        gc_line(-.7,.05,-.2,.5,.7,-.55)
+        gc_scale(2/w)
     end
 
     -- Drawable
@@ -555,6 +555,8 @@ Widgets.switch=setmetatable({
 function Widgets.switch:reset()
     Widgets.base.reset(self)
 
+    assert(type(self.disp)=='function','[switch].disp must be function')
+
     self._slideTime=0
     if self.labelPos=='left' then
         self.alignX='right'
@@ -590,20 +592,18 @@ function Widgets.switch:draw()
 
     local c=self.color
 
-    if self.disp then
-        -- Background
-        gc_setColor(self.fillColor[1],self.fillColor[2],self.fillColor[3],self._slideTime/self._hoverTimeMax+.5)
-        gc_rectangle('fill',-h,-h*.5,h*2,h,h*.5)
+    -- Background
+    gc_setColor(self.fillColor[1],self.fillColor[2],self.fillColor[3],self._slideTime/self._hoverTimeMax+.5)
+    gc_rectangle('fill',-h,-h*.5,h*2,h,h*.5)
 
-        -- Frame
-        gc_setLineWidth(self.lineWidth)
-        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*HOV)
-        gc_rectangle('line',-h,-h*.5,h*2,h,h*.5)
+    -- Frame
+    gc_setLineWidth(self.lineWidth)
+    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*HOV)
+    gc_rectangle('line',-h,-h*.5,h*2,h,h*.5)
 
-        -- Axis
-        gc_setColor(1,1,1,.8+.2*HOV)
-        gc_circle('fill',h*(self._slideTime/self._hoverTimeMax),0,h*(.35+HOV*.05))
-    end
+    -- Axis
+    gc_setColor(1,1,1,.8+.2*HOV)
+    gc_circle('fill',h*(self._slideTime/self._hoverTimeMax),0,h*(.35+HOV*.05))
 
     -- Drawable
     local x2,y2=0,0
