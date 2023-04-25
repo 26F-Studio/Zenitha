@@ -1,5 +1,6 @@
 local gc=love.graphics
 local getColor,setColor,prints,printf,draw,drawL=gc.getColor,gc.setColor,gc.print,gc.printf,gc.draw,gc.drawLayer
+local newText=gc.newText
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
 local sin,cos=math.sin,math.cos
 local pcall=pcall
@@ -228,7 +229,6 @@ end
 
 --------------------------------------------------------------
 
-
 local Camera={}
 function Camera:move(dx,dy)
     self.x0=self.x0+dx
@@ -276,6 +276,21 @@ function GC.newCamera()
         transform=love.math.newTransform(),
     }
     return setmetatable(c,{__index=Camera})
+end
+
+--------------------------------------------------------------
+
+local function measureWidth(font,str)
+    return newText(font,str):getWidth()
+end
+function GC.warpText(font,str,width)
+    local list={}
+
+    -- TODO:
+    -- use 'measureWidth(font,string)' to measure the width of string
+    -- return a table of strings, each of which is no longer than given width
+
+    return list
 end
 
 --------------------------------------------------------------
