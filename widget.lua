@@ -815,23 +815,24 @@ function Widgets.slider:draw()
         end
     end
 end
+function Widgets.slider:trigger(x,mode)
+    if not x then return end
+    local pos=clamp((x-self._x)/self.w,0,1)
+    local newVal=
+        self._unit and self._rangeL+floor(pos*self._rangeWidth/self._unit+.5)*self._unit
+        or (1-pos)*self._rangeL+pos*self._rangeR
+    if mode~='drag' or newVal~=self.disp() then
+        self.code(newVal,mode)
+    end
+end
 function Widgets.slider:press(x)
-    self:drag(x)
+    self:trigger(x,'press')
 end
 function Widgets.slider:drag(x)
-    if not x then return end
-    x=x-self._x
-    local newPos=clamp(x/self.w,0,1)
-    local newVal
-    if not self._unit then
-        newVal=(1-newPos)*self._rangeL+newPos*self._rangeR
-    else
-        newVal=newPos*self._rangeWidth
-        newVal=self._rangeL+floor(newVal/self._unit+.5)*self._unit
-    end
-    if newVal~=self.disp() then
-        self.code(newVal)
-    end
+    self:trigger(x,'drag')
+end
+function Widgets.slider:release(x)
+    self:trigger(x,'release')
 end
 function Widgets.slider:scroll(dx,dy)
     local n=updateWheel(self,(dx+dy)*self._rangeWidth/(self._unit or .01)/20)
@@ -839,8 +840,9 @@ function Widgets.slider:scroll(dx,dy)
         local p=self._pos0
         local u=self._unit or .01
         local P=clamp(p+u*n,self._rangeL,self._rangeR)
-        if p==P or not P then return end
-        self.code(P)
+        if P and p~=P then
+            self.code(P)
+        end
     end
 end
 function Widgets.slider:arrowKey(k)
