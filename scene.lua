@@ -171,7 +171,7 @@ function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
 
             style=style or 'fade'
             if not swap[style] then
-                MES.new('error',"No swap style named '"..style.."'")
+                MSG.new('error',"No swap style named '"..style.."'")
                 style='fade'
             end
             SCN.swapping=true
@@ -183,7 +183,7 @@ function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
             S.draw=swap[style].draw
         end
     else
-        MES.new('warn',"No Scene: "..tar)
+        MSG.new('warn',"No Scene: "..tar)
     end
 end
 function SCN.go(tar,style,...)-- Normal scene swapping, can back
@@ -193,7 +193,7 @@ function SCN.go(tar,style,...)-- Normal scene swapping, can back
             SCN.swapTo(tar,style,...)
         end
     else
-        MES.new('warn',"No Scene: "..tar)
+        MSG.new('warn',"No Scene: "..tar)
     end
 end
 function SCN.back(style,...)

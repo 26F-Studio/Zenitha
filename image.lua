@@ -7,7 +7,7 @@ local IMGlistMeta={
             self[k]=res
         else
             self[k]=PAPER
-            MES.new('error',STRING.repD("Cannot load image '$1': $2",self.__source[k],res))
+            MSG.new('error',STRING.repD("Cannot load image '$1': $2",self.__source[k],res))
         end
         return self[k]
     end,
@@ -25,7 +25,7 @@ local function link(A,B)
 end
 local IMG={
     init=function(_list)
-        if initialized then MES.new('info',"Achievement: attempt to initialize IMG lib twice") return end
+        if initialized then MSG.new('info',"Achievement: attempt to initialize IMG lib twice") return end
         initialized,IMG.init=true,nil
         link(IMG,_list)
     end

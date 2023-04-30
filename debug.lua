@@ -1,12 +1,12 @@
 local yield=coroutine.yield
 local DEBUG={}
 
--- Use DEBUG.checkLoadTime(mes) a few times in main.lua to mark time used for loading
+-- Use DEBUG.checkLoadTime(msg) a few times in main.lua to mark time used for loading
 -- Then use DEBUG.logLoadTime() to log the times
 local loadTimeList,lastTimeStamp={},love.timer.getTime()
-function DEBUG.checkLoadTime(mes)
-    assert(type(mes)=='string',"DEBUG.checkLoadTime(mes): mes must be string")
-    table.insert(loadTimeList,("%-26s \t%.3fs"):format(mes..":",love.timer.getTime()-lastTimeStamp))
+function DEBUG.checkLoadTime(msg)
+    assert(type(msg)=='string',"DEBUG.checkLoadTime(msg): msg must be string")
+    table.insert(loadTimeList,("%-26s \t%.3fs"):format(msg..":",love.timer.getTime()-lastTimeStamp))
     lastTimeStamp=love.timer.getTime()
 end
 function DEBUG.logLoadTime()

@@ -30,7 +30,7 @@ local mesIcon={
 local mesList={}
 local startY=0
 
-local MES={}
+local MSG={}
 local backColors={
     info= {COLOR.hex"3575F0"},
     check={COLOR.hex"4FB666"},
@@ -38,7 +38,7 @@ local backColors={
     error={COLOR.hex"CF4949"},
     other={COLOR.hex"787878"},
 }
-function MES.new(icon,str,time)
+function MSG.new(icon,str,time)
     local color=backColors.other
     if type(icon)=='string' then
         color=TABLE.shift(backColors[icon] or color)
@@ -60,26 +60,26 @@ function MES.new(icon,str,time)
         y=-h,
     })
 end
-function MES.setSafeY(y)
+function MSG.setSafeY(y)
     assert(type(y)=='number' and y>=0,"startY must be nonnegative number")
     startY=y
 end
-function MES.traceback()
-    local mes=
+function MSG.traceback()
+    local msg=
         debug.traceback('',1)
         :gsub(': in function',', in')
         :gsub(':',' ')
         :gsub('\t','')
-    MES.new('error',mes:sub(
-        mes:find("\n",2)+1,
-        mes:find("\n%[C%], in 'xpcall'")
+    MSG.new('error',msg:sub(
+        msg:find("\n",2)+1,
+        msg:find("\n%[C%], in 'xpcall'")
     ),5)
 end
-function MES.clear()
+function MSG.clear()
     TABLE.cut(mesList)
 end
 
-function MES.update(dt)
+function MSG.update(dt)
     for i=#mesList,1,-1 do
         local m=mesList[i]
         if m.startTime>0 then
@@ -101,7 +101,7 @@ function MES.update(dt)
     end
 end
 
-function MES.draw()
+function MSG.draw()
     if #mesList>0 then
         GC.translate(0,startY)
         GC.setLineWidth(2)
@@ -131,4 +131,4 @@ function MES.draw()
     end
 end
 
-return MES
+return MSG

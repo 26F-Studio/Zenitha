@@ -18,7 +18,7 @@ function VOC.setVol(v)
     volume=v
 end
 function VOC.init(list)
-    if initialized then MES.new('info',"Achievement: attempt to initialize VLC lib twice") return end
+    if initialized then MSG.new('info',"Achievement: attempt to initialize VLC lib twice") return end
     initialized,VOC.init=true,nil
     local rem=table.remove
     local voiceQueue={free=0}

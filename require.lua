@@ -32,6 +32,6 @@ return function(libName)
     if success and res then
         return res
     else
-        MES.new('error',"Cannot load "..libName..": "..res)
+        MSG.new('error',"Cannot load "..libName..": "..res)
     end
 end

@@ -37,7 +37,7 @@ local devMode
 local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastX,lastY=0,0-- Last click pos
 local jsState={}-- map, joystickID->axisStates: {axisName->axisVal}
-local errData={}-- list, each error create {mes={errMes strings},scene=sceneNameStr}
+local errData={}-- list, each error create {msg={errMsg strings},scene=sceneNameStr}
 local bigCanvases=setmetatable({},{__index=function(self,k)
     self[k]=gc.newCanvas()
     return self[k]
@@ -61,7 +61,7 @@ end
 local globalKey={
     f8=function()
         devMode=1
-        MES.new('info',"DEBUG ON",.2)
+        MSG.new('info',"DEBUG ON",.2)
     end
 }
 local devFnKey={NULL,NULL,NULL,NULL,NULL,NULL,NULL}
@@ -82,22 +82,22 @@ COLOR=      require'Zenitha.color'
 DEBUG=      require'Zenitha.debug'
 LOG=        require'Zenitha.log'
 JSON=       require'Zenitha.json'
-do-- Add pcall & MES for JSON lib
+do-- Add pcall & MSG for JSON lib
     local encode,decode=JSON.encode,JSON.decode
     JSON.encode=function(val)
         local a,b=pcall(encode,val)
         if a then
             return b
-        elseif MES then
-            MES.traceback()
+        elseif MSG then
+            MSG.traceback()
         end
     end
     JSON.decode=function(str)
         local a,b=pcall(decode,str)
         if a then
             return b
-        elseif MES then
-            MES.traceback()
+        elseif MSG then
+            MSG.traceback()
         end
     end
 end
@@ -146,7 +146,7 @@ SCN=        require'Zenitha.scene'
 TEXT=       require'Zenitha.text'
 SYSFX=      require'Zenitha.sysFX'
 WAIT=       require'Zenitha.wait'
-MES=        require'Zenitha.message'
+MSG=        require'Zenitha.message'
 BG=         require'Zenitha.background'
 WIDGET=     require'Zenitha.widget'
 SFX=        require'Zenitha.sfx'
@@ -323,11 +323,11 @@ local function noDevkeyPressed(key)
     elseif key=='f5' then  devFnKey[5]()
     elseif key=='f6' then  devFnKey[6]()
     elseif key=='f7' then  devFnKey[7]()
-    elseif key=='f8' then  devMode=nil MES.new('info',"DEBUG OFF",.2)
-    elseif key=='f9' then  devMode=1   MES.new('info',"DEBUG 1")
-    elseif key=='f10' then devMode=2   MES.new('info',"DEBUG 2")
-    elseif key=='f11' then devMode=3   MES.new('info',"DEBUG 3")
-    elseif key=='f12' then devMode=4   MES.new('info',"DEBUG 4")
+    elseif key=='f8' then  devMode=nil MSG.new('info',"DEBUG OFF",.2)
+    elseif key=='f9' then  devMode=1   MSG.new('info',"DEBUG 1")
+    elseif key=='f10' then devMode=2   MSG.new('info',"DEBUG 2")
+    elseif key=='f11' then devMode=3   MSG.new('info',"DEBUG 3")
+    elseif key=='f12' then devMode=4   MSG.new('info',"DEBUG 4")
     elseif devMode==2 then
         local W=WIDGET.sel
         if W then
@@ -424,7 +424,7 @@ function love.joystickadded(JS)
         rightx=0,righty=0,
         triggerleft=0,triggerright=0
     })
-    MES.new('info',"Joystick added")
+    MSG.new('info',"Joystick added")
 end
 function love.joystickremoved(JS)
     for i=1,#jsState do
@@ -440,7 +440,7 @@ function love.joystickremoved(JS)
             love.gamepadaxis(JS,'righty',0)
             love.gamepadaxis(JS,'triggerleft',-1)
             love.gamepadaxis(JS,'triggerright',-1)
-            MES.new('info',"Joystick removed")
+            MSG.new('info',"Joystick removed")
             table.remove(jsState,i)
             break
         end
@@ -534,7 +534,7 @@ function love.lowmemory()
     collectgarbage()
     if autoGCcount<3 then
         autoGCcount=autoGCcount+1
-        MES.new('check',"[auto GC] low MEM 设备内存过低")
+        MSG.new('check',"[auto GC] low MEM 设备内存过低")
     end
 end
 
@@ -589,7 +589,7 @@ function love.errorhandler(msg)
     local sceneStack=SCN and table.concat(SCN.stack,"/") or "NULL"
     if mainLoopStarted and #errData<3 and SCN.scenes['error'] then
         BG.set('none')
-        table.insert(errData,{mes=err,scene=sceneStack})
+        table.insert(errData,{msg=err,scene=sceneStack})
 
         -- Write messages to log file
         love.filesystem.append('error.log',
@@ -671,7 +671,7 @@ function love.run()
     local love=love
 
     local SCN_swapUpdate=SCN.swapUpdate
-    local MES_update,MES_draw=MES.update,MES.draw
+    local MES_update,MES_draw=MSG.update,MSG.draw
     local HTTP_update=HTTP.update
     local TASK_update=TASK.update
     local SYSFX_update,SYSFX_draw=SYSFX.update,SYSFX.draw
@@ -702,7 +702,7 @@ function love.run()
         SCN.scenes._zenitha=nil
     else
         if firstScene then
-            MES.new('error',"No scene named '"..firstScene.."'")
+            MSG.new('error',"No scene named '"..firstScene.."'")
         end
         SCN.go('_zenitha')
     end

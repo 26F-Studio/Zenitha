@@ -21,7 +21,7 @@ function BG.send(name,...)
     if BGs[name] then
         BGs[name].event(...)
     else
-        MES.new('warning',"No background named '"..name.."' to send data to")
+        MSG.new('warning',"No background named '"..name.."' to send data to")
     end
 end
 function BG.setDefault(bg)
@@ -31,7 +31,7 @@ function BG.set(name)
     name=name or BG.default
     if BG.locked then return end
     if not BGs[name] then
-        MES.new('warning',"No background named '"..name.."' to set")
+        MSG.new('warning',"No background named '"..name.."' to set")
         return
     end
     if name~=BG.cur then

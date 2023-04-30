@@ -4,8 +4,8 @@ local scene={}
 
 local backCounter
 local list,timer
-local function _push(mes)
-    ins(list,{mes,120})
+local function _push(msg)
+    ins(list,{msg,120})
     timer=1
 end
 
@@ -29,7 +29,7 @@ function scene.keyDown(key,isRep)
         if backCounter==0 then
             SCN.back()
         else
-            MES.new('info',backCounter,2.6)
+            MSG.new('info',backCounter,2.6)
         end
     end
 end

@@ -320,21 +320,21 @@ local commands={} do
             "Usage: crash",
         },
     }
-    commands.mes={
+    commands.msg={
         code=function(arg)
             if arg:match("^[a-z]+$") and ("<info|check|warn|error|other>"):find(arg) then
-                MES.new(arg,"Test message",6)
+                MSG.new(arg,"Test message",6)
             else
                 log{COLOR.I,"Show a message on the up-left corner"}
                 log""
-                log{COLOR.I,"Usage: mes <info|check|warn|error|other>"}
+                log{COLOR.I,"Usage: msg <info|check|warn|error|other>"}
             end
         end,
         description="Show a message",
         details={
             "Show a message on the up-left corner",
             "",
-            "Usage: mes <check|info|warn|error>",
+            "Usage: msg <check|info|warn|error>",
         },
     }
     commands.log={
