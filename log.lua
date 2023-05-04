@@ -17,12 +17,14 @@ local LOG=setmetatable({},{
     __metatable=true,
 })
 
--- Get raw logs data
+--- Get raw logs data
+---@return string[] @READ ONLY
 function LOG.getLogs()
     return logs
 end
 
--- Get all messages logged
+--- Get all logged strings as a big string
+---@return string
 function LOG.getLogString()
     return
         STRING.repD("$1 $2  logs  $3\n",

@@ -1,12 +1,21 @@
 local fs=love.filesystem
 local FILE={}
+
+--- Check if a file is safe to read/write (not in save directory)
+---@param file string
 function FILE.isSafe(file)
     return fs.getRealDirectory(file)~=fs.getSaveDirectory()
 end
-function FILE.load(name,args)
+
+--- Load a file with a specified mode
+--- (Auto detect if mode not given, not accurate)
+---@param path string
+---@param args? string|'-luaon'|'-lua'|'-json'|'-string'|'-canskip'
+---@return any
+function FILE.load(path,args)
     if not args then args='' end
-    if fs.getInfo(name) then
-        local F=fs.newFile(name)
+    if fs.getInfo(path) then
+        local F=fs.newFile(path)
         assert(F:open'r','open error')
         local s=F:read() F:close()
         local mode=
@@ -18,7 +27,7 @@ function FILE.load(name,args)
             (s:sub(1,1)=='[' and s:sub(-1)==']' or s:sub(1,1)=='{' and s:sub(-1)=='}') and 'json' or
             'string'
         if mode=='luaon' then
-            local func,err_mes=loadstring("--[["..STRING.simplifyPath(name)..']]'..s)
+            local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..']]'..s)
             if func then
                 setfenv(func,{})
                 local res=func()
@@ -27,7 +36,7 @@ function FILE.load(name,args)
                 error("decode error: "..err_mes)
             end
         elseif mode=='lua' then
-            local func,err_mes=loadstring("--[["..STRING.simplifyPath(name)..']]'..s)
+            local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..']]'..s)
             if func then
                 local res=func()
                 return assert(res,'run error')
@@ -49,9 +58,16 @@ function FILE.load(name,args)
         error("no file")
     end
 end
-function FILE.save(data,name,args)
+
+--- Save a file with a specified mode
+---
+--- Default to JSON, then Luaon, then string
+---@param data any
+---@param path string
+---@param args? string|'-d'|'-luaon'|'-expand'
+function FILE.save(data,path,args)
     if not args then args='' end
-    if STRING.sArg(args,'-d') and fs.getInfo(name) then
+    if STRING.sArg(args,'-d') and fs.getInfo(path) then
         error("duplicate")
     end
 
@@ -75,10 +91,13 @@ function FILE.save(data,name,args)
         data=tostring(data)
     end
 
-    local F=fs.newFile(name)
+    local F=fs.newFile(path)
     assert(F:open('w'),'open error')
     F:write(data) F:flush() F:close()
 end
+
+--- Clear a directory
+---@param path string
 function FILE.clear(path)
     if not FILE.isSafe(path) and fs.getInfo(path).type=='directory' then
         for _,name in next,fs.getDirectoryItems(path) do
@@ -92,6 +111,9 @@ function FILE.clear(path)
         end
     end
 end
+
+--- Delete a directory recursively
+---@param path string|''
 function FILE.clear_s(path)
     if path=='' or (not FILE.isSafe(path) and fs.getInfo(path).type=='directory') then
         for _,name in next,fs.getDirectoryItems(path) do

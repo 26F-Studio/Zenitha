@@ -5,9 +5,10 @@ local ins=table.insert
 local nameList={}
 local srcLib={}-- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
 local lastLoadNames={}
-local nowPlay={}
+local nowPlay={}-- Playing bgm objects
 local lastPlay=NONE-- Directly stored last played bgm name(s)
 
+---@type false|string|string[]
 local defaultBGM=false
 local maxLoadedCount=3
 local volume=1
@@ -128,26 +129,41 @@ end
 
 local BGM={}
 
+--- Get the loaded BGMs' name list, READ ONLY
+---@return table
 function BGM.getList() return nameList end
+
+--- Get the loaded BGMs' count
+---@return number
 function BGM.getCount() return #nameList end
 
+--- Set the default BGM(s) to play when BGM.play() is called without arguments
+---@param bgms string|string[]
 function BGM.setDefault(bgms)
     if type(bgms)=='string' then
         bgms={bgms}
     elseif type(bgms)=='table' then
         for i=1,#bgms do assert(type(bgms[i])=='string',"BGM list must be list of strings") end
     else
-        error("BGM.setDefault(bgms): bgms must be string or table")
+        error("BGM must be string or table")
     end
     defaultBGM=bgms
 end
+
+--- Set the max count of loaded BGMs
+---
+--- When loaded BGMs' count exceeds this value, some not-playing BGM source will be released
+---@param count number
 function BGM.setMaxSources(count)
-    assert(type(count)=='number' and count>0 and count%1==0,"BGM.setMaxSources(count): count must be positive integer")
+    assert(type(count)=='number' and count>0 and count%1==0,"Source count must be positive integer")
     maxLoadedCount=count
     _updateSources()
 end
+
+--- Set BGM volume
+---@param vol number
 function BGM.setVol(vol)
-    assert(type(vol)=='number' and vol>=0 and vol<=1,"BGM.setVol(vol): count must be in range 0~1")
+    assert(type(vol)=='number' and vol>=0 and vol<=1,"Volume must be in range 0~1")
     volume=vol
     for i=1,#nowPlay do
         local bgm=nowPlay[i]
@@ -156,7 +172,12 @@ function BGM.setVol(vol)
         end
     end
 end
-function BGM.init(name,path)
+
+--- Load BGM(s) from file(s)
+---@param name string|string[]
+---@param path string|string[]
+---@overload fun(map:table)
+function BGM.load(name,path)
     if type(name)=='table' then
         for k,v in next,name do
             _addFile(k,v)
@@ -168,13 +189,17 @@ function BGM.init(name,path)
     LOG(BGM.getCount().." BGM files added")
 end
 
+--- Play BGM(s), stop previous playing BGM(s) if exists
+--- Multi-channel BGMs must be exactly same length, all sources will be set to loop mode
+---@param bgms? false|string|string[]
+---@param args? string|'-preLoad'|'-noloop'|'-sdin'
 function BGM.play(bgms,args)
-    if not args then args='' end
     if not bgms then bgms=defaultBGM end
     if not bgms then return end
+    if not args then args='' end
 
     if type(bgms)=='string' then bgms={bgms} end
-    assert(type(bgms)=='table',"BGM.play(name,args): name must be string or table")
+    assert(type(bgms)=='table',"BGM must be string or table")
 
     if
         TABLE.compare(lastPlay,bgms) and
@@ -238,7 +263,11 @@ function BGM.play(bgms,args)
     _updateSources()
     return true
 end
+
+--- Stop current playing BGM(s), fade out if time is given
+---@param time? nil|number
 function BGM.stop(time)
+    assert(time==nil or type(time)=='number' and time>=0,"Given stopping time must be positive number, but got "..tostring(time))
     if #nowPlay>0 then
         for i=1,#nowPlay do
             local obj=nowPlay[i]
@@ -256,13 +285,9 @@ function BGM.stop(time)
     end
 end
 
----@param mode
----| 'volume'
----| 'lowgain'
----| 'highgain'
----| 'volume'
----| 'pitch'
----| 'seek'
+--- Set (current playing) BGM(s) states
+---@param mode 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'
+---@vararg any
 function BGM.set(bgms,mode,...)
     if type(bgms)=='string' then
         if bgms=='all' then
@@ -342,17 +367,24 @@ function BGM.set(bgms,mode,...)
     end
 end
 
+--- Get (current playing) BGM(s) name list
 function BGM.getPlaying()
     return TABLE.shift(lastPlay)
 end
+
+--- Get if BGM playing now
 function BGM.isPlaying()
     return #nowPlay>0 and nowPlay[1].source:isPlaying()
 end
+
+--- Get time of BGM playing now
 function BGM.tell()
     if nowPlay[1] then
         return nowPlay[1].source:tell()
     end
 end
+
+--- Get duration of BGM playing now
 function BGM.getDuration()
     if nowPlay[1] then
         return nowPlay[1].source:getDuration()

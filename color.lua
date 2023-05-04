@@ -1,4 +1,7 @@
-local abs=math.abs
+---@class color:table @READ ONLY
+
+local rnd,sin,abs=math.random,math.sin,math.abs
+
 local function hex(str)
     assert(type(str)=='string',"COLOR.hex(str): str must be string")
     str=str:match('#?(%x%x?%x?%x?%x?%x?%x?%x?)') or '000000'
@@ -79,47 +82,57 @@ setmetatable(COLOR,{__index=function(_,k)
     error("No color: "..tostring(k))
 end,__metatable=true})
 
-
-do-- Random generators
-    local rnd=math.random
-    local colors={'R','F','O','Y','A','K','G','J','C','I','S','B','P','V','M','W'}
-    local keys={true,true,true,true,true}
-    function COLOR.random(brightness)
-        if not keys[brightness] then error("COLOR.random(t): t must be 1~5 (brightness)") end
-        return COLOR[brightness][colors[rnd(#colors)]]
-    end
+local colorStrings={'R','F','O','Y','A','K','G','J','C','I','S','B','P','V','M','W'}
+--- Random color
+---@param brightness number 1|2|3|4|5
+---@return color
+function COLOR.random(brightness)
+    return COLOR[brightness][colorStrings[rnd(#colorStrings)]]
 end
 
-do-- Rainbow generators
-    local sin=math.sin
-    function COLOR.rainbow(phase,a)
-        return
-            sin(phase)*.4+.6,
-            sin(phase+2.0944)*.4+.6,
-            sin(phase-2.0944)*.4+.6,
-            a
-    end
-    function COLOR.rainbow_light(phase,a)
-        return
-            sin(phase)*.2+.7,
-            sin(phase+2.0944)*.2+.7,
-            sin(phase-2.0944)*.2+.7,
-            a
-    end
-    function COLOR.rainbow_dark(phase,a)
-        return
-            sin(phase)*.2+.4,
-            sin(phase+2.0944)*.2+.4,
-            sin(phase-2.0944)*.2+.4,
-            a
-    end
-    function COLOR.rainbow_gray(phase,a)
-        return
-            sin(phase)*.16+.5,
-            sin(phase+2.0944)*.16+.5,
-            sin(phase-2.0944)*.16+.5,
-            a
-    end
+--- Get Rainbow color with phase
+---@param phase number @ cycle in 2pi
+---@param a? number @ alpha
+---@return number, number, number, number|nil
+function COLOR.rainbow(phase,a)
+    return
+        sin(phase)*.4+.6,
+        sin(phase+2.0944)*.4+.6,
+        sin(phase-2.0944)*.4+.6,
+        a
+end
+--- Variant of COLOR.rainbow
+---@param phase number @ cycle in 2pi
+---@param a? number @ alpha
+---@return number, number, number, number|nil
+function COLOR.rainbow_light(phase,a)
+    return
+        sin(phase)*.2+.7,
+        sin(phase+2.0944)*.2+.7,
+        sin(phase-2.0944)*.2+.7,
+        a
+end
+--- Variant of COLOR.rainbow
+---@param phase number @ cycle in 2pi
+---@param a? number @ alpha
+---@return number, number, number, number|nil
+function COLOR.rainbow_dark(phase,a)
+    return
+        sin(phase)*.2+.4,
+        sin(phase+2.0944)*.2+.4,
+        sin(phase-2.0944)*.2+.4,
+        a
+end
+--- Variant of COLOR.rainbow
+---@param phase number @ cycle in 2pi
+---@param a? number @ alpha
+---@return number, number, number, number|nil
+function COLOR.rainbow_gray(phase,a)
+    return
+        sin(phase)*.16+.5,
+        sin(phase+2.0944)*.16+.5,
+        sin(phase-2.0944)*.16+.5,
+        a
 end
 
 return COLOR

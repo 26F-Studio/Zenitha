@@ -12,11 +12,22 @@ local BG={
     discard=NULL,
 }
 
+--- Lock the background, forbid changing with BG.set() until call BG.unlock()
 function BG.lock() BG.locked=true end
+
+--- Unlock the background, allow changing with BG.set()
 function BG.unlock() BG.locked=false end
+
+--- Add a background
+---@param name string
+---@param bg {init:function, resize:function, update:function, draw:function, event:function, discard:function}
 function BG.add(name,bg)
     BGs[name]=bg
 end
+
+--- Send data to a background (trigger its 'event' function)
+---@param name? string
+---@vararg any
 function BG.send(name,...)
     if BGs[name] then
         BGs[name].event(...)
@@ -24,9 +35,15 @@ function BG.send(name,...)
         MSG.new('warning',"No background named '"..name.."' to send data to")
     end
 end
-function BG.setDefault(bg)
-    BG.default=bg
+
+--- Set the default background, used when BG.set() is called without argument
+---@param name string
+function BG.setDefault(name)
+    BG.default=name
 end
+
+--- Set a addeed background (when not locked), use default background if name not given
+---@param name? string
 function BG.set(name)
     name=name or BG.default
     if BG.locked then return end

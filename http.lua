@@ -3,6 +3,8 @@ local recvCHN=love.thread.getChannel('outputChannel')
 
 local threads={}
 local threadCount=0
+
+---@language LUA
 local threadCode=[[
     local id=...
 

@@ -6,16 +6,29 @@ local curFont=false-- Current using font object
 
 local FONT={}
 
+--- Set default font type
+---@param name string
 function FONT.setDefaultFont(name)
     defaultFont=name
 end
+
+--- Set default fallback font type
+---@param name string
 function FONT.setDefaultFallback(name)
     defaultFallBack=name
 end
+
+--- Set fallback font for an exist font
+---@param font string
+---@param fallback string
 function FONT.setFallback(font,fallback)
     fallbackMap[font]=fallback
 end
 
+
+--- Get love's default font object
+---@param size number
+---@return love.Font
 function FONT.rawget(size)
     if not fontCache[size] then
         assert(type(size)=='number' and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
@@ -23,9 +36,15 @@ function FONT.rawget(size)
     end
     return fontCache[size]
 end
+
+--- Set love's default font
+---@param size number
 function FONT.rawset(size)
     set(fontCache[size] or FONT.rawget(size))
 end
+
+--- Load font(s) name-path pairs
+---@param fonts table<string,string> @<name, path>
 function FONT.load(fonts)
     for name,path in next,fonts do
         assert(love.filesystem.getInfo(path),STRING.repD("Font file $1($2) not exist!",name,path))
@@ -33,6 +52,11 @@ function FONT.load(fonts)
         fontCache[name]={}
     end
 end
+
+--- Get font object with font size, use default font name if not given
+---@param size number
+---@param name? string
+---@return love.Font
 function FONT.get(size,name)
     if not name then name=defaultFont end
 
@@ -51,6 +75,10 @@ function FONT.get(size,name)
     end
     return f
 end
+
+--- Set font with font size, use default font name if not given
+---@param size number
+---@param name? string
 function FONT.set(size,name)
     if not name then name=defaultFont end
 
