@@ -8,7 +8,7 @@ local lastLoadNames={}
 local nowPlay={}-- Playing bgm objects
 local lastPlay=NONE-- Directly stored last played bgm name(s)
 
----@type false|string|string[]
+--- @type false|string|string[]
 local defaultBGM=false
 local maxLoadedCount=3
 local volume=1
@@ -130,15 +130,15 @@ end
 local BGM={}
 
 --- Get the loaded BGMs' name list, READ ONLY
----@return table
+--- @return table
 function BGM.getList() return nameList end
 
 --- Get the loaded BGMs' count
----@return number
+--- @return number
 function BGM.getCount() return #nameList end
 
 --- Set the default BGM(s) to play when BGM.play() is called without arguments
----@param bgms string|string[]
+--- @param bgms string|string[]
 function BGM.setDefault(bgms)
     if type(bgms)=='string' then
         bgms={bgms}
@@ -153,7 +153,7 @@ end
 --- Set the max count of loaded BGMs
 ---
 --- When loaded BGMs' count exceeds this value, some not-playing BGM source will be released
----@param count number
+--- @param count number
 function BGM.setMaxSources(count)
     assert(type(count)=='number' and count>0 and count%1==0,"Source count must be positive integer")
     maxLoadedCount=count
@@ -161,7 +161,7 @@ function BGM.setMaxSources(count)
 end
 
 --- Set BGM volume
----@param vol number
+--- @param vol number
 function BGM.setVol(vol)
     assert(type(vol)=='number' and vol>=0 and vol<=1,"Volume must be in range 0~1")
     volume=vol
@@ -174,9 +174,9 @@ function BGM.setVol(vol)
 end
 
 --- Load BGM(s) from file(s)
----@param name string|string[]
----@param path string|string[]
----@overload fun(map:table)
+--- @param name string|string[]
+--- @param path string|string[]
+--- @overload fun(map:table)
 function BGM.load(name,path)
     if type(name)=='table' then
         for k,v in next,name do
@@ -191,8 +191,8 @@ end
 
 --- Play BGM(s), stop previous playing BGM(s) if exists
 --- Multi-channel BGMs must be exactly same length, all sources will be set to loop mode
----@param bgms? false|string|string[]
----@param args? string|'-preLoad'|'-noloop'|'-sdin'
+--- @param bgms? false|string|string[]
+--- @param args? string|'-preLoad'|'-noloop'|'-sdin'
 function BGM.play(bgms,args)
     if not bgms then bgms=defaultBGM end
     if not bgms then return end
@@ -265,7 +265,7 @@ function BGM.play(bgms,args)
 end
 
 --- Stop current playing BGM(s), fade out if time is given
----@param time? nil|number
+--- @param time? nil|number
 function BGM.stop(time)
     assert(time==nil or type(time)=='number' and time>=0,"Given stopping time must be positive number, but got "..tostring(time))
     if #nowPlay>0 then
@@ -286,8 +286,8 @@ function BGM.stop(time)
 end
 
 --- Set (current playing) BGM(s) states
----@param mode 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'
----@vararg any
+--- @param mode 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'
+--- @vararg any
 function BGM.set(bgms,mode,...)
     if type(bgms)=='string' then
         if bgms=='all' then

@@ -1,4 +1,8 @@
----@class color:table @READ ONLY
+--- @class Zenitha.color @READ ONLY
+--- @field [1] number @Red
+--- @field [2] number @Green
+--- @field [3] number @Blue
+--- @field [4]? number @Alpha
 
 local rnd,sin,abs=math.random,math.sin,math.abs
 
@@ -84,16 +88,16 @@ end,__metatable=true})
 
 local colorStrings={'R','F','O','Y','A','K','G','J','C','I','S','B','P','V','M','W'}
 --- Random color
----@param brightness number 1|2|3|4|5
----@return color
+--- @param brightness number 1|2|3|4|5
+--- @return Zenitha.color
 function COLOR.random(brightness)
     return COLOR[brightness][colorStrings[rnd(#colorStrings)]]
 end
 
 --- Get Rainbow color with phase
----@param phase number @ cycle in 2pi
----@param a? number @ alpha
----@return number, number, number, number|nil
+--- @param phase number @cycle in 2pi
+--- @param a? number @alpha
+--- @return number, number, number, number|nil
 function COLOR.rainbow(phase,a)
     return
         sin(phase)*.4+.6,
@@ -102,9 +106,9 @@ function COLOR.rainbow(phase,a)
         a
 end
 --- Variant of COLOR.rainbow
----@param phase number @ cycle in 2pi
----@param a? number @ alpha
----@return number, number, number, number|nil
+--- @param phase number @cycle in 2pi
+--- @param a? number @alpha
+--- @return number, number, number, number|nil
 function COLOR.rainbow_light(phase,a)
     return
         sin(phase)*.2+.7,
@@ -113,9 +117,9 @@ function COLOR.rainbow_light(phase,a)
         a
 end
 --- Variant of COLOR.rainbow
----@param phase number @ cycle in 2pi
----@param a? number @ alpha
----@return number, number, number, number|nil
+--- @param phase number @cycle in 2pi
+--- @param a? number @alpha
+--- @return number, number, number, number|nil
 function COLOR.rainbow_dark(phase,a)
     return
         sin(phase)*.2+.4,
@@ -124,9 +128,9 @@ function COLOR.rainbow_dark(phase,a)
         a
 end
 --- Variant of COLOR.rainbow
----@param phase number @ cycle in 2pi
----@param a? number @ alpha
----@return number, number, number, number|nil
+--- @param phase number @cycle in 2pi
+--- @param a? number @alpha
+--- @return number, number, number, number|nil
 function COLOR.rainbow_gray(phase,a)
     return
         sin(phase)*.16+.5,

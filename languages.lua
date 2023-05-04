@@ -1,7 +1,9 @@
+--- @type string|false
 local defaultLang=false
 local maxLangLoaded=3
 local langLoaded={}
 local langPaths={}
+
 local langLib={
     [false]={},
 }
@@ -30,6 +32,9 @@ setmetatable(langLib[false],{
 })
 
 local LANG={}
+
+--- Set the default language
+--- @param name string
 function LANG.setDefault(name)
     assert(type(name)=='string','Invalid language name')
     defaultLang=name
@@ -39,33 +44,59 @@ function LANG.setDefault(name)
         end
     end
 end
+
+--- Set the max loaded language count
+--- @param n number
 function LANG.setMaxLoaded(n)
     assert(type(n)=='number' and n>=1 and n%1==0,'Invalid number')
     maxLangLoaded=n
 end
+
+--- Add language file info list
+--- @param data table<string,string> @<name,path>
 function LANG.add(data)
     for k,v in next,data do
         assert(type(k)=='string' and type(v)=='string','Invalid language info list (need {zh="path1",en="path2",...})')
         langPaths[k]=v
     end
 end
+
+--- Get a language table, which can be used to get texts like `languageTable.opt --> 'Option'`
+--- @param name string
+--- @return table
 function LANG.get(name)
     return langLib[name]
 end
 
 local textSrc=langLib[false]
-function LANG.setTextFuncSrc(newSrc)
-    assert(type(newSrc)=='table','LANG.setTextFuncSrc(newPool): newPool must be table')
-    textSrc=newSrc
-end
 local keyCache=setmetatable({},{
     __index=function(self,k)
         self[k]=function() return textSrc[k] end
         return self[k]
     end,
 })
-function LANG.getText(key)
+
+--- Set the text function source
+--- @param newSrc table
+function LANG.setTextFuncSrc(newSrc)
+    assert(type(newSrc)=='table','LANG.setTextFuncSrc(newPool): newPool must be table')
+    textSrc=newSrc
+end
+
+--- Get a text-getting function.
+---
+--- You can use LANG('opt') instead of LANG.getText('opt')
+--- @param key string
+--- @return fun():string
+function LANG.getTextGetFunc(key)
     return keyCache[key]
 end
-setmetatable(LANG,{__call=function(_,key) return keyCache[key] end,__metatable=true})
+
+setmetatable(LANG,{
+    -- Works same as LANG.getText
+    __call=function(_,key)
+        return keyCache[key]
+    end,
+    __metatable=true
+})
 return LANG

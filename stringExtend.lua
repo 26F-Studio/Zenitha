@@ -21,9 +21,9 @@ function STRING.install()
 end
 
 --- "Replace dollars". Replace all $n with ..., like string.format
----@param str string
----@vararg any
----@return string
+--- @param str string
+--- @vararg any
+--- @return string
 function STRING.repD(str,...)
     local l={...}
     for i=#l,1,-1 do
@@ -33,9 +33,9 @@ function STRING.repD(str,...)
 end
 
 --- "Scan arg", scan if str has the arg (format of str is like '-json -q', arg is like '-q')
----@param str string
----@param switch string
----@return boolean
+--- @param str string
+--- @param switch string
+--- @return boolean
 function STRING.sArg(str,switch)
     if find(str..' ',switch..' ') then
         return true
@@ -54,15 +54,15 @@ local shiftMap={
     [',']='<',['.']='>',['/']='?',
 }
 --- "Capitalize" a character like string.upper, but can also shift numbers to signs
----@param c string
----@return string
+--- @param c string
+--- @return string
 function STRING.shiftChar(c)
     return shiftMap[c] or upper(c)
 end
 
 --- Trim %s at both ends of the string
----@param str string
----@return string
+--- @param str string
+--- @return string
 function STRING.trim(str)
     if not str:find('%S') then return'' end
     str=str:sub((str:find('%S'))):reverse()
@@ -70,10 +70,10 @@ function STRING.trim(str)
 end
 
 --- Split a string by sep
----@param str string
----@param sep string
----@param regex? boolean
----@return string[]
+--- @param str string
+--- @param sep string
+--- @param regex? boolean
+--- @return string[]
 function STRING.split(str,sep,regex)
     local L={}
     local p1=1-- start
@@ -95,8 +95,8 @@ function STRING.split(str,sep,regex)
 end
 
 --- Check if the string is a valid email address
----@param str string
----@return boolean
+--- @param str string
+--- @return boolean
 function STRING.simpEmailCheck(str)
     local list=STRING.split(str,'@')
     if #list~=2 then return false end
@@ -109,15 +109,15 @@ function STRING.simpEmailCheck(str)
 end
 
 --- Convert time (second) to MM:SS
----@param t number
----@return string
+--- @param t number
+--- @return string
 function STRING.time_simp(t)
     return format('%02d:%02d',floor(t/60),floor(t%60))
 end
 
 --- Convert time (second) to SS or MM:SS or HH:MM:SS
----@param t number
----@return string
+--- @param t number
+--- @return string
 function STRING.time(t)
     if t<60 then
         return format('%.3f″',t)
@@ -129,8 +129,8 @@ function STRING.time(t)
 end
 
 --- Warning: don't support number format like .26, must have digits before the dot, like 0.26
----@param s string
----@return number|nil,string|nil
+--- @param s string
+--- @return number|nil,string|nil
 function STRING.cutUnit(s)
     local _s,_e=s:find('^-?%d+%.?%d*')
     if _e==#s then-- All numbers
@@ -143,8 +143,8 @@ function STRING.cutUnit(s)
 end
 
 --- Get the type of a character
----@param c string
----@return 'space'|'word'|'sign'|'other'
+--- @param c string
+--- @return 'space'|'word'|'sign'|'other'
 function STRING.type(c)
     assert(type(c)=='string' and #c==1,'function STRING.type(c): c must be a single-charater string')
     local t=byte(c)
@@ -160,14 +160,14 @@ function STRING.type(c)
 end
 
 --- Base64 character list
----@type string[]
+--- @type string[]
 STRING.base64={} for c in string.gmatch('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','.') do
     table.insert(STRING.base64,c)
 end
 
 --- Simple utf8 coding
----@param num number
----@return string
+--- @param num number
+--- @return string
 function STRING.UTF8(num)
     assert(type(num)=='number','Wrong type ('..type(num)..')')
     if num<=0 then
@@ -188,8 +188,8 @@ local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}
 local secUnits={'Dc','Vg','Tg','Qd','Qi','Se','St','Og','Nn','Ce'}-- Ce is next-level unit, but DcCe is not used so used here
 for _,preU in next,preUnits do for _,secU in next,secUnits do table.insert(units,preU..secU) end end
 --- Convert a number to a approximate integer with large unit
----@param num number
----@return string
+--- @param num number
+--- @return string
 function STRING.bigInt(num)
     if num<1000 then
         return tostring(num)
@@ -202,9 +202,9 @@ function STRING.bigInt(num)
 end
 
 --- Convert a number to binary string
----@param num number
----@param len? number
----@return string
+--- @param num number
+--- @param len? number
+--- @return string
 function STRING.toBin(num,len)
     local s=''
     while num>0 do
@@ -215,9 +215,9 @@ function STRING.toBin(num,len)
 end
 
 --- Convert a number to octal string
----@param num number
----@param len? number
----@return string
+--- @param num number
+--- @param len? number
+--- @return string
 function STRING.toOct(num,len)
     local s=''
     while num>0 do
@@ -228,9 +228,9 @@ function STRING.toOct(num,len)
 end
 
 --- Convert a number to hexadecimal string
----@param num number
----@param len? number
----@return string
+--- @param num number
+--- @param len? number
+--- @return string
 function STRING.toHex(num,len)
     local s=''
     while num>0 do
@@ -242,8 +242,8 @@ end
 
 local rshift=bit.rshift
 --- Simple url encoding
----@param str string
----@return string
+--- @param str string
+--- @return string
 function STRING.urlEncode(str)
     local out=''
     for i=1,#str do
@@ -258,9 +258,9 @@ function STRING.urlEncode(str)
 end
 
 --- Simple vcs encryption
----@param text string
----@param key string
----@return string
+--- @param text string
+--- @param key string
+--- @return string
 function STRING.vcsEncrypt(text,key)
     local keyLen=#key
     local result=''
@@ -276,9 +276,9 @@ function STRING.vcsEncrypt(text,key)
 end
 
 --- Simple vcs decryption
----@param text string
----@param key string
----@return string
+--- @param text string
+--- @param key string
+--- @return string
 function STRING.vcsDecrypt(text,key)
     local keyLen=#key
     local result=''
@@ -294,10 +294,10 @@ function STRING.vcsDecrypt(text,key)
 end
 
 --- Return 16 byte string. Not powerful hash, just simply protect the original text
----@param text string
----@param seedRange? number @default to 26
----@param seed? number @default to 0
----@return string
+--- @param text string
+--- @param seedRange? number @default to 26
+--- @param seed? number @default to 0
+--- @return string
 function STRING.digezt(text,seedRange,seed)
     if not seed then seed=0 end
     if not seedRange then seedRange=26 end
@@ -321,8 +321,8 @@ function STRING.digezt(text,seedRange,seed)
 end
 
 --- Cut a line off a string
----@param str string
----@return string,string @one line (do not include \n), and the rest of string
+--- @param str string
+--- @return string,string @one line (do not include \n), and the rest of string
 function STRING.readLine(str)
     local p=str:find('\n')
     if p then
@@ -333,9 +333,9 @@ function STRING.readLine(str)
 end
 
 --- Cut n bytes off a string
----@param str string
----@param n number
----@return string,string @n bytes, and the rest of string
+--- @param str string
+--- @param n number
+--- @return string,string @n bytes, and the rest of string
 function STRING.readChars(str,n)
     return sub(str,1,n),sub(str,n+1)
 end
@@ -353,15 +353,15 @@ function STRING.simplifyPath(path,len)
 end
 
 --- Pack binary data into string (Zlib+Base64)
----@param str string
----@return string|love.Data
+--- @param str string
+--- @return string|love.Data
 function STRING.packBin(str)
     return data.encode('string','base64',data.compress('string','zlib',str))
 end
 
 --- Unpack binary data from string (Zlib+Base64)
----@param str string
----@return string|love.Data|nil
+--- @param str string
+--- @return string|love.Data|nil
 function STRING.unpackBin(str)
     local success,res
     success,res=pcall(data.decode,'string','base64',str)
@@ -371,15 +371,15 @@ function STRING.unpackBin(str)
 end
 
 --- Pack text data into string (Gzip+Base64)
----@param str string
----@return string|love.Data
+--- @param str string
+--- @return string|love.Data
 function STRING.packText(str)
     return data.encode('string','base64',data.compress('string','gzip',str))
 end
 
 --- Unpack text data from string (Gzip+Base64)
----@param str string
----@return string|love.Data|nil
+--- @param str string
+--- @return string|love.Data|nil
 function STRING.unpackText(str)
     local success,res
     success,res=pcall(data.decode,'string','base64',str)
@@ -389,15 +389,15 @@ function STRING.unpackText(str)
 end
 
 --- Pack table into string (JSON+Gzip+Base64)
----@param t table
----@return string|love.Data|nil
+--- @param t table
+--- @return string|love.Data|nil
 function STRING.packTable(t)
     return STRING.packText(JSON.encode(t))
 end
 
 --- Unpack table from string (JSON+Gzip+Base64)
----@param str string
----@return table|love.Data|nil
+--- @param str string
+--- @return table|love.Data|nil
 function STRING.unpackTable(str)
     return JSON.decode(STRING.unpackText(str))
 end

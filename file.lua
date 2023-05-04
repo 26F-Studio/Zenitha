@@ -2,16 +2,16 @@ local fs=love.filesystem
 local FILE={}
 
 --- Check if a file is safe to read/write (not in save directory)
----@param file string
+--- @param file string
 function FILE.isSafe(file)
     return fs.getRealDirectory(file)~=fs.getSaveDirectory()
 end
 
 --- Load a file with a specified mode
 --- (Auto detect if mode not given, not accurate)
----@param path string
----@param args? string|'-luaon'|'-lua'|'-json'|'-string'|'-canskip'
----@return any
+--- @param path string
+--- @param args? string|'-luaon'|'-lua'|'-json'|'-string'|'-canskip'
+--- @return any
 function FILE.load(path,args)
     if not args then args='' end
     if fs.getInfo(path) then
@@ -62,9 +62,9 @@ end
 --- Save a file with a specified mode
 ---
 --- Default to JSON, then Luaon, then string
----@param data any
----@param path string
----@param args? string|'-d'|'-luaon'|'-expand'
+--- @param data any
+--- @param path string
+--- @param args? string|'-d'|'-luaon'|'-expand'
 function FILE.save(data,path,args)
     if not args then args='' end
     if STRING.sArg(args,'-d') and fs.getInfo(path) then
@@ -97,7 +97,7 @@ function FILE.save(data,path,args)
 end
 
 --- Clear a directory
----@param path string
+--- @param path string
 function FILE.clear(path)
     if not FILE.isSafe(path) and fs.getInfo(path).type=='directory' then
         for _,name in next,fs.getDirectoryItems(path) do
@@ -113,7 +113,7 @@ function FILE.clear(path)
 end
 
 --- Delete a directory recursively
----@param path string|''
+--- @param path string|''
 function FILE.clear_s(path)
     if path=='' or (not FILE.isSafe(path) and fs.getInfo(path).type=='directory') then
         for _,name in next,fs.getDirectoryItems(path) do

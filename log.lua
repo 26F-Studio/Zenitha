@@ -18,13 +18,13 @@ local LOG=setmetatable({},{
 })
 
 --- Get raw logs data
----@return string[] @READ ONLY
+--- @return string[] @READ ONLY
 function LOG.getLogs()
     return logs
 end
 
 --- Get all logged strings as a big string
----@return string
+--- @return string
 function LOG.getLogString()
     return
         STRING.repD("$1 $2  logs  $3\n",

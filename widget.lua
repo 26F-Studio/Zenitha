@@ -1826,7 +1826,7 @@ function Widgets.listBox:draw()
         local pos=floor(scroll/lineH)
         local cap=self._capacity
         local sel=self._selected
-        ---@type function
+        --- @type function
         local drawFunc=self.drawFunc
         if self.stencilMode=='single' then
             local modH=scroll%lineH

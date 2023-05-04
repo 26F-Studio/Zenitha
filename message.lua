@@ -38,6 +38,11 @@ local backColors={
     error={COLOR.hex"CF4949"},
     other={COLOR.hex"787878"},
 }
+
+--- Create a new message popup at up-left corner
+--- @param icon string|love.Canvas
+--- @param str string
+--- @param time number|nil
 function MSG.new(icon,str,time)
     local color=backColors.other
     if type(icon)=='string' then
@@ -60,10 +65,15 @@ function MSG.new(icon,str,time)
         y=-h,
     })
 end
+
+--- Set the y position of message popup
+--- @param y number
 function MSG.setSafeY(y)
     assert(type(y)=='number' and y>=0,"startY must be nonnegative number")
     startY=y
 end
+
+--- Show a traceback message
 function MSG.traceback()
     local msg=
         debug.traceback('',1)
@@ -75,11 +85,15 @@ function MSG.traceback()
         msg:find("\n%[C%], in 'xpcall'")
     ),5)
 end
+
+--- Clear all messages
 function MSG.clear()
     TABLE.cut(mesList)
 end
 
-function MSG.update(dt)
+--- Update all messages (called by Zenitha)
+--- @param dt number
+function MSG._update(dt)
     for i=#mesList,1,-1 do
         local m=mesList[i]
         if m.startTime>0 then
@@ -101,7 +115,8 @@ function MSG.update(dt)
     end
 end
 
-function MSG.draw()
+--- Draw all messages (called by Zenitha)
+function MSG._draw()
     if #mesList>0 then
         GC.translate(0,startY)
         GC.setLineWidth(2)

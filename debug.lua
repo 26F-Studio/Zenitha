@@ -5,7 +5,7 @@ local DEBUG={}
 local loadTimeList,lastTimeStamp={},love.timer.getTime()
 --- Use this a few times in main.lua to mark time used for loading,
 --- then use DEBUG.logLoadTime() to log the times
----@param msg string
+--- @param msg string
 function DEBUG.checkLoadTime(msg)
     table.insert(loadTimeList,("%-26s \t%.3fs"):format(tostring(msg)..":",love.timer.getTime()-lastTimeStamp))
     lastTimeStamp=love.timer.getTime()
@@ -31,7 +31,7 @@ function DEBUG.yieldUntilNextScene()
 end
 
 --- Yield for some times
----@param count number
+--- @param count number
 function DEBUG.yieldN(count)
     for _=1,count do yield() end
 end

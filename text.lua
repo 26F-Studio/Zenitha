@@ -89,24 +89,49 @@ function textFX.score(T)
     )
 end
 
+--- @class Zenitha.textAnim
+--- @field text string
+--- @field x number
+--- @field y number
+--- @field r number
+--- @field g number
+--- @field b number
+--- @field a number
+--- @field fontSize number
+--- @field fontType string|nil
+--- @field duration number
+--- @field inPoint number
+--- @field outPoint number
+--- @field style string
+--- @field styleArg any
+--- @field draw function
+
+--- @class Zenitha.Text
+--- @field _texts Zenitha.textAnim[]
+
+--- @type Zenitha.Text
 local TEXT={_texts={}}
 function TEXT:clear()
     self._texts={}
 end
 
---[[ data:
-    text="Example Text",
-    x=0,y=0,
-    r=1,g=1,b=1,a=1,
-    fontSize=40,
-    fontType=nil,
-    duration=1,
-    inPoint=0.2,
-    outPoint=0.2,
-
-    style='appear',
-    styleArg=...,
-]]
+--- Add text to container
+--- @param data Zenitha.textAnim
+--- ```lua
+--- default={
+---     text="Example Text",
+---     x=0,y=0,
+---     r=1,g=1,b=1,a=1,
+---     fontSize=40,
+---     fontType=nil,
+---
+---     style='appear', -- Check declaration to learn more
+---     duration=1,
+---     inPoint=0.2,
+---     outPoint=0.2,
+---     styleArg=...,
+--- }
+--- ```
 function TEXT:add(data)
     local T={
         _t=0,-- Timer
@@ -129,6 +154,9 @@ function TEXT:add(data)
     if not T.a then T.a=T.a or 1 end
     ins(self._texts,T)
 end
+
+--- Update text container
+--- @param dt number
 function TEXT:update(dt)
     local list=self._texts
     for i=#list,1,-1 do
@@ -139,11 +167,16 @@ function TEXT:update(dt)
         end
     end
 end
+
+--- Draw text container
 function TEXT:draw()
     local list=self._texts
     for i=1,#list do list[i]:draw() end
 end
-function TEXT.new()-- Create new text container
+
+--- Create new text container
+--- @return Zenitha.Text
+function TEXT.new()
     return setmetatable({_texts={}},{__index=TEXT})
 end
 return TEXT

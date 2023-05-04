@@ -1,34 +1,34 @@
----@class SCR
----@field w0 number
----@field h0 number
----@field x number
----@field y number
----@field cx number
----@field cy number
----@field ex number
----@field ey number
----@field w number
----@field h number
----@field W number
----@field H number
----@field safeX number
----@field safeY number
----@field safeW number
----@field safeH number
----@field rad number
----@field k number
----@field dpi number
----@field origin love.Transform
----@field xOy love.Transform
----@field xOy_m love.Transform
----@field xOy_ul love.Transform
----@field xOy_u love.Transform
----@field xOy_ur love.Transform
----@field xOy_l love.Transform
----@field xOy_r love.Transform
----@field xOy_dl love.Transform
----@field xOy_d love.Transform
----@field xOy_dr love.Transform
+--- @class SCR
+--- @field w0 number
+--- @field h0 number
+--- @field x number
+--- @field y number
+--- @field cx number
+--- @field cy number
+--- @field ex number
+--- @field ey number
+--- @field w number
+--- @field h number
+--- @field W number
+--- @field H number
+--- @field safeX number
+--- @field safeY number
+--- @field safeW number
+--- @field safeH number
+--- @field rad number
+--- @field k number
+--- @field dpi number
+--- @field origin love.Transform
+--- @field xOy love.Transform
+--- @field xOy_m love.Transform
+--- @field xOy_ul love.Transform
+--- @field xOy_u love.Transform
+--- @field xOy_ur love.Transform
+--- @field xOy_l love.Transform
+--- @field xOy_r love.Transform
+--- @field xOy_dl love.Transform
+--- @field xOy_d love.Transform
+--- @field xOy_dr love.Transform
 
 local SCR={
     w0=800,h0=600, -- Default Screen Size
@@ -59,15 +59,15 @@ local SCR={
 if love.graphics then SCR.w0,SCR.h0=love.graphics.getDimensions() end
 
 --- Set expected screen size
----@param w number
----@param h number
+--- @param w number
+--- @param h number
 function SCR.setSize(w,h)
     SCR.w0,SCR.h0=w,h
 end
 
 --- Re-calculate arguments when window resized to w,h
----@param w number
----@param h number
+--- @param w number
+--- @param h number
 function SCR.resize(w,h)
     SCR.w,SCR.h,SCR.dpi=w,h,love.graphics.getDPIScale()
     SCR.W,SCR.H=SCR.w*SCR.dpi,SCR.h*SCR.dpi
@@ -102,7 +102,7 @@ function SCR.resize(w,h)
 end
 
 --- Get screen info
----@return string[]
+--- @return string[]
 function SCR.info()
     return {
         ("w0,h0 : %d, %d"):format(SCR.w0,SCR.h0),

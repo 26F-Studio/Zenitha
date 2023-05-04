@@ -671,9 +671,9 @@ function love.run()
     local love=love
 
     local SCN_swapUpdate=SCN.swapUpdate
-    local MES_update,MES_draw=MSG.update,MSG.draw
+    local MES_update,MES_draw=MSG._update,MSG._draw
     local HTTP_update=HTTP.update
-    local TASK_update=TASK.update
+    local TASK_update=TASK._update
     local SYSFX_update,SYSFX_draw=SYSFX.update,SYSFX.draw
     local WIDGET_update,WIDGET_draw=WIDGET.update,WIDGET.draw
     local STEP,SLEEP=love.timer.step,love.timer.sleep
