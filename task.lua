@@ -65,7 +65,7 @@ end
 
 --- Create a new task
 --- @param code function
---- @vararg any
+--- @param ... any @Arguments passed to the function
 function TASK.new(code,...)
     local thread=coroutine.create(code)
     assert(resume(thread,...))
@@ -96,7 +96,7 @@ end
 
 --- Iterate through tasks, remove them if the given function returns true
 --- @param func function
---- @vararg any
+--- @param ... any @Arguments passed to the given function
 function TASK.removeTask_iterate(func,...)
     for i=#tasks,1,-1 do
         if func(tasks[i],...) then

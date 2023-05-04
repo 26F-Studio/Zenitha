@@ -287,7 +287,7 @@ end
 
 --- Set (current playing) BGM(s) states
 --- @param mode 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'
---- @vararg any
+--- @param ... any
 function BGM.set(bgms,mode,...)
     if type(bgms)=='string' then
         if bgms=='all' then

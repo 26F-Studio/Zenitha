@@ -78,13 +78,13 @@ STRING=     require'Zenitha.stringExtend'
 TABLE=      require'Zenitha.tableExtend'
 
 -- Pure lua modules (simple)
-COLOR=      require'Zenitha.color'
+COLOR=      require'Zenitha.Color'
 DEBUG=      require'Zenitha.debug'
 LOG=        require'Zenitha.log'
 JSON=       require'Zenitha.json'
 do-- Add pcall & MSG for JSON lib
     local encode,decode=JSON.encode,JSON.decode
-    JSON.encode=function(val)
+    function JSON.encode(val)
         local a,b=pcall(encode,val)
         if a then
             return b
@@ -92,7 +92,7 @@ do-- Add pcall & MSG for JSON lib
             MSG.traceback()
         end
     end
-    JSON.decode=function(str)
+    function JSON.decode(str)
         local a,b=pcall(decode,str)
         if a then
             return b
@@ -175,9 +175,9 @@ local function _updateMousePos(x,y,dx,dy)
     dx,dy=dx/SCR.k,dy/SCR.k
     if SCN.mouseMove then SCN.mouseMove(x,y,dx,dy) end
     if ms.isDown(1) then
-        WIDGET.drag(x,y,dx,dy)
+        WIDGET._drag(x,y,dx,dy)
     else
-        WIDGET.cursorMove(x,y)
+        WIDGET._cursorMove(x,y)
     end
 end
 local function _triggerMouseDown(x,y,k)
@@ -191,7 +191,7 @@ local function _triggerMouseDown(x,y,k)
     end
     if SCN.swapping then return end
     if WIDGET.sel then
-        WIDGET.press(x,y,k)
+        WIDGET._press(x,y,k)
     else
         if SCN.mouseDown then SCN.mouseDown(x,y,k) end
         lastX,lastY=x,y
@@ -209,7 +209,7 @@ local function mouse_update(dt)
         my=max(min(my+dy,SCR.h0),0)
         if my==0 or my==SCR.h0 then
             WIDGET.sel=false
-            WIDGET.drag(0,0,0,-dy)
+            WIDGET._drag(0,0,0,-dy)
         end
         _updateMousePos(mx,my,dx,dy)
         cursorSpd=min(cursorSpd+dt*26,12.6)
@@ -229,7 +229,7 @@ local function gp_update(js,dt)
         my=max(min(my+dy,SCR.h0),0)
         if my==0 or my==SCR.h0 then
             WIDGET.sel=false
-            WIDGET.drag(0,0,0,-dy)
+            WIDGET._drag(0,0,0,-dy)
         end
         _updateMousePos(mx,my,dx,dy)
         cursorSpd=min(cursorSpd+dt*26,12.6)
@@ -253,7 +253,7 @@ function love.mousereleased(x,y,k,touch)
     if touch or WAIT.state or SCN.swapping then return end
     mx,my=ITP(xOy,x,y)
     if WIDGET.sel then
-        WIDGET.release(mx,my)
+        WIDGET._release(mx,my,k)
     else
         if SCN.mouseUp then SCN.mouseUp(mx,my,k) end
         if lastX and SCN.mouseClick and (mx-lastX)^2+(my-lastY)^2<62 then
@@ -266,7 +266,7 @@ function love.wheelmoved(dx,dy)
     if SCN.wheelMoved then
         SCN.wheelMoved(dx,dy)
     else
-        WIDGET.scroll(dx,dy)
+        WIDGET._scroll(dx,dy)
     end
 end
 
@@ -284,22 +284,22 @@ function love.touchpressed(id,x,y)
         WIDGET.unFocus(true)
         kb.setTextInput(false)
     end
-    WIDGET.cursorMove(x,y)
-    WIDGET.press(x,y,1)
+    WIDGET._cursorMove(x,y)
+    WIDGET._press(x,y,1)
     if SCN.touchDown then SCN.touchDown(x,y,id) end
 end
 function love.touchmoved(id,x,y,dx,dy)
     if WAIT.state or SCN.swapping then return end
     x,y=ITP(xOy,x,y)
     if SCN.touchMove then SCN.touchMove(x,y,dx/SCR.k,dy/SCR.k,id) end
-    WIDGET.drag(x,y,dx/SCR.k,dy/SCR.k)
+    WIDGET._drag(x,y,dx/SCR.k,dy/SCR.k)
 end
 function love.touchreleased(id,x,y)
     if WAIT.state or SCN.swapping then return end
     x,y=ITP(xOy,x,y)
     if id==SCN.mainTouchID then
-        WIDGET.release(x,y)
-        WIDGET.cursorMove(x,y)
+        WIDGET._release(x,y,id)
+        WIDGET._cursorMove(x,y)
         WIDGET.unFocus()
         SCN.mainTouchID=false
     end
@@ -379,7 +379,7 @@ function love.keypressed(key,_,isRep)
                 if not isRep then
                     clickFX(mx,my)
                     _triggerMouseDown(mx,my,1)
-                    WIDGET.release(mx,my,1)
+                    WIDGET._release(mx,my,1)
                 end
             end
         end
@@ -394,7 +394,7 @@ function love.textedited(texts)
     EDITING=texts
 end
 function love.textinput(texts)
-    WIDGET.textinput(texts)
+    WIDGET._textinput(texts)
 end
 
 -- analog sticks: -1, 0, 1 for neg, neutral, pos
@@ -504,7 +504,7 @@ function love.gamepadpressed(_,key)
             mouseShow=true
             clickFX(mx,my)
             _triggerMouseDown(mx,my,1)
-            WIDGET.release(mx,my,1)
+            WIDGET._release(mx,my,1)
         else
             if W and W.keypress then
                 W:keypress(key)
@@ -551,7 +551,11 @@ function love.resize(w,h)
     onResize(w,h)
 end
 
-function love.focus(f) onFocus(f) end
+function love.focus(f)
+    if onFocus then
+        onFocus(f)
+    end
+end
 
 local function secondLoopThread()
     local mainLoop=love.run()
@@ -670,12 +674,13 @@ function love.run()
 
     local love=love
 
-    local SCN_swapUpdate=SCN.swapUpdate
+    local SCN_swapUpdate=SCN._swapUpdate
     local MES_update,MES_draw=MSG._update,MSG._draw
+    local SYSFX_update,SYSFX_draw=SYSFX._update,SYSFX._draw
+    local WAIT_update=WAIT._update
     local HTTP_update=HTTP.update
     local TASK_update=TASK._update
-    local SYSFX_update,SYSFX_draw=SYSFX.update,SYSFX.draw
-    local WIDGET_update,WIDGET_draw=WIDGET.update,WIDGET.draw
+    local WIDGET_update,WIDGET_draw=WIDGET._update,WIDGET._draw
     local STEP,SLEEP=love.timer.step,love.timer.sleep
     local FPS,MINI=love.timer.getFPS,love.window.isMinimized
     local PUMP,POLL=love.event.pump,love.event.poll
@@ -696,7 +701,7 @@ function love.run()
     love.resize(gc.getWidth(),gc.getHeight())
     if #errData>0 then
         SCN.stack={'error'}
-        SCN.load('error')
+        SCN._load('error')
     elseif SCN.scenes[firstScene] then
         SCN.go(firstScene,'none')
         SCN.scenes._zenitha=nil
@@ -735,12 +740,12 @@ function love.run()
 
             if mouseShow then mouse_update(updateDT) end
             if next(jsState) then gp_update(jsState[1],updateDT) end
-            VOC.update()
-            BG.update(updateDT)
+            VOC._update()
+            BG._update(updateDT)
             TEXT:update(updateDT)
             MES_update(updateDT)
             SYSFX_update(updateDT)
-            WAIT.update(updateDT)
+            WAIT_update(updateDT)
             HTTP_update(updateDT)
             TASK_update(updateDT)
             if SCN.update then SCN.update(updateDT) end
@@ -823,7 +828,7 @@ function love.run()
                             gc_print(t,x+2,y)
                     end
                 gc_replaceTransform(SCR.origin)
-                    WAIT.draw()
+                    WAIT._draw()
                 gc_present()
 
                 -- SPEED UPUP! (probably not that obvious)
@@ -857,24 +862,41 @@ end
 -- Zenitha framework & methods
 Zenitha={}
 
+--- Go to quit scene then terminate the application
+--- @param style? string @Choose a scene swapping style
 function Zenitha._quit(style)
     onQuit()
     SCN.swapTo('_quit',style or 'slowFade')
 end
 
+--- Set the application name string
+--- @param name string
 function Zenitha.setAppName(name)
-    assert(type(name)=='string','Zenitha.setAppName(name): name must be string')
+    assert(type(name)=='string','App name must be string')
     appName=name
 end
+
+--- Get the application name
+--- @return string
 function Zenitha.getAppName() return appName end
 
+--- Set the application version text
+--- @param text string
 function Zenitha.setVersionText(text)
-    assert(type(text)=='string','Zenitha.setVersionText(text): text must be string')
+    assert(type(text)=='string','Version text must be string')
     versionText=text
 end
+
+--- Get the application version text
+--- @return string
 function Zenitha.getVersionText() return versionText end
 
+--- Get the joysticks' state table
 function Zenitha.getJsState() return jsState end
+
+--- Get the error info
+--- @param i number @Index of error info
+--- @return table @Error info table
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]
@@ -884,6 +906,9 @@ function Zenitha.getErr(i)
         return errData
     end
 end
+
+--- Set the debug info list
+--- @param list table<number,string|function>[]
 function Zenitha.setDebugInfo(list)
     assert(type(list)=='table',"Zenitha.setDebugInfo(list): list must be table")
     for i=1,#list do
@@ -893,26 +918,53 @@ function Zenitha.setDebugInfo(list)
     debugInfos=list
 end
 
+--- Set the first scene to load
+--- @param name string|any
 function Zenitha.setFirstScene(name)
     assert(type(name)=='string',"Zenitha.setFirstScene(name): name must be string")
     firstScene=name
 end
+
+--- Set whether to discard canvas buffer after drawing each frame
+--- @param b boolean
 function Zenitha.setCleanCanvas(b)
     assert(type(b)=='boolean',"Zenitha.setCleanCanvas(b): b must be boolean")
     discardCanvas=b
 end
-function Zenitha.setUpdateFreq(n)
-    assert(type(n)=='number',"Zenitha.setUpdateFreq(n): n must be number")
-    updateFreq=n
+
+--- Set the updating rate of the application
+---
+--- Default value is 100(%), all *.update(dt) will be called every main loop
+---
+--- If set to 50(%), all *.update(dt) will be called every 2 main loop
+--- @param rate number @Updating rate percentage, range from 0 to 100
+function Zenitha.setUpdateFreq(rate)
+    assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setUpdateFreq(n): n must in (0,100]")
+    updateFreq=rate
 end
-function Zenitha.setDrawFreq(n)
-    assert(type(n)=='number',"Zenitha.setDrawFreq(n): n must be number")
-    drawFreq=n
+
+--- Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
+--- @param rate number @Drawing rate percentage, range from 0 to 100
+function Zenitha.setDrawFreq(rate)
+    assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setDrawFreq(n): n must in (0,100]")
+    drawFreq=rate
 end
+
+--- Set the max update rate of main loop
+---
+--- Default value is 60
+--- @param fps number
 function Zenitha.setMaxFPS(fps)
     assert(type(fps)=='number' and fps>0,"Zenitha.setMaxFPS(fps): fps must be positive number")
     sleepInterval=1/fps
 end
+
+--- Set click effect
+---
+--- Boolean: switch on/off
+---
+--- Function: trigger custom function after every clicks (pass x,y as arguments)
+--- @param fx false|true|function
 function Zenitha.setClickFX(fx)
     assert(type(fx)=='boolean' or type(fx)=='function',"Zenitha.setClickFX(fx): fx must be boolean or function")
     if fx==false then fx=NULL end
@@ -920,15 +972,21 @@ function Zenitha.setClickFX(fx)
     clickFX=fx
 end
 
+--- Set highest priority global key-pressing event listener
+--- @param key string @Key name
+--- @param func function|false @Function to be called when key is pressed, false to remove
 function Zenitha.setOnGlobalKey(key,func)
     assert(type(key)=='string',"Zenitha.setOnFnKeys(key,func): key must be string")
-    if not func then
+    if func==false then
         globalKey[key]=nil
     else
-        assert(type(func)=='function',"Zenitha.setOnFnKeys(key,func): func must be function")
+        assert(type(func)=='function',"Zenitha.setOnFnKeys(key,func): func must be function|false")
         globalKey[key]=func
     end
 end
+
+--- Set Fn keys' event listener (for debugging)
+--- @param list table<function> @Function list, [1~7]=function
 function Zenitha.setOnFnKeys(list)
     assert(type(list)=='table',"Zenitha.setOnFnKeys(list): list must be table, [1~7]=function")
     for i=1,7 do
@@ -936,24 +994,47 @@ function Zenitha.setOnFnKeys(list)
         devFnKey[i]=list[i]
     end
 end
+
+--- Set global onFocus event listener
+--- @param func function @Function to be called when window focus changed
 function Zenitha.setOnFocus(func)
-    onFocus=assert(type(func)=='function' and func,"Zenitha.setOnFocus(func): func must be function")
+    assert(type(func)=='function',"Zenitha.setOnFocus(func): func must be function")
+    onFocus=func
 end
+
+--- Set global onResize event listener
+--- @param func function @Function to be called when window resized
 function Zenitha.setOnResize(func)
-    onResize=assert(type(func)=='function' and func,"Zenitha.setOnResize(func): func must be function")
+    assert(type(func)=='function',"Zenitha.setOnResize(func): func must be function")
+    onResize=func
 end
+
+--- Set global onQuit event listener
+--- @param func function @Function to be called when application is about to quit
 function Zenitha.setOnQuit(func)
-    onQuit=assert(type(func)=='function' and func,"Zenitha.setOnQuit(func): func must be function")
+    assert(type(func)=='function',"Zenitha.setOnQuit(func): func must be function")
+    onQuit=func
 end
 
--- [Warning] Color and line width is uncertain, set it in the function.
+--- Set cursor drawing function (pass time,x,y as arguments)
+---
+--- Color and line width is uncertain, set it yourself in the function.
+--- @param func function @Function to be called when drawing cursor
 function Zenitha.setDrawCursor(func)
-    drawCursor=assert(type(func)=='function' and func,"Zenitha.setCursor(func): func must be function")
-end
-function Zenitha.setDrawSysInfo(func)
-    drawSysInfo=assert(type(func)=='function' and func,"Zenitha.setDrawSysInfo(func): func must be function")
+    assert(type(func)=='function',"Zenitha.setCursor(func): func must be function")
+    drawCursor=func
 end
 
+--- Set system info drawing function (default transform is SCR.xOy_ul)
+--- @param func function @Function to be called when drawing system info
+function Zenitha.setDrawSysInfo(func)
+    assert(type(func)=='function',"Zenitha.setDrawSysInfo(func): func must be function")
+    drawSysInfo=func
+end
+
+--- Get a big canvas which is as big as the screen
+--- @param id string @Canvas ID
+--- @return love.Canvas
 function Zenitha.getBigCanvas(id)
     return bigCanvases[id]
 end

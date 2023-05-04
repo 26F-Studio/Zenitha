@@ -93,6 +93,18 @@ local swap={
     },
 }
 
+--- @class Zenitha.Scene
+--- @field widgetList Zenitha.widget.base[]
+--- @field scrollHeight number|nil
+
+--- @class Zenitha.SceneSwap
+--- @field duration number
+--- @field changeTime number
+--- @field draw function
+
+--- Add a scene
+--- @param name string
+--- @param scene Zenitha.Scene
 function SCN.add(name,scene)
     assert(not scenes[name],STRING.repD("SCN.add(name,scene): scene '$1' already exists",name))
     assert(type(scene)=='table',"SCN.add(name,scene): Scene object must be table")
@@ -115,6 +127,10 @@ function SCN.add(name,scene)
     setmetatable(scene.widgetList,WIDGET.indexMeta)
     scenes[name]=scene
 end
+
+--- Add a scene swapping animation
+--- @param name string
+--- @param swp Zenitha.SceneSwap
 function SCN.addSwap(name,swp)
     assert(type(name)=='string',"Arg name must be string")
     assert(not swap[name],"Swap '"..name.."' already exist")
@@ -124,19 +140,24 @@ function SCN.addSwap(name,swp)
     assert(type(swp.draw)=='function',"swp.draw must be function")
     swap[name]=swp
 end
+
+--- Set max scroll area of current scene, default to 0
+--- @param height? number
 function SCN.setScroll(height)
     SCN.maxScroll=height or 0
     SCN.curScroll=MATH.clamp(SCN.curScroll,0,SCN.maxScroll)
 end
 
-function SCN.swapUpdate(dt)
+--- Update scene swapping animation (called by Zenitha)
+--- @param dt number
+function SCN._swapUpdate(dt)
     local S=SCN.state
     S.time=S.time-dt
     if S.time<S.changeTime and S.time+dt>=S.changeTime then
         -- Actually load scene at this moment
         SCN.stack[#SCN.stack]=S.tar
         SCN.cur=S.tar
-        SCN.load(S.tar)
+        SCN._load(S.tar)
         SCN.mainTouchID=nil
     end
     if S.time<0 then
@@ -144,27 +165,38 @@ function SCN.swapUpdate(dt)
     end
 end
 
-function SCN.load(s)
+--- Load a scene, replace all events and fresh scrolling, widgets
+--- @param name string
+function SCN._load(name)
     love.keyboard.setTextInput(false)
 
-    local S=scenes[s]
+    local S=scenes[name]
     SCN.maxScroll=S.scrollHeight or 0
     SCN.curScroll=0
-    WIDGET.setWidgetList(S.widgetList)
+    WIDGET._setWidgetList(S.widgetList)
     for i=1,#eventNames do
         SCN[eventNames[i]]=S[eventNames[i]]
     end
 
     if S.enter then S.enter() end
 end
-function SCN.push(tar)
+
+--- Push a scene to stack
+--- @param tar? string
+function SCN._push(tar)
     table.insert(SCN.stack,tar or SCN.stack[#SCN.stack-1])
 end
-function SCN.pop()
+
+--- Pop a scene from stack
+function SCN._pop()
     table.remove(SCN.stack)
 end
 
-function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
+--- Swap to a sceene without add current scene to stack (cannot go back)
+--- @param tar string
+--- @param style? string
+--- @param ... any @Arguments passed to new scene
+function SCN.swapTo(tar,style,...)
     if scenes[tar] then
         if not SCN.swapping then
             SCN.prev=SCN.stack[#SCN.stack]
@@ -186,16 +218,25 @@ function SCN.swapTo(tar,style,...)-- Parallel scene swapping, cannot back
         MSG.new('warn',"No Scene: "..tar)
     end
 end
+
+--- Go to a scene
+--- @param tar string
+--- @param style? string
+--- @param ... any @Arguments passed to new scene
 function SCN.go(tar,style,...)-- Normal scene swapping, can back
     if scenes[tar] then
         if not SCN.swapping then
-            SCN.push(SCN.stack[#SCN.stack] or '_')
+            SCN._push(SCN.stack[#SCN.stack] or '_')
             SCN.swapTo(tar,style,...)
         end
     else
         MSG.new('warn',"No Scene: "..tar)
     end
 end
+
+--- Back to previous scene
+--- @param style? string
+--- @param ... any @Arguments passed to previous scene
 function SCN.back(style,...)
     if SCN.swapping then return end
 
@@ -205,26 +246,28 @@ function SCN.back(style,...)
         if SCN.leave then SCN.leave() end
 
         -- Poll&Back to previous Scene
-        SCN.pop()
+        SCN._pop()
         SCN.swapTo(SCN.stack[#SCN.stack],style,...)
     else
         Zenitha._quit(style)
     end
 end
+
+--- Back to a specific scene
+--- @param tar string
+--- @param style? string
+--- @param ... any @Arguments passed to target scene
 function SCN.backTo(tar,style,...)
     if SCN.swapping then return end
 
-    -- Leave scene
-    if SCN.sceneBack then
-        SCN.sceneBack()
-    end
-
     -- Poll&Back to previous Scene
     while SCN.stack[#SCN.stack-1]~=tar and #SCN.stack>1 do
-        SCN.pop()
+        SCN._pop()
     end
     SCN.swapTo(SCN.stack[#SCN.stack],style,...)
 end
+
+--- Print current scene stack to console
 function SCN.printStack()
     for i=1,#SCN.stack do print(SCN.stack[i]) end
 end

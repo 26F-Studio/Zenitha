@@ -1,4 +1,4 @@
---- @class Zenitha.color @READ ONLY
+--- @class Zenitha.Color @READ ONLY
 --- @field [1] number @Red
 --- @field [2] number @Green
 --- @field [3] number @Blue
@@ -89,7 +89,7 @@ end,__metatable=true})
 local colorStrings={'R','F','O','Y','A','K','G','J','C','I','S','B','P','V','M','W'}
 --- Random color
 --- @param brightness number 1|2|3|4|5
---- @return Zenitha.color
+--- @return Zenitha.Color
 function COLOR.random(brightness)
     return COLOR[brightness][colorStrings[rnd(#colorStrings)]]
 end

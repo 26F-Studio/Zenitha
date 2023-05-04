@@ -124,8 +124,8 @@ end
 --- @param mode 'center'|'right'|'left'
 --- @param d number
 --- @param shadeCount 4|8
---- @param c1? Zenitha.color
---- @param c2? Zenitha.color
+--- @param c1? Zenitha.Color
+--- @param c2? Zenitha.Color
 function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
     local w=1280
     if mode=='center' then
@@ -505,7 +505,7 @@ do-- function GC.load(L), GC.execute(t)
 
     local sizeLimit=gc.getSystemLimits().texturesize
     --- Similar to GC.execute, but draw on a canvas.
-    --- @param L table[][]|string[][]
+    --- @param L number[]|number[][]|table[][]|string[][]
     --- ## Example
     --- ```lua
     --- GC.load{100,100-- size of canvas

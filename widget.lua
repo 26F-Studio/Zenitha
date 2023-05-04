@@ -29,7 +29,6 @@ local indexMeta={
         end
     end
 }
-local onChange=NULL
 
 local function updateWheel(self,d)
     self._floatWheel=self._floatWheel+(d or 0)
@@ -48,15 +47,27 @@ local function alignDraw(self,drawable,x,y,ang,image_k)
     gc_draw(drawable,x,y,ang,k,1,ox,oy)
 end
 
+local leftAngle=GC.load{20,20,
+    {'setLW',5},
+    {'line',18,2,1,10,18,18},
+}
+local rightAngle=GC.load{20,20,
+    {'setLW',5},
+    {'line',2,2,19,10,2,18},
+}
+
 local Widgets={}
-local WIDGET={_prototype=Widgets}
 
 --------------------------------------------------------------
 
--- base (not used by user)
+--- @class Zenitha.widget.base @not used by user
 Widgets.base={
     type='null',
     name=false,
+
+    text=nil,
+    image=nil,
+
     keepFocus=false,
     x=0,y=0,
 
@@ -70,17 +81,23 @@ Widgets.base={
     fontSize=30,fontType=false,
     widthLimit=1e99,
     alignX='center',alignY='center',
+    sound=false,
     sound_press=false,sound_hover=false,
 
     isAbove=NULL,
+    draw=NULL,
     visibleFunc=false,-- function return a boolean
 
+    _text=nil,
+    _image=nil,
     _hoverTime=0,
     _hoverTimeMax=.1,
     _pressed=false,
     _pressTime=0,
     _pressTimeMax=.05,
     _visible=nil,
+
+    buildArgs={},
 }
 function Widgets.base:getInfo()
     local str=''
@@ -179,7 +196,7 @@ function Widgets.base.drag()    end
 function Widgets.base.scroll()  end
 
 
--- text
+--- @class Zenitha.widget.text: Zenitha.widget.base
 Widgets.text=setmetatable({
     type='text',
 
@@ -212,7 +229,7 @@ function Widgets.text:draw()
 end
 
 
--- image
+--- @class Zenitha.widget.image: Zenitha.widget.base
 Widgets.image=setmetatable({
     type='image',
     ang=0,k=1,
@@ -241,10 +258,10 @@ function Widgets.image:draw()
 end
 
 
--- button
+--- @class Zenitha.widget.button: Zenitha.widget.base
 Widgets.button=setmetatable({
     type='button',
-    w=40,h=false,
+    w=40,h=nil,
 
     text=false,
     image=false,
@@ -334,7 +351,7 @@ function Widgets.button:draw()
     gc_pop()
 end
 
--- button_fill
+--- @class Zenitha.widget.button_fill: Zenitha.widget.button
 Widgets.button_fill=setmetatable({
     type='button_fill',
     color_text=TABLE.shift(COLOR.L),
@@ -370,7 +387,7 @@ function Widgets.button_fill:draw()
     gc_pop()
 end
 
--- button_invis
+--- @class Zenitha.widget.button_invis: Zenitha.widget.button
 Widgets.button_invis=setmetatable({
     type='button_invis',
     sound=false,
@@ -401,7 +418,7 @@ function Widgets.button_invis:draw()
 end
 
 
--- checkBox
+--- @class Zenitha.widget.checkBox: Zenitha.widget.base
 Widgets.checkBox=setmetatable({
     type='checkBox',
     w=30,
@@ -517,7 +534,7 @@ function Widgets.checkBox:draw()
 end
 
 
--- switch
+--- @class Zenitha.widget.switch: Zenitha.widget.checkBox
 Widgets.switch=setmetatable({
     type='switch',
     h=30,
@@ -628,7 +645,7 @@ function Widgets.switch:draw()
 end
 
 
--- slider
+--- @class Zenitha.widget.slider: Zenitha.widget.base
 Widgets.slider=setmetatable({
     type='slider',
     w=100,
@@ -850,7 +867,7 @@ function Widgets.slider:arrowKey(k)
 end
 
 
--- slider_fill
+--- @class Zenitha.widget.slider_fill: Zenitha.widget.slider
 Widgets.slider_fill=setmetatable({
     type='slider_fill',
     w=100,h=40,
@@ -975,7 +992,7 @@ function Widgets.slider_fill:draw()
 end
 
 
--- slider_progress
+--- @class Zenitha.widget.slider_progress: Zenitha.widget.slider
 Widgets.slider_progress=setmetatable({
     type='slider_progress',
     w=100,h=10,
@@ -1076,15 +1093,7 @@ function Widgets.slider_progress:draw()
 end
 
 
--- selector
-local leftAngle=GC.load{20,20,
-    {'setLW',5},
-    {'line',18,2,1,10,18,18},
-}
-local rightAngle=GC.load{20,20,
-    {'setLW',5},
-    {'line',2,2,19,10,2,18},
-}
+--- @class Zenitha.widget.selector: Zenitha.widget.base
 Widgets.selector=setmetatable({
     type='selector',
 
@@ -1255,7 +1264,7 @@ function Widgets.selector:arrowKey(k)
 end
 
 
--- inputBox
+--- @class Zenitha.widget.inputBox: Zenitha.widget.base
 Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
@@ -1421,7 +1430,7 @@ function Widgets.inputBox:keypress(k)
 end
 
 
--- textBox
+--- @class Zenitha.widget.textBox: Zenitha.widget.base
 Widgets.textBox=setmetatable({
     type='textBox',
     keepFocus=true,
@@ -1442,7 +1451,7 @@ Widgets.textBox=setmetatable({
     sound_clear=false,
 
     _floatWheel=0,
-    _texts=false,
+    _texts=nil,
     _scrollPos=0,-- Scroll-down-distance
     _scrollPos1=0,
     _sure=0,-- Sure-timer for clear history
@@ -1613,7 +1622,7 @@ function Widgets.textBox:draw()
 end
 
 
--- listBox
+--- @class Zenitha.widget.listBox: Zenitha.widget.base
 Widgets.listBox=setmetatable({
     type='listBox',
     w=100,
@@ -1866,21 +1875,30 @@ end
 
 --------------------------------------------------------------
 
-
 -- Widget module
+local WIDGET={_prototype=Widgets}
+
+--- @type Zenitha.widget.base[]
 WIDGET.active={}-- Table contains all active widgets
+
+--- @type Zenitha.widget.base|false
 WIDGET.sel=false-- Selected widget
+
+--- Reset all widgets (called by Zenitha when scene changed and window resized or something)
 function WIDGET._reset()
     for i=1,#WIDGET.active do
         WIDGET.active[i]:reset()
     end
 end
-function WIDGET.setWidgetList(list)
+
+--- Set WIDGET.active to widget list (called by Zenitha when scene changed)
+--- @param list Zenitha.widget.base[]
+function WIDGET._setWidgetList(list)
     WIDGET.unFocus(true)
     WIDGET.active=list or NONE
 
     if list then
-        WIDGET.cursorMove(xOy:inverseTransformPoint(love.mouse.getPosition()))
+        WIDGET._cursorMove(xOy:inverseTransformPoint(love.mouse.getPosition()))
 
         -- Set metatable for new widget lists
         if getmetatable(list)~=indexMeta then
@@ -1889,11 +1907,17 @@ function WIDGET.setWidgetList(list)
 
         WIDGET._reset()
     end
-    onChange()
 end
+
+--- Get selected widget
+--- @return Zenitha.widget.base|false
 function WIDGET.getSelected()
     return WIDGET.sel
 end
+
+--- Check if widget W is focused, or check if any widget is focused if given false|nil
+--- @param W? Zenitha.widget.base|false
+--- @return boolean
 function WIDGET.isFocus(W)
     if W then
         return W and WIDGET.sel==W
@@ -1901,6 +1925,9 @@ function WIDGET.isFocus(W)
         return WIDGET.sel~=false
     end
 end
+
+--- Focus widget W
+--- @param W Zenitha.widget.base
 function WIDGET.focus(W)
     if WIDGET.sel==W then return end
     if W.sound_hover then
@@ -1918,6 +1945,11 @@ function WIDGET.focus(W)
         end
     end
 end
+
+--- Unfocus widget
+---
+--- soft unfocus like moving mouse, won't unfocus some widget with `keepFocus` tag, like inputBox.
+--- @param force? boolean
 function WIDGET.unFocus(force)
     local W=WIDGET.sel
     if W and (force or not W.keepFocus) then
@@ -1929,7 +1961,10 @@ function WIDGET.unFocus(force)
     end
 end
 
-function WIDGET.cursorMove(x,y)
+--- Update widget states with cursor move event (called by Zenitha)
+--- @param x number
+--- @param y number
+function WIDGET._cursorMove(x,y)
     for _,W in next,WIDGET.active do
         if W._visible and W:isAbove(x,y+SCN.curScroll) then
             WIDGET.focus(W)
@@ -1940,7 +1975,12 @@ function WIDGET.cursorMove(x,y)
         WIDGET.unFocus()
     end
 end
-function WIDGET.press(x,y,k)
+
+--- Update widget states with press event (called by Zenitha)
+--- @param x number
+--- @param y number
+--- @param k number
+function WIDGET._press(x,y,k)
     local W=WIDGET.sel
     if W then
         if not W:isAbove(x,y+SCN.curScroll) then
@@ -1954,12 +1994,23 @@ function WIDGET.press(x,y,k)
         end
     end
 end
-function WIDGET.release(x,y,k)
+
+--- Update widget states with release event (called by Zenitha)
+--- @param x number
+--- @param y number
+--- @param k number
+function WIDGET._release(x,y,k)
     if WIDGET.sel then
-        WIDGET.sel:release(x,y+SCN.curScroll)
+        WIDGET.sel:release(x,y+SCN.curScroll,k)
     end
 end
-function WIDGET.drag(x,y,dx,dy)
+
+--- Update widget states with drag event (called by Zenitha)
+--- @param x number
+--- @param y number
+--- @param dx number
+--- @param dy number
+function WIDGET._drag(x,y,dx,dy)
     local W=WIDGET.sel
     if W then
         W:drag(x,y+SCN.curScroll,dx,dy)
@@ -1967,7 +2018,11 @@ function WIDGET.drag(x,y,dx,dy)
         SCN.curScroll=clamp(SCN.curScroll-dy,0,SCN.maxScroll)
     end
 end
-function WIDGET.scroll(dx,dy)
+
+--- Update widget states with scroll event (called by Zenitha)
+--- @param dx number
+--- @param dy number
+function WIDGET._scroll(dx,dy)
     local W=WIDGET.sel
     if W then
         W:scroll(dx,dy)
@@ -1975,7 +2030,10 @@ function WIDGET.scroll(dx,dy)
         SCN.curScroll=clamp(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
     end
 end
-function WIDGET.textinput(texts)
+
+--- Update widget states with drag event (called by Zenitha)
+--- @param texts string
+function WIDGET._textinput(texts)
     local W=WIDGET.sel
     if W and W.type=='inputBox' then
         if (not W.regex or texts:match(W.regex)) and (not W.limit or #(WIDGET.sel._value..texts)<=W.limit) then
@@ -1987,7 +2045,9 @@ function WIDGET.textinput(texts)
     end
 end
 
-function WIDGET.update(dt)
+--- Update all widgets (called by Zenitha)
+--- @param dt number
+function WIDGET._update(dt)
     for _,W in next,WIDGET.active do
         if W.visibleFunc then
             local v=W.visibleFunc()
@@ -2007,19 +2067,28 @@ function WIDGET.update(dt)
         if W.update then W:update(dt) end
     end
 end
-function WIDGET.draw()
+
+--- Draw all widgets (called by Zenitha)
+function WIDGET._draw()
     gc_translate(0,-SCN.curScroll)
     for _,W in next,WIDGET.active do
         if W._visible then W:draw() end
     end
 end
-function WIDGET._draw(widgetList,scroll)
+
+--- Draw widgets
+--- @param widgetList Zenitha.widget.base[]
+--- @param scroll? number
+function WIDGET.draw(widgetList,scroll)
     gc_translate(0,-(scroll or 0))
     for _,W in next,widgetList do
         if W._visible then W:draw() end
     end
 end
 
+--- Create new widget
+--- @param args table @Arguments to create widget, check declare widget class for more info
+--- @return Zenitha.widget.base
 function WIDGET.new(args)
     local t=args.type
     args.type=nil
@@ -2042,62 +2111,69 @@ end
 
 --------------------------------------------------------------
 -- User funcs
-function WIDGET.setOnChange(func)
-    assert(type(func)=='function',"WIDGET.setOnChange(func): func must be function")
-    onChange=func
-end
 
 -- Widget function shortcuts
-do-- function WIDGET.c_backScn(style)
-    local cache={}
-    function WIDGET.c_backScn(style)
-        if not style then style='fade' end
-        if not cache[style] then
-            cache[style]=function() SCN.back(style) end
-        end
-        return cache[style]
+local c_cache={}
+
+--- Widget shortcut function of SCN.back()
+--- @param style? string
+--- @return function
+function WIDGET.c_backScn(style)
+    if not style then style='fade' end
+    local hash='c_backScn/'..style
+    if not c_cache[hash] then
+        c_cache[hash]=function() SCN.back(style) end
     end
+    return c_cache[hash]
 end
-do-- function WIDGET.c_goScn(name,style)
-    local cache={}
-    function WIDGET.c_goScn(name,style)
-        local hash=style and name..style or name
-        if not cache[hash] then
-            cache[hash]=function() SCN.go(name,style) end
-        end
-        return cache[hash]
+
+--- Widget shortcut function of SCN.go()
+--- @param name string
+--- @param style? string
+--- @return function
+function WIDGET.c_goScn(name,style)
+    local hash='c_goScn/'..(style and name..','..style or name)
+    if not c_cache[hash] then
+        c_cache[hash]=function() SCN.go(name,style) end
     end
+    return c_cache[hash]
 end
-do-- function WIDGET.c_swapScn(name,style)
-    local cache={}
-    function WIDGET.c_swapScn(name,style)
-        local hash=style and name..style or name
-        if not cache[hash] then
-            cache[hash]=function() SCN.swapTo(name,style) end
-        end
-        return cache[hash]
+
+--- Widget shortcut function of SCN.swapTo()
+--- @param name string
+--- @param style? string
+--- @return function
+function WIDGET.c_swapScn(name,style)
+    local hash='c_swapScn/'..(style and name..','..style or name)
+    if not c_cache[hash] then
+        c_cache[hash]=function() SCN.swapTo(name,style) end
     end
+    return c_cache[hash]
 end
-do-- function WIDGET.c_pressKey(k)
-    local cache={}
-    function WIDGET.c_pressKey(k)
-        if not cache[k] then
-            cache[k]=function() love.keypressed(k) end
-        end
-        return cache[k]
+
+--- Widget shortcut function of SCN.swapTo()
+--- @param key string
+--- @return function
+function WIDGET.c_pressKey(key)
+    local hash='c_pressKey/'..key
+    if not c_cache[hash] then
+        c_cache[hash]=function() love.keypressed(key) end
     end
+    return c_cache[key]
 end
 --------------------------------------------------------------
 
+--- Get custom new widget (not guaranteed to work)
+--- @param name string
+--- @param parent string
+--- @return Zenitha.widget.base
 function WIDGET.newClass(name,parent)
-    assert(type(name)=='string',"WIDGET.newClass(name,parent): name must be string")
-    assert(not Widgets[name],"Widget class "..name.." already exists")
     if not parent then parent='base' end
-    assert(type(parent)=='string',"WIDGET.newClass(name,parent): name must be string")
+    assert(type(name)=='string',"Widget name must be string")
+    assert(type(parent)=='string',"Widget name must be string")
+    assert(not Widgets[name],"Widget class "..name.." already exists")
     assert(Widgets[parent],"Parent widget class "..parent.." does not exist")
-    Widgets[name]=setmetatable({
-        type=name,
-    },{__index=Widgets[parent],__metatable=true})
+    Widgets[name]=setmetatable({type=name},{__index=Widgets[parent],__metatable=true})
     return Widgets[name]
 end
 

@@ -42,7 +42,7 @@ local backColors={
 --- Create a new message popup at up-left corner
 --- @param icon string|love.Canvas
 --- @param str string
---- @param time number|nil
+--- @param time? number
 function MSG.new(icon,str,time)
     local color=backColors.other
     if type(icon)=='string' then

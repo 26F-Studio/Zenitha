@@ -22,7 +22,7 @@ end
 
 --- "Replace dollars". Replace all $n with ..., like string.format
 --- @param str string
---- @vararg any
+--- @param ... any
 --- @return string
 function STRING.repD(str,...)
     local l={...}

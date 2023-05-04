@@ -27,7 +27,7 @@ end
 
 --- Send data to a background (trigger its 'event' function)
 --- @param name? string
---- @vararg any
+--- @param ... any @Arguments passed to background's 'event' function
 function BG.send(name,...)
     if BGs[name] then
         BGs[name].event(...)
@@ -58,7 +58,7 @@ function BG.set(name)
 
         BG.init=   bg.init or NULL
         BG.resize= bg.resize or NULL
-        BG.update= bg.update or NULL
+        BG._update= bg.update or NULL
         BG.draw=   bg.draw or NULL
         BG.event=  bg.event or NULL
         BG.discard=bg.discard or NULL

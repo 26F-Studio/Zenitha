@@ -37,10 +37,14 @@ end
 
 local SFX={}
 
+--- Initialize SFX lib with a list of filenames
 function SFX.init(list)
     assert(type(list)=='table',"Initialize SFX lib with a list of filenames!")
     for i=1,#list do table.insert(sfxList,list[i]) end
 end
+
+--- Load SFX files from specified directory
+--- @param path string @Path to the folder contains SFX files, including the last '/'
 function SFX.load(path)
     local c=0
     local missing=0
@@ -48,8 +52,8 @@ function SFX.load(path)
         local fullPath=path..sfxList[i]..'.ogg'
         if love.filesystem.getInfo(fullPath) then
             if Sources[sfxList[i]] then
-                for j=1,#Sources[sfxList[i]] do
-                    Sources[sfxList[i]][j]:release()
+                for _,src in next,Sources[sfxList[i]] do
+                    src:release()
                 end
             end
             Sources[sfxList[i]]={love.audio.newSource(fullPath,'static')}
@@ -65,6 +69,13 @@ function SFX.load(path)
     end
     collectgarbage()
 end
+
+--- Load SFX samples from specified directory
+--- @param pack {name:string,path:string,base:string}
+--- ## Example
+--- ```lua
+--- SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
+--- ```
 function SFX.loadSample(pack)
     assert(type(pack)=='table',"Usage: SFX.loadsample([table])")
     assert(pack.name,"No field: name")
@@ -80,18 +91,32 @@ function SFX.loadSample(pack)
     LOG((num-1).." "..pack.name.." samples loaded")
 end
 
+--- Get the number of SFX files loaded
+--- @return number
 function SFX.getCount()
     return #sfxList
 end
+
+--- Set the volume of SFX module
+--- @param vol number
 function SFX.setVol(vol)
     assert(type(vol)=='number' and vol>=0 and vol<=1,"SFX.setVol(vol): vol must be number in range 0~1")
     volume=vol
 end
+
+--- Set the stereo of SFX module
+--- @param s number @0~1
 function SFX.setStereo(s)
     assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): s must be number in range 0~1")
     stereo=s
 end
 
+--- Get note name with note number
+---
+--- 1 --> ' C1'
+--- 13 --> 'C#2'
+--- @param note number @Note number, 1~127
+--- @return string @Note name, e.g. 'C4'
 function SFX.getNoteName(note)
     if note<1 then
         return '---'
@@ -101,7 +126,15 @@ function SFX.getNoteName(note)
         return noteName[note%12+1]..octave
     end
 end
-function SFX.playSample(pack,...)-- vol-1, sampSet1, vol-2, sampSet2
+
+--- Play a sample
+--- @param pack string
+--- @param ... string|number @0~1 number for volume, big integer and string for tune
+--- ## Example
+--- ```lua
+--- SFX.playSample('piano', .7,'C4','E4', .9,'G4')
+--- ```
+function SFX.playSample(pack,...)
     if ... then
         local arg={...}
         local vol
@@ -124,6 +157,12 @@ function SFX.playSample(pack,...)-- vol-1, sampSet1, vol-2, sampSet2
         end
     end
 end
+
+--- Play a SFX
+--- @param name string
+--- @param vol? number @0~1
+--- @param pos? number @-1~1
+--- @param pitch? number @+12 for an octave
 function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
     if vol<=0 then return end
@@ -154,11 +193,14 @@ function SFX.play(name,vol,pos,pitch)
     S:setPitch(pitch and 1.0594630943592953^pitch or 1)
     S:play()
 end
-function SFX.reset()
+
+--- Remove references of stopped SFX sources
+function SFX.releaseFree()
     for _,L in next,Sources do
         if type(L)=='table' then
-            for i=#L,1,-1 do
-                if not L[i]:isPlaying() then
+            for i,src in next,L do
+                if not src:isPlaying() then
+                    src:release()
                     rem(L,i)
                 end
             end
