@@ -2159,7 +2159,7 @@ function WIDGET.c_pressKey(key)
     if not c_cache[hash] then
         c_cache[hash]=function() love.keypressed(key) end
     end
-    return c_cache[key]
+    return c_cache[hash]
 end
 --------------------------------------------------------------
 
