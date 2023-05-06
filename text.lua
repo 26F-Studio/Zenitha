@@ -108,6 +108,9 @@ end
 
 --- @class Zenitha.Text
 --- @field _texts Zenitha.textAnim[]
+--- @field add function
+--- @field update function
+--- @field draw function
 
 --- @type Zenitha.Text
 local TEXT={_texts={}}

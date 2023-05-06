@@ -329,7 +329,13 @@ end
 --- @field minK number
 --- @field maxK number
 --- @field transform love.Transform
+--- @field move function
+--- @field rotate function
+--- @field scale function
+--- @field update function
+--- @field apply function
 
+--- @type Zenitha.Camera
 local Camera={}
 
 --- Move camera
