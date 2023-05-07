@@ -306,7 +306,7 @@ function BGM.set(bgms,mode,...)
     end
     for i=1,#bgms do
         local obj=bgms[i]
-        if obj.source then
+        if obj and obj.source then
             if mode=='volume' then
                 _clearTask(obj,'volume')
 
