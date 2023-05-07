@@ -6,6 +6,9 @@
 
 local rnd,sin,abs=math.random,math.sin,math.abs
 
+--- Convert hex string to color
+--- @param str string
+--- @return number, number, number, number|nil
 local function hex(str)
     assert(type(str)=='string',"COLOR.hex(str): str must be string")
     str=str:match('#?(%x%x?%x?%x?%x?%x?%x?%x?)') or '000000'
@@ -15,7 +18,14 @@ local function hex(str)
     local a=(tonumber(str:sub(7,8),16) or 255)/255
     return r,g,b,a
 end
-local function hsv(h,s,v,a)-- Color type, Color amount, Light
+
+--- Convert HSV to RGB
+--- @param h number @Color type
+--- @param s number @Color amount
+--- @param v number @Light
+--- @param a? number @Alpha
+--- @return number, number, number, number|nil
+local function hsv(h,s,v,a)
     if s<=0 then return v,v,v,a end
     h=h*6
     local c=v*s
