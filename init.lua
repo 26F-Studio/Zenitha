@@ -78,7 +78,7 @@ STRING=     require'Zenitha.stringExtend'
 TABLE=      require'Zenitha.tableExtend'
 
 -- Pure lua modules (simple)
-COLOR=      require'Zenitha.Color'
+COLOR=      require'Zenitha.color'
 DEBUG=      require'Zenitha.debug'
 LOG=        require'Zenitha.log'
 JSON=       require'Zenitha.json'

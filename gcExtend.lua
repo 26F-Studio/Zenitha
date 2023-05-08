@@ -124,8 +124,8 @@ end
 --- @param mode 'center'|'right'|'left'
 --- @param d number
 --- @param shadeCount 4|8
---- @param c1? Zenitha.Color
---- @param c2? Zenitha.Color
+--- @param c1? Zenitha.Color @Shade color
+--- @param c2? Zenitha.Color @Center color
 function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
     local w=1280
     if mode=='center' then
