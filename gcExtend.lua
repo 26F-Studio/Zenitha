@@ -542,7 +542,7 @@ do-- function GC.load(L), GC.execute(t)
             gc.setColor(1,1,1)
             gc.setLineWidth(1)
             for i=3,#L do
-                --- @type any[]
+                --- @type any
                 local code=L[i]
                 local cmd=code[1]
                 if type(cmd)=='string' then

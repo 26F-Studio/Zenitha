@@ -75,7 +75,7 @@ local function addThread(num)
 end
 
 --- @class Zenitha.httpRequest
---- @field body table|nil @must be table, will be encoded to json
+--- @field body table|nil|string @must be table if given, will be encoded to json
 --- @field pool string @default to '_default' if not given
 --- @field method string|nil @default to 'POST' if body is given, 'GET' otherwise
 --- @field headers table|nil

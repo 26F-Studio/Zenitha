@@ -106,8 +106,8 @@ local swap={
 --- @param name string
 --- @param scene Zenitha.Scene
 function SCN.add(name,scene)
-    assert(not scenes[name],STRING.repD("SCN.add(name,scene): scene '$1' already exists",name))
-    assert(type(scene)=='table',"SCN.add(name,scene): Scene object must be table")
+    assert(type(scene)=='table',"scene must be table")
+    assert(not scenes[name],"scene '"..tostring(name).."' already exists")
 
     -- Check each field in scene object
     for k,v in next,scene do

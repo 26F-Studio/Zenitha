@@ -675,6 +675,7 @@ function love.run()
     local love=love
 
     local SCN_swapUpdate=SCN._swapUpdate
+    local TEXT,TEXT_update,TEXT_draw=TEXT,TEXT.update,TEXT.draw
     local MES_update,MES_draw=MSG._update,MSG._draw
     local SYSFX_update,SYSFX_draw=SYSFX._update,SYSFX._draw
     local WAIT_update=WAIT._update
@@ -742,7 +743,7 @@ function love.run()
             if next(jsState) then gp_update(jsState[1],updateDT) end
             VOC._update()
             BG._update(updateDT)
-            TEXT:update(updateDT)
+            TEXT_update(TEXT,updateDT)
             MES_update(updateDT)
             SYSFX_update(updateDT)
             WAIT_update(updateDT)
@@ -772,7 +773,7 @@ function love.run()
                 gc_replaceTransform(xOy)
                     WIDGET_draw()
                     SYSFX_draw()
-                    TEXT:draw()
+                    TEXT_draw(TEXT)
                     if mouseShow then drawCursor(time,mx,my) end
                 gc_replaceTransform(SCR.xOy_ul)
                     drawSysInfo()

@@ -61,12 +61,41 @@ local Widgets={}
 --------------------------------------------------------------
 
 --- @class Zenitha.widget.base @not used by user
+--- @field color string|Zenitha.Color
+--- @field frameColor string|Zenitha.Color
+--- @field fillColor string|Zenitha.Color
+--- @field activeColor string|Zenitha.Color
+--- @field idleColor string|Zenitha.Color
+---
+--- @field sound_press string|false
+--- @field sound_hover string|false
+---
+--- @field _text love.Drawable|false
+--- @field _image love.Drawable|false
+--- @field _hoverTime number
+--- @field _hoverTimeMax number
+--- @field _pressed boolean
+--- @field _pressTime number
+--- @field _pressTimeMax number
+--- @field _visible boolean|nil
+---
+--- @field reset function
+--- @field press function
+--- @field release function
+--- @field scroll function
+--- @field drag function
+--- @field update function
+--- @field draw function
+--- @field isAbove function
+--- @field arrowKey function
+--- @field keypress function
+--- @field code function
 Widgets.base={
     type='null',
     name=false,
 
-    text=nil,
-    image=nil,
+    text=false,
+    image=false,
 
     keepFocus=false,
     x=0,y=0,
@@ -88,8 +117,8 @@ Widgets.base={
     draw=NULL,
     visibleFunc=false,-- function return a boolean
 
-    _text=nil,
-    _image=nil,
+    _text=false,
+    _image=false,
     _hoverTime=0,
     _hoverTimeMax=.1,
     _pressed=false,
@@ -158,7 +187,7 @@ function Widgets.base:reset()
         self._text=PAPER
     end
 
-    self._image=nil
+    self._image=false
     if self.image then
         if type(self.image)=='string' then
             self._image=IMG[self.image] or PAPER
@@ -202,7 +231,7 @@ Widgets.text=setmetatable({
 
     text=false,
 
-    _text=nil,
+    _text=false,
 
     buildArgs={
         'name',
@@ -236,7 +265,7 @@ Widgets.image=setmetatable({
 
     image=false,
 
-    _image=nil,
+    _image=false,
 
     buildArgs={
         'name',
@@ -259,9 +288,11 @@ end
 
 
 --- @class Zenitha.widget.button: Zenitha.widget.base
+--- @field w number
+--- @field h number
 Widgets.button=setmetatable({
     type='button',
-    w=40,h=nil,
+    w=40,h=false,
 
     text=false,
     image=false,
@@ -270,8 +301,8 @@ Widgets.button=setmetatable({
 
     code=NULL,
 
-    _text=nil,
-    _image=nil,
+    _text=false,
+    _image=false,
     _pressed=false,
 
     buildArgs={
@@ -294,8 +325,8 @@ Widgets.button=setmetatable({
 function Widgets.button:reset()
     Widgets.base.reset(self)
     if not self.h then self.h=self.w end
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
+    assert(self.w and type(self.w)=='number','[button].w must be number')
+    assert(self.h and type(self.h)=='number','[button].h must be number')
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
@@ -419,6 +450,9 @@ end
 
 
 --- @class Zenitha.widget.checkBox: Zenitha.widget.base
+--- @field w number
+--- @field sound_on string|false
+--- @field sound_off string|false
 Widgets.checkBox=setmetatable({
     type='checkBox',
     w=30,
@@ -433,8 +467,8 @@ Widgets.checkBox=setmetatable({
     disp=false,-- function return a boolean
     code=NULL,
 
-    _text=nil,
-    _image=nil,
+    _text=false,
+    _image=false,
 
     buildArgs={
         'name',
@@ -458,7 +492,9 @@ function Widgets.checkBox:reset()
     Widgets.base.reset(self)
 
     assert(type(self.disp)=='function','[checkBox].disp must be function')
-
+    assert(not self.sound_on or type(self.sound_on)=='string','[checkBox].sound_on must be string')
+    assert(not self.sound_off or type(self.sound_off)=='string','[checkBox].sound_off must be string')
+    
     if self.labelPos=='left' then
         self.alignX='right'
     elseif self.labelPos=='right' then
@@ -535,6 +571,7 @@ end
 
 
 --- @class Zenitha.widget.switch: Zenitha.widget.checkBox
+--- @field _slideTime number
 Widgets.switch=setmetatable({
     type='switch',
     h=30,
@@ -547,10 +584,10 @@ Widgets.switch=setmetatable({
     disp=false,-- function return a boolean
     code=NULL,
 
-    _text=nil,
-    _image=nil,
+    _text=false,
+    _image=false,
 
-    _slideTime=nil,
+    _slideTime=false,
 
     buildArgs={
         'name',
@@ -646,11 +683,22 @@ end
 
 
 --- @class Zenitha.widget.slider: Zenitha.widget.base
+--- @field w number
+--- @field valueShow false|'int'|'float'|'percent'|function
+--- @field _showFunc function
+--- @field _pos number
+--- @field _pos0 number
+--- @field _rangeL number
+--- @field _rangeR number
+--- @field _rangeWidth number
+--- @field _unit number
+--- @field _smooth boolean
+--- @field _textShowTime number
 Widgets.slider=setmetatable({
     type='slider',
     w=100,
     axis={0,1},
-    smooth=nil,
+    smooth=false,
 
     text=false,
     image=false,
@@ -664,17 +712,17 @@ Widgets.slider=setmetatable({
     code=NULL,
 
     _floatWheel=0,
-    _text=nil,
-    _image=nil,
-    _showFunc=nil,
-    _pos=nil,
-    _pos0=nil,
-    _rangeL=nil,
-    _rangeR=nil,
-    _rangeWidth=nil,-- just _rangeR-_rangeL, for convenience
-    _unit=nil,
-    _smooth=nil,
-    _textShowTime=nil,
+    _text=false,
+    _image=false,
+    _showFunc=false,
+    _pos=false,
+    _pos0=false,
+    _rangeL=false,
+    _rangeR=false,
+    _rangeWidth=false,-- just _rangeR-_rangeL, for convenience
+    _unit=false,
+    _smooth=false,
+    _textShowTime=false,
 
     buildArgs={
         'name',
@@ -868,6 +916,8 @@ end
 
 
 --- @class Zenitha.widget.slider_fill: Zenitha.widget.slider
+--- @field w number
+--- @field h number
 Widgets.slider_fill=setmetatable({
     type='slider_fill',
     w=100,h=40,
@@ -883,12 +933,12 @@ Widgets.slider_fill=setmetatable({
     disp=false,
     code=NULL,
 
-    _text=nil,
-    _image=nil,
-    _pos=nil,
-    _rangeL=nil,
-    _rangeR=nil,
-    _rangeWidth=nil,-- just _rangeR-_rangeL, for convenience
+    _text=false,
+    _image=false,
+    _pos=false,
+    _rangeL=false,
+    _rangeR=false,
+    _rangeWidth=false,-- just _rangeR-_rangeL, for convenience
 
     buildArgs={
         'name',
@@ -909,15 +959,15 @@ Widgets.slider_fill=setmetatable({
 function Widgets.slider_fill:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
-    assert(type(self.disp)=='function','[slider].disp must be function')
+    assert(self.w and type(self.w)=='number','[slider_fill].w must be number')
+    assert(self.h and type(self.h)=='number','[slider_fill].h must be number')
+    assert(type(self.disp)=='function','[slider_fill].disp must be function')
 
     assert(
         type(self.axis)=='table' and #self.axis==2 and
         type(self.axis[1])=='number' and
         type(self.axis[2])=='number',
-        "[slider].axis must be {number,number}"
+        "[slider_fill].axis must be {number,number}"
     )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -993,6 +1043,8 @@ end
 
 
 --- @class Zenitha.widget.slider_progress: Zenitha.widget.slider
+--- @field w number
+--- @field h number
 Widgets.slider_progress=setmetatable({
     type='slider_progress',
     w=100,h=10,
@@ -1006,12 +1058,12 @@ Widgets.slider_progress=setmetatable({
     disp=false,
     code=NULL,
 
-    _text=nil,
-    _image=nil,
-    _pos=nil,
-    _rangeL=nil,
-    _rangeR=nil,
-    _rangeWidth=nil,
+    _text=false,
+    _image=false,
+    _pos=false,
+    _rangeL=false,
+    _rangeR=false,
+    _rangeWidth=false,
 
     buildArgs={
         'name',
@@ -1031,15 +1083,15 @@ Widgets.slider_progress=setmetatable({
 function Widgets.slider_progress:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
-    assert(type(self.disp)=='function','[slider].disp must be function')
+    assert(self.w and type(self.w)=='number','[slider_progress].w must be number')
+    assert(self.h and type(self.h)=='number','[slider_progress].h must be number')
+    assert(type(self.disp)=='function','[slider_progress].disp must be function')
 
     assert(
         type(self.axis)=='table' and #self.axis==2 and
         type(self.axis[1])=='number' and
         type(self.axis[2])=='number',
-        "[slider].axis must be {number,number}"
+        "[slider_progress].axis must be {number,number}"
     )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -1094,21 +1146,25 @@ end
 
 
 --- @class Zenitha.widget.selector: Zenitha.widget.base
+--- @field w number
+--- @field _select number|false
+--- @field _selText love.Text
 Widgets.selector=setmetatable({
     type='selector',
-
     w=100,
+
     labelPos='left',
     labelDistance=20,
     sound=false,
 
+    list=false,-- table of items
     disp=false,-- function return a boolean
     show=function(v) return v end,
     code=NULL,
 
     _floatWheel=0,
-    _text=nil,
-    _image=nil,
+    _text=false,
+    _image=false,
     _select=false,-- Selected item ID
     _selText=false,-- Selected item name
     selFontSize=30,selFontType=false,
@@ -1265,11 +1321,16 @@ end
 
 
 --- @class Zenitha.widget.inputBox: Zenitha.widget.base
+--- @field w number
+--- @field h number
+--- @field sound_input string|false
+--- @field sound_bksp string|false
+--- @field sound_clear string|false
+--- @field sound_fail string|false
 Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
-    w=100,
-    h=40,
+    w=100,h=40,
 
     frameColor='L',
     fillColor={0,0,0,.3},
@@ -1431,11 +1492,15 @@ end
 
 
 --- @class Zenitha.widget.textBox: Zenitha.widget.base
+--- @field w number
+--- @field h number
+--- @field scrollBarColor string|Zenitha.Color
+--- @field sound_clear string|false
+--- @field _texts table
 Widgets.textBox=setmetatable({
     type='textBox',
     keepFocus=true,
-    w=100,
-    h=40,
+    w=100,h=40,
 
     fillColor={0,0,0,.3},
     scrollBarPos='left',
@@ -1451,7 +1516,7 @@ Widgets.textBox=setmetatable({
     sound_clear=false,
 
     _floatWheel=0,
-    _texts=nil,
+    _texts=false,
     _scrollPos=0,-- Scroll-down-distance
     _scrollPos1=0,
     _sure=0,-- Sure-timer for clear history
@@ -1480,6 +1545,7 @@ function Widgets.textBox:reset()
     assert(type(self.scrollBarColor)=='table','[textBox].scrollBarColor must be table')
     assert(self.w and type(self.w)=='number','[textBox].w must be number')
     assert(self.h and type(self.h)=='number','[textBox].h must be number')
+    assert(not self.sound_clear or type(self.sound_clear)=='string','[textBox].sound_clear must be string')
     for _,v in next,{'activeColor','idleColor'} do
         if type(self[v])=='string' then self[v]=COLOR[self[v]] end
         assert(type(self[v])=='table','[textBox].'..v..' must be table')
@@ -1623,10 +1689,14 @@ end
 
 
 --- @class Zenitha.widget.listBox: Zenitha.widget.base
+--- @field w number
+--- @field h number
+--- @field sound_click string|false
+--- @field sound_select string|false
+--- @field _list table @List of options
 Widgets.listBox=setmetatable({
     type='listBox',
-    w=100,
-    h=40,
+    w=100,h=40,
 
     fillColor={0,0,0,.3},
     scrollBarPos='left',
@@ -1674,6 +1744,8 @@ function Widgets.listBox:reset()
     Widgets.base.reset(self)
     if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
     assert(type(self.scrollBarColor)=='table','[listBox].scrollBarColor must be table')
+    assert(not self.sound_click or type(self.sound_click)=='string','[listBox].sound_click must be string')
+    assert(not self.sound_select or type(self.sound_select)=='string','[listBox].sound_select must be string')
     assert(self.w and type(self.w)=='number','[listBox].w must be number')
     assert(self.h and type(self.h)=='number','[listBox].h must be number')
     for _,v in next,{'activeColor','idleColor'} do
@@ -2034,10 +2106,11 @@ end
 --- Update widget states with drag event (called by Zenitha)
 --- @param texts string
 function WIDGET._textinput(texts)
+    --- @type Zenitha.widget.inputBox
     local W=WIDGET.sel
     if W and W.type=='inputBox' then
-        if (not W.regex or texts:match(W.regex)) and (not W.limit or #(WIDGET.sel._value..texts)<=W.limit) then
-            WIDGET.sel._value=WIDGET.sel._value..texts
+        if not W.regex or texts:match(W.regex) then
+            W._value=W._value..texts
             SFX.play(W.sound_input)
         else
             SFX.play(W.sound_fail)
@@ -2080,7 +2153,7 @@ end
 --- @param widgetList Zenitha.widget.base[]
 --- @param scroll? number
 function WIDGET.draw(widgetList,scroll)
-    gc_translate(0,-(scroll or 0))
+    if scroll then gc_translate(0,-scroll) end
     for _,W in next,widgetList do
         if W._visible then W:draw() end
     end

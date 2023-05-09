@@ -1,4 +1,4 @@
---- @class Zenitha.Color @READ ONLY
+--- @class Zenitha.Color:table @READ ONLY
 --- @field [1] number @Red
 --- @field [2] number @Green
 --- @field [3] number @Blue
