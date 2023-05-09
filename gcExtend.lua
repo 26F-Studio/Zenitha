@@ -523,7 +523,7 @@ do-- function GC.load(L), GC.execute(t)
     --- ```
     function GC.load(L)
         local w,h=tonumber(L[1]),tonumber(L[2])
-        assert(w and h,"function GC.load(L): L[1] and L[2] must be positive number")
+        assert(w and h,"GC.load(L): L[1] and L[2] must be positive number")
         gc.push()
             local canvas
             while true do

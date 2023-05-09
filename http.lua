@@ -38,7 +38,7 @@ local threadCode=[[
 
         local result={
             pool=arg.pool,
-            poolPtr=arg.poolPtr,
+            _poolPtr=arg._poolPtr,
             code=code,
             body=table.concat(data),
             detail=detail,
@@ -74,6 +74,18 @@ local function addThread(num)
     end
 end
 
+--- @class Zenitha.httpRequest
+--- @field body table|nil @must be table, will be encoded to json
+--- @field pool string @default to '_default' if not given
+--- @field method string|nil @default to 'POST' if body is given, 'GET' otherwise
+--- @field headers table|nil
+--- @field url string @default to the url set with HTTP.setHost
+--- @field path string|nil @append to url
+--- @field _poolPtr string @internal use only
+--- @field _destroy true @internal use only
+
+--- Send a HTTP request
+--- @param arg Zenitha.httpRequest
 function HTTP.request(arg)
     arg.method=arg.method or arg.body and 'POST' or 'GET'
     if arg.url then
@@ -99,11 +111,12 @@ function HTTP.request(arg)
     end
 
     if arg.pool==nil then arg.pool='_default' end
-    arg.poolPtr=tostring(msgPool[arg.pool])
+    arg._poolPtr=tostring(msgPool[arg.pool])
 
     sendCHN:push(arg)
 end
 
+--- Kill all threads and clear all message pool
 function HTTP.reset()
     for i=1,#threads do
         threads[i]:release()
@@ -114,8 +127,11 @@ function HTTP.reset()
     recvCHN:clear()
     addThread(threadCount)
 end
+
+--- Set thread count
+--- @param n number @1~26
 function HTTP.setThreadCount(n)
-    assert(type(n)=='number' and n>=1 and n<=26 and n%1==0,"function HTTP.setThreadCount(n): n must be integer from 1 to 26")
+    assert(type(n)=='number' and n>=1 and n<=26 and n%1==0,"HTTP.setThreadCount(n): n must be integer from 1 to 26")
     if n>threadCount then
         addThread(n-threadCount)
     else
@@ -124,42 +140,62 @@ function HTTP.setThreadCount(n)
         end
     end
 end
+
+--- Get thread count
+--- @return number
 function HTTP.getThreadCount()
     return threadCount
 end
+
+--- Set trigger interval
+--- @param interval number @second
 function HTTP.setInterval(interval)
     if interval<=0 then interval=1e99 end
     assert(type(interval)=='number',"Interval must be number")
     HTTP._trigInterval=interval
 end
+
+--- Clear a message pool
+--- @param pool string|nil @pool name
 function HTTP.clearPool(pool)
     if pool==nil then pool='_default' end
     assert(type(pool)=='string',"Pool must be nil or string")
     HTTP._msgCount=HTTP._msgCount-#msgPool[pool]
     msgPool[pool]={}
 end
+
+--- Delete a message pool
+--- @param pool string @pool name
 function HTTP.deletePool(pool)
     assert(type(pool)=='string',"Pool must be nil or string")
     assert(pool~='_default',"Cannot delete _default pool. What are you doing?")
     HTTP._msgCount=HTTP._msgCount-#msgPool[pool]
     msgPool[pool]=nil
 end
+
+--- Poll a message from pool (specifiedif given)
+--- @param pool string|nil @pool name
+--- @return table|nil
 function HTTP.pollMsg(pool)
     if not (type(pool)=='nil' or type(pool)=='string') then error("Pool must be nil or string") end
-    HTTP.update()
+    HTTP._update()
     local p=msgPool[pool or '_default']
     if #p>0 then
         HTTP._msgCount=HTTP._msgCount-1
         return table.remove(p)
     end
 end
+
+--- Set default host
+--- @param host string @host url
 function HTTP.setHost(host)
     assert(type(host)=='string',"Host must be string")
     if host:sub(1,7)~='http://' then host='http://'..host end
     HTTP._host=host
 end
 
-function HTTP.update(dt)
+--- Update receiving channel and put results into pool (called by Zenitha)
+function HTTP._update(dt)
     if dt then
         HTTP._trigTime=HTTP._trigTime+dt
         if HTTP._trigTime>HTTP._trigInterval then
@@ -173,7 +209,7 @@ function HTTP.update(dt)
         if m.destroy then
             threads[m.id]:release()
             threads[m.id]=false
-        elseif tostring(msgPool[m.pool])==m.poolPtr then -- If pool were cleared, discard this datapack
+        elseif tostring(msgPool[m.pool])==m._poolPtr then -- If pool were cleared, discard this datapack
             table.insert(msgPool[m.pool],{
                 code=m.code,
                 body=m.body,

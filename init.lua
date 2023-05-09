@@ -678,7 +678,7 @@ function love.run()
     local MES_update,MES_draw=MSG._update,MSG._draw
     local SYSFX_update,SYSFX_draw=SYSFX._update,SYSFX._draw
     local WAIT_update=WAIT._update
-    local HTTP_update=HTTP.update
+    local HTTP_update=HTTP._update
     local TASK_update=TASK._update
     local WIDGET_update,WIDGET_draw=WIDGET._update,WIDGET._draw
     local STEP,SLEEP=love.timer.step,love.timer.sleep
