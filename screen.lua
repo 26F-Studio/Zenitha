@@ -1,47 +1,49 @@
---- @class SCR
---- @field w0 number
---- @field h0 number
---- @field x number
---- @field y number
---- @field cx number
---- @field cy number
---- @field ex number
---- @field ey number
---- @field w number
---- @field h number
---- @field W number
---- @field H number
---- @field safeX number
---- @field safeY number
---- @field safeW number
---- @field safeH number
---- @field rad number
---- @field k number
---- @field dpi number
---- @field origin love.Transform
---- @field xOy love.Transform
---- @field xOy_m love.Transform
---- @field xOy_ul love.Transform
---- @field xOy_u love.Transform
---- @field xOy_ur love.Transform
---- @field xOy_l love.Transform
---- @field xOy_r love.Transform
---- @field xOy_dl love.Transform
---- @field xOy_d love.Transform
---- @field xOy_dr love.Transform
+--- @class Zenitha.ScreenInfo
+--- @field w0 number @Default Screen Size
+--- @field h0 number @Default Screen Size
+--- @field w number @Fullscreen w/h for graphic functions
+--- @field h number @Fullscreen w/h for graphic functions
+--- @field diam number @Diameter sqrt(w^2+h^2)
+--- @field W number @Fullscreen w/h for shader
+--- @field H number @Fullscreen w/h for shader
+--- @field safeX number @Safe area position
+--- @field safeY number @Safe area position
+--- @field safeW number @Safe area size
+--- @field safeH number @Safe area size
+--- @field dpi number @DPI from gc.getDPIScale()
+---
+--- @field x number @Expected box's Up-left position
+--- @field y number @Expected box's Up-left position
+--- @field k number @Expected box's Scaling size
+--- @field cx number @Expected box's Center position (Center X/Y)
+--- @field cy number @Expected box's Center position (Center X/Y)
+--- @field ex number @Expected box's Down-right position (End X/Y)
+--- @field ey number @Expected box's Down-right position (End X/Y)
+---
+--- @field origin love.Transform @Screen transformation objects (love-origin)
+--- @field xOy love.Transform    @Screen transformation objects (default)
+--- @field xOy_m love.Transform  @Screen transformation objects (middle)
+--- @field xOy_ul love.Transform @Screen transformation objects (up-left)
+--- @field xOy_u love.Transform  @Screen transformation objects (up)
+--- @field xOy_ur love.Transform @Screen transformation objects (up-right)
+--- @field xOy_l love.Transform  @Screen transformation objects (left)
+--- @field xOy_r love.Transform  @Screen transformation objects (right)
+--- @field xOy_dl love.Transform @Screen transformation objects (down-left)
+--- @field xOy_d love.Transform  @Screen transformation objects (down)
+--- @field xOy_dr love.Transform @Screen transformation objects (down-right)
 
+
+--- @type Zenitha.ScreenInfo
 local SCR={
-    w0=800,h0=600, -- Default Screen Size
-    x=0,y=0,        -- Up-left Coord on screen
-    cx=0,cy=0,      -- Center Coord on screen (Center X/Y)
-    ex=0,ey=0,      -- Down-right Coord on screen (End X/Y)
-    w=0,h=0,        -- Fullscreen w/h for graphic functions
-    W=0,H=0,        -- Fullscreen w/h for shader
-    safeX=0,safeY=0,-- Safe area position
-    safeW=0,safeH=0,-- Safe area size
-    rad=0,          -- Radius
-    k=1,            -- Scale size
-    dpi=1,          -- DPI from gc.getDPIScale()
+    w0=800,h0=600,
+    w=0,h=0,diam=0,
+    W=0,H=0,
+    safeX=0,safeY=0,
+    safeW=0,safeH=0,
+    dpi=1,
+    x=0,y=0,k=1,
+    cx=0,cy=0,
+    ex=0,ey=0,
 
     -- Screen transformation objects
     origin=love.math.newTransform(),
@@ -72,7 +74,7 @@ function SCR.resize(w,h)
     SCR.w,SCR.h,SCR.dpi=w,h,love.graphics.getDPIScale()
     SCR.W,SCR.H=SCR.w*SCR.dpi,SCR.h*SCR.dpi
     SCR.r=h/w
-    SCR.rad=(w^2+h^2)^.5
+    SCR.diam=(w^2+h^2)^.5
 
     SCR.x,SCR.y=0,0
     if SCR.r>=SCR.h0/SCR.w0 then
@@ -113,7 +115,7 @@ function SCR.info()
         ("W,H : %d, %d"):format(SCR.W,SCR.H),
         ("safeX,safeY : %d, %d"):format(SCR.safeX,SCR.safeY),
         ("safeW,safeH : %d, %d"):format(SCR.safeW,SCR.safeH),
-        ("k,dpi,rad : %.2f, %d, %.2f"):format(SCR.k,SCR.dpi,SCR.rad),
+        ("k,dpi,diam : %.2f, %d, %.2f"):format(SCR.k,SCR.dpi,SCR.diam),
     }
 end
 return SCR
