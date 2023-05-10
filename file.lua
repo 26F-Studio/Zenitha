@@ -60,8 +60,7 @@ function FILE.load(path,args)
 end
 
 --- Save a file with a specified mode
----
---- Default to JSON, then Luaon, then string
+--- (Default to JSON, then LuaON, then string)
 --- @param data any
 --- @param path string
 --- @param args? string|'-d'|'-luaon'|'-expand'

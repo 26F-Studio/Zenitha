@@ -43,10 +43,16 @@ function FONT.rawset(size)
     set(fontCache[size] or FONT.rawget(size))
 end
 
---- Load font(s) name-path pairs
---- @param fonts table<string,string> @<name, path>
-function FONT.load(fonts)
-    for name,path in next,fonts do
+--- Load font(s) from file(s)
+--- @param name string|string[]|any
+--- @param path string
+--- @overload fun(map:table<string,string>)
+function FONT.load(name,path)
+    if type(name)=='table' then
+        for k,v in next,name do
+            FONT.load(k,v)
+        end
+    else
         assert(love.filesystem.getInfo(path),STRING.repD("Font file $1($2) not exist!",name,path))
         fontFiles[name]=love.filesystem.newFile(path)
         fontCache[name]={}

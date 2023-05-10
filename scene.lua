@@ -223,7 +223,7 @@ end
 --- @param tar string
 --- @param style? string
 --- @param ... any @Arguments passed to new scene
-function SCN.go(tar,style,...)-- Normal scene swapping, can back
+function SCN.go(tar,style,...)
     if scenes[tar] then
         if not SCN.swapping then
             SCN._push(SCN.stack[#SCN.stack] or '_')
