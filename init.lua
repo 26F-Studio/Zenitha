@@ -112,14 +112,14 @@ do-- Add pbkdf2 for HASH lib
     local bxor=require'bit'.bxor
     local char=string.char
     local function sxor(s1, s2)
-        local b3=""
+        local b3=''
         for i=1,#s1 do
             b3=b3..char(bxor(s1:byte(i),s2:byte(i)))
         end
         return b3
     end
     function HASH.pbkdf2(hashFunc, pw, salt, n)
-        local u=HASH.hex2bin(HASH.hmac(hashFunc, pw, salt.."\0\0\0\1"))
+        local u=HASH.hex2bin(HASH.hmac(hashFunc, pw, salt..'\0\0\0\1'))
         local t=u
 
         for _=2,n do
@@ -678,7 +678,7 @@ function love.run()
     local TEXT,TEXT_update,TEXT_draw=TEXT,TEXT.update,TEXT.draw
     local MES_update,MES_draw=MSG._update,MSG._draw
     local SYSFX_update,SYSFX_draw=SYSFX._update,SYSFX._draw
-    local WAIT_update=WAIT._update
+    local WAIT_update,WAIT_draw=WAIT._update,WAIT._draw
     local HTTP_update=HTTP._update
     local TASK_update=TASK._update
     local WIDGET_update,WIDGET_draw=WIDGET._update,WIDGET._draw
@@ -713,6 +713,7 @@ function love.run()
         SCN.go('_zenitha')
     end
 
+    -- Main loop
     return function()
         local time=timer()
         STEP()
@@ -729,7 +730,6 @@ function love.run()
                 return a or true
             end
         end
-
 
         -- UPDATE
         updateCounter=updateCounter+updateFreq
@@ -829,7 +829,7 @@ function love.run()
                             gc_print(t,x+2,y)
                     end
                 gc_replaceTransform(SCR.origin)
-                    WAIT._draw()
+                    WAIT_draw()
                 gc_present()
 
                 -- SPEED UPUP! (probably not that obvious)

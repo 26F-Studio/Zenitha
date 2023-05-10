@@ -25,7 +25,7 @@ end
 
 --- Get all logged strings as a big string
 --- @return string
-function LOG.getLogString()
+function LOG.getString()
     return
         STRING.repD("$1 $2  logs  $3\n",
             Zenitha.getAppName(),
