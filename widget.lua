@@ -1796,7 +1796,7 @@ end
 function Widgets.listBox:pop()
     if #self._list>0 then
         rem(self._list)
-        Widgets.listBox:drag(0,0,0,0)
+        self:drag(0,0,0,0)
     end
 end
 function Widgets.listBox:remove()

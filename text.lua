@@ -114,6 +114,8 @@ end
 
 --- @type Zenitha.Text
 local TEXT={_texts={}}
+
+--- Clear text container
 function TEXT:clear()
     self._texts={}
 end
