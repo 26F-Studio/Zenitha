@@ -227,7 +227,7 @@ local commands={} do
     commands.mv={
         code=function(arg)
             -- Check arguments
-            arg=arg:split(" ")
+            arg=STRING.split(arg," ")
             if #arg>2 then
                 log{COLOR.lY,"Warning: file names must have no spaces"}
                 return
