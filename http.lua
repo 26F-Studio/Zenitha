@@ -1,6 +1,8 @@
 local sendCHN=love.thread.getChannel('inputChannel')
 local recvCHN=love.thread.getChannel('outputChannel')
 
+local getCount=sendCHN.getCount
+
 local threads={}
 local threadCount=0
 
@@ -57,8 +59,6 @@ local msgPool=setmetatable({},{
 
 local HTTP={
     _msgCount=0,
-    _trigTime=0,
-    _trigInterval=.26,
     _host=false,
 }
 
@@ -147,14 +147,6 @@ function HTTP.getThreadCount()
     return threadCount
 end
 
---- Set trigger interval
---- @param interval number @second
-function HTTP.setInterval(interval)
-    if interval<=0 then interval=1e99 end
-    assert(type(interval)=='number',"Interval must be number")
-    HTTP._trigInterval=interval
-end
-
 --- Clear a message pool
 --- @param pool string|nil @pool name
 function HTTP.clearPool(pool)
@@ -195,16 +187,8 @@ function HTTP.setHost(host)
 end
 
 --- Update receiving channel and put results into pool (called by Zenitha)
-function HTTP._update(dt)
-    if dt then
-        HTTP._trigTime=HTTP._trigTime+dt
-        if HTTP._trigTime>HTTP._trigInterval then
-            HTTP._trigTime=HTTP._trigTime%HTTP._trigInterval
-        else
-            return
-        end
-    end
-    while recvCHN:getCount()>0 do
+function HTTP._update()
+    while getCount(recvCHN)>0 do
         local m=recvCHN:pop()
         if m.destroy then
             threads[m.id]:release()

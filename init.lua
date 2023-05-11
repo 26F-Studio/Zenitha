@@ -747,7 +747,7 @@ function love.run()
             MES_update(updateDT)
             SYSFX_update(updateDT)
             WAIT_update(updateDT)
-            HTTP_update(updateDT)
+            HTTP_update()
             TASK_update(updateDT)
             if SCN.update then SCN.update(updateDT) end
             if SCN.swapping then SCN_swapUpdate(updateDT) end

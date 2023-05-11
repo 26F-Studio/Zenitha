@@ -118,4 +118,5 @@ function SCR.info()
         ("k,dpi,diam : %.2f, %d, %.2f"):format(SCR.k,SCR.dpi,SCR.diam),
     }
 end
+
 return SCR
