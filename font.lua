@@ -1,8 +1,16 @@
 local set=love.graphics.setFont
+
+--- @type love.File[],love.Font[][]
 local fontFiles,fontCache={},{}
+
+--- @type string,string
 local defaultFont,defaultFallBack
+
+--- @type table<string,string>
 local fallbackMap={}
-local curFont=false-- Current using font object
+
+--- @type love.Font
+local curFont=nil-- Current using font object
 
 local FONT={}
 

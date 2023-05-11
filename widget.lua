@@ -2143,7 +2143,6 @@ end
 
 --- Draw all widgets (called by Zenitha)
 function WIDGET._draw()
-    gc_translate(0,-SCN.curScroll)
     for _,W in next,WIDGET.active do
         if W._visible then W:draw() end
     end

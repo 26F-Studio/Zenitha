@@ -771,6 +771,7 @@ function love.run()
                         SCN.draw()
                     end
                 gc_replaceTransform(xOy)
+                    gc_translate(0,-SCN.curScroll)
                     WIDGET_draw()
                     SYSFX_draw()
                     TEXT_draw(TEXT)
