@@ -836,7 +836,7 @@ function Widgets.slider:draw()
     -- Units
     if not self._smooth then
         gc_setLineWidth(self.lineWidth)
-        for p=rangeL,rangeR,self._unit do
+        for p=rangeL,rangeR,self._unit or .01 do
             local X=x+(x2-x)*(p-rangeL)/self._rangeWidth
             gc_line(X,y+7,X,y-7)
         end
