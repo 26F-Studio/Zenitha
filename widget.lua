@@ -494,7 +494,7 @@ function Widgets.checkBox:reset()
     assert(type(self.disp)=='function','[checkBox].disp must be function')
     assert(not self.sound_on or type(self.sound_on)=='string','[checkBox].sound_on must be string')
     assert(not self.sound_off or type(self.sound_off)=='string','[checkBox].sound_off must be string')
-    
+
     if self.labelPos=='left' then
         self.alignX='right'
     elseif self.labelPos=='right' then
@@ -759,8 +759,8 @@ local sliderShowFunc={
 function Widgets.slider:reset()
     Widgets.base.reset(self)
 
+    assert(self.w and type(self.w)=='number','[slider_fill].w must be number')
     assert(type(self.disp)=='function','[slider].disp must be function')
-
     assert(
         type(self.axis)=='table' and (#self.axis==2 or #self.axis==3) and
         type(self.axis[1])=='number' and
@@ -768,14 +768,19 @@ function Widgets.slider:reset()
         (not self.axis[3] or type(self.axis[3])=='number'),
         "[slider].axis must be {low,high} or {low,high,unit}"
     )
+    assert(self.smooth==nil or type(self.smooth)=='boolean','[slider].smooth must be boolean')
+
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
     self._rangeWidth=self._rangeR-self._rangeL
     self._unit=self.axis[3]
-    if self.smooth~=nil then
-        self._smooth=self.smooth
-    else
+    if self.smooth==nil then
         self._smooth=not self.axis[3]
+    else
+        self._smooth=self.smooth
+        if not self._smooth then
+            self._unit=self._unit or 1
+        end
     end
     self._pos=self._rangeL
     self._pos0=self._rangeL
@@ -834,7 +839,7 @@ function Widgets.slider:draw()
     gc_setColor(1,1,1,.5+HOV*.36)
 
     -- Units
-    if not self._smooth then
+    if not self._smooth and self._unit then
         gc_setLineWidth(self.lineWidth)
         for p=rangeL,rangeR,self._unit do
             local X=x+(x2-x)*(p-rangeL)/self._rangeWidth
