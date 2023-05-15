@@ -90,21 +90,20 @@ function textFX.score(T)
 end
 
 --- @class Zenitha.textAnim
---- @field text string
---- @field x number
---- @field y number
---- @field r number
---- @field g number
---- @field b number
---- @field a number
---- @field fontSize number
---- @field fontType string|nil
---- @field duration number
---- @field inPoint number
---- @field outPoint number
---- @field style string
---- @field styleArg any
---- @field draw function
+--- @field text? string
+--- @field x? number
+--- @field y? number
+--- @field r? number
+--- @field g? number
+--- @field b? number
+--- @field a? number
+--- @field fontSize? number
+--- @field fontType? string|nil
+--- @field duration? number
+--- @field inPoint? number
+--- @field outPoint? number
+--- @field style? string
+--- @field styleArg? any
 
 --- @class Zenitha.Text
 --- @field _texts Zenitha.textAnim[]

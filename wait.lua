@@ -28,16 +28,16 @@ local defaultDraw=function(a,t)
 end
 
 --- @class Zenitha.waitObj
---- @field init            function
---- @field update          function
---- @field quit            function
---- @field draw            function
---- @field escapable       boolean
---- @field coverAlpha      number
---- @field noDefaultInit   boolean
---- @field noDefaultUpdate boolean
---- @field noDefaultDraw   boolean
---- @field noDefaultQuit   boolean
+--- @field init?            function
+--- @field update?          function
+--- @field quit?            function
+--- @field draw?            function
+--- @field escapable?       boolean
+--- @field coverAlpha?      number
+--- @field noDefaultInit?   boolean
+--- @field noDefaultUpdate? boolean
+--- @field noDefaultDraw?   boolean
+--- @field noDefaultQuit?   boolean
 
 --- Start a new Wait Modal
 --- @param data Zenitha.waitObj

@@ -94,8 +94,29 @@ local swap={
 }
 
 --- @class Zenitha.Scene
---- @field widgetList Zenitha.widget.base[]
---- @field scrollHeight number|nil
+--- @field widgetList? Zenitha.widget.base[]
+--- @field scrollHeight? number|nil
+---
+--- @field enter? function
+--- @field leave? function
+--- @field mouseDown? function
+--- @field mouseMove? function
+--- @field mouseUp? function
+--- @field mouseClick? function
+--- @field wheelMoved? function
+--- @field touchDown? function
+--- @field touchUp? function
+--- @field touchMove? function
+--- @field touchClick? function
+--- @field keyDown? function
+--- @field keyUp? function
+--- @field gamepadDown? function
+--- @field gamepadUp? function
+--- @field fileDropped? function
+--- @field directoryDropped? function
+--- @field resize? function
+--- @field update? function
+--- @field draw? function
 
 --- @class Zenitha.SceneSwap
 --- @field duration number
