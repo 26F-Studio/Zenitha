@@ -39,31 +39,31 @@ local SFX={}
 
 --- Initialize SFX lib with a list of filenames
 function SFX.init(list)
-    assert(type(list)=='table',"Initialize SFX lib with a list of filenames!")
-    for i=1,#list do table.insert(sfxList,list[i]) end
+    assert(type(list)=='table',"Initialize SFX lib with a table<name,path>")
+    TABLE.cover(list,sfxList)
 end
 
 --- Load SFX files from specified directory
 --- @param path string @Path to the folder contains SFX files, including the last '/'
 function SFX.load(path)
-    local c=0
+    local loadCnt=0
     local missing=0
-    for i=1,#sfxList do
-        local fullPath=path..sfxList[i]..'.ogg'
+    for k,v in next,sfxList do
+        local fullPath=path..v
         if love.filesystem.getInfo(fullPath) then
-            if Sources[sfxList[i]] then
-                for _,src in next,Sources[sfxList[i]] do
+            if Sources[k] then
+                for _,src in next,Sources[k] do
                     src:release()
                 end
             end
-            Sources[sfxList[i]]={love.audio.newSource(fullPath,'static')}
-            c=c+1
+            Sources[k]={love.audio.newSource(fullPath,'static')}
+            loadCnt=loadCnt+1
         else
-            LOG("No SFX: "..sfxList[i]..'.ogg',.1)
+            LOG("No SFX: "..v,.1)
             missing=missing+1
         end
     end
-    LOG(("%d/%d SFX files loaded (%d missing)"):format(c,#sfxList,missing))
+    LOG(("%d/%d SFX files loaded (%d missing)"):format(loadCnt,loadCnt+missing,missing))
     if missing>0 then
         MSG.new('info',missing.." SFX files missing")
     end
