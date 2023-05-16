@@ -69,12 +69,6 @@ function LANG.get(name)
 end
 
 local textSrc=langLib[false]
-local keyCache=setmetatable({},{
-    __index=function(self,k)
-        self[k]=function() return textSrc[k] end
-        return self[k]
-    end,
-})
 
 --- Set the text function source
 --- @param newSrc table
@@ -83,19 +77,26 @@ function LANG.setTextFuncSrc(newSrc)
     textSrc=newSrc
 end
 
+local textFuncs=setmetatable({},{
+    __index=function(self,k)
+        self[k]=function() return textSrc[k] end
+        return self[k]
+    end,
+})
+
 --- Get a text-getting function.
 ---
---- You can use LANG('opt') instead of LANG.getText('opt')
+--- You can use LANG('key') instead of LANG.getTextFunc('key')
 --- @param key string
 --- @return fun():string
-function LANG.getTextGetFunc(key)
-    return keyCache[key]
+function LANG.getTextFunc(key)
+    return textFuncs[key]
 end
 
 setmetatable(LANG,{
-    -- Works same as LANG.getText
+    -- Works same as LANG.getTextFunc
     __call=function(_,key)
-        return keyCache[key]
+        return textFuncs[key]
     end,
     __metatable=true
 })

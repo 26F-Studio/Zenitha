@@ -186,11 +186,15 @@ end
 --- @param org any[]
 function TABLE.trimDuplicate(org)
     local cache={}
-    for i=1,#org,-1 do
+    local len=#org
+    local i=1
+    while i<=len do
         if cache[org[i]] then
             rem(org,i)
+            len=len-1
         else
             cache[org[i]]=true
+            i=i+1
         end
     end
 end
