@@ -34,10 +34,12 @@ local scene={
         WIDGET.new{type='selector',    text='selector2', x=330,y=560,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[2] end,code=function(v) testVal_3[2]=v end},
         WIDGET.new{type='selector',    text='selector3', x=330,y=610,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[3] end,code=function(v) testVal_3[3]=v end},
 
-        WIDGET.new{type='button',      text='Quit',      x=600,y=540,w=200,h=100,code=function() love.event.quit() end},
-        WIDGET.new{type='button',      text='Console',   x=600,y=630,w=160,h=60,code=WIDGET.c_goScn'_console'},
-        WIDGET.new{type='button',      text='Text',      x=550,y=700,w=90,h=60,code=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,fontSize=100} end},
-        WIDGET.new{type='button',      text='Wait',      x=650,y=700,w=90,h=60,code=function() WAIT.new{timeout=1} end},
+        WIDGET.new{type='button',      text='Quit',      x=600,y=540,w=200,h=80,code=function() love.event.quit() end},
+        WIDGET.new{type='button',      text='Console',   x=600,y=620,w=190,h=60,code=WIDGET.c_goScn'_console'},
+        WIDGET.new{type='button',      text='Text',      x=550,y=690,w=90,h=60,code=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,fontSize=100} end},
+        WIDGET.new{type='button',      text='Wait',      x=650,y=690,w=90,h=60,code=function() WAIT.new{timeout=1} end},
+        WIDGET.new{type='button',      text='Msg',       x=550,y=760,w=90,h=60,code=function() MSG.new('info',"Test message",5) end},
+        WIDGET.new{type='button',      text='Task',      x=650,y=760,w=90,h=60,code=function() TASK.new(function() for a=0,MATH.tau,MATH.tau/32 do SYSFX.new('ripple',1,SCR.w0/2+260*math.cos(a),SCR.h0/2+260*math.sin(a),50) DEBUG.yieldT(.01) end end) end},
 
         WIDGET.new{type='inputBox',    text='inputBox',  x=100,y=650,w=300,h=100,labelPos='down'},
         WIDGET.new{type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
