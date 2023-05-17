@@ -36,6 +36,8 @@ local scene={
 
         WIDGET.new{type='button',      text='Quit',      x=600,y=540,w=200,h=100,code=function() love.event.quit() end},
         WIDGET.new{type='button',      text='Console',   x=600,y=630,w=160,h=60,code=WIDGET.c_goScn'_console'},
+        WIDGET.new{type='button',      text='Text',      x=550,y=700,w=90,h=60,code=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,fontSize=100} end},
+        WIDGET.new{type='button',      text='Wait',      x=650,y=700,w=90,h=60,code=function() WAIT.new{timeout=1} end},
 
         WIDGET.new{type='inputBox',    text='inputBox',  x=100,y=650,w=300,h=100,labelPos='down'},
         WIDGET.new{type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},

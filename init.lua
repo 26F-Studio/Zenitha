@@ -773,6 +773,7 @@ function love.run()
                 gc_replaceTransform(xOy)
                     gc_translate(0,-SCN.curScroll)
                     WIDGET_draw()
+                gc_replaceTransform(xOy)
                     SYSFX_draw()
                     TEXT_draw(TEXT)
                     if mouseShow then drawCursor(time,mx,my) end

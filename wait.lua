@@ -32,6 +32,7 @@ end
 --- @field update?          function
 --- @field quit?            function
 --- @field draw?            function
+--- @field timeout?         number
 --- @field escapable?       boolean
 --- @field coverAlpha?      number
 --- @field noDefaultInit?   boolean
@@ -49,6 +50,7 @@ function WAIT.new(data)
     assert(data.update==nil          or type(data.update)          =='function',"Field 'update' must be function")
     assert(data.quit==nil            or type(data.quit)            =='function',"Field 'leave' must be function")
     assert(data.draw==nil            or type(data.draw)            =='function',"Field 'draw' must be function")
+    assert(data.timeout==nil         or type(data.timeout)         =='number',  "Field 'timeout' must be number")
     assert(data.escapable==nil       or type(data.escapable)       =='boolean', "Field 'escapable' must be boolean")
     assert(data.coverAlpha==nil      or type(data.coverAlpha)      =='number',  "Field 'coverAlpha' must be number")
     assert(data.noDefaultInit==nil   or type(data.noDefaultInit)   =='boolean', "Field 'noDefaultInit' must be boolean")
