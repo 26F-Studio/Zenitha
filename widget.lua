@@ -778,9 +778,6 @@ function Widgets.slider:reset()
         self._smooth=not self.axis[3]
     else
         self._smooth=self.smooth
-        if not self._smooth then
-            self._unit=self._unit or 1
-        end
     end
     self._pos=self._rangeL
     self._pos0=self._rangeL
@@ -932,7 +929,6 @@ Widgets.slider_fill=setmetatable({
     image=false,
     labelPos='left',
     labelDistance=20,
-    numFontSize=30,numFontType='_norm',
     lineDist=3,
 
     disp=false,
