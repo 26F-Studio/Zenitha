@@ -61,11 +61,11 @@ local Widgets={}
 --------------------------------------------------------------
 
 --- @class Zenitha.widget.base @not used by user
---- @field color string|Zenitha.Color
---- @field frameColor string|Zenitha.Color
---- @field fillColor string|Zenitha.Color
---- @field activeColor string|Zenitha.Color
---- @field idleColor string|Zenitha.Color
+--- @field color Zenitha.ColorStr|Zenitha.Color
+--- @field frameColor Zenitha.ColorStr|Zenitha.Color
+--- @field fillColor Zenitha.ColorStr|Zenitha.Color
+--- @field activeColor Zenitha.ColorStr|Zenitha.Color
+--- @field idleColor Zenitha.ColorStr|Zenitha.Color
 ---
 --- @field sound_press string|false
 --- @field sound_hover string|false
@@ -110,7 +110,6 @@ Widgets.base={
     fontSize=30,fontType=false,
     widthLimit=1e99,
     alignX='center',alignY='center',
-    sound=false,
     sound_press=false,sound_hover=false,
 
     isAbove=NULL,
@@ -170,7 +169,6 @@ function Widgets.base:reset()
     assert(type(self.widthLimit)=='number','[widget].widthLimit must be number')
     assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc must be function')
 
-    assert(not self.sound or type(self.sound)=='string','[widget].sound must be string')
     assert(not self.sound_press or type(self.sound_press)=='string','[widget].sound_press must be string')
     assert(not self.sound_hover or type(self.sound_hover)=='string','[widget].sound_hover must be string')
 
@@ -290,6 +288,7 @@ end
 --- @class Zenitha.widget.button: Zenitha.widget.base
 --- @field w number
 --- @field h number
+--- @field sound_release string|false
 Widgets.button=setmetatable({
     type='button',
     w=40,h=false,
@@ -297,7 +296,7 @@ Widgets.button=setmetatable({
     text=false,
     image=false,
     cornerR=10,
-    sound=false,
+    sound_release=false,
 
     code=NULL,
 
@@ -315,7 +314,7 @@ Widgets.button=setmetatable({
         'text','image',
         'color',
         'fontSize','fontType',
-        'sound',
+        'sound_release',
         'sound_press','sound_hover',
 
         'code',
@@ -327,6 +326,7 @@ function Widgets.button:reset()
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number','[button].w must be number')
     assert(self.h and type(self.h)=='number','[button].h must be number')
+    assert(not self.sound_release or type(self.sound_release)=='string','[widget].sound_release must be string')
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
@@ -339,8 +339,8 @@ function Widgets.button:press()
 end
 function Widgets.button:release(_,_,k)
     self._pressed=false
-    if self.sound then
-        SFX.play(self.sound)
+    if self.sound_release then
+        SFX.play(self.sound_release)
     end
     self.code(k)
 end
@@ -421,7 +421,7 @@ end
 --- @class Zenitha.widget.button_invis: Zenitha.widget.button
 Widgets.button_invis=setmetatable({
     type='button_invis',
-    sound=false,
+    sound_release=false,
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_invis:draw()
     gc_push('transform')
@@ -1156,7 +1156,6 @@ Widgets.selector=setmetatable({
 
     labelPos='left',
     labelDistance=20,
-    sound=false,
 
     list=false,-- table of items
     disp=false,-- function return a boolean
@@ -1182,7 +1181,6 @@ Widgets.selector=setmetatable({
 
         'labelPos',
         'labelDistance',
-        'sound',
         'sound_press','sound_hover',
 
         'list','disp','show',
@@ -1291,8 +1289,8 @@ function Widgets.selector:press(x)
             self.code(self.list[s])
             self._select=s
             self._selText:set(self.show(self.list[s]))
-            if self.sound then
-                SFX.play(self.sound)
+            if self.sound_press then
+                SFX.play(self.sound_press)
             end
         end
     end
@@ -1311,8 +1309,8 @@ function Widgets.selector:scroll(dx,dy)
         self.code(self.list[s])
         self._select=s
         self._selText:set(self.show(self.list[s]))
-        if self.sound then
-            SFX.play(self.sound)
+        if self.sound_press then
+            SFX.play(self.sound_press)
         end
     end
 end
@@ -1362,7 +1360,6 @@ Widgets.inputBox=setmetatable({
         'sound_input','sound_bksp','sound_clear','sound_fail',
         'sound_press','sound_hover',
 
-        'list',
         'disp','code',
         'visibleFunc',
     },
@@ -1495,7 +1492,7 @@ end
 --- @class Zenitha.widget.textBox: Zenitha.widget.base
 --- @field w number
 --- @field h number
---- @field scrollBarColor string|Zenitha.Color
+--- @field scrollBarColor Zenitha.ColorStr|Zenitha.Color
 --- @field sound_clear string|false
 --- @field _texts table
 Widgets.textBox=setmetatable({
@@ -2159,8 +2156,92 @@ function WIDGET.draw(widgetList,scroll)
     end
 end
 
+--- @class Zenitha.widgetArg: table
+---
+--- General
+--- @field name string
+--- @field pos table
+---
+--- @field x number
+--- @field y number
+--- @field w number
+--- @field h number
+--- @field widthLimit number
+---
+--- @field color Zenitha.ColorStr|Zenitha.Color
+--- @field text string|function
+--- @field fontSize number
+--- @field fontType number
+--- @field image string|love.Drawable
+--- @field alignX 'left'|'center'|'right'
+--- @field alignY 'up'|'center'|'down'
+--- @field labelPos 'left'|'right'|'up'|'down'
+--- @field labelDistance number
+--- @field disp function
+--- @field code function
+--- @field visibleFunc function
+---
+--- @field lineWidth number
+--- @field cornerR number
+---
+--- @field activeColor Zenitha.ColorStr|Zenitha.Color
+--- @field fillColor Zenitha.ColorStr|Zenitha.Color
+--- @field frameColor Zenitha.ColorStr|Zenitha.Color
+--- @field idleColor Zenitha.ColorStr|Zenitha.Color
+---
+--- @field sound_press string
+--- @field sound_hover string
+---
+--- Image
+--- @field ang number
+--- @field k number
+---
+--- Check box
+--- @field sound_on string
+--- @field sound_off string
+---
+--- Slider
+--- @field axis {x:number,y:number,unit?:number}
+--- @field smooth boolean
+--- @field valueShow false|'int'|'float'|'percent'|function
+---
+--- @field lineDist number
+---
+--- Selector
+--- @field selFontSize number
+--- @field selFontType string
+--- @field list table
+--- @field show function
+---
+--- Input box
+--- @field secret boolean
+--- @field regex string
+--- @field maxInputLength number
+--- @field sound_input string
+--- @field sound_bksp string
+--- @field sound_clear string
+--- @field sound_fail string
+---
+--- Scrolling boxes
+--- @field scrollBarPos number
+--- @field scrollBarWidth number
+--- @field scrollBarDist number
+--- @field scrollBarColor Zenitha.ColorStr|Zenitha.Color
+--- @field lineHeight number
+---
+--- Text box
+--- @field yOffset number
+--- @field fixContent boolean
+---
+--- List box
+--- @field drawFunc function
+--- @field releaseDist number
+--- @field stencilMode 'total'|'single'|false
+--- @field sound_click string
+--- @field sound_select string
+
 --- Create new widget
---- @param args table @Arguments to create widget, check declare widget class for more info
+--- @param args Zenitha.widgetArg @Arguments to create widget, check declare widget class for more info
 --- @return Zenitha.widget.base
 function WIDGET.new(args)
     local t=args.type

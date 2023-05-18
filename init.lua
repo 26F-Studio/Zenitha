@@ -42,13 +42,12 @@ local bigCanvases=setmetatable({},{__index=function(self,k)
     self[k]=gc.newCanvas()
     return self[k]
 end})
-local function defaultClickFX(x,y) SYSFX.new('tap',3,x,y) end
 
 -- User-changeable values
 local appName='Zenitha'
 local versionText='V0.1'
 local firstScene=false
-local clickFX=defaultClickFX
+local clickFX=function(x,y) SYSFX.new('tap',3,x,y) end
 local discardCanvas=false
 local updateFreq=100
 local drawFreq=100
@@ -534,7 +533,7 @@ function love.lowmemory()
     collectgarbage()
     if autoGCcount<3 then
         autoGCcount=autoGCcount+1
-        MSG.new('check',"[auto GC] low MEM 设备内存过低")
+        MSG.new('check',"[auto GC] low MEM 设备内存过低"..string.rep('.',4-autoGCcount))
     end
 end
 
@@ -971,7 +970,7 @@ end
 function Zenitha.setClickFX(fx)
     assert(type(fx)=='boolean' or type(fx)=='function',"Zenitha.setClickFX(fx): fx must be boolean or function")
     if fx==false then fx=NULL end
-    if fx==true then fx=defaultClickFX end
+    if fx==true then fx=function(x,y) SYSFX.new('tap',3,x,y) end end
     clickFX=fx
 end
 
