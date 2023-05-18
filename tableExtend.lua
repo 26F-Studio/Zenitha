@@ -26,6 +26,16 @@ function TABLE.newPool(indexFunc)
     })
 end
 
+--- Make a table to be able to auto filled from a source
+--- @param t table
+--- @param source table
+function TABLE.setAutoFill(t,source)
+    setmetatable(t,{__index=function(self,k)
+        self[k]=source[k]
+        return source[k]
+    end})
+end
+
 --- Get a copy of [1~#] elements
 --- @param org any[] @original table
 --- @param depth? number @how many layers will be recreate, default to inf
