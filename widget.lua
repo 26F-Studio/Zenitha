@@ -288,7 +288,7 @@ end
 --- @class Zenitha.widget.button: Zenitha.widget.base
 --- @field w number
 --- @field h number
---- @field sound_release string|false
+--- @field sound_trigger string|false
 Widgets.button=setmetatable({
     type='button',
     w=40,h=false,
@@ -296,7 +296,7 @@ Widgets.button=setmetatable({
     text=false,
     image=false,
     cornerR=10,
-    sound_release=false,
+    sound_trigger=false,
 
     code=NULL,
 
@@ -314,7 +314,7 @@ Widgets.button=setmetatable({
         'text','image',
         'color',
         'fontSize','fontType',
-        'sound_release',
+        'sound_trigger',
         'sound_press','sound_hover',
 
         'code',
@@ -326,7 +326,7 @@ function Widgets.button:reset()
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number','[button].w must be number')
     assert(self.h and type(self.h)=='number','[button].h must be number')
-    assert(not self.sound_release or type(self.sound_release)=='string','[widget].sound_release must be string')
+    assert(not self.sound_trigger or type(self.sound_trigger)=='string','[button].sound_trigger must be string')
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
@@ -339,8 +339,8 @@ function Widgets.button:press()
 end
 function Widgets.button:release(_,_,k)
     self._pressed=false
-    if self.sound_release then
-        SFX.play(self.sound_release)
+    if self.sound_trigger then
+        SFX.play(self.sound_trigger)
     end
     self.code(k)
 end
@@ -421,7 +421,7 @@ end
 --- @class Zenitha.widget.button_invis: Zenitha.widget.button
 Widgets.button_invis=setmetatable({
     type='button_invis',
-    sound_release=false,
+    sound_trigger=false,
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_invis:draw()
     gc_push('transform')
@@ -2159,6 +2159,7 @@ end
 --- @class Zenitha.widgetArg: table
 ---
 --- General
+--- @field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
 --- @field name string
 --- @field pos table
 ---
@@ -2171,7 +2172,7 @@ end
 --- @field color Zenitha.ColorStr|Zenitha.Color
 --- @field text string|function
 --- @field fontSize number
---- @field fontType number
+--- @field fontType string
 --- @field image string|love.Drawable
 --- @field alignX 'left'|'center'|'right'
 --- @field alignY 'up'|'center'|'down'
