@@ -25,6 +25,15 @@ function DEBUG.runVarMonitor()
     end})
 end
 
+--- Set Visible collectgarbage call
+function DEBUG.setCollectGarvageVisible()
+    local _gc=collectgarbage
+    collectgarbage=function()
+        _gc()
+        print(debug.traceback())
+    end
+end
+
 --- Yield until the scene swapping animation finished
 function DEBUG.yieldUntilNextScene()
     while SCN.swapping do yield() end
