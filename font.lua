@@ -1,12 +1,12 @@
 local set=love.graphics.setFont
 
---- @type love.File[],love.Font[][]
+--- @type love.File[], love.Font[][]
 local fontFiles,fontCache={},{}
 
---- @type string,string
+--- @type string, string
 local defaultFont,defaultFallBack
 
---- @type table<string,string>
+--- @type table<string, string>
 local fallbackMap={}
 
 --- @type love.Font
@@ -54,7 +54,7 @@ end
 --- Load font(s) from file(s)
 --- @param name string|string[]|any
 --- @param path string
---- @overload fun(map:table<string,string>)
+--- @overload fun(map:table<string, string>)
 function FONT.load(name,path)
     if type(name)=='table' then
         for k,v in next,name do

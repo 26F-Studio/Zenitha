@@ -71,7 +71,7 @@ function SFX.load(path)
 end
 
 --- Load SFX samples from specified directory
---- @param pack {name:string,path:string,base:string}
+--- @param pack {name:string, path:string, base:string}
 --- ## Example
 --- ```lua
 --- SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}

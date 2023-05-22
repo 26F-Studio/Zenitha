@@ -910,7 +910,7 @@ function Zenitha.getErr(i)
 end
 
 --- Set the debug info list
---- @param list table<number,table<string|function>>[]
+--- @param list table<number,  table<string|function>>[]
 function Zenitha.setDebugInfo(list)
     assert(type(list)=='table',"Zenitha.setDebugInfo(list): list must be table")
     for i=1,#list do

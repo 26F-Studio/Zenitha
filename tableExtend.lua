@@ -17,7 +17,7 @@ function TABLE.new(val,count)
 end
 
 --- Get a new table with __index metatable
---- @param indexFunc fun(self:table,key:any):any
+--- @param indexFunc fun(self:table, key:any):any
 --- @return table
 function TABLE.newPool(indexFunc)
     return setmetatable({},{

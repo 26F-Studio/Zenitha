@@ -176,7 +176,7 @@ end
 --- Load BGM(s) from file(s)
 --- @param name string|string[]
 --- @param path string
---- @overload fun(map:table<string,string>)
+--- @overload fun(map:table<string, string>)
 function BGM.load(name,path)
     if type(name)=='table' then
         for k,v in next,name do

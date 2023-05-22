@@ -27,7 +27,7 @@ local function link(A,B)
 end
 
 --- Initialize IMG lib (only once)
---- @param imgTable table<any,string|table> @<path string you like, filePath|recursed table>
+--- @param imgTable table<any, string|table> @<path string you like, filePath|recursed table>
 --- ## Example
 --- ```lua
 --- IMG.init{

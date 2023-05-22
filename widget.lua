@@ -2202,7 +2202,7 @@ end
 --- @field sound_off string
 ---
 --- Slider
---- @field axis {x:number,y:number,unit?:number}
+--- @field axis {x:number, y:number, unit?:number}
 --- @field smooth boolean
 --- @field valueShow false|'int'|'float'|'percent'|function
 ---
