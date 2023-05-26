@@ -1,3 +1,25 @@
+--- @class Zenitha.textAnim
+--- @field text? string
+--- @field x? number
+--- @field y? number
+--- @field r? number
+--- @field g? number
+--- @field b? number
+--- @field a? number
+--- @field fontSize? number
+--- @field fontType? string|nil
+--- @field duration? number
+--- @field inPoint? number
+--- @field outPoint? number
+--- @field style? string
+--- @field styleArg? any
+
+--- @class Zenitha.Text
+--- @field _texts Zenitha.textAnim[]
+--- @field add function
+--- @field update function
+--- @field draw function
+
 local setColor=GC.setColor
 local draw=GC.draw
 
@@ -88,28 +110,6 @@ function textFX.score(T)
         T._ox,T._oy
     )
 end
-
---- @class Zenitha.textAnim
---- @field text? string
---- @field x? number
---- @field y? number
---- @field r? number
---- @field g? number
---- @field b? number
---- @field a? number
---- @field fontSize? number
---- @field fontType? string|nil
---- @field duration? number
---- @field inPoint? number
---- @field outPoint? number
---- @field style? string
---- @field styleArg? any
-
---- @class Zenitha.Text
---- @field _texts Zenitha.textAnim[]
---- @field add function
---- @field update function
---- @field draw function
 
 --- @type Zenitha.Text
 local TEXT={_texts={}}
