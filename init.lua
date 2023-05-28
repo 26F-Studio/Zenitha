@@ -544,7 +544,7 @@ function love.resize(w,h)
         bigCanvases[k]:release()
         bigCanvases[k]=gc.newCanvas()
     end
-    if BG.resize then BG.resize(w,h) end
+    BG._resize(w,h)
     if SCN.resize then SCN.resize(w,h) end
     WIDGET._reset()
     onResize(w,h)
@@ -674,6 +674,7 @@ function love.run()
     local love=love
 
     local SCN_swapUpdate=SCN._swapUpdate
+    local BG_update,BG_draw=BG._update,BG._draw
     local TEXT,TEXT_update,TEXT_draw=TEXT,TEXT.update,TEXT.draw
     local MES_update,MES_draw=MSG._update,MSG._draw
     local SYSFX_update,SYSFX_draw=SYSFX._update,SYSFX._draw
@@ -741,7 +742,7 @@ function love.run()
             if mouseShow then mouse_update(updateDT) end
             if next(jsState) then gp_update(jsState[1],updateDT) end
             VOC._update()
-            BG._update(updateDT)
+            BG_update(updateDT)
             TEXT_update(TEXT,updateDT)
             MES_update(updateDT)
             SYSFX_update(updateDT)
@@ -763,7 +764,7 @@ function love.run()
                 lastDrawTime=time
 
                 gc_replaceTransform(SCR.origin)
-                    BG.draw()
+                    BG_draw()
                 gc_replaceTransform(xOy)
                     if SCN.draw then
                         gc_translate(0,-SCN.curScroll)
@@ -941,14 +942,14 @@ end
 --- If set to 50(%), all *.update(dt) will be called every 2 main loop
 --- @param rate number @Updating rate percentage, range from 0 to 100
 function Zenitha.setUpdateFreq(rate)
-    assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setUpdateFreq(n): n must in (0,100]")
+    assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setUpdateFreq(rate): rate must in (0,100]")
     updateFreq=rate
 end
 
 --- Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
 --- @param rate number @Drawing rate percentage, range from 0 to 100
 function Zenitha.setDrawFreq(rate)
-    assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setDrawFreq(n): n must in (0,100]")
+    assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setDrawFreq(rate): rate must in (0,100]")
     drawFreq=rate
 end
 
@@ -1023,7 +1024,7 @@ end
 --- Color and line width is uncertain, set it yourself in the function.
 --- @param func function @Function to be called when drawing cursor
 function Zenitha.setDrawCursor(func)
-    assert(type(func)=='function',"Zenitha.setCursor(func): func must be function")
+    assert(type(func)=='function',"Zenitha.setDrawCursor(func): func must be function")
     drawCursor=func
 end
 

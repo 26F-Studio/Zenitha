@@ -1,16 +1,23 @@
+--- @class Zenitha.background
+--- @field init function
+--- @field resize function
+--- @field update function
+--- @field draw function
+--- @field event function
+--- @field discard function
+
 local gc_clear=love.graphics.clear
+
+--- @type Zenitha.background[]
 local BGs={}-- Stored backgrounds
+
 local BG={
     default='none',
     locked=false,
-    cur=false,
-    init=NULL,
-    resize=NULL,
-    update=NULL,
-    draw=NULL,
-    event=NULL,
-    discard=NULL,
+    cur='none',
 }
+
+local fields={'init','resize','update','draw','event','discard'}
 
 --- Lock the background, forbid changing with BG.set() until call BG.unlock()
 function BG.lock() BG.locked=true end
@@ -22,6 +29,13 @@ function BG.unlock() BG.locked=false end
 --- @param name string
 --- @param bg {init:function, resize:function, update:function, draw:function, event:function, discard:function}
 function BG.add(name,bg)
+    assert(type(name)=='string',"BG name must be string")
+    assert(not BGs[name],"BG name '"..name.."' already exists")
+    assert(type(bg)=='table',"BG must be table, got "..type(bg))
+    for i=1,#fields do
+        if bg[fields[i]]==nil then bg[fields[i]]=NULL end
+        assert(type(bg[fields[i]])=='function',"BG."..fields[i].." must be function")
+    end
     BGs[name]=bg
 end
 
@@ -52,20 +66,28 @@ function BG.set(name)
         return
     end
     if name~=BG.cur then
-        BG.discard()
+        BGs[BG.cur].discard()
         BG.cur=name
-        local bg=BGs[name]
-
-        BG.init=   bg.init or NULL
-        BG.resize= bg.resize or NULL
-        BG._update= bg.update or NULL
-        BG.draw=   bg.draw or NULL
-        BG.event=  bg.event or NULL
-        BG.discard=bg.discard or NULL
-        BG.init()
+        BGs[BG.cur].init()
     end
     return true
 end
+
+--- Get the current background name
+--- @return string|false
+function BG.get() return BG.cur end
+
+--- Trigger when resize
+--- @param w number
+--- @param h number
+function BG._resize(w,h) BGs[BG.cur].resize(w,h) end
+
+--- Update current BG (called by Zenitha)
+--- @param dt number
+function BG._update(dt) BGs[BG.cur].update(dt) end
+
+--- Draw current BG (called by Zenitha)
+function BG._draw() BGs[BG.cur].draw() end
 
 do-- Built-in: None
     BG.add('none',{
