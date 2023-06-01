@@ -26,12 +26,14 @@ end
 --- Round a number with specified unit
 --- @param n number
 --- @param u number
+--- @return number
 function MATH.roundUnit(n,u)
     return floor(n/u+.5)*u
 end
 
 --- Get a random boolean with specified chance, 50% if not given
 --- @param chance? number @0~1
+--- @return boolean
 function MATH.roll(chance)
     return rnd()<(chance or .5)
 end
@@ -39,6 +41,7 @@ end
 --- Select random one between a and b (50% - 50%)
 --- @param a any
 --- @param b any
+--- @return any
 function MATH.coin(a,b)
     if rnd()<.5 then
         return a
@@ -47,11 +50,20 @@ function MATH.coin(a,b)
     end
 end
 
+--- Get a random number between a and b
+--- @param a number
+--- @param b number
+--- @return number
+function MATH.rand(a,b)
+    return a+rnd()*(b-a)
+end
+
 
 --- Restrict a number in a range
 --- @param v number
 --- @param low number
 --- @param high number
+--- @return number
 function MATH.clamp(v,low,high)
     if v<=low then
         return low
@@ -66,6 +78,7 @@ end
 --- @param v1 number
 --- @param v2 number
 --- @param ratio number @0~1 at most time
+--- @return number
 function MATH.mix(v1,v2,ratio)
     return v1+(v2-v1)*ratio
 end
@@ -74,6 +87,7 @@ local clamp,mix=MATH.clamp,MATH.mix
 --- Get mix value (linear) of a list of numbers with a ratio (clampped in [0,1])
 --- @param list number[]
 --- @param ratio number
+--- @return number
 function MATH.listMix(list,ratio)
     local t2=(#list-1)*clamp(ratio,0,1)+1
     return mix(list[floor(t2)],list[ceil(t2)],t2%1)
@@ -81,6 +95,12 @@ end
 
 --- Specify a line pass (x1,y1) and (x2,y2), get the y value when x=t
 --- Works similar to MATH.mix()
+--- @param t number
+--- @param x1 number
+--- @param y1 number
+--- @param x2 number
+--- @param y2 number
+--- @return number
 function MATH.interpolate(t,x1,y1,x2,y2)
     return y1+(t-x1)*(y2-y1)/(x2-x1)
 end
@@ -91,6 +111,7 @@ end
 --- @param a number
 --- @param b number
 --- @param k number
+--- @return number
 function MATH.expApproach(a,b,k)
     return b+(a-b)*exp(-k)
 end
@@ -100,6 +121,7 @@ end
 --- @param y1 number
 --- @param x2 number
 --- @param y2 number
+--- @return number
 function MATH.distance(x1,y1,x2,y2)
     return ((x1-x2)^2+(y1-y2)^2)^.5
 end
@@ -107,6 +129,12 @@ end
 --- Check if a point is in a polygon
 ---
 --- By Pedro Gimeno,donated to the public domain
+---comment
+---@param x any
+---@param y any
+---@param poly any
+---@param evenOddRule any
+---@return boolean
 function MATH.pointInPolygon(x,y,poly,evenOddRule)
     local x1,y1,x2,y2
     local len=#poly
