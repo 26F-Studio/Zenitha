@@ -115,6 +115,7 @@ Widgets.base={
     isAbove=NULL,
     draw=NULL,
     visibleFunc=false,-- function return a boolean
+    visibleTick=false,-- function return a boolean
 
     _text=false,
     _image=false,
@@ -168,6 +169,7 @@ function Widgets.base:reset()
     assert(type(self.fontType)=='string' or self.fontType==false,'[widget].fontType must be string')
     assert(type(self.widthLimit)=='number','[widget].widthLimit must be number')
     assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc must be function')
+    assert(not self.visibleTick or type(self.visibleTick)=='function','[widget].visibleTick must be function')
 
     assert(not self.sound_press or type(self.sound_press)=='string','[widget].sound_press must be string')
     assert(not self.sound_hover or type(self.sound_hover)=='string','[widget].sound_hover must be string')
@@ -196,10 +198,13 @@ function Widgets.base:reset()
 
     self._hoverTime=0
 
+    if self._visible==nil then
+        self._visible=true
+    end
     if self.visibleFunc then
         self._visible=self.visibleFunc()
-    elseif self._visible==nil then
-        self._visible=true
+    elseif self.visibleTick then
+        self._visible=self.visibleTick()
     end
 end
 function Widgets.base:setVisible(bool)
@@ -243,6 +248,7 @@ Widgets.text=setmetatable({
         'widthLimit',
 
         'visibleFunc',
+        'visibleTick',
     }
 },{__index=Widgets.base,__metatable=true})
 function Widgets.text:reset()
@@ -275,6 +281,7 @@ Widgets.image=setmetatable({
         'alignX','alignY',
 
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.image:draw()
@@ -319,6 +326,7 @@ Widgets.button=setmetatable({
 
         'code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.button:reset()
@@ -486,6 +494,7 @@ Widgets.checkBox=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.checkBox:reset()
@@ -604,6 +613,7 @@ Widgets.switch=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.checkBox,__metatable=true})
 function Widgets.switch:reset()
@@ -740,6 +750,7 @@ Widgets.slider=setmetatable({
         'valueShow',
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 local sliderShowFunc={
@@ -955,6 +966,7 @@ Widgets.slider_fill=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_fill:reset()
@@ -1079,6 +1091,7 @@ Widgets.slider_progress=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_progress:reset()
@@ -1186,6 +1199,7 @@ Widgets.selector=setmetatable({
         'list','disp','show',
         'code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.selector:reset()
@@ -1362,6 +1376,7 @@ Widgets.inputBox=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.inputBox:reset()
@@ -1535,6 +1550,7 @@ Widgets.textBox=setmetatable({
         'sound_clear',
 
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.textBox:reset()
@@ -1736,6 +1752,7 @@ Widgets.listBox=setmetatable({
         'sound_click','sound_select',
         'code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.listBox:reset()
@@ -2120,8 +2137,8 @@ end
 --- @param dt number
 function WIDGET._update(dt)
     for _,W in next,WIDGET.active do
-        if W.visibleFunc then
-            local v=W.visibleFunc()
+        if W.visibleTick then
+            local v=W.visibleTick()
             if W._visible~=v then
                 W._visible=v
                 if v then
@@ -2180,7 +2197,8 @@ end
 --- @field labelDistance number
 --- @field disp function
 --- @field code function
---- @field visibleFunc function
+--- @field visibleFunc function Used to determine if widget is visible when scene changed
+--- @field visibleTick function Used to change widget's visibility every frame
 ---
 --- @field lineWidth number
 --- @field cornerR number
