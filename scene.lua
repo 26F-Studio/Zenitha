@@ -268,8 +268,8 @@ function SCN.back(style,...)
         if SCN.leave then SCN.leave() end
 
         -- Poll&Back to previous Scene
+        SCN.swapTo(SCN.stack[#SCN.stack-1],style,...)
         SCN._pop()
-        SCN.swapTo(SCN.stack[#SCN.stack],style,...)
     else
         Zenitha._quit(style)
     end
