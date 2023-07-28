@@ -262,9 +262,7 @@ function love.mousereleased(x,y,k,touch)
 end
 function love.wheelmoved(dx,dy)
     if WAIT.state or SCN.swapping then return end
-    if SCN.wheelMoved then
-        SCN.wheelMoved(dx,dy)
-    else
+    if not SCN.wheelMoved or SCN.wheelMoved(dx,dy) then
         WIDGET._scroll(dx,dy)
     end
 end
