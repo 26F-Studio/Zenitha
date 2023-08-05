@@ -3,13 +3,19 @@ local IMG={}
 local initialized=false
 local IMGlistMeta={
     __index=function(self,k)
-        assert(self.__source[k],STRING.repD("No field '$1'",tostring(k)))
-        local ok,res=pcall(love.graphics.newImage,self.__source[k])
+        local path=self.__source[k]
+        local ok,res
+        if type(path)=='string' then-- string, load image from path
+            assert(path,STRING.repD("No field '$1'",tostring(k)))
+            ok,res=pcall(love.graphics.newImage,path)
+        else-- not string (neither table), keep the value
+            ok,res=true,path
+        end
         if ok then
             self[k]=res
         else
             self[k]=PAPER
-            MSG.new('error',STRING.repD("Cannot load image '$1': $2",self.__source[k],res))
+            MSG.new('error',STRING.repD("Cannot load image '$1': $2",path,res))
         end
         return self[k]
     end,
