@@ -43,6 +43,39 @@ function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end
 --- @param k? number
 function GC.mDraw(obj,x,y,a,k)  draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
 
+--- Draw an obj with both middle X & Y
+--- @param obj love.Texture
+--- @param x? number
+--- @param y? number
+--- @param a? number
+--- @param k? number
+function GC.mDrawQX(obj,quad,x,y,a,k)
+    local _,_,w,h=quad:getViewport()
+    draw(obj,quad,x,y,a,k,nil,w*.5,h*.5)
+end
+
+--- Draw an obj with both middle X & Y
+--- @param obj love.Texture
+--- @param x? number
+--- @param y? number
+--- @param a? number
+--- @param k? number
+function GC.mDrawQY(obj,quad,x,y,a,k)
+    local _,_,w,h=quad:getViewport()
+    draw(obj,quad,x,y,a,k,nil,w*.5,h*.5)
+end
+
+--- Draw an obj with both middle X & Y
+--- @param obj love.Texture
+--- @param x? number
+--- @param y? number
+--- @param a? number
+--- @param k? number
+function GC.mDrawQ(obj,quad,x,y,a,k)
+    local _,_,w,h=quad:getViewport()
+    draw(obj,quad,x,y,a,k,nil,w*.5,h*.5)
+end
+
 --- Draw an layered obj with x=obj:getWidth()/2
 --- @param obj love.Texture
 --- @param x? number
