@@ -3,7 +3,9 @@ local assert,tostring,tonumber=assert,tostring,tonumber
 local floor,lg=math.floor,math.log10
 local find,format=string.find,string.format
 local sub,gsub=string.sub,string.gsub
-local rep,upper=string.rep,string.upper
+local match,gmatch=string.match,string.gmatch
+local rep,reverse=string.rep,string.reverse
+local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
 
 local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
@@ -60,13 +62,35 @@ function STRING.shiftChar(c)
     return shiftMap[c] or upper(c)
 end
 
+local upperData,lowerData
+
+--- string.upper with utf8 support, warning: low performance
+--- @param str string
+--- @return string
+function STRING.upperUTF8(str)
+    for _,pair in next,upperData do
+        str=str:gsub(pair[1],pair[2])
+    end
+    return str
+end
+--- string.lower with utf8 support, warning: low performance
+--- @param str string
+--- @return string
+function STRING.lowerUTF8(str)
+    for _,pair in next,lowerData do
+        str=str:gsub(pair[1],pair[2])
+    end
+    return str
+end
+
 --- Trim %s at both ends of the string
 --- @param str string
 --- @return string
 function STRING.trim(str)
-    if not str:find('%S') then return'' end
-    str=str:sub((str:find('%S'))):reverse()
-    return str:sub((str:find('%S'))):reverse()
+    local s=find(str,'%S')
+    if not s then return '' end
+    str=reverse(sub(str,s))
+    return reverse(sub(str,s))
 end
 
 --- Split a string by sep
@@ -100,7 +124,7 @@ end
 function STRING.simpEmailCheck(str)
     local list=STRING.split(str,'@')
     if #list~=2 then return false end
-    if list[1]:sub(-1)=='.' or list[2]:sub(-1)=='.' then return false end
+    if sub(list[1],-1)=='.' or sub(list[2],-1)=='.' then return false end
     local e1,e2=STRING.split(list[1],'.'),STRING.split(list[2],'.')
     if #e1*#e2==0 then return false end
     for _,v in next,e1 do if #v==0 then return false end end
@@ -132,13 +156,13 @@ end
 --- @param s string
 --- @return number|nil, string|nil
 function STRING.cutUnit(s)
-    local _s,_e=s:find('^-?%d+%.?%d*')
+    local _s,_e=find(s,'^-?%d+%.?%d*')
     if _e==#s then-- All numbers
         return tonumber(s),nil
     elseif not _s then-- No numbers
         return nil,s
     else
-        return tonumber(s:sub(_s,_e)),s:sub(_e+1)
+        return tonumber(sub(s,_s,_e)),sub(s,_e+1)
     end
 end
 
@@ -161,7 +185,7 @@ end
 
 --- Base64 character list
 --- @type string[]
-STRING.base64={} for c in string.gmatch('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','.') do
+STRING.base64={} for c in gmatch('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','.') do
     table.insert(STRING.base64,c)
 end
 
@@ -247,10 +271,10 @@ local rshift=bit.rshift
 function STRING.urlEncode(str)
     local out=''
     for i=1,#str do
-        if str:sub(i,i):match('[a-zA-Z0-9]') then
-            out=out..str:sub(i,i)
+        if match(sub(str,i,i),'[a-zA-Z0-9]') then
+            out=out..sub(str,i,i)
         else
-            local b=str:byte(i)
+            local b=byte(str,i)
             out=out..'%'..b16[rshift(b,4)]..b16[b%16]
         end
     end
@@ -324,9 +348,9 @@ end
 --- @param str string
 --- @return string, string @one line (do not include \n), and the rest of string
 function STRING.readLine(str)
-    local p=str:find('\n')
+    local p=find(str,'\n')
     if p then
-        return str:sub(1,p-1),str:sub(p+1)
+        return sub(str,1,p-1),sub(str,p+1)
     else
         return str,''
     end
@@ -348,7 +372,7 @@ end
 --- ```
 function STRING.simplifyPath(path,len)
     local l=STRING.split(path,'/')
-    for i=1,#l-1 do l[i]=l[i]:sub(1,len or 1) end
+    for i=1,#l-1 do l[i]=sub(l[i],1,len or 1) end
     return table.concat(l,'/')
 end
 
@@ -401,5 +425,26 @@ end
 function STRING.unpackTable(str)
     return JSON.decode(STRING.unpackText(str))
 end
+
+repeat
+    local f=io.open('Zenitha/upcaser.txt','r')
+    if not f then break end
+    upperData=STRING.split(gsub(f:read('a'),'\n',','),',')
+    for i=1,#upperData do
+        local pair=STRING.split(upperData[i],'=')
+        -- upperData[pair[1]]=pair[2]
+        upperData[i]=pair
+    end
+    f:close()
+    f=io.open('Zenitha/lowcaser.txt','r')
+    if not f then break end
+    lowerData=STRING.split(gsub(f:read('a'),'\n',','),',')
+    for i=1,#lowerData do
+        local pair=STRING.split(lowerData[i],'=')
+        -- lowerData[pair[1]]=pair[2]
+        lowerData[i]=pair
+    end
+    f:close()
+until true
 
 return STRING
