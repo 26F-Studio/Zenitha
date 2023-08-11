@@ -1,10 +1,15 @@
-local type,rem=type,table.remove
+local type=type
+local ins,rem=table.insert,table.remove
 local floor,rnd=math.floor,math.random
 local clamp=MATH.clamp
 
-local sfxList={}
+--- @type string[]
+local nameList={}
+--- @type table<string,love.Source[]>
+local srcMap={}
+--- @type table<string,{base:number,top:number}>
 local packSetting={}
-local Sources={}
+
 local volume=1
 local stereo=1
 
@@ -37,37 +42,55 @@ end
 
 local SFX={}
 
---- Initialize SFX lib with a list of filenames
-function SFX.init(list)
-    assert(type(list)=='table',"Initialize SFX lib with a table<name,path>")
-    TABLE.cover(list,sfxList)
-end
-
---- Load SFX files from specified directory
---- @param path string @Path to the folder contains SFX files, including the last '/'
-function SFX.load(path)
-    local loadCnt=0
-    local missing=0
-    for k,v in next,sfxList do
-        local fullPath=path..v
-        if love.filesystem.getInfo(fullPath) then
-            if Sources[k] then
-                for _,src in next,Sources[k] do
+--- @param name string
+--- @param path string
+--- @param lazyLoad? boolean
+local function loadOne(name,path,lazyLoad)
+    assert(type(name)=='string',"name must be string")
+    assert(type(path)=='string',"path must be string")
+    if love.filesystem.getInfo(path) and FILE.isSafe(path) then
+        if srcMap[name] then
+            rem(nameList,TABLE.find(nameList,name))
+            for _,src in next,srcMap[name] do
+                if type(src)=='userdata' then
                     src:release()
                 end
             end
-            Sources[k]={love.audio.newSource(fullPath,'static')}
-            loadCnt=loadCnt+1
+        end
+        ins(nameList,name)
+        srcMap[name]={lazyLoad and path or love.audio.newSource(path,'static')}
+        return true
+    end
+end
+
+--- Load SFX name-path pairs
+--- @overload fun(pathTable:table,lazyLoad?:boolean)
+--- @param name string
+--- @param path string
+--- @param lazyLoad? boolean @If true, the file will be loaded when it's played for the first time
+function SFX.load(name,path,lazyLoad)
+    if type(name)=='table' then
+        local success=0
+        local fail=0
+        for k,v in next,name do
+            if loadOne(k,v,path) then
+                success=success+1
+            else
+                fail=fail+1
+            end
+        end
+        if fail>0 then
+            LOG(fail.." SFX files missing")
+        end
+        LOG(("%d SFX files added, total %d"):format(success,#nameList))
+    else
+        if loadOne(name,path,lazyLoad) then
+            LOG("SFX loaded: "..name)
         else
-            LOG("No SFX: "..v,.1)
-            missing=missing+1
+            LOG("No SFX: "..path)
         end
     end
-    LOG(("%d/%d SFX files loaded (%d missing)"):format(loadCnt,loadCnt+missing,missing))
-    if missing>0 then
-        MSG.new('info',missing.." SFX files missing")
-    end
-    collectgarbage()
+    table.sort(nameList)
 end
 
 --- Load SFX samples from specified directory
@@ -82,7 +105,7 @@ function SFX.loadSample(pack)
     assert(pack.path,"No field: path")
     local num=1
     while love.filesystem.getInfo(pack.path..'/'..num..'.ogg') do
-        Sources[pack.name..num]={love.audio.newSource(pack.path..'/'..num..'.ogg','static')}
+        srcMap[pack.name..num]={love.audio.newSource(pack.path..'/'..num..'.ogg','static')}
         num=num+1
     end
     local base=(_getTuneHeight(pack.base) or 37)-1
@@ -91,10 +114,10 @@ function SFX.loadSample(pack)
     LOG((num-1).." "..pack.name.." samples loaded")
 end
 
---- Get the number of SFX files loaded
+--- Get the number of SFX files loaded (not include SFX samples)
 --- @return number
 function SFX.getCount()
-    return #sfxList
+    return #nameList
 end
 
 --- Set the volume of SFX module
@@ -167,8 +190,14 @@ function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
     if vol<=0 then return end
 
-    local S=Sources[name]-- Source list
+    local S=srcMap[name]-- Source list
     if not S then return end
+    if type(S[1])=='string' then-- Do the lazy load
+        local path=tostring(S[1])-- to avoid syntax checker error
+        local src=love.filesystem.getInfo(path) and FILE.isSafe(path) and love.audio.newSource(path,'static')
+        assert(src,"WTF why path data can be bad")
+        S[1]=src
+    end
 
     local n=1
     while S[n]:isPlaying() do
@@ -196,13 +225,11 @@ end
 
 --- Remove references of stopped SFX sources
 function SFX.releaseFree()
-    for _,L in next,Sources do
-        if type(L)=='table' then
-            for i,src in next,L do
-                if not src:isPlaying() then
-                    src:release()
-                    rem(L,i)
-                end
+    for _,L in next,srcMap do
+        for i,src in next,L do
+            if not src:isPlaying() then
+                src:release()
+                rem(L,i)
             end
         end
     end
