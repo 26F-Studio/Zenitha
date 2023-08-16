@@ -208,7 +208,15 @@ function Widgets.base:reset()
     end
 end
 function Widgets.base:setVisible(bool)
-    self._visible=bool and true or false
+    if bool==nil then
+        if self.visibleFunc then
+            self._visible=self.visibleFunc()
+        elseif self.visibleTick then
+            self._visible=self.visibleTick()
+        end
+    else
+        self._visible=bool and true or false
+    end
 end
 function Widgets.base:update(dt)
     if self._pressed then
