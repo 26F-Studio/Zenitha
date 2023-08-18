@@ -129,11 +129,10 @@ end
 --- Check if a point is in a polygon
 ---
 --- By Pedro Gimeno,donated to the public domain
----comment
----@param x any
----@param y any
----@param poly any
----@param evenOddRule any
+---@param x number
+---@param y number
+---@param poly number[] {x1,y1,x2,y2,...}
+---@param evenOddRule boolean
 ---@return boolean
 function MATH.pointInPolygon(x,y,poly,evenOddRule)
     local x1,y1,x2,y2
@@ -158,6 +157,18 @@ function MATH.pointInPolygon(x,y,poly,evenOddRule)
     else-- non-zero winding rule
         return wn~=0
     end
+end
+
+--- Get the greatest common divisor of two positive integers
+---@param a number
+---@param b number
+---@return number
+function MATH.gcd(a,b)
+    repeat
+        a=a%b
+        a,b=b,a
+    until b<1
+    return a
 end
 
 return MATH
