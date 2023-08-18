@@ -62,14 +62,15 @@ function STRING.shiftChar(c)
     return shiftMap[c] or upper(c)
 end
 
-local upperData,lowerData
+local upperData,lowerData={},{} -- Data is filled later in this file
 
 --- string.upper with utf8 support, warning: low performance
 --- @param str string
 --- @return string
 function STRING.upperUTF8(str)
-    for _,pair in next,upperData do
-        str=str:gsub(pair[1],pair[2])
+    for i=1,#upperData do
+        local pair=upperData[i]
+        str=gsub(str,pair[1],pair[2])
     end
     return str
 end
@@ -77,8 +78,9 @@ end
 --- @param str string
 --- @return string
 function STRING.lowerUTF8(str)
-    for _,pair in next,lowerData do
-        str=str:gsub(pair[1],pair[2])
+    for i=1,#lowerData do
+        local pair=lowerData[i]
+        str=gsub(str,pair[1],pair[2])
     end
     return str
 end
@@ -132,24 +134,26 @@ function STRING.simpEmailCheck(str)
     return true
 end
 
---- Convert time (second) to MM:SS
+--- Convert time (second) to "MM:SS"
 --- @param t number
 --- @return string
 function STRING.time_simp(t)
     return format('%02d:%02d',floor(t/60),floor(t%60))
 end
 
---- Convert time (second) to SS or MM:SS or HH:MM:SS
+--- Convert time (second) to seconds~year string (max 3 units)
 --- @param t number
 --- @return string
 function STRING.time(t)
-    if t<60 then
-        return format('%.3f″',t)
-    elseif t<3600 then
-        return format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100)
-    else
-        return format('%d:%.2d′%05.2f″',floor(t/3600),floor(t/60%60),floor(t%60*100)/100)
-    end
+    return
+        t<=0 and "-0.00″" or
+        t<60 and format('%.3f″',t) or
+        t<3600 and format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100) or
+        t<86400 and format('%d:%.2d′%05.1f″',floor(t/3600),floor(t/60%60),floor(t%60*10)/10) or
+        t<2629728 and format('%dd %d:%.2d′',floor(t/86400),floor(t/3600%3600),floor(t/60%60)) or
+        t<31556736 and format('%dm%dd%dh',floor(t/2629728),floor(t/86400%86400),floor(t/3600%3600)) or
+        t<3155673600 and format('%dy%dm%dd',floor(t/31556736),floor(t/2629728%2629728),floor(t/86400%86400)) or
+        format('%.2fcentury',floor(t/3155673600))
 end
 
 --- Warning: don't support number format like .26, must have digits before the dot, like 0.26
@@ -429,22 +433,20 @@ end
 repeat
     local f=io.open('Zenitha/upcaser.txt','r')
     if not f then break end
-    upperData=STRING.split(gsub(f:read('a'),'\n',','),',')
-    for i=1,#upperData do
-        local pair=STRING.split(upperData[i],'=')
-        -- upperData[pair[1]]=pair[2]
+    local upperFileData=STRING.split(gsub(f:read('a'),'\n',','),',')
+    f:close()
+    for i=1,#upperFileData do
+        local pair=STRING.split(upperFileData[i],'=')
         upperData[i]=pair
     end
-    f:close()
     f=io.open('Zenitha/lowcaser.txt','r')
     if not f then break end
-    lowerData=STRING.split(gsub(f:read('a'),'\n',','),',')
-    for i=1,#lowerData do
-        local pair=STRING.split(lowerData[i],'=')
-        -- lowerData[pair[1]]=pair[2]
+    local lowerFileData=STRING.split(gsub(f:read('a'),'\n',','),',')
+    f:close()
+    for i=1,#lowerFileData do
+        local pair=STRING.split(lowerFileData[i],'=')
         lowerData[i]=pair
     end
-    f:close()
 until true
 
 return STRING
