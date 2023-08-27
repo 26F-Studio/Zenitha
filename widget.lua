@@ -62,8 +62,9 @@ local Widgets={}
 
 --- @class Zenitha.widget.base @not used by user
 --- @field color Zenitha.ColorStr|Zenitha.Color
---- @field frameColor Zenitha.ColorStr|Zenitha.Color
+--- @field textColor Zenitha.ColorStr|Zenitha.Color
 --- @field fillColor Zenitha.ColorStr|Zenitha.Color
+--- @field frameColor Zenitha.ColorStr|Zenitha.Color
 --- @field activeColor Zenitha.ColorStr|Zenitha.Color
 --- @field idleColor Zenitha.ColorStr|Zenitha.Color
 ---
@@ -101,7 +102,8 @@ Widgets.base={
     x=0,y=0,
 
     color='L',
-    fillColor='lS',
+    textColor='L',
+    fillColor='L',
     frameColor='L',
     activeColor='LY',
     idleColor='L',
@@ -142,10 +144,12 @@ function Widgets.base:reset()
     assert(type(self.y)=='number','[widget].y must be number')
     if type(self.color)=='string' then self.color=COLOR[self.color] end
     assert(type(self.color)=='table','[widget].color must be table')
-    if type(self.frameColor)=='string' then self.frameColor=COLOR[self.frameColor] end
-    assert(type(self.frameColor)=='table','[widget].frameColor must be table')
+    if type(self.textColor)=='string' then self.textColor=COLOR[self.textColor] end
+    assert(type(self.textColor)=='table','[widget].textColor must be table')
     if type(self.fillColor)=='string' then self.fillColor=COLOR[self.fillColor] end
     assert(type(self.fillColor)=='table','[widget].fillColor must be table')
+    if type(self.frameColor)=='string' then self.frameColor=COLOR[self.frameColor] end
+    assert(type(self.frameColor)=='table','[widget].frameColor must be table')
     if type(self.activeColor)=='string' then self.activeColor=COLOR[self.activeColor] end
     assert(type(self.activeColor)=='table','[widget].activeColor must be table')
     if type(self.idleColor)=='string' then self.idleColor=COLOR[self.idleColor] end
@@ -401,8 +405,8 @@ end
 --- @class Zenitha.widget.button_fill: Zenitha.widget.button
 Widgets.button_fill=setmetatable({
     type='button_fill',
-    color_text=TABLE.shift(COLOR.L),
-    buildArgs=TABLE.combine(Widgets.button.buildArgs,{'color_text'}),
+    textColor='D',
+    buildArgs=TABLE.combine(Widgets.button.buildArgs,{'textColor'}),
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_fill:draw()
     gc_push('transform')
@@ -428,7 +432,7 @@ function Widgets.button_fill:draw()
         alignDraw(self,self._image)
     end
     if self._text then
-        gc_setColor(self.color_text)
+        gc_setColor(self.textColor)
         alignDraw(self,self._text)
     end
     gc_pop()
@@ -593,6 +597,7 @@ Widgets.switch=setmetatable({
     type='switch',
     h=30,
 
+    fillColor='lS',
     text=false,
     image=false,
     labelPos='left',
@@ -722,9 +727,10 @@ Widgets.slider=setmetatable({
     image=false,
     labelPos='left',
     labelDistance=20,
-    numFontSize=25,numFontType='_norm',
+    numFontSize=25,numFontType=false,
     cornerR=3,
     valueShow=nil,
+    textAlwaysShow=false,
 
     disp=false,-- function return the displaying _value
     code=NULL,
@@ -751,9 +757,11 @@ Widgets.slider=setmetatable({
         'axis','smooth',
         'labelPos',
         'labelDistance',
-        'color','text',
+        'color','textColor','fillColor',
+        'text',
         'fontSize','fontType',
         'widthLimit',
+        'textAlwaysShow',
 
         'valueShow',
         'disp','code',
@@ -844,7 +852,9 @@ function Widgets.slider:update(dt)
     if WIDGET.sel==self then
         self._textShowTime=2
     end
-    self._textShowTime=max(self._textShowTime-dt,0)
+    if not self.textAlwaysShow then
+        self._textShowTime=max(self._textShowTime-dt,0)
+    end
 end
 function Widgets.slider:draw()
     local x,y=self._x,self._y
@@ -852,7 +862,11 @@ function Widgets.slider:draw()
     local x2=x+self.w
     local rangeL,rangeR=self._rangeL,self._rangeR
 
-    gc_setColor(1,1,1,.5+HOV*.36)
+    local c=self.color
+    local fc=self.fillColor
+    local r,g,b=c[1],c[2],c[3]
+    local fr,fg,fb=fc[1],fc[2],fc[3]
+    gc_setColor(r,g,b,.5+HOV*.36)
 
     -- Units
     if not self._smooth and self._unit then
@@ -872,26 +886,26 @@ function Widgets.slider:draw()
     local cx=x+(x2-x)*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
-    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or COLOR.DL)
+    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or self.fillColor)
     gc_rectangle('fill',bx,by,bw,bh,self.cornerR)
 
     -- Glow
     if HOV>0 then
         gc_setLineWidth(self.lineWidth*.5)
-        gc_setColor(1,1,1,HOV*.8)
+        gc_setColor(r,g,b,HOV*.8)
         gc_rectangle('line',bx+1,by+1,bw-2,bh-2,self.cornerR)
     end
 
     -- Float text
     if self._textShowTime>0 then
         setFont(self.numFontSize,self.numFontType)
-        gc_setColor(1,1,1,min(self._textShowTime/2,1))
+        gc_setColor(fr,fg,fb,min(self._textShowTime/2,1))
         gc_mStr(self:_showFunc(),cx,by-self.numFontSize-10)
     end
 
     -- Drawable
     if self._text then
-        gc_setColor(COLOR.L)
+        gc_setColor(self.textColor)
         if self.labelPos=='left' then
             alignDraw(self,self._text,x-self.labelDistance,y)
         elseif self.labelPos=='right' then
@@ -2211,9 +2225,10 @@ end
 --- @field lineWidth number
 --- @field cornerR number
 ---
---- @field activeColor Zenitha.ColorStr|Zenitha.Color
+--- @field textColor Zenitha.ColorStr|Zenitha.Color
 --- @field fillColor Zenitha.ColorStr|Zenitha.Color
 --- @field frameColor Zenitha.ColorStr|Zenitha.Color
+--- @field activeColor Zenitha.ColorStr|Zenitha.Color
 --- @field idleColor Zenitha.ColorStr|Zenitha.Color
 ---
 --- @field sound_press string
