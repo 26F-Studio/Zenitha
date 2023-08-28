@@ -37,19 +37,21 @@ end
 --- Get love's default font object
 --- @param size number
 --- @return love.Font
-function FONT.rawget(size)
+local function _rawget(size)
     if not fontCache[size] then
         assert(type(size)=='number' and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
         fontCache[size]=love.graphics.setNewFont(size,'normal',love.graphics.getDPIScale()*SCR.k*2)
     end
     return fontCache[size]
 end
+FONT.rawget=_rawget
 
 --- Set love's default font
 --- @param size number
-function FONT.rawset(size)
-    set(fontCache[size] or FONT.rawget(size))
+local function _rawset(size)
+    set(fontCache[size] or _rawget(size))
 end
+FONT.rawset=_rawset
 
 --- Load font(s) from file(s)
 --- @param name string|string[]|any
@@ -73,11 +75,11 @@ end
 --- @param size number
 --- @param name? string
 --- @return love.Font
-function FONT.get(size,name)
+local function _get(size,name)
     if not name then name=defaultFont end
 
     local f=fontCache[name]
-    if not f then return FONT.rawget(size) end
+    if not f then return _rawget(size) end
     f=f[size]
 
     if not f then
@@ -85,27 +87,28 @@ function FONT.get(size,name)
         f=love.graphics.setNewFont(fontFiles[name],size,'normal',love.graphics.getDPIScale()*SCR.k*2)
         local fallbackName=fallbackMap[name] or defaultFallBack and name~=defaultFallBack and defaultFallBack
         if fallbackName then
-            f:setFallbacks(FONT.get(size,fallbackName))
+            f:setFallbacks(_get(size,fallbackName))
         end
         fontCache[name][size]=f
     end
     return f
 end
+FONT.get=_get
 
 --- Set font with font size, use default font name if not given
 ---
 --- Warning: any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
 --- @param size number
 --- @param name? string
-function FONT.set(size,name)
+local function _set(size,name)
     if not name then name=defaultFont end
 
-    local f=FONT.get(size,name)
-
+    local f=_get(size,name)
     if f~=curFont then
         curFont=f
         set(curFont)
     end
 end
+FONT.set=_set
 
 return FONT
