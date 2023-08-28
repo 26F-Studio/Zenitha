@@ -1,13 +1,15 @@
 local MATH={} for k,v in next,math do MATH[k]=v end
 
-local floor,ceil=math.floor,math.ceil
-local rnd=math.random
-local exp=math.exp
-
 MATH.tau=2*math.pi
 MATH.phi=(1+math.sqrt(5))/2
 MATH.inf=1/0
 MATH.nan=0/0
+
+local floor,ceil=math.floor,math.ceil
+local sin,cos=math.sin,math.cos
+local rnd=math.random
+local exp,log=math.exp,math.log
+local tau=MATH.tau
 
 --- Check if a number is NaN
 --- @param n number
@@ -59,8 +61,8 @@ function MATH.rand(a,b)
 end
 
 --- Get a random integer with specified frequency list
----@param fList number[] positive numbers
----@return integer
+--- @param fList number[] positive numbers
+--- @return integer
 function MATH.randFreq(fList)
     local sum=TABLE.sum(fList)
     for i=1,#fList do sum=sum+fList[i] end
@@ -71,6 +73,22 @@ function MATH.randFreq(fList)
         if r<0 then return i end
     end
     error("Frequency list should be a simple positive number list")
+end
+
+--- Get a random numbers in gaussian distribution (Box-Muller algorithm + stream buffer)
+--- @return number
+local randNormBF
+function MATH.randNorm()
+    if randNormBF then
+        local res=randNormBF
+        randNormBF=nil
+        return res
+    else
+        local r=rnd()*tau
+        local d=(-2*log(1-rnd())*tau)^.5
+        randNormBF=sin(r)*d
+        return cos(r)*d
+    end
 end
 
 --- Restrict a number in a range
@@ -142,12 +160,12 @@ end
 
 --- Check if a point is in a polygon
 ---
---- By Pedro Gimeno,donated to the public domain
----@param x number
----@param y number
----@param poly number[] {x1,y1,x2,y2,...}
----@param evenOddRule boolean
----@return boolean
+--- By Pedro Gimeno, donated to the public domain
+--- @param x number
+--- @param y number
+--- @param poly number[] {x1,y1,x2,y2,...}
+--- @param evenOddRule boolean
+--- @return boolean
 function MATH.pointInPolygon(x,y,poly,evenOddRule)
     local x1,y1,x2,y2
     local len=#poly
@@ -174,9 +192,9 @@ function MATH.pointInPolygon(x,y,poly,evenOddRule)
 end
 
 --- Get the greatest common divisor of two positive integers
----@param a number
----@param b number
----@return number
+--- @param a number
+--- @param b number
+--- @return number
 function MATH.gcd(a,b)
     repeat
         a=a%b
