@@ -50,7 +50,7 @@ function MATH.coin(a,b)
     end
 end
 
---- Get a random number between a and b
+--- Get a random real number between a and b
 --- @param a number
 --- @param b number
 --- @return number
@@ -58,6 +58,20 @@ function MATH.rand(a,b)
     return a+rnd()*(b-a)
 end
 
+--- Get a random integer with specified frequency list
+---@param fList number[] positive numbers
+---@return integer
+function MATH.randFreq(fList)
+    local sum=TABLE.sum(fList)
+    for i=1,#fList do sum=sum+fList[i] end
+
+    local r=rnd()*sum
+    for i=1,#fList do
+        r=r-fList[i]
+        if r<0 then return i end
+    end
+    error("Frequency list should be a simple positive number list")
+end
 
 --- Restrict a number in a range
 --- @param v number
