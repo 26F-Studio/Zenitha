@@ -64,6 +64,8 @@ local SCN={
 
     scenes=scenes,
 }
+
+local defaultSwap='fade'
 -- Scene swapping animations
 local swap={
     none={
@@ -223,10 +225,10 @@ function SCN.swapTo(tar,style,...)
         if not SCN.swapping then
             SCN.prev=SCN.stack[#SCN.stack]
 
-            style=style or 'fade'
+            style=style or defaultSwap
             if not swap[style] then
                 MSG.new('error',"No swap style named '"..style.."'")
-                style='fade'
+                style=defaultSwap
             end
             SCN.swapping=true
             SCN.args={...}
@@ -292,6 +294,12 @@ end
 --- Print current scene stack to console
 function SCN.printStack()
     for i=1,#SCN.stack do print(SCN.stack[i]) end
+end
+
+function SCN.setDefaultSwap(anim)
+    assert(type(anim)=='string',"swap style must be string")
+    assert(swap[anim],"No swap style named '"..anim.."'")
+    defaultSwap=anim
 end
 
 return SCN

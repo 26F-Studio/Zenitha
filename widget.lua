@@ -2315,8 +2315,7 @@ local c_cache={}
 --- @param style? string
 --- @return function
 function WIDGET.c_backScn(style)
-    if not style then style='fade' end
-    local hash='c_backScn/'..style
+    local hash='c_backScn/'..tostring(style)
     if not c_cache[hash] then
         c_cache[hash]=function() SCN.back(style) end
     end
