@@ -65,8 +65,6 @@ end
 --- @return integer
 function MATH.randFreq(fList)
     local sum=TABLE.sum(fList)
-    for i=1,#fList do sum=sum+fList[i] end
-
     local r=rnd()*sum
     for i=1,#fList do
         r=r-fList[i]
