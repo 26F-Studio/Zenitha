@@ -100,12 +100,10 @@ end
 function FONT.set(size,name)
     if not name then name=defaultFont end
 
-    local f=fontCache[name]
-    if not f then return FONT.rawset(size) end
-    f=f[size]
+    local f=FONT.get(size,name)
 
     if f~=curFont then
-        curFont=f or FONT.get(size,name)
+        curFont=f
         set(curFont)
     end
 end

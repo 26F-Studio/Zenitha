@@ -637,8 +637,7 @@ function love.errorhandler(msg)
             GC.scale(k)
             setFont(100,'_norm') gc_print(":(",100,0,0,1.2)
             setFont(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
-            setFont(25,'_norm') gc.printf(err[1],100,380,SCR.w/k-200)
-            setFont(20,'_norm')
+            setFont(20,'_norm') gc.printf(err[1],100,380,SCR.w/k-200)
             GC.print(love.system.getOS().."-"..versionText.."\nScene stack:"..sceneStack,100,640)
             GC.print("TRACEBACK",100,430)
             for i=4,#err-2 do
@@ -786,8 +785,8 @@ function love.run()
                 gc_replaceTransform(SCR.xOy_d)
                     -- Version string
                     gc_setColor(.9,.9,.9,.42)
-                    setFont(20,'_norm')
-                    gc_printf(versionText,-2600,-30,5200,'center')
+                    setFont(15,'_norm')
+                    gc_printf(versionText,-2600,-20,5200,'center')
                 gc_replaceTransform(SCR.xOy_dl)
                     local safeX=SCR.safeX/SCR.k
 
