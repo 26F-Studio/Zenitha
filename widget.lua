@@ -358,11 +358,13 @@ function Widgets.button:press()
     self._pressed=true
 end
 function Widgets.button:release(_,_,k)
-    self._pressed=false
-    if self.sound_trigger then
-        SFX.play(self.sound_trigger)
+    if self._pressed then
+        self._pressed=false
+        if self.sound_trigger then
+            SFX.play(self.sound_trigger)
+        end
+        self.code(k)
     end
-    self.code(k)
 end
 function Widgets.button:drag(x,y)
     if not self:isAbove(x,y) and self==WIDGET.sel then
