@@ -35,7 +35,7 @@ local mainLoopStarted=false
 local autoGCcount=0
 local devMode
 local mx,my,mouseShow,cursorSpd=640,360,false,0
-local lastX,lastY=0,0-- Last click pos
+local lastClicks={}
 local jsState={}-- map, joystickID->axisStates: {axisName->axisVal}
 local errData={}-- list, each error create {msg={errMsg strings},scene=sceneNameStr}
 local bigCanvases=setmetatable({},{__index=function(self,k)
@@ -52,6 +52,7 @@ local discardCanvas=false
 local updateFreq=100
 local drawFreq=100
 local sleepInterval=1/60
+local clickDist2=62
 local function drawCursor(_,x,y)
     gc_setColor(1,1,1)
     gc.setLineWidth(2)
@@ -181,11 +182,12 @@ local function _updateMousePos(x,y,dx,dy)
 end
 local function _triggerMouseDown(x,y,k)
     if devMode==1 then
+        if not lastClicks[k] then lastClicks[k]={x=0,y=0} end
         print(("(%d,%d)<-%d,%d ~~(%d,%d)<-%d,%d"):format(
             x,y,
-            x-lastX,y-lastY,
+            x-lastClicks[k].x,y-lastClicks[k].y,
             math.floor(x/10)*10,math.floor(y/10)*10,
-            math.floor((x-lastX)/10)*10,math.floor((y-lastY)/10)*10
+            math.floor((x-lastClicks[k].x)/10)*10,math.floor((y-lastClicks[k].y)/10)*10
         ))
     end
     if SCN.swapping then return end
@@ -193,7 +195,7 @@ local function _triggerMouseDown(x,y,k)
         WIDGET._press(x,y,k)
     else
         if SCN.mouseDown then SCN.mouseDown(x,y,k) end
-        lastX,lastY=x,y
+        lastClicks[k]={x=x,y=y}
     end
     clickFX(x,y)
 end
@@ -246,19 +248,27 @@ function love.mousemoved(x,y,dx,dy,touch)
     if touch then return end
     mouseShow=true
     mx,my=ITP(xOy,x,y)
+    for k,last in next,lastClicks do
+        if type(k)=='number' and (x-last.x)^2+(y-last.y)^2>clickDist2 then
+            lastClicks[k]=nil
+        end
+    end
     _updateMousePos(mx,my,dx,dy)
 end
 function love.mousereleased(x,y,k,touch)
     if touch or WAIT.state or SCN.swapping then return end
     mx,my=ITP(xOy,x,y)
-    if WIDGET.sel then
+    local widgetSel=not not WIDGET.sel
+    if widgetSel then
         WIDGET._release(mx,my,k)
-    else
-        if SCN.mouseUp then SCN.mouseUp(mx,my,k) end
-        if lastX and SCN.mouseClick and (mx-lastX)^2+(my-lastY)^2<62 then
-            SCN.mouseClick(mx,my,k)
+    end
+    if SCN.mouseUp then SCN.mouseUp(mx,my,k) end
+    if not widgetSel then
+        if lastClicks[k] and SCN.mouseClick then
+            SCN.mouseClick(mx,my,k,((x-lastClicks[k].x)^2+(y-lastClicks[k].y)^2)^.5)
         end
     end
+    WIDGET._cursorMove(mx,my)
 end
 function love.wheelmoved(dx,dy)
     if WAIT.state or SCN.swapping then return end
@@ -276,20 +286,23 @@ function love.touchpressed(id,x,y)
         love.touchmoved(id,x,y,0,0)
     end
     x,y=ITP(xOy,x,y)
-    lastX,lastY=x,y
+    lastClicks[id]={x=x,y=y}
     if WIDGET.sel and WIDGET.sel.type=='inputBox' and not WIDGET.sel:isAbove(x,y) then
         WIDGET.unFocus(true)
         kb.setTextInput(false)
     end
     WIDGET._cursorMove(x,y)
     WIDGET._press(x,y,1)
-    if SCN.touchDown then SCN.touchDown(x,y,id) end
+    if not WIDGET.sel and SCN.touchDown then SCN.touchDown(x,y,id) end
 end
 function love.touchmoved(id,x,y,dx,dy)
     if WAIT.state or SCN.swapping then return end
     x,y=ITP(xOy,x,y)
-    if SCN.touchMove then SCN.touchMove(x,y,dx/SCR.k,dy/SCR.k,id) end
+    if (x-lastClicks[id].x)^2+(y-lastClicks[id].y)^2>clickDist2 then
+        lastClicks[id]=nil
+    end
     WIDGET._drag(x,y,dx/SCR.k,dy/SCR.k)
+    if not WIDGET.sel and SCN.touchMove then SCN.touchMove(x,y,dx/SCR.k,dy/SCR.k,id) end
 end
 function love.touchreleased(id,x,y)
     if WAIT.state or SCN.swapping then return end
@@ -301,8 +314,8 @@ function love.touchreleased(id,x,y)
         SCN.mainTouchID=false
     end
     if SCN.touchUp then SCN.touchUp(x,y,id) end
-    if (x-lastX)^2+(y-lastY)^2<62 then
-        if SCN.touchClick then SCN.touchClick(x,y) end
+    if lastClicks[id] and SCN.touchClick then
+        SCN.touchClick(x,y,id,((x-lastClicks[id].x)^2+(y-lastClicks[id].y)^2)^.5)
         clickFX(x,y)
     end
 end
@@ -970,6 +983,15 @@ function Zenitha.setClickFX(fx)
     if fx==false then fx=NULL end
     if fx==true then fx=function(x,y) SYSFX.new('tap',3,x,y) end end
     clickFX=fx
+end
+
+--- Set click distance threshold
+---
+--- Default value is 62
+--- @param dist number @Distance threshold
+function Zenitha.setClickDist(dist)
+    assert(type(dist)=='number' and dist>0,"Zenitha.setClickDist(dist): dist must be positive number")
+    clickDist2=dist^2
 end
 
 --- Set highest priority global key-pressing event listener
