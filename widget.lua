@@ -749,6 +749,7 @@ Widgets.slider=setmetatable({
     _unit=false,
     _smooth=false,
     _textShowTime=false,
+    _approachSpeed=26,
 
     buildArgs={
         'name',
@@ -849,7 +850,7 @@ function Widgets.slider:update(dt)
     Widgets.base.update(self,dt)
     if self._visible then
         self._pos0=self.disp()
-        self._pos=MATH.expApproach(self._pos,self._pos0,dt*26)
+        self._pos=MATH.expApproach(self._pos,self._pos0,dt*self._approachSpeed)
     end
     if WIDGET.sel==self then
         self._textShowTime=2
