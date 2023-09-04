@@ -236,28 +236,28 @@ end
 --- @return table[]
 function TABLE.rotate(matrix,dir)
     local icb={}
-    if dir=='R' then-- Rotate CW
+    if dir=='R' then -- Rotate CW
         for y=1,#matrix[1] do
             icb[y]={}
             for x=1,#matrix do
                 icb[y][x]=matrix[x][#matrix[1]-y+1]
             end
         end
-    elseif dir=='L' then-- Rotate CCW
+    elseif dir=='L' then -- Rotate CCW
         for y=1,#matrix[1] do
             icb[y]={}
             for x=1,#matrix do
                 icb[y][x]=matrix[#matrix-x+1][y]
             end
         end
-    elseif dir=='F' then-- Rotate 180 degree
+    elseif dir=='F' then -- Rotate 180 degree
         for y=1,#matrix do
             icb[y]={}
             for x=1,#matrix[1] do
                 icb[y][x]=matrix[#matrix-y+1][#matrix[1]-x+1]
             end
         end
-    elseif dir=='0' then-- Not rotate, just simple copy
+    elseif dir=='0' then -- Not rotate, just simple copy
         for y=1,#matrix do
             icb[y]={}
             for x=1,#matrix[1] do
@@ -446,7 +446,7 @@ end
 --------------------------------------------------------------
 
 --- Dump a simple lua table (no whitespaces)
-do-- function TABLE.dumpDeflate(L,t)
+do -- function TABLE.dumpDeflate(L,t)
     local function dump(t)
         local s='{'
         local count=1
@@ -488,7 +488,7 @@ do-- function TABLE.dumpDeflate(L,t)
 end
 
 --- Dump a simple lua table
-do-- function TABLE.dump(L,t)
+do -- function TABLE.dump(L,t)
     local tabs=setmetatable({
         [0]='',
         '\t',

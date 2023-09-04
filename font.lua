@@ -10,7 +10,7 @@ local defaultFont,defaultFallBack
 local fallbackMap={}
 
 --- @type love.Font
-local curFont=nil-- Current using font object
+local curFont=nil -- Current using font object
 
 local FONT={}
 

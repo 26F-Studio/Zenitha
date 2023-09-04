@@ -36,8 +36,8 @@ local autoGCcount=0
 local devMode
 local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastClicks={}
-local jsState={}-- map, joystickID->axisStates: {axisName->axisVal}
-local errData={}-- list, each error create {msg={errMsg strings},scene=sceneNameStr}
+local jsState={} -- map, joystickID->axisStates: {axisName->axisVal}
+local errData={} -- list, each error create {msg={errMsg strings},scene=sceneNameStr}
 local bigCanvases=setmetatable({},{__index=function(self,k)
     self[k]=gc.newCanvas()
     return self[k]
@@ -82,7 +82,7 @@ COLOR=      require'Zenitha.color'
 DEBUG=      require'Zenitha.debug'
 LOG=        require'Zenitha.log'
 JSON=       require'Zenitha.json'
-do-- Add pcall & MSG for JSON lib
+do -- Add pcall & MSG for JSON lib
     local encode,decode=JSON.encode,JSON.decode
     function JSON.encode(val)
         local a,b=pcall(encode,val)
@@ -108,7 +108,7 @@ REQUIRE=    require'Zenitha.require'
 PROFILE=    require'Zenitha.profile'
 TASK=       require'Zenitha.task'
 HASH=       require'Zenitha.sha2'
-do-- Add pbkdf2 for HASH lib
+do -- Add pbkdf2 for HASH lib
     local bxor=require'bit'.bxor
     local char=string.char
     local function sxor(s1, s2)
@@ -460,7 +460,7 @@ function love.gamepadaxis(JS,axis,val)
     if jsState[1] and JS==jsState[1]._jsObj then
         local js=jsState[1]
         if axis=='leftx' or axis=='lefty' or axis=='rightx' or axis=='righty' then
-            local newVal=-- range: [0,1]
+            local newVal= -- range: [0,1]
                 val>.4 and 1 or
                 val<-.4 and -1 or
                 0
@@ -478,7 +478,7 @@ function love.gamepadaxis(JS,axis,val)
                 js[axis]=newVal
             end
         elseif axis=='triggerleft' or axis=='triggerright' then
-            local newVal=val>.3 and 1 or 0-- range: [0,1]
+            local newVal=val>.3 and 1 or 0 -- range: [0,1]
             if newVal~=js[axis] then
                 if newVal==1 then
                     love.gamepadpressed(JS,jsAxisEventName[axis])

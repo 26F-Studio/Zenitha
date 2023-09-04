@@ -22,7 +22,7 @@ local commands={} do
             details: an array of strings containing documents, shows when user types 'help [command]'.
     ]]
 
-    local cmdList={}-- List of all non-alias commands
+    local cmdList={} -- List of all non-alias commands
 
     -- Basic
     commands.help={
@@ -107,7 +107,7 @@ local commands={} do
     }
 
     -- File
-    do-- tree
+    do -- tree
         local function tree(path,name,depth)
             local info=love.filesystem.getInfo(path..name)
             if info.type=='file' then
@@ -139,7 +139,7 @@ local commands={} do
             },
         }
     end
-    do-- del
+    do -- del
         local function delFile(name)
             if love.filesystem.remove(name) then
                 log{COLOR.Y,("Deleted: '%s'"):format(name)}

@@ -6,8 +6,8 @@ local crossTime=.08
 local diversion=0
 
 local voiceQueue={}
-local voiceSet={}-- {vocSet1={'voc1_1', 'voc1_2', ...}, vocSet2={'voc2_1', ...}, ...}
-local sourceBank={}-- {vocName1={SRC1s}, vocName2={SRC2s}, ...}
+local voiceSet={} -- {vocSet1={'voc1_1', 'voc1_2', ...}, vocSet2={'voc2_1', ...}, ...}
+local sourceBank={} -- {vocName1={SRC1s}, vocName2={SRC2s}, ...}
 
 local VOC={}
 
@@ -146,17 +146,17 @@ function VOC.init(list)
     function VOC._update()
         for i=#voiceQueue,1,-1 do
             local Q=voiceQueue[i]
-            if Q.s==0 then-- Free channel, auto delete when >3
+            if Q.s==0 then -- Free channel, auto delete when >3
                 if i>3 then
                     rem(voiceQueue,i)
                 end
-            elseif Q.s==1 then-- Waiting load source
+            elseif Q.s==1 then -- Waiting load source
                 Q[1]=_getVoice(Q[1])
                 Q[1]:setVolume(volume)
                 Q[1]:setPitch(1.0594630943592953^(diversion*(math.random()*2-1)))
                 Q[1]:play()
                 Q.s=Q[2] and 2 or 4
-            elseif Q.s==2 then-- Playing 1,ready 2
+            elseif Q.s==2 then -- Playing 1,ready 2
                 if Q[1]:getDuration()-Q[1]:tell()<crossTime then
                     Q[2]=_getVoice(Q[2])
                     Q[2]:setVolume(volume)
@@ -164,14 +164,14 @@ function VOC.init(list)
                     Q[2]:play()
                     Q.s=3
                 end
-            elseif Q.s==3 then-- Playing 12 same time
+            elseif Q.s==3 then -- Playing 12 same time
                 if not Q[1]:isPlaying() then
                     for j=1,#Q do
                         Q[j]=Q[j+1]
                     end
                     Q.s=Q[2] and 2 or 4
                 end
-            elseif Q.s==4 then-- Playing last
+            elseif Q.s==4 then -- Playing last
                 if not Q[1].isPlaying(Q[1]) then
                     Q[1]=nil
                     Q.s=0

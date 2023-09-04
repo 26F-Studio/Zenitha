@@ -168,11 +168,11 @@ function SFX.playSample(pack,...)
             else
                 local base=packSetting[pack].base
                 local top=packSetting[pack].top
-                local tune=type(a)=='string' and _getTuneHeight(a) or a-- Absolute tune in number
+                local tune=type(a)=='string' and _getTuneHeight(a) or a -- Absolute tune in number
                 local playTune=tune+rnd(-2,2)
-                if playTune<=base then-- Too low notes
+                if playTune<=base then -- Too low notes
                     playTune=base+1
-                elseif playTune>top then-- Too high notes
+                elseif playTune>top then -- Too high notes
                     playTune=top
                 end
                 SFX.play(pack..playTune-base,vol,nil,tune-playTune)
@@ -190,10 +190,10 @@ function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
     if vol<=0 then return end
 
-    local S=srcMap[name]-- Source list
+    local S=srcMap[name] -- Source list
     if not S then return end
-    if type(S[1])=='string' then-- Do the lazy load
-        local path=tostring(S[1])-- to avoid syntax checker error
+    if type(S[1])=='string' then -- Do the lazy load
+        local path=tostring(S[1]) -- to avoid syntax checker error
         local src=love.filesystem.getInfo(path) and FILE.isSafe(path) and love.audio.newSource(path,'static')
         assert(src,"WTF why path data can be bad")
         S[1]=src
@@ -209,7 +209,7 @@ function SFX.play(name,vol,pos,pitch)
         end
     end
 
-    S=S[n]-- AU_SRC
+    S=S[n] -- AU_SRC
     if S:getChannelCount()==1 then
         if pos then
             pos=clamp(pos,-1,1)*stereo

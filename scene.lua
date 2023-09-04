@@ -25,7 +25,7 @@
 
 --- @class Zenitha.SceneSwap
 --- @field duration number
---- @field changeTime number
+--- @field timeChange number
 --- @field draw function
 
 --- @type Zenitha.Scene[]
@@ -45,22 +45,22 @@ local eventNames={
 }
 
 local SCN={
-    mainTouchID=nil,     -- First touching ID(userdata)
+    mainTouchID=nil, -- First touching ID(userdata)
     maxScroll=0,
     curScroll=0,
 
-    swapping=false,      -- If Swapping
+    swapping=false, -- If Swapping
     state={
-        tar=false,       -- Swapping target
-        style=false,     -- Swapping style
-        changeTime=false,-- Loading point
-        time=false,      -- Full swap time
-        draw=false,      -- Swap draw  func
+        tar=false,        -- Swapping target
+        style=false,      -- Swapping style
+        draw=false,       -- Swap draw func
+        timeRem=false,    -- Swap time remain
+        timeChange=false, -- Loading point
     },
-    stack={},-- Scene stack
+    stack={}, -- Scene stack
     prev=false,
     cur=false,
-    args={},-- Arguments from previous scene
+    args={}, -- Arguments from previous scene
 
     scenes=scenes,
 }
@@ -69,36 +69,36 @@ local defaultSwap='fade'
 -- Scene swapping animations
 local swap={
     none={
-        duration=0,changeTime=0,
+        duration=0,timeChange=0,
         draw=function() end,
     },
     flash={
-        duration=.16,changeTime=.08,
+        duration=.16,timeChange=.08,
         draw=function() GC.clear(1,1,1) end,
     },
     fade={
-        duration=.5,changeTime=.25,
+        duration=.5,timeChange=.25,
         draw=function(t)
             GC.setColor(.1,.1,.1,t>.25 and 2-t*4 or t*4)
             GC.rectangle('fill',0,0,SCR.w,SCR.h)
         end,
     },
     fastFade={
-        duration=.2,changeTime=.1,
+        duration=.2,timeChange=.1,
         draw=function(t)
             GC.setColor(.1,.1,.1,t>.1 and 2-t*10 or t*10)
             GC.rectangle('fill',0,0,SCR.w,SCR.h)
         end,
     },
     slowFade={
-        duration=3,changeTime=1.5,
+        duration=3,timeChange=1.5,
         draw=function(t)
             GC.setColor(.1,.1,.1,t>1.5 and (3-t)/1.5 or t/1.5)
             GC.rectangle('fill',0,0,SCR.w,SCR.h)
         end,
     },
     swipeL={
-        duration=.5,changeTime=.25,
+        duration=.5,timeChange=.25,
         draw=function(t)
         t=t*2
             GC.setColor(.1,.1,.1,1-math.abs(t-.5))
@@ -107,7 +107,7 @@ local swap={
         end,
     },
     swipeR={
-        duration=.5,changeTime=.25,
+        duration=.5,timeChange=.25,
         draw=function(t)
             t=t*2
             GC.setColor(.1,.1,.1,1-math.abs(t-.5))
@@ -116,7 +116,7 @@ local swap={
         end,
     },
     swipeD={
-        duration=.5,changeTime=.25,
+        duration=.5,timeChange=.25,
         draw=function(t)
             t=t*2
             GC.setColor(.1,.1,.1,1-math.abs(t-.5))
@@ -160,7 +160,7 @@ function SCN.addSwap(name,swp)
     assert(not swap[name],"Swap '"..name.."' already exist")
     assert(type(swp)=='table',"Arg swp must be table")
     assert(type(swp.duration)=='number' and swp.duration>=0,"swp.duration must be nonnegative number")
-    assert(type(swp.changeTime)=='number' and swp.changeTime>=0,"swp.changeTime must be nonnegative number")
+    assert(type(swp.timeChange)=='number' and swp.timeChange>=0,"swp.timeChange must be nonnegative number")
     assert(type(swp.draw)=='function',"swp.draw must be function")
     swap[name]=swp
 end
@@ -176,15 +176,15 @@ end
 --- @param dt number
 function SCN._swapUpdate(dt)
     local S=SCN.state
-    S.time=S.time-dt
-    if S.time<S.changeTime and S.time+dt>=S.changeTime then
+    S.timeRem=S.timeRem-dt
+    if S.timeRem<S.timeChange and S.timeRem+dt>=S.timeChange then
         -- Actually load scene at this moment
         SCN.stack[#SCN.stack]=S.tar
         SCN.cur=S.tar
         SCN._load(S.tar)
         SCN.mainTouchID=nil
     end
-    if S.time<0 then
+    if S.timeRem<0 then
         SCN.swapping=false
     end
 end
@@ -234,8 +234,8 @@ function SCN.swapTo(tar,style,...)
             SCN.args={...}
             local S=SCN.state
             S.tar,S.style=tar,style
-            S.time=swap[style].duration
-            S.changeTime=swap[style].changeTime
+            S.timeRem=swap[style].duration
+            S.timeChange=swap[style].timeChange
             S.draw=swap[style].draw
         end
     else

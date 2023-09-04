@@ -14,8 +14,8 @@ local _hooker
 _hooker=function(event,line,info)
     info=info or getInfo(2,'fnS')
     local f=info.func
-    if _internal[f] then return end-- ignore the profiler itself
-    if info.name then _labeled[f]=info.name end-- get the function name if available
+    if _internal[f] then return end -- ignore the profiler itself
+    if info.name then _labeled[f]=info.name end -- get the function name if available
 
     -- find the line definition
     if not _defined[f] then

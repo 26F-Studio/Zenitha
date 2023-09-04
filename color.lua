@@ -84,7 +84,7 @@ do
         COLOR['L'..name:sub(1,1)]=COLOR[name][5]
     end
 
-    for i=1,5 do-- Create 1~5 Brightness level shortcut
+    for i=1,5 do -- Create 1~5 Brightness level shortcut
         COLOR[i]={}
         for j=1,#colorNames do
             local name=colorNames[j]

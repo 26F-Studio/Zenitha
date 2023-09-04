@@ -9,7 +9,7 @@
 local gc_clear=love.graphics.clear
 
 --- @type Zenitha.background[]
-local BGs={}-- Stored backgrounds
+local BGs={} -- Stored backgrounds
 
 local BG={
     default='none',
@@ -89,14 +89,14 @@ function BG._update(dt) BGs[BG.cur].update(dt) end
 --- Draw current BG (called by Zenitha)
 function BG._draw() BGs[BG.cur].draw() end
 
-do-- Built-in: None
+do -- Built-in: None
     BG.add('none',{
         draw=function()
             gc_clear(.08,.08,.084)
         end,
     })
 end
-do-- Built-in: Color
+do -- Built-in: Color
     local r,g,b=.26,.26,.26
     BG.add('color',{
         draw=function()
@@ -107,7 +107,7 @@ do-- Built-in: Color
         end,
     })
 end
-do-- Built-in: Image
+do -- Built-in: Image
     local gc_setColor=love.graphics.setColor
     local back={}
     local image=false

@@ -231,7 +231,7 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
     local halfAng=6.283185307179586/segments/2
     local erasedLen=rCorner*math.tan(halfAng)
     if mode=='line' then
-        erasedLen=erasedLen+1-- Fix 1px cover
+        erasedLen=erasedLen+1 -- Fix 1px cover
         for i=1,segments do
             -- Line
             local x1,y1,x2,y2=X[i],Y[i],X[i+1],Y[i+1]
@@ -267,9 +267,9 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
     end
 end
 
-do-- function GC.getScreenShot(table,key)-- Save screenshot as image object to a table
+do -- function GC.getScreenShot(table,key) -- Save screenshot as image object to a table
     local _t,_k
-    local function _captureFunc(imageData)-- Actually triggered by engine a bit later after calling GC.getScreenShot, because love2d's capture function doesn't effect instantly
+    local function _captureFunc(imageData) -- Actually triggered by engine a bit later after calling GC.getScreenShot, because love2d's capture function doesn't effect instantly
         _t[_k]=gc.newImage(imageData)
     end
     --- @param t table
@@ -451,7 +451,7 @@ end
 
 --------------------------------------------------------------
 
-do-- function GC.load(L), GC.execute(t)
+do -- function GC.load(L), GC.execute(t)
     local cmds={
         push=     'push',
         pop=      'pop',
@@ -547,7 +547,7 @@ do-- function GC.load(L), GC.execute(t)
     --- @param L number[]|number[][]|table[][]|string[][]
     --- ## Example
     --- ```lua
-    --- GC.load{100,100-- size of canvas
+    --- GC.load{100,100 -- size of canvas
     ---     {'setCL',1,0,0},
     ---     {'dRect','fill',0,0,100,100},
     ---     {'setCL',1,1,0},

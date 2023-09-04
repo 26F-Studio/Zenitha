@@ -138,7 +138,7 @@ end
 --- ```
 function TEXT:add(data)
     local T={
-        _t=0,-- Timer
+        _t=0, -- Timer
         text=GC.newText(FONT.get(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),
         x=data.x or 0,y=data.y or 0,
         r=data.r,g=data.g,b=data.b,a=data.a,

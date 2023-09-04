@@ -3,10 +3,10 @@ local effectsSupported=audio.isEffectsSupported()
 local ins=table.insert
 
 local nameList={}
-local srcLib={}-- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
+local srcLib={} -- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
 local lastLoadNames={}
-local nowPlay={}-- Playing bgm objects
-local lastPlay=NONE-- Directly stored last played bgm name(s)
+local nowPlay={} -- Playing bgm objects
+local lastPlay=NONE -- Directly stored last played bgm name(s)
 
 --- @type false|string|string[]
 local defaultBGM=false
@@ -320,14 +320,14 @@ function BGM.set(bgms,mode,...)
             elseif mode=='pitch' then
                 _clearTask(obj,'pitch')
 
-                local pitch,changeTime=...
+                local pitch,timeUse=...
                 if not pitch then pitch=1 end
-                if not changeTime then changeTime=1 end
+                if not timeUse then timeUse=1 end
 
                 assert(type(pitch)=='number' and pitch>0 and pitch<=32,"BGM.set(...,pitch): pitch must be in range 0~32")
-                assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
+                assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
 
-                TASK.new(task_setPitch,obj,pitch,changeTime)
+                TASK.new(task_setPitch,obj,pitch,timeUse)
             elseif mode=='seek' then
                 local time=...
                 assert(type(time)=='number',"BGM.set(...,time): time must be number")
@@ -335,28 +335,28 @@ function BGM.set(bgms,mode,...)
             elseif mode=='lowgain' then
                 if effectsSupported then
                     _clearTask(obj,'lowgain')
-                    local lowgain,changeTime=...
+                    local lowgain,timeUse=...
                     if not lowgain then lowgain=1 end
-                    if not changeTime then changeTime=1 end
+                    if not timeUse then timeUse=1 end
 
                     assert(type(lowgain)=='number' and lowgain>=0 and lowgain<=1,"BGM.set(...,lowgain,highgain): lowgain must be in range 0~1")
-                    assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
+                    assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
 
-                    TASK.new(task_setLowgain,obj,lowgain,changeTime)
+                    TASK.new(task_setLowgain,obj,lowgain,timeUse)
                     obj.lowgain=lowgain
                     obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
                 end
             elseif mode=='highgain' then
                 if effectsSupported then
                     _clearTask(obj,'highgain')
-                    local highgain,changeTime=...
+                    local highgain,timeUse=...
                     if not highgain then highgain=1 end
-                    if not changeTime then changeTime=1 end
+                    if not timeUse then timeUse=1 end
 
                     assert(type(highgain)=='number' and highgain>=0 and highgain<=1,"BGM.set(...,lowgain,highgain): highgain must be in range 0~1")
-                    assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
+                    assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
 
-                    TASK.new(task_setHighgain,obj,highgain,changeTime)
+                    TASK.new(task_setHighgain,obj,highgain,timeUse)
                     obj.highgain=highgain
                     obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
                 end

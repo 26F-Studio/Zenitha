@@ -184,7 +184,7 @@ function MATH.pointInPolygon(x,y,poly,evenOddRule)
     end
     if evenOddRule then
         return wn%2~=0
-    else-- non-zero winding rule
+    else -- non-zero winding rule
         return wn~=0
     end
 end

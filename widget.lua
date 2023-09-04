@@ -116,8 +116,8 @@ Widgets.base={
 
     isAbove=NULL,
     draw=NULL,
-    visibleFunc=false,-- function return a boolean
-    visibleTick=false,-- function return a boolean
+    visibleFunc=false, -- function return a boolean
+    visibleTick=false, -- function return a boolean
 
     _text=false,
     _image=false,
@@ -486,7 +486,7 @@ Widgets.checkBox=setmetatable({
     cornerR=3,
     sound_on=false,sound_off=false,
 
-    disp=false,-- function return a boolean
+    disp=false, -- function return a boolean
     code=NULL,
 
     _text=false,
@@ -605,7 +605,7 @@ Widgets.switch=setmetatable({
     labelPos='left',
     labelDistance=20,
 
-    disp=false,-- function return a boolean
+    disp=false, -- function return a boolean
     code=NULL,
 
     _text=false,
@@ -734,7 +734,7 @@ Widgets.slider=setmetatable({
     valueShow=nil,
     textAlwaysShow=false,
 
-    disp=false,-- function return the displaying _value
+    disp=false, -- function return the displaying _value
     code=NULL,
 
     _floatWheel=0,
@@ -745,7 +745,7 @@ Widgets.slider=setmetatable({
     _pos0=false,
     _rangeL=false,
     _rangeR=false,
-    _rangeWidth=false,-- just _rangeR-_rangeL, for convenience
+    _rangeWidth=false, -- just _rangeR-_rangeL, for convenience
     _unit=false,
     _smooth=false,
     _textShowTime=false,
@@ -819,9 +819,9 @@ function Widgets.slider:reset()
         elseif type(self.valueShow)=='string' then
             self._showFunc=assert(sliderShowFunc[self.valueShow],"[slider].valueShow must be function, or 'int', 'float', or 'percent'")
         end
-    elseif self.valueShow==false then-- Show nothing if false
+    elseif self.valueShow==false then -- Show nothing if false
         self._showFunc=sliderShowFunc.null
-    else-- Use default if nil
+    else -- Use default if nil
         if self._unit and self._unit%1==0 then
             self._showFunc=sliderShowFunc.int
         else
@@ -975,7 +975,7 @@ Widgets.slider_fill=setmetatable({
     _pos=false,
     _rangeL=false,
     _rangeR=false,
-    _rangeWidth=false,-- just _rangeR-_rangeL, for convenience
+    _rangeWidth=false, -- just _rangeR-_rangeL, for convenience
 
     buildArgs={
         'name',
@@ -1195,16 +1195,16 @@ Widgets.selector=setmetatable({
     labelPos='left',
     labelDistance=20,
 
-    list=false,-- table of items
-    disp=false,-- function return a boolean
+    list=false, -- table of items
+    disp=false, -- function return a boolean
     show=function(v) return v end,
     code=NULL,
 
     _floatWheel=0,
     _text=false,
     _image=false,
-    _select=false,-- Selected item ID
-    _selText=false,-- Selected item name
+    _select=false, -- Selected item ID
+    _selText=false, -- Selected item name
     selFontSize=30,selFontType=false,
 
     buildArgs={
@@ -1381,7 +1381,7 @@ Widgets.inputBox=setmetatable({
     maxInputLength=1e99,
     sound_input=false,sound_bksp=false,sound_clear=false,sound_fail=false,
 
-    _value='',-- Text contained
+    _value='', -- Text contained
 
     buildArgs={
         'name',
@@ -1555,9 +1555,9 @@ Widgets.textBox=setmetatable({
 
     _floatWheel=0,
     _texts=false,
-    _scrollPos=0,-- Scroll-down-distance
+    _scrollPos=0, -- Scroll-down-distance
     _scrollPos1=0,
-    _sure=0,-- Sure-timer for clear history
+    _sure=0, -- Sure-timer for clear history
 
     buildArgs={
         'name',
@@ -1609,7 +1609,7 @@ function Widgets.textBox:setTexts(t)
 end
 function Widgets.textBox:push(t)
     ins(self._texts,t)
-    if self._scrollPos==(#self._texts-1)*self.lineHeight-self.h then-- minus 1 for the new message
+    if self._scrollPos==(#self._texts-1)*self.lineHeight-self.h then -- minus 1 for the new message
         self._scrollPos=min(self._scrollPos+self.lineHeight,#self._texts*self.lineHeight-self.h)
     end
 end
@@ -1746,7 +1746,7 @@ Widgets.listBox=setmetatable({
     cornerR=3,
     activeColor='LI',
     idleColor='L',
-    drawFunc=false,-- function that draw options. Input: option,id,ifSelected
+    drawFunc=false, -- function that draw options. Input: option,id,ifSelected
     releaseDist=10,
     stencilMode='total',
     sound_click=false,
@@ -1991,10 +1991,10 @@ end
 local WIDGET={_prototype=Widgets}
 
 --- @type Zenitha.widget.base[]
-WIDGET.active={}-- Table contains all active widgets
+WIDGET.active={} -- Table contains all active widgets
 
 --- @type Zenitha.widget.base|false
-WIDGET.sel=false-- Selected widget
+WIDGET.sel=false -- Selected widget
 
 --- Reset all widgets (called by Zenitha when scene changed and window resized or something)
 function WIDGET._reset()

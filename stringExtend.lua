@@ -102,8 +102,8 @@ end
 --- @return string[]
 function STRING.split(str,sep,regex)
     local L={}
-    local p1=1-- start
-    local p2-- target
+    local p1=1 -- start
+    local p2 -- target
     if regex then
         while p1<=#str do
             p2=find(str,sep,p1) or #str+1
@@ -161,9 +161,9 @@ end
 --- @return number|nil, string|nil
 function STRING.cutUnit(s)
     local _s,_e=find(s,'^-?%d+%.?%d*')
-    if _e==#s then-- All numbers
+    if _e==#s then -- All numbers
         return tonumber(s),nil
-    elseif not _s then-- No numbers
+    elseif not _s then -- No numbers
         return nil,s
     else
         return tonumber(sub(s,_s,_e)),sub(s,_e+1)
@@ -213,7 +213,7 @@ end
 
 local units={'','K','M','B','T','Qa','Qt','Sx','Sp','Oc','No'}
 local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}
-local secUnits={'Dc','Vg','Tg','Qd','Qi','Se','St','Og','Nn','Ce'}-- Ce is next-level unit, but DcCe is not used so used here
+local secUnits={'Dc','Vg','Tg','Qd','Qi','Se','St','Og','Nn','Ce'} -- Ce is next-level unit, but DcCe is not used so used here
 for _,preU in next,preUnits do for _,secU in next,secUnits do table.insert(units,preU..secU) end end
 --- Convert a number to a approximate integer with large unit
 --- @param num number
