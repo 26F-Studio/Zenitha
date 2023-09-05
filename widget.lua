@@ -1732,7 +1732,7 @@ end
 --- @field h number
 --- @field sound_click string|false
 --- @field sound_select string|false
---- @field _list table @List of options
+--- @field _list table @List of items
 Widgets.listBox=setmetatable({
     type='listBox',
     w=100,h=40,
@@ -1746,7 +1746,7 @@ Widgets.listBox=setmetatable({
     cornerR=3,
     activeColor='LI',
     idleColor='L',
-    drawFunc=false, -- function that draw options. Input: option,id,ifSelected
+    drawFunc=false, -- function that draw items. Input: item,id,isSelect
     releaseDist=10,
     stencilMode='total',
     sound_click=false,
