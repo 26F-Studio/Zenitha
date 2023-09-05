@@ -791,7 +791,7 @@ function love.run()
                     drawSysInfo()
                 gc_replaceTransform(SCR.origin)
                     if SCN.swapping then
-                        SCN.state.draw(SCN.state.time)
+                        SCN.state.draw(SCN.state.timeRem)
                     end
                 gc_replaceTransform(SCR.xOy_ul)
                     MES_draw()
