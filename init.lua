@@ -298,7 +298,7 @@ end
 function love.touchmoved(id,x,y,dx,dy)
     if WAIT.state or SCN.swapping then return end
     x,y=ITP(xOy,x,y)
-    if (x-lastClicks[id].x)^2+(y-lastClicks[id].y)^2>clickDist2 then
+    if lastClicks[id] and (x-lastClicks[id].x)^2+(y-lastClicks[id].y)^2>clickDist2 then
         lastClicks[id]=nil
     end
     WIDGET._drag(x,y,dx/SCR.k,dy/SCR.k)
