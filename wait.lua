@@ -115,7 +115,7 @@ function WAIT._draw()
                 WAIT.coverColor[3],
                 alpha*(WAIT.arg.coverAlpha or WAIT.coverAlpha)
             )
-            GC.rectangle('fill',0,0,SCR.w,SCR.h);
+            GC.rectangle('fill',0,0,SCR.w,SCR.h)
         end
 
         if not WAIT.arg.noDefaultDraw then defaultDraw(alpha,WAIT.totalTimer) end
