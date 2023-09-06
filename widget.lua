@@ -19,6 +19,7 @@ local sub,ins,rem=string.sub,table.insert,table.remove
 
 local SCN,SCR,xOy=SCN,SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
+local utf8=require('utf8')
 
 local indexMeta={
     __index=function(L,k)
@@ -1424,6 +1425,12 @@ function Widgets.inputBox:reset()
         error("[inputBox].labelPos must be 'left', 'right', 'up', or 'down'")
     end
 end
+function Widgets.inputBox:_cutTooLong()
+    local extra=utf8.offset(self._value,self.maxInputLength+1)
+    if extra then
+        self._value=sub(self._value,1,extra-1)
+    end
+end
 function Widgets.inputBox:hasText()
     return #self._value>0
 end
@@ -1434,11 +1441,13 @@ function Widgets.inputBox:setText(str)
     if not str then str="" end
     assert(type(str)=='string',"Arg must be string")
     self._value=str
+    self:_cutTooLong()
 end
 function Widgets.inputBox:addText(str)
     if not str then str="" end
     assert(type(str)=='string',"Arg must be string")
     self._value=self._value..str
+    self:_cutTooLong()
 end
 function Widgets.inputBox:clear()
     self._value=''
@@ -1525,6 +1534,7 @@ function Widgets.inputBox:keypress(k)
             end
         end
         self._value=t
+        self:_cutTooLong()
     end
 end
 
@@ -2151,6 +2161,7 @@ function WIDGET._textinput(texts)
     if W and W.type=='inputBox' then
         if not W.regex or texts:match(W.regex) then
             W._value=W._value..texts
+            W:_cutTooLong()
             SFX.play(W.sound_input)
         else
             SFX.play(W.sound_fail)
