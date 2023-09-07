@@ -46,6 +46,23 @@ function STRING.sArg(str,switch)
     end
 end
 
+--- Paste new string into original string, won't exceed the length of original string
+--- @param str string
+--- @param str2 string
+--- @param pos number
+--- @return string
+function STRING.paste(str,str2,pos)
+    local mPos=#str-#str2+1
+    if pos<1 then
+        str2=sub(str2,2-pos)
+        return str2..sub(str,1+#str2)
+    elseif pos>mPos then
+        return sub(str,1,pos-1)..sub(str2,1,mPos-pos-1)
+    else
+        return sub(str,1,pos-1)..str2..sub(str,pos+#str2)
+    end
+end
+
 
 local shiftMap={
     ['1']='!',['2']='@',['3']='#',['4']='$',['5']='%',
