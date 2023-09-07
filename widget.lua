@@ -2213,88 +2213,88 @@ end
 ---
 --- General
 --- @field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
---- @field name string
---- @field pos table
+--- @field name? string
+--- @field pos? table
 ---
---- @field x number
---- @field y number
---- @field w number
---- @field h number
---- @field widthLimit number
+--- @field x? number
+--- @field y? number
+--- @field w? number
+--- @field h? number
+--- @field widthLimit? number
 ---
---- @field color Zenitha.ColorStr|Zenitha.Color
---- @field text string|function
---- @field fontSize number
---- @field fontType string
---- @field image string|love.Drawable
---- @field alignX 'left'|'center'|'right'
---- @field alignY 'up'|'center'|'down'
---- @field labelPos 'left'|'right'|'up'|'down'
---- @field labelDistance number
---- @field disp function
---- @field code function
---- @field visibleFunc function Used to determine if widget is visible when scene changed
---- @field visibleTick function Used to change widget's visibility every frame
+--- @field color? Zenitha.ColorStr|Zenitha.Color
+--- @field text? string|function
+--- @field fontSize? number
+--- @field fontType? string
+--- @field image? string|love.Drawable
+--- @field alignX? 'left'|'center'|'right'
+--- @field alignY? 'up'|'center'|'down'
+--- @field labelPos? 'left'|'right'|'up'|'down'
+--- @field labelDistance? number
+--- @field disp? function
+--- @field code? function
+--- @field visibleFunc? function Used to determine if widget is visible when scene changed
+--- @field visibleTick? function Used to change widget's visibility every frame
 ---
---- @field lineWidth number
---- @field cornerR number
+--- @field lineWidth? number
+--- @field cornerR? number
 ---
---- @field textColor Zenitha.ColorStr|Zenitha.Color
---- @field fillColor Zenitha.ColorStr|Zenitha.Color
---- @field frameColor Zenitha.ColorStr|Zenitha.Color
---- @field activeColor Zenitha.ColorStr|Zenitha.Color
---- @field idleColor Zenitha.ColorStr|Zenitha.Color
+--- @field textColor? Zenitha.ColorStr|Zenitha.Color
+--- @field fillColor? Zenitha.ColorStr|Zenitha.Color
+--- @field frameColor? Zenitha.ColorStr|Zenitha.Color
+--- @field activeColor? Zenitha.ColorStr|Zenitha.Color
+--- @field idleColor? Zenitha.ColorStr|Zenitha.Color
 ---
---- @field sound_press string
---- @field sound_hover string
+--- @field sound_press? string
+--- @field sound_hover? string
 ---
 --- Image
---- @field ang number
---- @field k number
+--- @field ang? number
+--- @field k? number
 ---
 --- Check box
---- @field sound_on string
---- @field sound_off string
+--- @field sound_on? string
+--- @field sound_off? string
 ---
 --- Slider
---- @field axis {x:number, y:number, unit?:number}
---- @field smooth boolean
---- @field valueShow false|'int'|'float'|'percent'|function
+--- @field axis? {x:number, y:number, unit?:number}
+--- @field smooth? boolean
+--- @field valueShow? false|'int'|'float'|'percent'|function
 ---
---- @field lineDist number
+--- @field lineDist? number
 ---
 --- Selector
---- @field selFontSize number
---- @field selFontType string
---- @field list table
---- @field show function
+--- @field selFontSize? number
+--- @field selFontType? string
+--- @field list? table
+--- @field show? function
 ---
 --- Input box
---- @field secret boolean
---- @field regex string
---- @field maxInputLength number
---- @field sound_input string
---- @field sound_bksp string
---- @field sound_clear string
---- @field sound_fail string
+--- @field secret? boolean
+--- @field regex? string
+--- @field maxInputLength? number
+--- @field sound_input? string
+--- @field sound_bksp? string
+--- @field sound_clear? string
+--- @field sound_fail? string
 ---
 --- Scrolling boxes
---- @field scrollBarPos number
---- @field scrollBarWidth number
---- @field scrollBarDist number
---- @field scrollBarColor Zenitha.ColorStr|Zenitha.Color
---- @field lineHeight number
+--- @field scrollBarPos? number
+--- @field scrollBarWidth? number
+--- @field scrollBarDist? number
+--- @field scrollBarColor? Zenitha.ColorStr|Zenitha.Color
+--- @field lineHeight? number
 ---
 --- Text box
---- @field yOffset number
---- @field fixContent boolean
+--- @field yOffset? number
+--- @field fixContent? boolean
 ---
 --- List box
---- @field drawFunc function
---- @field releaseDist number
---- @field stencilMode 'total'|'single'|false
---- @field sound_click string
---- @field sound_select string
+--- @field drawFunc? function
+--- @field releaseDist? number
+--- @field stencilMode? 'total'|'single'|false
+--- @field sound_click? string
+--- @field sound_select? string
 
 --- Create new widget
 --- @param args Zenitha.widgetArg @Arguments to create widget, check declare widget class for more info
