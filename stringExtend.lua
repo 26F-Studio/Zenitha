@@ -53,6 +53,7 @@ end
 --- @return string
 function STRING.paste(str,str2,pos)
     local mPos=#str-#str2+1
+    if pos<0 then pos=pos+#str+1 end
     if pos<1 then
         str2=sub(str2,2-pos)
         return str2..sub(str,1+#str2)
