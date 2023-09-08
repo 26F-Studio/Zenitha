@@ -66,7 +66,7 @@ function WAIT.new(data)
     WAIT.totalTimer=0
 end
 
---- Interrupt the current 
+--- Interrupt the current
 function WAIT.interrupt()
     if WAIT.state and WAIT.state~='leave' then
         WAIT.state='leave'
