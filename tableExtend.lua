@@ -1,4 +1,4 @@
-local rnd=math.random
+local rnd,floor=math.random,math.floor
 local find=string.find
 local rem=table.remove
 local next,type=next,type
@@ -226,7 +226,7 @@ end
 --- @param org any[]
 function TABLE.reverse(org)
     local l=#org
-    for i=1,math.floor(l/2) do
+    for i=1,floor(l/2) do
         org[i],org[l+1-i]=org[l+1-i],org[i]
     end
 end
@@ -307,6 +307,25 @@ end
 --- @return number|nil
 function TABLE.find(t,val,start)
     for i=start or 1,#t do if t[i]==val then return i end end
+end
+
+--- TABLE.find, but for ordered list only
+--- @param t any[]
+--- @param val any
+--- @return number|nil
+function TABLE.findOrdered(t,val)
+    if val<t[1] or val>t[#t] then return end
+    local i,j=1,#t
+    while i<=j do
+        local m=floor((i+j)/2)
+        if t[m]>val then
+            j=m-1
+        elseif t[m]<val then
+            i=m+1
+        else
+            return m
+        end
+    end
 end
 
 --- Find value in whole table
