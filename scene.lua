@@ -1,5 +1,5 @@
 --- @class Zenitha.Scene
---- @field widgetList? Zenitha.widget.base[]
+--- @field widgetList? Zenitha.widgetArg[]|Zenitha.widget.base[]
 --- @field scrollHeight? number|nil
 ---
 --- @field enter? function
@@ -133,10 +133,18 @@ function SCN.add(name,scene)
     assert(type(scene)=='table',"scene must be table")
     assert(not scenes[name],"scene '"..tostring(name).."' already exists")
 
+    if scene.widgetList==nil then scene.widgetList={} end
+
     -- Check each field in scene object
     for k,v in next,scene do
         if k=='widgetList' then
             assert(type(scene.widgetList)=='table',"[scene].widgetList must be table")
+            for kw,w in next,scene.widgetList do
+                assert(type(w)=='table',"[scene].widgetList[...] must be widget args table or widget object")
+                if not w._widget then
+                    scene.widgetList[kw]=WIDGET.new(w)
+                end
+            end
         elseif k=='scrollHeight' then
             assert(type(scene.scrollHeight)=='number' and scene.scrollHeight>0,"[scene].scrollHeight must be positive number")
         elseif TABLE.find(eventNames,k) then
@@ -147,8 +155,6 @@ function SCN.add(name,scene)
     end
     for i=1,#eventNames do assert(not scene[eventNames[i]] or type(scene[eventNames[i]])=='function',"[scene]."..eventNames[i].." must be function") end
 
-    if not scene.widgetList then scene.widgetList={} end
-    setmetatable(scene.widgetList,WIDGET.indexMeta)
     scenes[name]=scene
 end
 

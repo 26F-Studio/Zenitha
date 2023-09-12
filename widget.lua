@@ -62,6 +62,10 @@ local Widgets={}
 --------------------------------------------------------------
 
 --- @class Zenitha.widget.base @not used by user
+--- @field _widget true
+--- @field type string
+--- @field name string
+---
 --- @field color Zenitha.ColorStr|Zenitha.Color
 --- @field textColor Zenitha.ColorStr|Zenitha.Color
 --- @field fillColor Zenitha.ColorStr|Zenitha.Color
@@ -93,6 +97,7 @@ local Widgets={}
 --- @field keypress function
 --- @field code function
 Widgets.base={
+    _widget=true,
     type='null',
     name=false,
 
