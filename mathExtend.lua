@@ -113,6 +113,15 @@ function MATH.mix(v1,v2,ratio)
     return v1+(v2-v1)*ratio
 end
 
+--- Get ratio value (linear) of two numbers with a mixed value
+--- @param v1 number
+--- @param v2 number
+--- @param value number
+--- @return number
+function MATH.imix(v1,v2,value)
+    return (value-v1)/(v2-v1)
+end
+
 local clamp,mix=MATH.clamp,MATH.mix
 --- Get mix value (linear) of a list of numbers with a ratio (clampped in [0,1])
 --- @param list number[]
