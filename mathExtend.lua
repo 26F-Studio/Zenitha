@@ -1,4 +1,5 @@
-local MATH={} for k,v in next,math do MATH[k]=v end
+local MATH={}
+for k,v in next,math do MATH[k]=v end
 
 MATH.tau=2*math.pi
 MATH.phi=(1+math.sqrt(5))/2
@@ -52,7 +53,7 @@ function MATH.coin(a,b)
     end
 end
 
---- Get a random real number between a and b
+--- Get a random real number in [a, b)
 --- @param a number
 --- @param b number
 --- @return number
@@ -69,6 +70,19 @@ function MATH.randFreq(fList)
     for i=1,#fList do
         r=r-fList[i]
         if r<0 then return i end
+    end
+    error("Frequency list should be a simple positive number list")
+end
+
+--- Get a random key with specified frequency table
+--- @param fList table<any,number> positive numbers
+--- @return integer
+function MATH.randFreqAll(fList)
+    local sum=TABLE.sumAll(fList)
+    local r=rnd()*sum
+    for k,v in next,fList do
+        r=r-v
+        if r<0 then return k end
     end
     error("Frequency list should be a simple positive number list")
 end
@@ -104,44 +118,67 @@ function MATH.clamp(v,low,high)
     end
 end
 
---- Get mix value (linear) of two numbers with a ratio
+--- Get mix value (linear) of two numbers with a ratio (not clamped)
 --- @param v1 number
 --- @param v2 number
 --- @param ratio number @0~1 at most time
 --- @return number
-function MATH.mix(v1,v2,ratio)
+function MATH.lerp(v1,v2,ratio)
     return v1+(v2-v1)*ratio
 end
 
---- Get ratio value (linear) of two numbers with a mixed value
+--- Inverse function of MATH.lerp (not clamped)
 --- @param v1 number
 --- @param v2 number
 --- @param value number
 --- @return number
-function MATH.imix(v1,v2,value)
+function MATH.iLerp(v1,v2,value)
     return (value-v1)/(v2-v1)
 end
 
-local clamp,mix=MATH.clamp,MATH.mix
+--- Similar to MATH.lerp (clamped)
+--- @param v1 number
+--- @param v2 number
+--- @param ratio number @0~1 at most time
+--- @return number
+function MATH.cLerp(v1,v2,ratio)
+    return
+        ratio<=v1 and 0 or
+        ratio>=v2 and 1 or
+        v1+(v2-v1)*ratio
+end
+
+--- Inverse function of MATH.cLerp (clamped)
+--- @param v1 number
+--- @param v2 number
+--- @param value number
+--- @return number
+function MATH.icLerp(v1,v2,value)
+    return (value-v1)/(v2-v1)
+end
+
+local clamp,lerp=MATH.clamp,MATH.lerp
+
 --- Get mix value (linear) of a list of numbers with a ratio (clampped in [0,1])
 --- @param list number[]
 --- @param ratio number
 --- @return number
-function MATH.listMix(list,ratio)
-    local t2=(#list-1)*clamp(ratio,0,1)+1
-    return mix(list[floor(t2)],list[ceil(t2)],t2%1)
+function MATH.listLerp(list,ratio)
+    local index=(#list-1)*clamp(ratio,0,1)+1
+    return lerp(list[floor(index)],list[ceil(index)],index%1)
 end
 
 --- Specify a line pass (x1,y1) and (x2,y2), get the y value when x=t
---- Works similar to MATH.mix()
---- @param t number
+---
+--- Same to the combination of MATH.iLerp and MATH.lerp
 --- @param x1 number
 --- @param y1 number
 --- @param x2 number
 --- @param y2 number
+--- @param ratio number
 --- @return number
-function MATH.interpolate(t,x1,y1,x2,y2)
-    return y1+(t-x1)*(y2-y1)/(x2-x1)
+function MATH.interpolate(x1,y1,x2,y2,ratio)
+    return y1+(ratio-x1)*(y2-y1)/(x2-x1)
 end
 
 --- Get a closer value from a to b with "exponential speed" k

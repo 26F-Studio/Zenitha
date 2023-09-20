@@ -194,7 +194,7 @@ end
 
 --- Remove duplicated value of [1~#]
 --- @param org any[]
-function TABLE.trimDuplicate(org)
+function TABLE.remDup(org)
     local cache={}
     local len=#org
     local i=1
@@ -209,9 +209,9 @@ function TABLE.trimDuplicate(org)
     end
 end
 
---- Discard duplicated value
+--- Remove duplicated value
 --- @param org table
-function TABLE.remDuplicate(org)
+function TABLE.remDupAll(org)
     local cache={}
     for k,v in next,org do
         if cache[v] then
@@ -232,8 +232,8 @@ function TABLE.reverse(org)
 end
 
 --- Get a rotated copy of a matrix
---- @param matrix table[]
---- @return table[]
+--- @param matrix any[][]
+--- @return any[][]
 function TABLE.rotate(matrix,dir)
     local icb={}
     if dir=='R' then -- Rotate CW
@@ -272,7 +272,7 @@ end
 
 --------------------------------------------------------------
 
---- Check if tow list have same elements
+--- Check if two list have same elements
 --- @param a any[]
 --- @param b any[]
 --- @return boolean
@@ -285,7 +285,7 @@ function TABLE.compare(a,b)
     return true
 end
 
---- Check if tow table have same elements
+--- Check if two table have same elements
 --- @param a table
 --- @param b table
 --- @return boolean
@@ -390,7 +390,7 @@ function TABLE.countAll(t,val)
 end
 
 --- Sum table in [1~#]
---- @param t any[]
+--- @param t number[]
 --- @return number
 function TABLE.sum(t)
     local s=0
@@ -401,7 +401,7 @@ function TABLE.sum(t)
 end
 
 --- Sum table
---- @param t table
+--- @param t table<any,number>
 --- @return number
 function TABLE.sumAll(t)
     local s=0
