@@ -8,8 +8,10 @@ MATH.nan=0/0
 
 local floor,ceil=math.floor,math.ceil
 local sin,cos=math.sin,math.cos
+local max,min=math.max,math.min
 local rnd=math.random
 local exp,log=math.exp,math.log
+local abs=math.abs
 local tau=MATH.tau
 
 --- Check if a number is NaN
@@ -200,6 +202,57 @@ end
 --- @return number
 function MATH.distance(x1,y1,x2,y2)
     return ((x1-x2)^2+(y1-y2)^2)^.5
+end
+
+--- Get Minkowski distance between two 2D points
+--- @param p 0|number 0 for Chebyshev distance
+--- @param x1 number
+--- @param y1 number
+--- @param x2 number
+--- @param y2 number
+function MATH.mDist2(p,x1,y1,x2,y2)
+    return
+        p==0 and max(abs(x1-x2),abs(y1-y2)) or
+        p==1 and abs(x1-x2)+abs(y1-y2) or
+        p==2 and ((x1-x2)^2+(y1-y2)^2)^.5 or
+        (abs(x1-x2)^p+abs(y1-y2)^p)^(1/p)
+end
+
+--- Get Minkowski distance between two 3D points
+--- @param p 0|number 0 for Chebyshev distance
+--- @param x1 number
+--- @param y1 number
+--- @param z1 number
+--- @param x2 number
+--- @param y2 number
+--- @param z2 number
+function MATH.mDist3(p,x1,y1,z1,x2,y2,z2)
+    return
+        p==0 and max(abs(x1-x2),abs(y1-y2),abs(z1-z2)) or
+        p==1 and abs(x1-x2)+abs(y1-y2)+abs(z1-z2) or
+        p==2 and ((x1-x2)^2+(y1-y2)^2+(z1-z2)^2)^.5 or
+        (abs(x1-x2)^p+abs(y1-y2)^p+abs(z1-z2)^p)^(1/p)
+end
+
+--- Get Minkowski distance between two vectors
+--- @param p 0|number 0 for Chebyshev distance
+--- @param v1 number[]
+--- @param v2 number[]
+function MATH.mDistV(p,v1,v2)
+    assert(#v1==#v2,"Vector length not match")
+    if p==0 then
+        local maxD=0
+        for i=1,#v1 do
+            maxD=max(maxD,abs(v1[i]-v2[i]))
+        end
+        return maxD
+    else
+        local sum=0
+        for i=1,#v1 do
+            sum=sum+abs(v1[i]-v2[i])^p
+        end
+        return sum^(1/p)
+    end
 end
 
 --- Check if a point is in a polygon
