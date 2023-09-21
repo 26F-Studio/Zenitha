@@ -1,7 +1,9 @@
 --- @class Zenitha.textAnim
 --- @field text? string
+--- @field _t number
 --- @field x? number
 --- @field y? number
+--- @field color number[]
 --- @field r? number
 --- @field g? number
 --- @field b? number
@@ -13,12 +15,15 @@
 --- @field outPoint? number
 --- @field style? string
 --- @field styleArg? any
+--- @field draw function
 
 --- @class Zenitha.Text
 --- @field _texts Zenitha.textAnim[]
 --- @field add function
 --- @field update function
 --- @field draw function
+--- @field new function
+--- @field clear function
 
 local setColor=GC.setColor
 local draw=GC.draw
@@ -151,7 +156,7 @@ function TEXT:add(data)
     }
     T._ox,T._oy=T.text:getWidth()*.5,T.text:getHeight()*.5
     if type(data.color)=='string' then data.color=COLOR[data.color] end
-    if data.color then T.r=data.color[1] T.g=data.color[2] T.b=data.color[3] T.a=data.color[4] end
+    if data.color then T.r,T.g,T.b,T.a=data.color[1],data.color[2],data.color[3],data.color[4] end
     if not T.r then T.r=T.r or 1 end
     if not T.g then T.g=T.g or 1 end
     if not T.b then T.b=T.b or 1 end

@@ -7,7 +7,7 @@ return love.system.getOS()=='iOS' and
         t=level[t]
         if t then vib(t<=.03 and 1 or t<=.09 and 2 or 3) end
     end
-or
+    or
     --- @param t number @vibration level
     function(t)
         t=level[t]

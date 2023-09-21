@@ -54,7 +54,10 @@ end
 --- local image4_1=IMG.imagePack.image4[1]
 --- ```
 function IMG.init(imgTable)
-    if initialized then MSG.new('info',"Achievement: attempt to initialize IMG lib twice") return end
+    if initialized then
+        MSG.new('info',"Achievement: attempt to initialize IMG lib twice")
+        return
+    end
     initialized,IMG.init=true,nil
     link(IMG,imgTable)
 end

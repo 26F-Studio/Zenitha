@@ -64,7 +64,7 @@ local msgPool=setmetatable({},{
     __index=function(self,k)
         self[k]={}
         return self[k]
-    end
+    end,
 })
 
 local HTTP={
@@ -204,9 +204,12 @@ function HTTP._update()
     end
 end
 
-setmetatable(HTTP,{__call=function(self,arg)
-    return self.request(arg)
-end,__metatable=true})
+setmetatable(HTTP,{
+    __call=function(self,arg)
+        return self.request(arg)
+    end,
+    __metatable=true
+})
 
 HTTP.reset()
 

@@ -512,7 +512,7 @@ do -- function TABLE.dump(L,t)
         [0]='',
         '\t',
     },{__index=function(self,k)
-        if k>=626 then error("Too many tabs!") end
+        if k>=260 then error("Too many tabs!") end
         for i=#self+1,k do
             self[i]=self[i-1]..'\t'
         end

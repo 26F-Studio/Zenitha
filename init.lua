@@ -26,7 +26,8 @@ NONE=setmetatable({},{__newindex=function() error("Attempt to modify a constant 
 NULL=function(...) end
 PAPER=love.graphics.newCanvas(1,1)
 
-SYSTEM=love.system.getOS() if SYSTEM=='OS X' then SYSTEM='macOS' end
+SYSTEM=love.system.getOS()
+if SYSTEM=='OS X' then SYSTEM='macOS' end
 MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
 EDITING=""
 
@@ -38,10 +39,12 @@ local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastClicks={}
 local jsState={} -- map, joystickID->axisStates: {axisName->axisVal}
 local errData={} -- list, each error create {msg={errMsg strings},scene=sceneNameStr}
-local bigCanvases=setmetatable({},{__index=function(self,k)
+local bigCanvases=setmetatable({},{
+    __index=function(self,k)
     self[k]=gc.newCanvas()
     return self[k]
-end})
+    end,
+})
 
 -- User-changeable values
 local appName='Zenitha'
@@ -62,7 +65,7 @@ local globalKey={
     f8=function()
         devMode=1
         MSG.new('info',"DEBUG ON",.2)
-    end
+    end,
 }
 local devFnKey={NULL,NULL,NULL,NULL,NULL,NULL,NULL}
 local onResize=NULL
@@ -111,14 +114,14 @@ HASH=       require'Zenitha.sha2'
 do -- Add pbkdf2 for HASH lib
     local bxor=require'bit'.bxor
     local char=string.char
-    local function sxor(s1, s2)
+    local function sxor(s1,s2)
         local b3=''
         for i=1,#s1 do
             b3=b3..char(bxor(s1:byte(i),s2:byte(i)))
         end
         return b3
     end
-    function HASH.pbkdf2(hashFunc, pw, salt, n)
+    function HASH.pbkdf2(hashFunc,pw,salt,n)
         local u=HASH.hex2bin(HASH.hmac(hashFunc, pw, salt..'\0\0\0\1'))
         local t=u
 
@@ -415,7 +418,7 @@ local jsAxisEventName={
     rightx={'rightstick_left','rightstick_right'},
     righty={'rightstick_up','rightstick_down'},
     triggerleft='triggerleft',
-    triggerright='triggerright'
+    triggerright='triggerright',
 }
 local gamePadKeys={'a','b','x','y','back','guide','start','leftstick','rightstick','leftshoulder','rightshoulder','dpup','dpdown','dpleft','dpright'}
 local dPadToKey={
@@ -430,9 +433,12 @@ function love.joystickadded(JS)
     table.insert(jsState,{
         _id=JS:getID(),
         _jsObj=JS,
-        leftx=0,lefty=0,
-        rightx=0,righty=0,
-        triggerleft=0,triggerright=0
+        leftx=0,
+        lefty=0,
+        rightx=0,
+        righty=0,
+        triggerleft=0,
+        triggerright=0,
     })
     MSG.new('info',"Joystick added")
 end
@@ -820,7 +826,8 @@ function love.run()
                         end
 
                         -- Update & draw frame time
-                        table.insert(frameTimeList,1,drawDT) table.remove(frameTimeList,126)
+                        table.insert(frameTimeList,1,drawDT)
+                        table.remove(frameTimeList,126)
                         gc_setColor(1,1,1,.26)
                         for i=1,#frameTimeList do
                             gc.rectangle('fill',150+2*i,-20,2,-frameTimeList[i]*4000)

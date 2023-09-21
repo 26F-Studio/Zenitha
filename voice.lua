@@ -67,7 +67,10 @@ function VOC._update() end
 --- Initialize the voice module, must be called before use
 --- @param list table
 function VOC.init(list)
-    if initialized then MSG.new('info',"Achievement: attempt to initialize VLC lib twice") return end
+    if initialized then
+        MSG.new('info',"Achievement: attempt to initialize VLC lib twice")
+        return
+    end
     initialized,VOC.init=true,nil
     voiceQueue,sourceBank,voiceSet={},{},{}
 

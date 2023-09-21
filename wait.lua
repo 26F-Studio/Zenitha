@@ -202,7 +202,8 @@ end
 setmetatable(WAIT,{
     __call=function(self,data)
         self.new(data)
-    end,__metatable=true
+    end,
+    __metatable=true,
 })
 
 return WAIT

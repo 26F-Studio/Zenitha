@@ -28,7 +28,7 @@ local indexMeta={
                 return L[i]
             end
         end
-    end
+    end,
 }
 
 local function updateWheel(self,d)
@@ -50,11 +50,11 @@ end
 
 local leftAngle=GC.load{20,20,
     {'setLW',5},
-    {'line',18,2,1,10,18,18},
+    {'line', 18,2,1,10,18,18},
 }
 local rightAngle=GC.load{20,20,
     {'setLW',5},
-    {'line',2,2,19,10,2,18},
+    {'line', 2,2,19,10,2,18},
 }
 
 local Widgets={}
@@ -267,7 +267,7 @@ Widgets.text=setmetatable({
 
         'visibleFunc',
         'visibleTick',
-    }
+    },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.text:reset()
     Widgets.base.reset(self)
@@ -1667,7 +1667,7 @@ function Widgets.textBox:scroll(dx,dy)
     )
 end
 function Widgets.textBox:arrowKey(k)
-    self:scroll(0,k =='up' and -1 or k=='down' and 1 or 0)
+    self:scroll(0,k=='up' and -1 or k=='down' and 1 or 0)
 end
 function Widgets.textBox:update(dt)
     if self._sure>0 then

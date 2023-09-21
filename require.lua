@@ -4,10 +4,10 @@ local _androidPlatform='armeabi-v7a'
 if love.system.getOS()=='Android' then
     local p=io.popen('uname -m')
     if type(p)=='userdata' then
-    local arch=p:read('*a'):lower()
-    p:close()
-    if arch:find('v8') or arch:find('64') then
-        _androidPlatform='arm64-v8a'
+        local arch=p:read('*a'):lower()
+        p:close()
+        if arch:find('v8') or arch:find('64') then
+            _androidPlatform='arm64-v8a'
         end
     end
 end

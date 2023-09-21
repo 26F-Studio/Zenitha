@@ -3,9 +3,9 @@ local effectsSupported=audio.isEffectsSupported()
 local ins=table.insert
 
 local nameList={}
-local srcLib={} -- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
+local srcLib={}     -- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
 local lastLoadNames={}
-local nowPlay={} -- Playing bgm objects
+local nowPlay={}    -- Playing bgm objects
 local lastPlay=NONE -- Directly stored last played bgm name(s)
 
 --- @type false|string|string[]
@@ -101,11 +101,17 @@ local function _addFile(name,path)
     if not srcLib[name] then
         ins(nameList,name)
         srcLib[name]={
-            name=name,path=path,source=false,
-            vol=0,volChanging=false,
-            pitch=1,pitchChanging=false,
-            lowgain=1,lowgainChanging=false,
-            highgain=1,highgainChanging=false,
+            name=name,
+            path=path,
+            source=false,
+            vol=0,
+            volChanging=false,
+            pitch=1,
+            pitchChanging=false,
+            lowgain=1,
+            lowgainChanging=false,
+            highgain=1,
+            highgainChanging=false,
         }
     end
 end
@@ -380,7 +386,8 @@ end
 --- Get time of BGM playing now
 function BGM.tell()
     if nowPlay[1] then
-        return nowPlay[1].source:tell()
+        local src=nowPlay[1].source
+        return src:tell()%src:getDuration() -- bug of love2d, tell() may return value greater than duration
     end
 end
 

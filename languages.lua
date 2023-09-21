@@ -98,6 +98,6 @@ setmetatable(LANG,{
     __call=function(_,key)
         return textFuncs[key]
     end,
-    __metatable=true
+    __metatable=true,
 })
 return LANG

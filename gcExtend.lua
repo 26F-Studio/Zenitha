@@ -9,7 +9,7 @@ local NULL=NULL
 
 local GC=setmetatable({},{
     __index=gc,
-    __metatable=true
+    __metatable=true,
 })
 
 --------------------------------------------------------------
@@ -17,7 +17,7 @@ local GC=setmetatable({},{
 --- @param obj string
 --- @param x number
 --- @param y number
-function GC.mStr(obj,x,y)       printf(obj,x-1260,y,2520,'center') end
+function GC.mStr(obj,x,y) printf(obj,x-1260,y,2520,'center') end
 
 --- Draw an obj with x=obj:getWidth()/2
 --- @param obj love.Texture
@@ -41,7 +41,7 @@ function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end
 --- @param y? number
 --- @param a? number
 --- @param k? number
-function GC.mDraw(obj,x,y,a,k)  draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
+function GC.mDraw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
 
 --- Draw an obj with both middle X & Y
 --- @param obj love.Texture
@@ -98,7 +98,7 @@ function GC.mDrawLY(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,0,obj:getHeight()*.5)
 --- @param y? number
 --- @param a? number
 --- @param k? number
-function GC.mDrawL(obj,l,x,y,a,k)  drawL(obj,l,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
+function GC.mDrawL(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
 
 --------------------------------------------------------------
 
