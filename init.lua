@@ -16,6 +16,7 @@ local gc_setColor,gc_circle=gc.setColor,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
 
 local max,min=math.max,math.min
+local floor,abs=math.floor,math.abs
 math.randomseed(os.time()*2600)
 kb.setKeyRepeat(true)
 
@@ -41,8 +42,8 @@ local jsState={} -- map, joystickID->axisStates: {axisName->axisVal}
 local errData={} -- list, each error create {msg={errMsg strings},scene=sceneNameStr}
 local bigCanvases=setmetatable({},{
     __index=function(self,k)
-    self[k]=gc.newCanvas()
-    return self[k]
+        self[k]=gc.newCanvas(nil,nil,{msaa=select(3,love.window.getMode()).msaa})
+        return self[k]
     end,
 })
 
@@ -189,8 +190,8 @@ local function _triggerMouseDown(x,y,k)
         print(("(%d,%d)<-%d,%d ~~(%d,%d)<-%d,%d"):format(
             x,y,
             x-lastClicks[k].x,y-lastClicks[k].y,
-            math.floor(x/10)*10,math.floor(y/10)*10,
-            math.floor((x-lastClicks[k].x)/10)*10,math.floor((y-lastClicks[k].y)/10)*10
+            floor(x/10)*10,floor(y/10)*10,
+            floor((x-lastClicks[k].x)/10)*10,floor((y-lastClicks[k].y)/10)*10
         ))
     end
     if SCN.swapping then return end
@@ -223,12 +224,10 @@ local function mouse_update(dt)
 end
 local function gp_update(js,dt)
     local sx,sy=js._jsObj:getGamepadAxis('leftx'),js._jsObj:getGamepadAxis('lefty')
-    if math.abs(sx)>.1 or math.abs(sy)>.1 then
+    if abs(sx)>.1 or abs(sy)>.1 then
         local dx,dy=0,0
-        if sy<-.1 then dy=dy+2*sy*cursorSpd end
-        if sy>.1 then  dy=dy+2*sy*cursorSpd end
-        if sx<-.1 then dx=dx+2*sx*cursorSpd end
-        if sx>.1 then  dx=dx+2*sx*cursorSpd end
+        if abs(sy)>.1 then dy=dy+2*sy*cursorSpd end
+        if abs(sx)>.1 then dx=dx+2*sx*cursorSpd end
         mx=max(min(mx+dx,SCR.w0),0)
         my=max(min(my+dy,SCR.h0),0)
         if my==0 or my==SCR.h0 then
@@ -652,7 +651,7 @@ function love.errorhandler(msg)
             GC.clear(.3,.5,.9)
             GC.push('transform')
             GC.replaceTransform(SCR.origin)
-            local k=math.min(SCR.h/720,1)
+            local k=min(SCR.h/720,1)
             GC.scale(k)
             setFont(100,'_norm') gc_print(":(",100,0,0,1.2)
             setFont(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
@@ -839,7 +838,7 @@ function love.run()
                             gc.setLineWidth(1)
                             gc.line(x,0,x,SCR.h)
                             gc.line(0,y,SCR.w,y)
-                            local t=math.floor(mx+.5)..","..math.floor(my+.5)
+                            local t=floor(mx+.5)..","..floor(my+.5)
                             gc.setColor(COLOR.D)
                             gc_print(t,x+1,y)
                             gc_print(t,x+1,y-1)
