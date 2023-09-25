@@ -41,13 +41,13 @@ function VOC.getCount() return 0 end
 function VOC.getQueueCount() return 0 end
 
 --- Get the number of voice files in the bank
---- @return number @Free channel id
+--- @return number Free channel id
 function VOC.getFreeChannel() return 0 end
 
 --- Load voice files from specified path
 ---
 --- Only available after VOC.init()
---- @param path string @Path to the folder contains voice files, including the last '/'
+--- @param path string Path to the folder contains voice files, including the last '/'
 --- @diagnostic disable-next-line: unused-local
 function VOC.load(path) error("Cannot VOC.load() before VOC.init()") end
 

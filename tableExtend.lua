@@ -5,8 +5,8 @@ local next,type=next,type
 local TABLE={}
 
 --- Get a new filled table
---- @param val any @value to fill
---- @param count number @how many elements
+--- @param val any value to fill
+--- @param count number how many elements
 --- @return any[]
 function TABLE.new(val,count)
     local L={}
@@ -37,8 +37,8 @@ function TABLE.setAutoFill(t,source)
 end
 
 --- Get a copy of [1~#] elements
---- @param org any[] @original table
---- @param depth? number @how many layers will be recreate, default to inf
+--- @param org any[] original table
+--- @param depth? number how many layers will be recreate, default to inf
 --- @return any[]
 function TABLE.shift(org,depth)
     if not depth then depth=1e99 end
@@ -54,9 +54,9 @@ function TABLE.shift(org,depth)
 end
 
 --- Connect [1~#] elements of new to the end of org
---- @param org any[] @original list
---- @param new any[] @new list
---- @return any[] @org with new data
+--- @param org any[] original list
+--- @param new any[] new list
+--- @return any[] org with new data
 function TABLE.connect(org,new)
     local l0=#org
     for i=1,#new do
@@ -66,8 +66,8 @@ function TABLE.connect(org,new)
 end
 
 --- Get a table of two lists connected
---- @param L1 any[] @list 1
---- @param L2 any[] @list 2
+--- @param L1 any[] list 1
+--- @param L2 any[] list 2
 --- @return any[]
 function TABLE.combine(L1,L2)
     local l={}
@@ -78,8 +78,8 @@ function TABLE.combine(L1,L2)
 end
 
 --- Get a full copy of org, depth = how many layers will be recreate, default to inf
---- @param org table @original table
---- @param depth? number @how many layers will be recreate, default to inf
+--- @param org table original table
+--- @param depth? number how many layers will be recreate, default to inf
 --- @return table
 function TABLE.copy(org,depth)
     if not depth then depth=1e99 end
@@ -117,7 +117,7 @@ function TABLE.coverR(new,old)
 end
 
 --- For all things in org, delete them if it's in sub
---- @param org table @original table
+--- @param org table original table
 --- @param sub table
 function TABLE.subtract(org,sub)
     for _,v in next,sub do
@@ -518,7 +518,7 @@ do -- function TABLE.dump(L,t)
         end
         return self[k]
     end})
-    local function dump(L,t)
+    local function dump(L,t,lim)
         local s
         if t then
             s='{\n'
@@ -557,10 +557,11 @@ do -- function TABLE.dump(L,t)
         return s..tabs[t-1]..'}'
     end
     --- @param t table
+    --- @param depth number depth limit, default to 1
     --- @return string
-    function TABLE.dump(t)
+    function TABLE.dump(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
-        return dump(t)
+        return dump(t,1,depth)
     end
 end
 

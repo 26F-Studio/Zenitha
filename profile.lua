@@ -88,7 +88,7 @@ function profile.reset()
 end
 
 --- Iterates all functions that have been called since the profile was started.
---- @param limit? number @limit the number of functions to return
+--- @param limit? number limit the number of functions to return
 function profile.query(limit)
     local t={}
     for f,n in next,_ncalls do
@@ -112,7 +112,7 @@ end
 
 local cols={3,20,8,6,32}
 --- Generate the datasheet
---- @param limit? number @limit the number of functions to return
+--- @param limit? number limit the number of functions to return
 --- @return string
 function profile.report(limit)
     local out={}
@@ -144,7 +144,7 @@ local switch=false
 --- Turn profile mode on/off
 ---
 --- Automatically copy the report to clipboard when turned off
---- @return boolean @current state
+--- @return boolean current state
 function profile.switch()
     switch=not switch
     if not switch then

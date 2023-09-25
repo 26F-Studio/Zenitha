@@ -41,7 +41,7 @@ end
 
 --- Send data to a background (trigger its 'event' function)
 --- @param name? string
---- @param ... any @Arguments passed to background's 'event' function
+--- @param ... any Arguments passed to background's 'event' function
 function BG.send(name,...)
     if BGs[name] then
         BGs[name].event(...)

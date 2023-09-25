@@ -1,36 +1,36 @@
 --- @class Zenitha.ScreenInfo
---- @field w0 number @Default Screen Size
---- @field h0 number @Default Screen Size
---- @field w number @Fullscreen w/h for graphic functions
---- @field h number @Fullscreen w/h for graphic functions
---- @field diam number @Diameter sqrt(w^2+h^2)
---- @field W number @Fullscreen w/h for shader
---- @field H number @Fullscreen w/h for shader
---- @field safeX number @Safe area position
---- @field safeY number @Safe area position
---- @field safeW number @Safe area size
---- @field safeH number @Safe area size
---- @field dpi number @DPI from gc.getDPIScale()
+--- @field w0 number Default Screen Size
+--- @field h0 number Default Screen Size
+--- @field w number Fullscreen w/h for graphic functions
+--- @field h number Fullscreen w/h for graphic functions
+--- @field diam number Diameter sqrt(w^2+h^2)
+--- @field W number Fullscreen w/h for shader
+--- @field H number Fullscreen w/h for shader
+--- @field safeX number Safe area position
+--- @field safeY number Safe area position
+--- @field safeW number Safe area size
+--- @field safeH number Safe area size
+--- @field dpi number DPI from gc.getDPIScale()
 ---
---- @field x number @Expected box's Up-left position
---- @field y number @Expected box's Up-left position
---- @field k number @Expected box's Scaling size
---- @field cx number @Expected box's Center position (Center X/Y)
---- @field cy number @Expected box's Center position (Center X/Y)
---- @field ex number @Expected box's Down-right position (End X/Y)
---- @field ey number @Expected box's Down-right position (End X/Y)
+--- @field x number Expected box's Up-left position
+--- @field y number Expected box's Up-left position
+--- @field k number Expected box's Scaling size
+--- @field cx number Expected box's Center position (Center X/Y)
+--- @field cy number Expected box's Center position (Center X/Y)
+--- @field ex number Expected box's Down-right position (End X/Y)
+--- @field ey number Expected box's Down-right position (End X/Y)
 ---
---- @field origin love.Transform @Screen transformation objects (love-origin)
---- @field xOy love.Transform    @Screen transformation objects (default)
---- @field xOy_m love.Transform  @Screen transformation objects (middle)
---- @field xOy_ul love.Transform @Screen transformation objects (up-left)
---- @field xOy_u love.Transform  @Screen transformation objects (up)
---- @field xOy_ur love.Transform @Screen transformation objects (up-right)
---- @field xOy_l love.Transform  @Screen transformation objects (left)
---- @field xOy_r love.Transform  @Screen transformation objects (right)
---- @field xOy_dl love.Transform @Screen transformation objects (down-left)
---- @field xOy_d love.Transform  @Screen transformation objects (down)
---- @field xOy_dr love.Transform @Screen transformation objects (down-right)
+--- @field origin love.Transform Screen transformation objects (love-origin)
+--- @field xOy love.Transform    Screen transformation objects (default)
+--- @field xOy_m love.Transform  Screen transformation objects (middle)
+--- @field xOy_ul love.Transform Screen transformation objects (up-left)
+--- @field xOy_u love.Transform  Screen transformation objects (up)
+--- @field xOy_ur love.Transform Screen transformation objects (up-right)
+--- @field xOy_l love.Transform  Screen transformation objects (left)
+--- @field xOy_r love.Transform  Screen transformation objects (right)
+--- @field xOy_dl love.Transform Screen transformation objects (down-left)
+--- @field xOy_d love.Transform  Screen transformation objects (down)
+--- @field xOy_dr love.Transform Screen transformation objects (down-right)
 
 
 --- @type Zenitha.ScreenInfo

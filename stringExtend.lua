@@ -341,8 +341,8 @@ end
 
 --- Return 16 byte string. Not powerful hash, just simply protect the original text
 --- @param text string
---- @param seedRange? number @default to 26
---- @param seed? number @default to 0
+--- @param seedRange? number default to 26
+--- @param seed? number default to 0
 --- @return string
 function STRING.digezt(text,seedRange,seed)
     if not seed then seed=0 end
@@ -368,7 +368,7 @@ end
 
 --- Cut a line off a string
 --- @param str string
---- @return string, string @one line (do not include \n), and the rest of string
+--- @return string, string one line (do not include \n), and the rest of string
 function STRING.readLine(str)
     local p=find(str,'\n')
     if p then
@@ -381,7 +381,7 @@ end
 --- Cut n bytes off a string
 --- @param str string
 --- @param n number
---- @return string, string @n bytes, and the rest of string
+--- @return string, string n bytes, and the rest of string
 function STRING.readChars(str,n)
     return sub(str,1,n),sub(str,n+1)
 end

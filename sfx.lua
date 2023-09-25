@@ -67,7 +67,7 @@ end
 --- @overload fun(pathTable:table,lazyLoad?:boolean)
 --- @param name string
 --- @param path string
---- @param lazyLoad? boolean @If true, the file will be loaded when it's played for the first time
+--- @param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
 function SFX.load(name,path,lazyLoad)
     if type(name)=='table' then
         local success=0
@@ -128,7 +128,7 @@ function SFX.setVol(vol)
 end
 
 --- Set the stereo of SFX module
---- @param s number @0~1
+--- @param s number 0~1
 function SFX.setStereo(s)
     assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): s must be number in range 0~1")
     stereo=s
@@ -138,8 +138,8 @@ end
 ---
 --- 1 --> ' C1'
 --- 13 --> 'C#2'
---- @param note number @Note number, 1~127
---- @return string @Note name, e.g. 'C4'
+--- @param note number Note number, 1~127
+--- @return string Note name, e.g. 'C4'
 function SFX.getNoteName(note)
     if note<1 then
         return '---'
@@ -152,7 +152,7 @@ end
 
 --- Play a sample
 --- @param pack string
---- @param ... string|number @0~1 number for volume, big integer and string for tune
+--- @param ... string|number 0~1 number for volume, big integer and string for tune
 --- ## Example
 --- ```lua
 --- SFX.playSample('piano', .7,'C4','E4', .9,'G4')
@@ -183,9 +183,9 @@ end
 
 --- Play a SFX
 --- @param name string
---- @param vol? number @0~1
---- @param pos? number @-1~1
---- @param pitch? number @+12 for an octave
+--- @param vol? number 0~1
+--- @param pos? number -1~1
+--- @param pitch? number +12 for an octave
 function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
     if vol<=0 then return end

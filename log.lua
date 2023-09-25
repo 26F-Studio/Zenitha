@@ -18,7 +18,7 @@ local LOG=setmetatable({},{
 })
 
 --- Get raw logs data
---- @return string[] @READ ONLY
+--- @return string[] @READ ONLY, DO NOT MODIFY
 function LOG.getLogs()
     return logs
 end

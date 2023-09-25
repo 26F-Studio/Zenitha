@@ -61,7 +61,7 @@ local Widgets={}
 
 --------------------------------------------------------------
 
---- @class Zenitha.widget.base @not used by user
+--- @class Zenitha.widget.base not used by user
 --- @field _widget true
 --- @field type string
 --- @field name string
@@ -1747,7 +1747,7 @@ end
 --- @field h number
 --- @field sound_click string|false
 --- @field sound_select string|false
---- @field _list table @List of items
+--- @field _list table List of items
 Widgets.listBox=setmetatable({
     type='listBox',
     w=100,h=40,
@@ -2302,7 +2302,7 @@ end
 --- @field sound_select? string
 
 --- Create new widget
---- @param args Zenitha.widgetArg @Arguments to create widget, check declare widget class for more info
+--- @param args Zenitha.widgetArg Arguments to create widget, check declare widget class for more info
 --- @return Zenitha.widget.base
 function WIDGET.new(args)
     local t=args.type

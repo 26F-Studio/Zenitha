@@ -1,12 +1,12 @@
 --- @class Zenitha.httpRequest
---- @field body? table|nil|string @must be table if given, will be encoded to json
---- @field pool? string @default to '_default' if not given
---- @field method? string|nil @default to 'POST' if body is given, 'GET' otherwise
+--- @field body? table|nil|string must be table if given, will be encoded to json
+--- @field pool? string default to '_default' if not given
+--- @field method? string|nil default to 'POST' if body is given, 'GET' otherwise
 --- @field headers? table|nil
---- @field url? string @default to the url set with HTTP.setHost
---- @field path? string|nil @append to url
---- @field _poolPtr string @internal use only
---- @field _destroy true @internal use only
+--- @field url? string default to the url set with HTTP.setHost
+--- @field path? string|nil append to url
+--- @field _poolPtr string internal use only
+--- @field _destroy true internal use only
 
 local sendCHN=love.thread.getChannel('inputChannel')
 local recvCHN=love.thread.getChannel('outputChannel')
@@ -129,7 +129,7 @@ function HTTP.reset()
 end
 
 --- Set thread count
---- @param n number @1~26
+--- @param n number 1~26
 function HTTP.setThreadCount(n)
     assert(type(n)=='number' and n>=1 and n<=26 and n%1==0,"HTTP.setThreadCount(n): n must be integer from 1 to 26")
     if n>threadCount then
@@ -148,7 +148,7 @@ function HTTP.getThreadCount()
 end
 
 --- Clear a message pool
---- @param pool string|nil @pool name
+--- @param pool string|nil pool name
 function HTTP.clearPool(pool)
     if pool==nil then pool='_default' end
     assert(type(pool)=='string',"Pool must be nil or string")
@@ -157,7 +157,7 @@ function HTTP.clearPool(pool)
 end
 
 --- Delete a message pool
---- @param pool string @pool name
+--- @param pool string pool name
 function HTTP.deletePool(pool)
     assert(type(pool)=='string',"Pool must be nil or string")
     assert(pool~='_default',"Cannot delete _default pool. What are you doing?")
@@ -166,7 +166,7 @@ function HTTP.deletePool(pool)
 end
 
 --- Poll a message from pool (specifiedif given)
---- @param pool string|nil @pool name
+--- @param pool string|nil pool name
 --- @return table|nil
 function HTTP.pollMsg(pool)
     if not (type(pool)=='nil' or type(pool)=='string') then error("Pool must be nil or string") end
@@ -179,7 +179,7 @@ function HTTP.pollMsg(pool)
 end
 
 --- Set default host
---- @param host string @host url
+--- @param host string host url
 function HTTP.setHost(host)
     assert(type(host)=='string',"Host must be string")
     if host:sub(1,7)~='http://' then host='http://'..host end

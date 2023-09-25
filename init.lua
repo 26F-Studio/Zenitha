@@ -882,7 +882,7 @@ end
 Zenitha={}
 
 --- Go to quit scene then terminate the application
---- @param style? string @Choose a scene swapping style
+--- @param style? string Choose a scene swapping style
 function Zenitha._quit(style)
     onQuit()
     SCN.swapTo('_quit',style or 'slowFade')
@@ -914,8 +914,8 @@ function Zenitha.getVersionText() return versionText end
 function Zenitha.getJsState() return jsState end
 
 --- Get the error info
---- @param i number @Index of error info
---- @return table @Error info table
+--- @param i number Index of error info
+--- @return table Error info table
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]
@@ -956,14 +956,14 @@ end
 --- Default value is 100(%), all *.update(dt) will be called every main loop
 ---
 --- If set to 50(%), all *.update(dt) will be called every 2 main loop
---- @param rate number @Updating rate percentage, range from 0 to 100
+--- @param rate number Updating rate percentage, range from 0 to 100
 function Zenitha.setUpdateFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setUpdateFreq(rate): rate must in (0,100]")
     updateFreq=rate
 end
 
 --- Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
---- @param rate number @Drawing rate percentage, range from 0 to 100
+--- @param rate number Drawing rate percentage, range from 0 to 100
 function Zenitha.setDrawFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setDrawFreq(rate): rate must in (0,100]")
     drawFreq=rate
@@ -994,15 +994,15 @@ end
 --- Set click distance threshold
 ---
 --- Default value is 62
---- @param dist number @Distance threshold
+--- @param dist number Distance threshold
 function Zenitha.setClickDist(dist)
     assert(type(dist)=='number' and dist>0,"Zenitha.setClickDist(dist): dist must be positive number")
     clickDist2=dist^2
 end
 
 --- Set highest priority global key-pressing event listener
---- @param key string @Key name
---- @param func function|false @Function to be called when key is pressed, false to remove
+--- @param key string Key name
+--- @param func function|false Function to be called when key is pressed, false to remove
 function Zenitha.setOnGlobalKey(key,func)
     assert(type(key)=='string',"Zenitha.setOnFnKeys(key,func): key must be string")
     if func==false then
@@ -1014,7 +1014,7 @@ function Zenitha.setOnGlobalKey(key,func)
 end
 
 --- Set Fn keys' event listener (for debugging)
---- @param list table<function> @Function list, [1~7]=function
+--- @param list table<function> Function list, [1~7]=function
 function Zenitha.setOnFnKeys(list)
     assert(type(list)=='table',"Zenitha.setOnFnKeys(list): list must be table, [1~7]=function")
     for i=1,7 do
@@ -1024,21 +1024,21 @@ function Zenitha.setOnFnKeys(list)
 end
 
 --- Set global onFocus event listener
---- @param func function @Function to be called when window focus changed
+--- @param func function Function to be called when window focus changed
 function Zenitha.setOnFocus(func)
     assert(type(func)=='function',"Zenitha.setOnFocus(func): func must be function")
     onFocus=func
 end
 
 --- Set global onResize event listener
---- @param func function @Function to be called when window resized
+--- @param func function Function to be called when window resized
 function Zenitha.setOnResize(func)
     assert(type(func)=='function',"Zenitha.setOnResize(func): func must be function")
     onResize=func
 end
 
 --- Set global onQuit event listener
---- @param func function @Function to be called when application is about to quit
+--- @param func function Function to be called when application is about to quit
 function Zenitha.setOnQuit(func)
     assert(type(func)=='function',"Zenitha.setOnQuit(func): func must be function")
     onQuit=func
@@ -1047,21 +1047,21 @@ end
 --- Set cursor drawing function (pass time,x,y as arguments)
 ---
 --- Color and line width is uncertain, set it yourself in the function.
---- @param func function @Function to be called when drawing cursor
+--- @param func function Function to be called when drawing cursor
 function Zenitha.setDrawCursor(func)
     assert(type(func)=='function',"Zenitha.setDrawCursor(func): func must be function")
     drawCursor=func
 end
 
 --- Set system info drawing function (default transform is SCR.xOy_ul)
---- @param func function @Function to be called when drawing system info
+--- @param func function Function to be called when drawing system info
 function Zenitha.setDrawSysInfo(func)
     assert(type(func)=='function',"Zenitha.setDrawSysInfo(func): func must be function")
     drawSysInfo=func
 end
 
 --- Get a big canvas which is as big as the screen
---- @param id string @Canvas ID
+--- @param id string Canvas ID
 --- @return love.Canvas
 function Zenitha.getBigCanvas(id)
     return bigCanvases[id]

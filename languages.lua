@@ -53,7 +53,7 @@ function LANG.setMaxLoaded(n)
 end
 
 --- Add language file info list
---- @param data table<string, string> @<name, path>
+--- @param data table<string, string> name-path
 function LANG.add(data)
     for k,v in next,data do
         assert(type(k)=='string' and type(v)=='string','Invalid language info list (need {zh="path1",en="path2",...})')

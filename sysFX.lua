@@ -222,7 +222,7 @@ end
 
 --- Create a new systemFX, used in UI
 --- @param name 'beam'|'tap'|'glow'|'ripple'|'rectRipple'|'rect'|'particle'|'line'
---- @param ... any @Arguments related to specific FX type
+--- @param ... any Arguments related to specific FX type
 --- beam: rate,x1,y1,x2,y2,wid,r,g,b,a
 ---
 --- tap: rate,x,y

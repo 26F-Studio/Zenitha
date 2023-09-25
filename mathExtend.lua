@@ -23,7 +23,7 @@ end
 
 --- Get a number's sign
 --- @param a number
---- @return number @-1 or 0 or 1
+--- @return number -1 or 0 or 1
 function MATH.sign(a)
     return a>0 and 1 or a<0 and -1 or 0
 end
@@ -37,7 +37,7 @@ function MATH.roundUnit(n,u)
 end
 
 --- Get a random boolean with specified chance, 50% if not given
---- @param chance? number @0~1
+--- @param chance? number 0~1
 --- @return boolean
 function MATH.roll(chance)
     return rnd()<(chance or .5)
@@ -123,7 +123,7 @@ end
 --- Get mix value (linear) of two numbers with a ratio (not clamped)
 --- @param v1 number
 --- @param v2 number
---- @param ratio number @0~1 at most time
+--- @param ratio number 0~1 at most time
 --- @return number
 function MATH.lerp(v1,v2,ratio)
     return v1+(v2-v1)*ratio
@@ -141,7 +141,7 @@ end
 --- Similar to MATH.lerp (clamped)
 --- @param v1 number
 --- @param v2 number
---- @param ratio number @0~1 at most time
+--- @param ratio number 0~1 at most time
 --- @return number
 function MATH.cLerp(v1,v2,ratio)
     return

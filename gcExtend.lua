@@ -157,8 +157,8 @@ end
 --- @param mode 'center'|'right'|'left'
 --- @param d number
 --- @param shadeCount 4|8
---- @param c1? Zenitha.Color @Shade color
---- @param c2? Zenitha.Color @Center color
+--- @param c1? Zenitha.Color Shade color
+--- @param c2? Zenitha.Color Center color
 function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
     local w=1280
     if mode=='center' then
@@ -188,7 +188,7 @@ end
 --- @param mode 'fill'|'line'
 --- @param x? number
 --- @param y? number
---- @param rad number @Radius
+--- @param rad number Radius
 --- @param segments number
 --- @param phase? number
 function GC.regPolygon(mode,x,y,rad,segments,phase)
@@ -210,9 +210,9 @@ end
 --- @param mode 'fill'|'line'
 --- @param x? number
 --- @param y? number
---- @param rad number @Radius
+--- @param rad number Radius
 --- @param segments number
---- @param rCorner number @Radius of rounded corner
+--- @param rCorner number Radius of rounded corner
 --- @param phase? number
 function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
     if not x then x=0 end

@@ -225,7 +225,7 @@ end
 --- Swap to a sceene without add current scene to stack (cannot go back)
 --- @param tar string
 --- @param style? string
---- @param ... any @Arguments passed to new scene
+--- @param ... any Arguments passed to new scene
 function SCN.swapTo(tar,style,...)
     if scenes[tar] then
         if not SCN.swapping then
@@ -252,7 +252,7 @@ end
 --- Go to a scene
 --- @param tar string
 --- @param style? string
---- @param ... any @Arguments passed to new scene
+--- @param ... any Arguments passed to new scene
 function SCN.go(tar,style,...)
     if scenes[tar] then
         if not SCN.swapping then
@@ -266,7 +266,7 @@ end
 
 --- Back to previous scene
 --- @param style? string
---- @param ... any @Arguments passed to previous scene
+--- @param ... any Arguments passed to previous scene
 function SCN.back(style,...)
     if SCN.swapping then return end
 
@@ -286,7 +286,7 @@ end
 --- Back to a specific scene
 --- @param tar string
 --- @param style? string
---- @param ... any @Arguments passed to target scene
+--- @param ... any Arguments passed to target scene
 function SCN.backTo(tar,style,...)
     if SCN.swapping then return end
 
