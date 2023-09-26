@@ -1,5 +1,5 @@
 local rnd,floor=math.random,math.floor
-local find=string.find
+local find,gsub=string.find,string.gsub
 local rem=table.remove
 local next,type=next,type
 local TABLE={}
@@ -30,12 +30,10 @@ end
 --- @param t table
 --- @param source table
 function TABLE.setAutoFill(t,source)
-    setmetatable(t,{
-        __index=function(self,k)
-            self[k]=source[k]
-            return source[k]
-        end
-    })
+    setmetatable(t,{__index=function(self,k)
+        self[k]=source[k]
+        return source[k]
+    end})
 end
 
 --- Get a copy of [1~#] elements
@@ -482,20 +480,21 @@ do -- function TABLE.dumpDeflate(L,t)
                 end
             elseif T=='string' then
                 if find(k,'[^0-9a-zA-Z_]') then
-                    k='[\''..k..'\']='
+                    k='[\"'..gsub(k,'"','\\"')..'\"]='
                 else
                     k=k..'='
                 end
             elseif T=='boolean' then
                 k='['..k..']='
             else
-                k='[\'*'..tostring(k)..'\']='
+                k='[\"*'..tostring(k)..'\"]='
             end
+
             T=type(v)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
             elseif T=='string' then
-                v='\''..v..'\''
+                v='\"'..gsub(v,'"','\\"')..'\"'
             elseif T=='table' then
                 if t>lim then v=tostring(v) else v=dump(v,t+1,lim) end
             else
@@ -516,17 +515,14 @@ end
 
 --- Dump a simple lua table
 do -- function TABLE.dump(L,t)
-    local tabs=setmetatable({
-        [0]='',
-        '\t',
-    },{
+    local tabs=setmetatable({[0]='','\t'},{
         __index=function(self,k)
             if k>=260 then error("Too many tabs!") end
             for i=#self+1,k do
                 self[i]=self[i-1]..'\t'
             end
             return self[k]
-        end
+        end,
     })
     local function dump(L,t,lim)
         local s
@@ -548,21 +544,21 @@ do -- function TABLE.dump(L,t)
                 end
             elseif T=='string' then
                 if find(k,'[^0-9a-zA-Z_]') then
-                    k='[\''..k..'\']='
+                    k='[\"'..gsub(k,'"','\\"')..'\"]='
                 else
                     k=k..'='
                 end
             elseif T=='boolean' then
                 k='['..k..']='
             else
-                k='[\'*'..tostring(k)..'\']='
+                k='["*'..tostring(k)..'\"]='
             end
 
             T=type(v)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
             elseif T=='string' then
-                v='\''..v..'\''
+                v='\"'..gsub(v,'"','\\"')..'\"'
             elseif T=='table' then
                 if t>lim then v=tostring(v) else v=dump(v,t+1,lim) end
             else
