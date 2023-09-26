@@ -489,7 +489,7 @@ do -- function TABLE.dumpDeflate(L,t)
             elseif T=='boolean' then
                 k='['..k..']='
             else
-                error("Error key type!")
+                k='[\'*'..tostring(k)..'\']='
             end
             T=type(v)
             if T=='number' or T=='boolean' then
