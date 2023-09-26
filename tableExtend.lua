@@ -30,10 +30,12 @@ end
 --- @param t table
 --- @param source table
 function TABLE.setAutoFill(t,source)
-    setmetatable(t,{__index=function(self,k)
-        self[k]=source[k]
-        return source[k]
-    end})
+    setmetatable(t,{
+        __index=function(self,k)
+            self[k]=source[k]
+            return source[k]
+        end
+    })
 end
 
 --- Get a copy of [1~#] elements
@@ -466,10 +468,10 @@ end
 
 --- Dump a simple lua table (no whitespaces)
 do -- function TABLE.dumpDeflate(L,t)
-    local function dump(t)
+    local function dump(L,t,lim)
         local s='{'
         local count=1
-        for k,v in next,t do
+        for k,v in next,L do
             local T=type(k)
             if T=='number' then
                 if k==count then
@@ -484,25 +486,31 @@ do -- function TABLE.dumpDeflate(L,t)
                 else
                     k=k..'='
                 end
-            elseif T=='boolean' then k='['..k..']='
-            else error("Error key type!")
+            elseif T=='boolean' then
+                k='['..k..']='
+            else
+                error("Error key type!")
             end
             T=type(v)
-            if T=='number' then v=tostring(v)
-            elseif T=='string' then v='\''..v..'\''
-            elseif T=='table' then v=dump(v)
-            elseif T=='boolean' then v=tostring(v)
-            else v='*'..tostring(v)
+            if T=='number' or T=='boolean' then
+                v=tostring(v)
+            elseif T=='string' then
+                v='\''..v..'\''
+            elseif T=='table' then
+                if t>lim then v=tostring(v) else v=dump(v,t+1,lim) end
+            else
+                v='*'..tostring(v)
             end
             s=s..k..v..','
         end
         return s..'}'
     end
     --- @param t table
+    --- @param depth? number how many layers will enter, default to inf
     --- @return string
-    function TABLE.dumpDeflate(t)
+    function TABLE.dumpDeflate(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
-        return dump(t)
+        return dump(t,1,depth or 1e99)
     end
 end
 
@@ -511,13 +519,15 @@ do -- function TABLE.dump(L,t)
     local tabs=setmetatable({
         [0]='',
         '\t',
-    },{__index=function(self,k)
-        if k>=260 then error("Too many tabs!") end
-        for i=#self+1,k do
-            self[i]=self[i-1]..'\t'
+    },{
+        __index=function(self,k)
+            if k>=260 then error("Too many tabs!") end
+            for i=#self+1,k do
+                self[i]=self[i-1]..'\t'
+            end
+            return self[k]
         end
-        return self[k]
-    end})
+    })
     local function dump(L,t,lim)
         local s
         if t then
@@ -542,26 +552,32 @@ do -- function TABLE.dump(L,t)
                 else
                     k=k..'='
                 end
-            elseif T=='boolean' then k='['..k..']='
-            else k='[\'*'..tostring(k)..'\']='
+            elseif T=='boolean' then
+                k='['..k..']='
+            else
+                k='[\'*'..tostring(k)..'\']='
             end
+
             T=type(v)
-            if T=='number' then v=tostring(v)
-            elseif T=='string' then v='\''..v..'\''
-            elseif T=='table' then v=dump(v,t+1)
-            elseif T=='boolean' then v=tostring(v)
-            else v='*'..tostring(v)
+            if T=='number' or T=='boolean' then
+                v=tostring(v)
+            elseif T=='string' then
+                v='\''..v..'\''
+            elseif T=='table' then
+                if t>lim then v=tostring(v) else v=dump(v,t+1,lim) end
+            else
+                v='*'..tostring(v)
             end
             s=s..tabs[t]..k..v..',\n'
         end
         return s..tabs[t-1]..'}'
     end
     --- @param t table
-    --- @param depth number depth limit, default to 1
+    --- @param depth? number how many layers will enter, default to inf
     --- @return string
     function TABLE.dump(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
-        return dump(t,1,depth)
+        return dump(t,1,depth or 1e99)
     end
 end
 
