@@ -1014,12 +1014,13 @@ function Zenitha.setOnGlobalKey(key,func)
 end
 
 --- Set Fn keys' event listener (for debugging)
---- @param list table<function> Function list, [1~7]=function
+--- @param list function[] @Function list, [1~7]=function
 function Zenitha.setOnFnKeys(list)
     assert(type(list)=='table',"Zenitha.setOnFnKeys(list): list must be table, [1~7]=function")
     for i=1,7 do
-        assert(type(list[i])=='function',"Zenitha.setOnFnKeys(list): list must be table, [1~7]=function")
-        devFnKey[i]=list[i]
+        if type(list[i])=='function' then
+            devFnKey[i]=list[i]
+        end
     end
 end
 
