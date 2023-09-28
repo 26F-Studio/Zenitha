@@ -464,8 +464,7 @@ end
 
 --------------------------------------------------------------
 
---- Dump a simple lua table (no whitespaces)
-do -- function TABLE.dumpDeflate(L,t)
+do -- function TABLE.dumpDeflate(t,depth)
     local function dump(L,t,lim)
         local s='{'
         local count=1
@@ -504,6 +503,7 @@ do -- function TABLE.dumpDeflate(L,t)
         end
         return s..'}'
     end
+    --- Dump a simple lua table (no whitespaces)
     --- @param t table
     --- @param depth? number how many layers will enter, default to inf
     --- @return string
@@ -513,8 +513,7 @@ do -- function TABLE.dumpDeflate(L,t)
     end
 end
 
---- Dump a simple lua table
-do -- function TABLE.dump(L,t)
+do -- function TABLE.dump(t,depth)
     local tabs=setmetatable({[0]='','\t'},{
         __index=function(self,k)
             if k>=260 then error("Too many tabs!") end
@@ -568,6 +567,7 @@ do -- function TABLE.dump(L,t)
         end
         return s..tabs[t-1]..'}'
     end
+    --- Dump a simple lua table
     --- @param t table
     --- @param depth? number how many layers will enter, default to inf
     --- @return string
@@ -577,4 +577,46 @@ do -- function TABLE.dump(L,t)
     end
 end
 
+do -- function TABLE.newLazyTable(src,loadFunc)
+    local function lazyLoadMF(self,k)
+        local mt=getmetatable(self)
+        self[k]=mt.__loader(mt.__source[k])
+        return self[k]
+    end
+    local function link(A,B,loadFunc)
+        setmetatable(A,{
+            __source=B,
+            __loader=loadFunc,
+            __index=lazyLoadMF,
+        })
+        for k,v in next,B do
+            if type(v)=='table' then
+                A[k]={}
+                link(A[k],v,loadFunc)
+            end
+        end
+    end
+    --- Create a new table with lazy load feature
+    --- @param src table
+    --- @param loadFunc fun(resID:any):any should receive a resource identifier from src table, then return a non-nil value
+    --- @param lazy? boolean
+    --- @return table
+    function TABLE.newResourceTable(src,loadFunc,lazy)
+        local new={}
+        link(new,src,loadFunc)
+        if not lazy then
+            TABLE.wakeLazyTable(src,new)
+        end
+        return new
+    end
+end
+function TABLE.wakeLazyTable(src,lazyT)
+    for k,v in next,src do
+        if type(v)=='table' then
+            TABLE.wakeLazyTable(v,lazyT[k])
+        else
+            local _=lazyT[k]
+        end
+    end
+end
 return TABLE
