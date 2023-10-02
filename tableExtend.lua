@@ -469,10 +469,11 @@ do -- function TABLE.dumpDeflate(t,depth)
         local s='{'
         local count=1
         for k,v in next,L do
+            -- Key part
             local T=type(k)
             if T=='number' then
                 if k==count then
-                    k=''
+                    k='' -- List part, no brackets needed
                     count=count+1
                 else
                     k='['..k..']='
@@ -489,6 +490,7 @@ do -- function TABLE.dumpDeflate(t,depth)
                 k='[\"*'..tostring(k)..'\"]='
             end
 
+            -- Value part
             T=type(v)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
@@ -533,10 +535,11 @@ do -- function TABLE.dump(t,depth)
         end
         local count=1
         for k,v in next,L do
+            -- Key part
             local T=type(k)
             if T=='number' then
                 if k==count then
-                    k=''
+                    k='' -- List part, no brackets needed
                     count=count+1
                 else
                     k='['..k..']='
@@ -553,6 +556,7 @@ do -- function TABLE.dump(t,depth)
                 k='["*'..tostring(k)..'\"]='
             end
 
+            -- Value part
             T=type(v)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
