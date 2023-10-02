@@ -100,7 +100,7 @@ end
 --- SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
 --- ```
 function SFX.loadSample(pack)
-    assert(type(pack)=='table',"Usage: SFX.loadsample([table])")
+    assert(type(pack)=='table',"Usage: SFX.loadsample(table)")
     assert(pack.name,"No field: name")
     assert(pack.path,"No field: path")
     local num=1

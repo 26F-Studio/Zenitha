@@ -166,7 +166,7 @@ function Widgets.base:reset()
             type(self.pos)=='table' and
             (type(self.pos[1])=='number' or self.pos[1]==false) and
             (type(self.pos[2])=='number' or self.pos[2]==false),
-            "[widget].pos[1] and [2] must be [number] or false}"
+            "[widget].pos[1] and [2] must be number or false}"
         )
         self._x=self.x+(self.pos[1] and self.pos[1]*(SCR.w0+2*SCR.x/SCR.k)-SCR.x/SCR.k or 0)
         self._y=self.y+(self.pos[2] and self.pos[2]*(SCR.h0+2*SCR.y/SCR.k)-SCR.y/SCR.k or 0)
