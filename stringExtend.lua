@@ -1,6 +1,7 @@
 local data=love.data
 local assert,tostring,tonumber=assert,tostring,tonumber
 local floor,lg=math.floor,math.log10
+local min,max=math.min,math.max
 local find,format=string.find,string.format
 local sub,gsub=string.sub,string.gsub
 local match,gmatch=string.match,string.gmatch
@@ -136,6 +137,26 @@ function STRING.split(str,sep,regex)
         end
     end
     return L
+end
+
+function STRING.editDist(s1,s2) -- By Copilot
+    local len1,len2=#s1,#s2
+    local t1,t2={},{}
+    for i=1,len1 do t1[i]=s1:sub(i,i) end
+    for i=1,len2 do t2[i]=s2:sub(i,i) end
+
+    local dp={}
+    for i=0,len1 do dp[i]=TABLE.new(0,len2) end
+    dp[0][0]=0
+    for i=1,len1 do dp[i][0]=i end
+    for i=1,len2 do dp[0][i]=i end
+
+    for i=1,len1 do
+        for j=1,len2 do
+            dp[i][j]=t1[i]==t2[j] and dp[i-1][j-1] or min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])+1
+        end
+    end
+    return dp[len1][len2]
 end
 
 --- Check if the string is a valid email address
