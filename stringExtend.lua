@@ -107,10 +107,10 @@ end
 --- @param str string
 --- @return string
 function STRING.trim(str)
-    local s=find(str,'%S')
-    if not s then return '' end
-    str=reverse(sub(str,s))
-    return reverse(sub(str,s))
+    local p=find(str,'%S')
+    if not p then return '' end
+    str=reverse(sub(str,p))
+    return reverse(sub(str,(find(str,'%S'))))
 end
 
 --- Split a string by sep
