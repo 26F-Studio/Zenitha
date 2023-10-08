@@ -2,6 +2,7 @@ local gc=love.graphics
 local getColor,setColor,prints,printf,draw,drawL=gc.getColor,gc.setColor,gc.print,gc.printf,gc.draw,gc.drawLayer
 local newText=gc.newText
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
+local rectangle,circle=gc.rectangle,gc.circle
 local applyTransform=gc.applyTransform
 local sin,cos=math.sin,math.cos
 local pcall=pcall
@@ -184,6 +185,18 @@ function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
     printf(str,x,y,w,mode)
 end
 
+--- Draw a rectangle, but with middle point
+--- @param mode love.DrawMode # How to draw the rectangle.
+--- @param x number
+--- @param y number
+--- @param w number
+--- @param h number
+--- @param rx? number
+--- @param ry? number
+function GC.mRect(mode,x,y,w,h,rx,ry)
+    rectangle(mode,x-w*.5,y-h*.5,w,h,rx,ry)
+end
+
 --- Draw a regular polygon
 --- @param mode 'fill'|'line'
 --- @param x? number
@@ -283,7 +296,6 @@ end
 --------------------------------------------------------------
 
 local gc_stencil,gc_setStencilTest=gc.stencil,gc.setStencilTest
-local gc_rectangle,gc_circle=gc.rectangle,gc.circle
 
 local stc_action,stc_value='replace',1
 
@@ -319,7 +331,7 @@ end
 
 local rect_x,rect_y,rect_w,rect_h
 local function stencil_rectangle()
-    gc_rectangle('fill',rect_x,rect_y,rect_w,rect_h)
+    rectangle('fill',rect_x,rect_y,rect_w,rect_h)
 end
 --- Draw a rectangle as stencil
 --- @param x number
@@ -333,7 +345,7 @@ end
 
 local circle_x,circle_y,circle_r,circle_seg
 local function stencil_circle()
-    gc_circle('fill',circle_x,circle_y,circle_r,circle_seg)
+    circle('fill',circle_x,circle_y,circle_r,circle_seg)
 end
 --- Draw a circle as stencil
 --- @param x number
