@@ -7,6 +7,7 @@ local gc_print,gc_printf=GC.print,GC.printf
 local gc_mStr=GC.mStr
 local gc_stc_reset,gc_stc_stop=GC.stc_reset,GC.stc_stop
 local gc_stc_circ,gc_stc_rect=GC.stc_circ,GC.stc_rect
+local gc_mRect=GC.mRect
 
 local kb=love.keyboard
 local timer=love.timer.getTime
@@ -391,12 +392,12 @@ function Widgets.button:draw()
 
     -- Background
     gc_setColor(c[1],c[2],c[3],.1+.2*self._hoverTime/self._hoverTimeMax)
-    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
+    gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
     gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.95)
-    gc_rectangle('line',-w*.5,-h*.5,w,h,self.cornerR)
+    gc_mRect('line',0,0,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
@@ -432,7 +433,7 @@ function Widgets.button_fill:draw()
 
     -- Rectangle
     gc_setColor(.15+r*.7*(1-HOV*.26),.15+g*.7*(1-HOV*.26),.15+b*.7*(1-HOV*.26),.9)
-    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
+    gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
@@ -462,7 +463,7 @@ function Widgets.button_invis:draw()
 
     -- Rectangle
     gc_setColor(c[1],c[2],c[3],HOV*.16)
-    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
+    gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
@@ -563,12 +564,12 @@ function Widgets.checkBox:draw()
 
     -- Background
     gc_setColor(c[1],c[2],c[3],.3*HOV)
-    gc_rectangle('fill',-w*.5,-w*.5,w,w,self.cornerR)
+    gc_mRect('fill',0,0,w,w,self.cornerR)
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
     gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8)
-    gc_rectangle('line',-w*.5,-w*.5,w,w,self.cornerR)
+    gc_mRect('line',0,0,w,w,self.cornerR)
     if self.disp() then
         gc_scale(.5*w)
         gc_setLineWidth(self.lineWidth*2/w)
@@ -679,12 +680,12 @@ function Widgets.switch:draw()
 
     -- Background
     gc_setColor(self.fillColor[1],self.fillColor[2],self.fillColor[3],self._slideTime/self._hoverTimeMax+.5)
-    gc_rectangle('fill',-h,-h*.5,h*2,h,h*.5)
+    gc_mRect('fill',0,0,h*2,h,h*.5)
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
     gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*HOV)
-    gc_rectangle('line',-h,-h*.5,h*2,h,h*.5)
+    gc_mRect('line',0,0,h*2,h,h*.5)
 
     -- Axis
     gc_setColor(1,1,1,.8+.2*HOV)
@@ -1047,10 +1048,10 @@ function Widgets.slider_fill:draw()
     -- Capsule
     gc_setColor(1,1,1,.6+HOV*.26)
     gc_setLineWidth(self.lineWidth+HOV)
-    gc_rectangle('line',x-self.lineDist,y-r-self.lineDist,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
+    gc_mRect('line',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     if HOV>0 then
         gc_setColor(1,1,1,HOV*.12)
-        gc_rectangle('fill',x-self.lineDist,y-r-self.lineDist,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
+        gc_mRect('fill',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     end
 
     -- Stenciled capsule and text
@@ -1945,7 +1946,7 @@ function Widgets.listBox:draw()
         gc_setColor(WIDGET.sel==self and self.activeColor or self.idleColor)
         local lw=self.lineWidth
         gc_setLineWidth(lw)
-        gc_rectangle('line',-lw*.5,-lw*.5,w+lw,h+lw,self.cornerR)
+        gc_mRect('line',w*.5,h*.5,w+lw,h+lw,self.cornerR)
 
         -- Slider
         if h<H then
