@@ -1,6 +1,13 @@
 local fs=love.filesystem
 local FILE={}
 
+--- Check if a file exists
+---@param path string
+---@param filterType? love.FileType
+function FILE.exist(path,filterType)
+    return not not fs.getInfo(path,filterType)
+end
+
 --- Check if a file is safe to read/write (not in save directory)
 --- @param file string
 function FILE.isSafe(file)
