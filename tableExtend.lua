@@ -1,7 +1,7 @@
 local rnd,floor=math.random,math.floor
 local find,gsub=string.find,string.gsub
 local rem=table.remove
-local next,type=next,type
+local next,type,select=next,type,select
 local TABLE={}
 
 --- Get a new filled table
@@ -581,7 +581,7 @@ do -- function TABLE.dump(t,depth)
     end
 end
 
-do -- function TABLE.newLazyTable(src,loadFunc)
+do -- function TABLE.newResourceTable(src,loadFunc)
     local function lazyLoadMF(self,k)
         local mt=getmetatable(self)
         self[k]=mt.__loader(mt.__source[k])
@@ -623,4 +623,27 @@ function TABLE.wakeLazyTable(src,lazyT)
         end
     end
 end
+
+--------------------------------------------------------------
+
+function TABLE.getFirstValue(...)
+    local t={...}
+    for i=1,select('#',...) do
+        if t[i]~=nil then
+            return t[i]
+        end
+    end
+end
+
+function TABLE.getlastValue(...)
+    local t={...}
+    local last
+    for i=1,select('#',...) do
+        if t[i]~=nil then
+            last=t[i]
+        end
+    end
+    return last
+end
+
 return TABLE
