@@ -23,7 +23,7 @@ end
 
 --- Get a number's sign
 --- @param a number
---- @return number -1 or 0 or 1
+--- @return -1|0|1
 function MATH.sign(a)
     return a>0 and 1 or a<0 and -1 or 0
 end
