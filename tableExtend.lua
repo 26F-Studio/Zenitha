@@ -401,7 +401,7 @@ function TABLE.sum(t)
 end
 
 --- Sum table
---- @param t table<any,number>
+--- @param t table<any, number>
 --- @return number
 function TABLE.sumAll(t)
     local s=0

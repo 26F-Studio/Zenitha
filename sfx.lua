@@ -5,9 +5,9 @@ local clamp=MATH.clamp
 
 --- @type string[]
 local nameList={}
---- @type table<string,love.Source[]>
+--- @type table<string, love.Source[]>
 local srcMap={}
---- @type table<string,{base:number,top:number}>
+--- @type table<string, {base:number, top:number}>
 local packSetting={}
 
 local volume=1
