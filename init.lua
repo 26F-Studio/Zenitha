@@ -181,7 +181,7 @@ local function _updateMousePos(x,y,dx,dy)
     if ms.isDown(1) then
         WIDGET._drag(x,y,dx,dy)
     else
-        WIDGET._cursorMove(x,y)
+        WIDGET._cursorMove(x,y,'move')
     end
 end
 local function _triggerMouseDown(x,y,k)
@@ -195,6 +195,7 @@ local function _triggerMouseDown(x,y,k)
         ))
     end
     if SCN.swapping then return end
+    WIDGET._cursorMove(x,y,'press')
     if WIDGET.sel then
         WIDGET._press(x,y,k)
     else
@@ -270,7 +271,7 @@ function love.mousereleased(x,y,k,touch)
             SCN.mouseClick(mx,my,k,((x-lastClicks[k].x)^2+(y-lastClicks[k].y)^2)^.5)
         end
     end
-    WIDGET._cursorMove(mx,my)
+    WIDGET._cursorMove(mx,my,'release')
 end
 function love.wheelmoved(dx,dy)
     if WAIT.state or SCN.swapping then return end
@@ -293,7 +294,7 @@ function love.touchpressed(id,x,y)
         WIDGET.unFocus(true)
         kb.setTextInput(false)
     end
-    WIDGET._cursorMove(x,y)
+    WIDGET._cursorMove(x,y,'press')
     WIDGET._press(x,y,1)
     if not WIDGET.sel and SCN.touchDown then SCN.touchDown(x,y,id) end
 end
@@ -311,7 +312,7 @@ function love.touchreleased(id,x,y)
     x,y=ITP(xOy,x,y)
     if id==SCN.mainTouchID then
         WIDGET._release(x,y,id)
-        WIDGET._cursorMove(x,y)
+        WIDGET._cursorMove(x,y,'release')
         WIDGET.unFocus()
         SCN.mainTouchID=false
     end

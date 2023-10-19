@@ -2026,7 +2026,8 @@ function WIDGET._setWidgetList(list)
     WIDGET.active=list or NONE
 
     if list then
-        WIDGET._cursorMove(xOy:inverseTransformPoint(love.mouse.getPosition()))
+        local x,y=xOy:inverseTransformPoint(love.mouse.getPosition())
+        WIDGET._cursorMove(x,y,'init')
 
         -- Set metatable for new widget lists
         if getmetatable(list)~=indexMeta then
@@ -2056,7 +2057,8 @@ end
 
 --- Focus widget W
 --- @param W Zenitha.widget.base
-function WIDGET.focus(W)
+--- @param reason? 'init'|'press'|'move'|'release'
+function WIDGET.focus(W,reason)
     if WIDGET.sel==W then return end
     if W.sound_hover then
         SFX.play(W.sound_hover)
@@ -2066,10 +2068,16 @@ function WIDGET.focus(W)
         EDITING=''
     end
     if W and W._visible then
-        WIDGET.sel=W
-        if W.type=='inputBox' and not kb.hasTextInput() then
-            local _,y1=xOy:transformPoint(0,W.y+W.h)
-            kb.setTextInput(true,0,y1,1,1)
+        if W.type=='inputBox' then
+            if reason~='move' and reason~='init' then
+                WIDGET.sel=W
+                if not kb.hasTextInput() then
+                    local _,y1=xOy:transformPoint(0,W.y+W.h)
+                    kb.setTextInput(true,0,y1,1,1)
+                end
+            end
+        else
+            WIDGET.sel=W
         end
     end
 end
@@ -2092,10 +2100,11 @@ end
 --- Update widget states with cursor move event (called by Zenitha)
 --- @param x number
 --- @param y number
-function WIDGET._cursorMove(x,y)
+--- @param reason 'init'|'press'|'move'|'release'
+function WIDGET._cursorMove(x,y,reason)
     for _,W in next,WIDGET.active do
         if W._visible and W:isAbove(x,y+SCN.curScroll) then
-            WIDGET.focus(W)
+            WIDGET.focus(W,reason)
             return
         end
     end
@@ -2109,6 +2118,7 @@ end
 --- @param y number
 --- @param k number
 function WIDGET._press(x,y,k)
+    WIDGET._cursorMove(x,y,'press')
     local W=WIDGET.sel
     if W then
         if not W:isAbove(x,y+SCN.curScroll) then
@@ -2185,7 +2195,7 @@ function WIDGET._update(dt)
                 W._visible=v
                 if v then
                     if W:isAbove(xOy:inverseTransformPoint(love.mouse.getPosition())) then
-                        WIDGET.focus(W)
+                        WIDGET.focus(W,'move')
                     end
                 else
                     if W==WIDGET.sel then
