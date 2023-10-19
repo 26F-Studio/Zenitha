@@ -11,6 +11,7 @@ local char,byte=string.char,string.byte
 
 local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
 
+--- @class string
 local STRING={}
 
 --- Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
@@ -111,7 +112,7 @@ function STRING.trim(str)
     local p=find(str,'%S')
     if not p then return '' end
     str=reverse(sub(str,p))
-    return reverse(sub(str,(find(str,'%S'))))
+    return reverse(sub(str,assert(find(str,'%S'))))
 end
 
 --- Split a string by sep
