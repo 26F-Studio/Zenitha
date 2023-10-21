@@ -143,6 +143,7 @@ IMG=        require'Zenitha.image'
 FILE=       require'Zenitha.file'
 SCR=        require'Zenitha.screen'
 GC=         require'Zenitha.gcExtend'
+TCP=        require'Zenitha.tcp'
 
 -- Love-based modules (complex)
 HTTP=       require'Zenitha.http'
