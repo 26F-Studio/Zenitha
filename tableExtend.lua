@@ -584,8 +584,9 @@ end
 do -- function TABLE.newResourceTable(src,loadFunc)
     local function lazyLoadMF(self,k)
         local mt=getmetatable(self)
-        self[k]=mt.__loader(mt.__source[k])
-        return self[k]
+        local res=mt.__loader(mt.__source[k])
+        self[k]=res
+        return res
     end
     local function link(A,B,loadFunc)
         setmetatable(A,{
