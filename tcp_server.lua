@@ -1,79 +1,126 @@
 local socket=require("socket")
+
 local S_confCHN=love.thread.getChannel("tcp_s_config")
 local S_sendCHN=love.thread.getChannel("tcp_s_send")
 local S_recvCHN=love.thread.getChannel("tcp_s_receive")
 
-local function send(clients,data,id)
-    if id==0 then
-        for _,v in pairs(clients) do
-            v:send(data)
+--- @type Zenitha.TCP._server
+local server
+--- @type table<string,Zenitha.TCP.Client>
+local clients
+
+--- @return Zenitha.TCP.MsgPack
+local function parseMessage(message,id)
+    local sep=message:find('|')
+    if sep then -- Receiver(s) specified
+        local recvIDs=STRING.split(message:sub(1,sep-1),',')
+        local data=message:sub(sep+1)
+        return {
+            data=data,
+            receiver=recvIDs,
+            sender=id,
+        }
+    else -- Broadcast
+        return {
+            data=message,
+            sender=id,
+        }
+    end
+end
+
+--- @param data string
+--- @param receiver Zenitha.TCP.recvID
+--- @param sender Zenitha.TCP.sendID
+local function sendMessage(data,receiver,sender)
+    if receiver==nil then
+        for _,client in next,clients do
+            if client.id~=sender then
+                client.conn:send(sender..'|'..data)
+            end
         end
-    elseif type(id)=='number' then
-        clients[id]:send(data)
-    else
-        for _,v in pairs(id) do
-            clients[v]:send(data)
+    elseif type(receiver)=='string' then
+        if receiver=='0' then
+            S_recvCHN:push{
+                data=data,
+                sender=sender,
+            }
+        elseif clients[receiver] then
+            clients[receiver].conn:send(sender..'|'..data)
+        else
+            print("Client '"..receiver.."' does not exist")
+        end
+    elseif type(receiver)=='table' then
+        for _,id in next,receiver do
+            sendMessage(data,id,sender)
         end
     end
 end
 
-local function serverLoop(server)
-    local currentId=0 -- store the total connections
-    local clients={}  -- e.g. clients[1] = 0xSocketAddress
-    -- start the loop to listening connection
+local function serverLoop()
+    local nextClientId=1
+    clients={}
+
     while true do
-        local config=S_confCHN:demand()
-        if config.action=="stop" then
-            server:close()
-            break
+        local config=S_confCHN:pop()
+        if config then
+            if config.action=='close' then
+                server:close()
+                return
+            elseif config.action=='kick' then
+                local c=clients[config.id]
+                if c then
+                    c.conn:close()
+                end
+            end
         end
         do
-            local connection,err=server:accept();
+            local conn,err=server:accept();
             if not err then
-                currentId=currentId+1
-                local client={
-                    id=currentId,
-                    connection=connection,
-                    sockName=connection:getsockname(),
+                --- @type Zenitha.TCP.Client
+                local c={
+                    id=tostring(nextClientId),
+                    conn=conn,
+                    sockname=conn:getsockname(),
                     timestamp=os.time(),
                 }
-                client:settimeout(0.001)
-                clients[client.id]=client
+                print(c.sockname.." connected")
+                c.conn:settimeout(0.001)
+                clients[c.id]=c
+
+                nextClientId=nextClientId+1
             end
         end
 
+        --- @type Zenitha.TCP.MsgPack
         local data=S_sendCHN:pop()
         if data then
-            send(clients,data.data,data.id)
+            sendMessage(data.data,'0','0')
         end
 
-        for id,client in pairs(clients) do
-            local message,err,partial=client:receive() -- accept data from client
-            -- 1,2,3,4|...
+        for id,client in next,clients do
+            local message,err,partial=client.conn:receive()
             if message then
-                -- {id:idList,action:string,data:string}
-                send(clients,"{id:client.id,data:data}",0)-- todo
-            else
-                print(err)
+                print(id..": "..message)
+                local pack=parseMessage(message,id)
+                sendMessage(pack.data,pack.receiver,id)
             end
         end
     end
 end
 
 while true do
-    --- @type {action:string,data:{}}
-    local config=S_confCHN:demand()
-    if config.action=="connect" then
-        local server,err=socket.bind("*", config.data.port)
-        if err then
-            S_confCHN:push({
-                success=false,
-                message="Cannot bind to ('0.0.0.0':"..config.data.port.."): "..err,
-            })
-        else
-            server:settimeout(0.001)
-            S_confCHN:push({success=true})
-            serverLoop(server)
-        end
+    local port=S_confCHN:demand()
+    local err
+    server,err=socket.bind('*',port)
+    if err then
+        S_recvCHN:push{
+            success=false,
+            message="Cannot bind to ('0.0.0.0':"..port.."): "..err,
+        }
+    else
+        print("Server started on port "..port)
+        server:settimeout(0.001)
+        S_recvCHN:push{success=true}
+        serverLoop()
     end
 end
