@@ -422,14 +422,15 @@ end
 
 --- Pack binary data into string (Zlib+Base64)
 --- @param str string
---- @return string|love.Data
+--- @return string
 function STRING.packBin(str)
+    --- @type string
     return data.encode('string','base64',data.compress('string','zlib',str))
 end
 
 --- Unpack binary data from string (Zlib+Base64)
 --- @param str string
---- @return string|love.Data|nil
+--- @return string|any
 function STRING.unpackBin(str)
     local success,res
     success,res=pcall(data.decode,'string','base64',str)
@@ -440,14 +441,15 @@ end
 
 --- Pack text data into string (Gzip+Base64)
 --- @param str string
---- @return string|love.Data
+--- @return string
 function STRING.packText(str)
+    --- @type string
     return data.encode('string','base64',data.compress('string','gzip',str))
 end
 
 --- Unpack text data from string (Gzip+Base64)
 --- @param str string
---- @return string|love.Data|nil
+--- @return string|any
 function STRING.unpackText(str)
     local success,res
     success,res=pcall(data.decode,'string','base64',str)
@@ -458,14 +460,15 @@ end
 
 --- Pack table into string (JSON+Gzip+Base64)
 --- @param t table
---- @return string|love.Data|nil
+--- @return string
 function STRING.packTable(t)
+    --- @type string
     return STRING.packText(JSON.encode(t))
 end
 
 --- Unpack table from string (JSON+Gzip+Base64)
 --- @param str string
---- @return table|love.Data|nil
+--- @return table|any
 function STRING.unpackTable(str)
     return JSON.decode(STRING.unpackText(str))
 end
