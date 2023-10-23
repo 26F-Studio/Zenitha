@@ -63,6 +63,22 @@ function MATH.rand(a,b)
     return a+rnd()*(b-a)
 end
 
+--- Get a random value from a table
+--- @param map table
+--- @return integer
+function MATH.randFrom(map)
+    local count=0
+    for _ in next,map do
+        count=count+1
+    end
+    local r=rnd()*count
+    for _,v in next,map do
+        r=r-1
+        if r<=0 then return v end
+    end
+    error("WTF")
+end
+
 --- Get a random integer with specified frequency list
 --- @param fList number[] positive numbers
 --- @return integer
