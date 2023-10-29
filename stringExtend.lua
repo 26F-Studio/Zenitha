@@ -75,11 +75,26 @@ local shiftMap={
     [';']=':',['\'']='"',
     [',']='<',['.']='>',['/']='?',
 }
---- "Capitalize" a character like string.upper, but can also shift numbers to signs
---- @param c string
+--- string.upper, but can also shift numbers to signs
+--- @param str string
 --- @return string
-function STRING.shiftChar(c)
-    return shiftMap[c] or upper(c)
+function STRING.shift(str)
+    return shiftMap[str] or upper(str)
+end
+
+local unshiftMap={
+    ['!']='1',['@']='2',['#']='3',['$']='4',['%']='5',
+    ['^']='6',['&']='7',['*']='8',['(']='9',[')']='0',
+    ['~']='`',['_']='-',['+']='=',
+    ['{']='[',['}']=']',['|']='\\',
+    [':']=';',['"']='\'',
+    ['<']=',',['>']='.',['?']='/',
+}
+--- string.lower, but can also unshift signs to numbers
+--- @param str string
+--- @return string
+function STRING.unshift(str)
+    return unshiftMap[str] or lower(str)
 end
 
 local upperData,lowerData={},{} -- Data is filled later in this file
@@ -109,10 +124,11 @@ end
 --- @param str string
 --- @return string
 function STRING.trim(str)
-    local p=find(str,'%S')
-    if not p then return '' end
-    str=reverse(sub(str,p))
-    return reverse(sub(str,assert(find(str,'%S'))))
+    -- local p=find(str,'%S')
+    -- if not p then return '' end
+    -- str=reverse(sub(str,p))
+    -- return reverse(sub(str,assert(find(str,'%S'))))
+    return match(str,"%s*(.+)%s*") or ""
 end
 
 --- Split a string by sep
@@ -140,6 +156,10 @@ function STRING.split(str,sep,regex)
     return L
 end
 
+--- Calculate the edit distance between two strings
+--- @param s1 string
+--- @param s2 string
+--- @return number
 function STRING.editDist(s1,s2) -- By Copilot
     local len1,len2=#s1,#s2
     local t1,t2={},{}
@@ -197,16 +217,16 @@ function STRING.time(t)
 end
 
 --- Warning: don't support number format like .26, must have digits before the dot, like 0.26
---- @param s string
+--- @param str string
 --- @return number|nil, string|nil
-function STRING.cutUnit(s)
-    local _s,_e=find(s,'^-?%d+%.?%d*')
-    if _e==#s then -- All numbers
-        return tonumber(s),nil
+function STRING.cutUnit(str)
+    local _s,_e=find(str,'^-?%d+%.?%d*')
+    if _e==#str then -- All numbers
+        return tonumber(str),nil
     elseif not _s then -- No numbers
-        return nil,s
+        return nil,str
     else
-        return tonumber(sub(s,_s,_e)),sub(s,_e+1)
+        return tonumber(sub(str,_s,_e)),sub(str,_e+1)
     end
 end
 
