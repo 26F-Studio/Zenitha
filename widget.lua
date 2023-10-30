@@ -65,7 +65,7 @@ local Widgets={}
 --- @class Zenitha.widget.base not used by user
 --- @field _widget true
 --- @field type string
---- @field name string
+--- @field name string|false
 ---
 --- @field color Zenitha.ColorStr|Zenitha.Color
 --- @field textColor Zenitha.ColorStr|Zenitha.Color
@@ -796,7 +796,7 @@ local sliderShowFunc={
 function Widgets.slider:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[slider_fill].w must be number')
+    assert(self.w and type(self.w)=='number','[slider].w must be number')
     assert(type(self.disp)=='function','[slider].disp must be function')
     assert(
         type(self.axis)=='table' and (#self.axis==2 or #self.axis==3) and
