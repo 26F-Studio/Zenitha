@@ -4,7 +4,7 @@ local S_confCHN=love.thread.getChannel("tcp_s_config")
 local S_sendCHN=love.thread.getChannel("tcp_s_send")
 local S_recvCHN=love.thread.getChannel("tcp_s_receive")
 
---- @type Zenitha.TCP._server
+--- @type LuaSocket.master
 local server
 --- @type table<string,Zenitha.TCP.Client>
 local clients
@@ -47,7 +47,7 @@ local function sendMessage(data,receiver,sender)
         elseif clients[receiver] then
             clients[receiver].conn:send(sender..'|'..data)
         else
-            print("Client '"..receiver.."' does not exist")
+            print("[TCP_S] Client '"..receiver.."' does not exist")
         end
     elseif type(receiver)=='table' then
         for _,id in next,receiver do
@@ -65,11 +65,14 @@ local function serverLoop()
         if config then
             if config.action=='close' then
                 server:close()
+                print("[TCP_S] Server closed")
                 return
             elseif config.action=='kick' then
                 local c=clients[config.id]
                 if c then
                     c.conn:close()
+                    print("[TCP_S] Kicked "..c.sockname)
+                    clients[config.id]=nil
                 end
             end
         end
@@ -83,8 +86,8 @@ local function serverLoop()
                     sockname=conn:getsockname(),
                     timestamp=os.time(),
                 }
-                print(c.sockname.." connected")
-                c.conn:settimeout(0.001)
+                print("[TCP_S] "..c.sockname.." connected")
+                c.conn:settimeout(0.01)
                 clients[c.id]=c
 
                 nextClientId=nextClientId+1
@@ -100,9 +103,14 @@ local function serverLoop()
         for id,client in next,clients do
             local message,err,partial=client.conn:receive()
             if message then
-                print(id..": "..message)
+                print("[TCP] "..id..": "..message)
                 local pack=parseMessage(message,id)
                 sendMessage(pack.data,pack.receiver,id)
+            elseif err~='timeout' then
+                if err=='closed' then
+                    clients[id]=nil
+                    print("[TCP_S] "..client.sockname.." disconnected")
+                end
             end
         end
     end
@@ -115,11 +123,11 @@ while true do
     if err then
         S_recvCHN:push{
             success=false,
-            message="Cannot bind to ('0.0.0.0':"..port.."): "..err,
+            message="Cannot bind to port "..port..", reason: "..err,
         }
     else
-        print("Server started on port "..port)
-        server:settimeout(0.001)
+        print("[TCP_S] Server started on port "..port)
+        server:settimeout(0.01)
         S_recvCHN:push{success=true}
         serverLoop()
     end

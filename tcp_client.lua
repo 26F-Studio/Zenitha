@@ -4,8 +4,8 @@ local C_confCHN=love.thread.getChannel("tcp_c_config")
 local C_sendCHN=love.thread.getChannel("tcp_c_send")
 local C_recvCHN=love.thread.getChannel("tcp_c_receive")
 
---- @type Zenitha.TCP._server
-local server
+--- @type LuaSocket.master
+local client
 
 --- @return Zenitha.TCP.MsgPack
 local function parseMessage(message)
@@ -16,41 +16,49 @@ local function parseMessage(message)
     } or {data=message}
 end
 
-local function serverLoop()
+local function clientLoop()
     while true do
         local config=C_confCHN:pop()
         if config then
             if config.action=='close' then
-                server:close()
+                client:close()
+                print("[TCP_C] Disconnected from server")
                 return
             end
         end
 
-        local message,status,partial=server:receive()
+        local message,status,partial=client:receive()
         if message then C_recvCHN:push(parseMessage(message)) end
-        if status=='closed' then return end
+        if status=='closed' then
+            print("[TCP_C] Server disconnected")
+            return
+        end
 
         --- @type Zenitha.TCP.MsgPack
         local data=C_sendCHN:pop()
         if data then
-            if type(receiver)=='table' then receiver=table.concat(receiver,',') end
-            server:send(receiver..'|'..data)
+            if type(data.receiver)=='table' then data.receiver=table.concat(data.receiver,',') end
+            local mes=data.receiver..'|'..data.data
+            client:send(mes)
+            print("[TCP_C] Message sent: "..mes)
         end
     end
 end
 
 while true do
+    local ip=C_confCHN:demand()
     local port=C_confCHN:demand()
     local err
-    server,err=socket.tcp()
+    client,err=socket.connect(ip,port)
     if err then
         C_recvCHN:push{
             success=false,
-            message="Cannot bind to ('0.0.0.0':"..port.."): "..err,
+            message="Cannot bind to "..ip..":"..port..", reason: "..err,
         }
     else
-        server:settimeout(0.001)
+        print("[TCP_C] Connected to "..ip..":"..port)
+        client:settimeout(0.01)
         C_recvCHN:push{success=true}
-        serverLoop()
+        clientLoop()
     end
 end

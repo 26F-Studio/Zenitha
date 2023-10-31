@@ -1,15 +1,8 @@
 --- @alias Zenitha.TCP.sendID '0'|string 0 = server/broadcast, 1+ = client id
 --- @alias Zenitha.TCP.recvID Zenitha.TCP.sendID|string[] 0 = server/broadcast, 1+ = client id
 
---- @class Zenitha.TCP._server
---- @field settimeout function
---- @field accept function
---- @field send function
---- @field receive function
---- @field close function
-
 --- @class Zenitha.TCP.Client
---- @field conn Zenitha.TCP._server
+--- @field conn LuaSocket.master
 --- @field id string '1'|'2'|...
 --- @field sockname string
 --- @field timestamp number
@@ -21,13 +14,20 @@
 
 local TCP={}
 
-
-
 local S_thread=love.thread.newThread('Zenitha/tcp_server.lua'); S_thread:start()
 local S_running=false
 local S_confCHN=love.thread.getChannel('tcp_s_config')
 local S_sendCHN=love.thread.getChannel('tcp_s_send')
 local S_recvCHN=love.thread.getChannel('tcp_s_receive')
+local function S_daemonFunc()
+    while true do
+        DEBUG.yieldT(0.626)
+        if not S_thread:isRunning() then
+            print(S_thread:getError())
+            return
+        end
+    end
+end
 
 --- Get client connection status
 function TCP.S_isRunning()
@@ -37,19 +37,8 @@ end
 --- Start server
 --- @param port number
 function TCP.S_start(port)
-    TASK.new(function()
-        local T=0
-        while 1 do
-            T=T+coroutine.yield()
-            if T>1 then
-                T=0
-                if not S_thread:isRunning() then
-                    print(S_thread:getError())
-                    return
-                end
-            end
-        end
-    end)
+    TASK.removeTask_code(S_daemonFunc)
+    TASK.new(S_daemonFunc)
     S_confCHN:push(port)
     local result=S_recvCHN:demand()
     if result.success then
@@ -100,6 +89,15 @@ local C_running=false
 local C_confCHN=love.thread.getChannel('tcp_c_config')
 local C_sendCHN=love.thread.getChannel('tcp_c_send')
 local C_recvCHN=love.thread.getChannel('tcp_c_receive')
+local function C_daemonFunc()
+    while true do
+        DEBUG.yieldT(0.626)
+        if not C_thread:isRunning() then
+            print(C_thread:getError())
+            return
+        end
+    end
+end
 
 --- Get client connection status
 function TCP.C_isRunning()
@@ -110,8 +108,10 @@ end
 --- @param ip string
 --- @param port number
 function TCP.C_connect(ip,port)
-    C_sendCHN:push(ip)
-    C_sendCHN:push(port)
+    TASK.removeTask_code(C_daemonFunc)
+    TASK.new(C_daemonFunc)
+    C_confCHN:push(ip)
+    C_confCHN:push(port)
     local result=C_recvCHN:demand()
     if result.success then
         C_running=true
