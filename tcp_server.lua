@@ -4,12 +4,12 @@ local S_confCHN=love.thread.getChannel("tcp_s_config")
 local S_sendCHN=love.thread.getChannel("tcp_s_send")
 local S_recvCHN=love.thread.getChannel("tcp_s_receive")
 
---- @type LuaSocket.master
+---@type LuaSocket.master
 local server
---- @type table<string,Zenitha.TCP.Client>
+---@type table<string,Zenitha.TCP.Client>
 local clients
 
---- @return Zenitha.TCP.MsgPack
+---@return Zenitha.TCP.MsgPack
 local function parseMessage(message,id)
     local sep=message:find('|')
     if sep then -- Receiver(s) specified
@@ -28,9 +28,9 @@ local function parseMessage(message,id)
     end
 end
 
---- @param data string
---- @param receiver Zenitha.TCP.recvID
---- @param sender Zenitha.TCP.sendID
+---@param data string
+---@param receiver Zenitha.TCP.recvID
+---@param sender Zenitha.TCP.sendID
 local function sendMessage(data,receiver,sender)
     if receiver==nil then
         for _,client in next,clients do
@@ -79,7 +79,7 @@ local function serverLoop()
         do
             local conn,err=server:accept();
             if not err then
-                --- @type Zenitha.TCP.Client
+                ---@type Zenitha.TCP.Client
                 local c={
                     id=tostring(nextClientId),
                     conn=conn,
@@ -94,7 +94,7 @@ local function serverLoop()
             end
         end
 
-        --- @type Zenitha.TCP.MsgPack
+        ---@type Zenitha.TCP.MsgPack
         local data=S_sendCHN:pop()
         if data then
             sendMessage(data.data,'0','0')

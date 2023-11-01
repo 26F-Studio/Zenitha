@@ -1,16 +1,16 @@
---- @alias Zenitha.ColorStr 'R'|'lR'|'dR'|'LR'|'DR'|'F'|'lF'|'dF'|'LF'|'DF'|'O'|'lO'|'dO'|'LO'|'DO'|'Y'|'lY'|'dY'|'LY'|'DY'|'A'|'lA'|'dA'|'LA'|'DA'|'K'|'lK'|'dK'|'LK'|'DK'|'G'|'lG'|'dG'|'LG'|'DG'|'J'|'lJ'|'dJ'|'LJ'|'DJ'|'C'|'lC'|'dC'|'LC'|'DC'|'I'|'lI'|'dI'|'LI'|'DI'|'S'|'lS'|'dS'|'LS'|'DS'|'B'|'lB'|'dB'|'LB'|'DB'|'P'|'lP'|'dP'|'LP'|'DP'|'V'|'lV'|'dV'|'LV'|'DV'|'M'|'lM'|'dM'|'LM'|'DM'|'W'|'lW'|'dW'|'LW'|'DW'|'D'|'lD'|'dD'|'LD'|'DD'|'L'|'lL'|'dL'|'LL'|'DL'|'X'|'lX'|'dX'|'LX'|'DX'
+---@alias Zenitha.ColorStr 'R'|'lR'|'dR'|'LR'|'DR'|'F'|'lF'|'dF'|'LF'|'DF'|'O'|'lO'|'dO'|'LO'|'DO'|'Y'|'lY'|'dY'|'LY'|'DY'|'A'|'lA'|'dA'|'LA'|'DA'|'K'|'lK'|'dK'|'LK'|'DK'|'G'|'lG'|'dG'|'LG'|'DG'|'J'|'lJ'|'dJ'|'LJ'|'DJ'|'C'|'lC'|'dC'|'LC'|'DC'|'I'|'lI'|'dI'|'LI'|'DI'|'S'|'lS'|'dS'|'LS'|'DS'|'B'|'lB'|'dB'|'LB'|'DB'|'P'|'lP'|'dP'|'LP'|'DP'|'V'|'lV'|'dV'|'LV'|'DV'|'M'|'lM'|'dM'|'LM'|'DM'|'W'|'lW'|'dW'|'LW'|'DW'|'D'|'lD'|'dD'|'LD'|'DD'|'L'|'lL'|'dL'|'LL'|'DL'|'X'|'lX'|'dX'|'LX'|'DX'
 
---- @class Zenitha.Color: table READ ONLY
---- @field [1] number Red
---- @field [2] number Green
---- @field [3] number Blue
---- @field [4]? number Alpha
+---@class Zenitha.Color: table READ ONLY
+---@field [1] number Red
+---@field [2] number Green
+---@field [3] number Blue
+---@field [4]? number Alpha
 
 local rnd,sin,abs=math.random,math.sin,math.abs
 
---- Convert hex string to color
---- @param str string
---- @return number, number, number, number|nil
+---Convert hex string to color
+---@param str string
+---@return number, number, number, number|nil
 local function hex(str)
     assert(type(str)=='string',"COLOR.hex(str): str must be string")
     str=str:match('#?(%x%x?%x?%x?%x?%x?%x?%x?)') or '000000'
@@ -21,12 +21,12 @@ local function hex(str)
     return r,g,b,a
 end
 
---- Convert HSV to RGB
---- @param h number Color type
---- @param s number Color amount
---- @param v number Light
---- @param a? number Alpha
---- @return number, number, number, number|nil
+---Convert HSV to RGB
+---@param h number Color type
+---@param s number Color amount
+---@param v number Light
+---@param a? number Alpha
+---@return number, number, number, number|nil
 local function hsv(h,s,v,a)
     if s<=0 then return v,v,v,a end
     h=h*6
@@ -99,17 +99,17 @@ setmetatable(COLOR,{__index=function(_,k)
 end,__metatable=true})
 
 local colorStrings={'R','F','O','Y','A','K','G','J','C','I','S','B','P','V','M','W'}
---- Random color
---- @param brightness number 1|2|3|4|5
---- @return Zenitha.Color
+---Random color
+---@param brightness number 1|2|3|4|5
+---@return Zenitha.Color
 function COLOR.random(brightness)
     return COLOR[brightness][colorStrings[rnd(#colorStrings)]]
 end
 
---- Get Rainbow color with phase
---- @param phase number cycle in 2pi
---- @param a? number alpha
---- @return number, number, number, number|nil
+---Get Rainbow color with phase
+---@param phase number cycle in 2pi
+---@param a? number alpha
+---@return number, number, number, number|nil
 function COLOR.rainbow(phase,a)
     return
         sin(phase)*.4+.6,
@@ -117,10 +117,10 @@ function COLOR.rainbow(phase,a)
         sin(phase-2.0944)*.4+.6,
         a
 end
---- Variant of COLOR.rainbow
---- @param phase number cycle in 2pi
---- @param a? number alpha
---- @return number, number, number, number|nil
+---Variant of COLOR.rainbow
+---@param phase number cycle in 2pi
+---@param a? number alpha
+---@return number, number, number, number|nil
 function COLOR.rainbow_light(phase,a)
     return
         sin(phase)*.2+.7,
@@ -128,10 +128,10 @@ function COLOR.rainbow_light(phase,a)
         sin(phase-2.0944)*.2+.7,
         a
 end
---- Variant of COLOR.rainbow
---- @param phase number cycle in 2pi
---- @param a? number alpha
---- @return number, number, number, number|nil
+---Variant of COLOR.rainbow
+---@param phase number cycle in 2pi
+---@param a? number alpha
+---@return number, number, number, number|nil
 function COLOR.rainbow_dark(phase,a)
     return
         sin(phase)*.2+.4,
@@ -139,10 +139,10 @@ function COLOR.rainbow_dark(phase,a)
         sin(phase-2.0944)*.2+.4,
         a
 end
---- Variant of COLOR.rainbow
---- @param phase number cycle in 2pi
---- @param a? number alpha
---- @return number, number, number, number|nil
+---Variant of COLOR.rainbow
+---@param phase number cycle in 2pi
+---@param a? number alpha
+---@return number, number, number, number|nil
 function COLOR.rainbow_gray(phase,a)
     return
         sin(phase)*.16+.5,

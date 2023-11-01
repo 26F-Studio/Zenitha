@@ -3,11 +3,11 @@ local ins,rem=table.insert,table.remove
 local floor,rnd=math.floor,math.random
 local clamp=MATH.clamp
 
---- @type string[]
+---@type string[]
 local nameList={}
---- @type table<string, love.Source[]>
+---@type table<string, love.Source[]>
 local srcMap={}
---- @type table<string, {base:number, top:number}>
+---@type table<string, {base:number, top:number}>
 local packSetting={}
 
 local volume=1
@@ -42,9 +42,9 @@ end
 
 local SFX={}
 
---- @param name string
---- @param path string
---- @param lazyLoad? boolean
+---@param name string
+---@param path string
+---@param lazyLoad? boolean
 local function loadOne(name,path,lazyLoad)
     assert(type(name)=='string',"name must be string")
     assert(type(path)=='string',"path must be string")
@@ -63,11 +63,11 @@ local function loadOne(name,path,lazyLoad)
     end
 end
 
---- Load SFX name-path pairs
---- @overload fun(pathTable:table,lazyLoad?:boolean)
---- @param name string
---- @param path string
---- @param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
+---Load SFX name-path pairs
+---@overload fun(pathTable:table,lazyLoad?:boolean)
+---@param name string
+---@param path string
+---@param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
 function SFX.load(name,path,lazyLoad)
     if type(name)=='table' then
         local success=0
@@ -93,12 +93,12 @@ function SFX.load(name,path,lazyLoad)
     table.sort(nameList)
 end
 
---- Load SFX samples from specified directory
---- @param pack {name:string, path:string, base:string}
---- ## Example
---- ```lua
---- SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
---- ```
+---Load SFX samples from specified directory
+---@param pack {name:string, path:string, base:string}
+---## Example
+---```lua
+---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
+---```
 function SFX.loadSample(pack)
     assert(type(pack)=='table',"Usage: SFX.loadsample(table)")
     assert(pack.name,"No field: name")
@@ -114,32 +114,32 @@ function SFX.loadSample(pack)
     LOG((num-1).." "..pack.name.." samples loaded")
 end
 
---- Get the number of SFX files loaded (not include SFX samples)
---- @return number
+---Get the number of SFX files loaded (not include SFX samples)
+---@return number
 function SFX.getCount()
     return #nameList
 end
 
---- Set the volume of SFX module
---- @param vol number
+---Set the volume of SFX module
+---@param vol number
 function SFX.setVol(vol)
     assert(type(vol)=='number' and vol>=0 and vol<=1,"SFX.setVol(vol): vol must be number in range 0~1")
     volume=vol
 end
 
---- Set the stereo of SFX module
---- @param s number 0~1
+---Set the stereo of SFX module
+---@param s number 0~1
 function SFX.setStereo(s)
     assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): s must be number in range 0~1")
     stereo=s
 end
 
---- Get note name with note number
+---Get note name with note number
 ---
---- 1 --> ' C1'
---- 13 --> 'C#2'
---- @param note number Note number, 1~127
---- @return string Note name, e.g. 'C4'
+---1 --> ' C1'
+---13 --> 'C#2'
+---@param note number Note number, 1~127
+---@return string Note name, e.g. 'C4'
 function SFX.getNoteName(note)
     if note<1 then
         return '---'
@@ -150,13 +150,13 @@ function SFX.getNoteName(note)
     end
 end
 
---- Play a sample
---- @param pack string
---- @param ... string|number 0~1 number for volume, big integer and string for tune
---- ## Example
---- ```lua
---- SFX.playSample('piano', .7,'C4','E4', .9,'G4')
---- ```
+---Play a sample
+---@param pack string
+---@param ... string|number 0~1 number for volume, big integer and string for tune
+---## Example
+---```lua
+---SFX.playSample('piano', .7,'C4','E4', .9,'G4')
+---```
 function SFX.playSample(pack,...)
     if ... then
         local arg={...}
@@ -181,11 +181,11 @@ function SFX.playSample(pack,...)
     end
 end
 
---- Play a SFX
---- @param name string
---- @param vol? number 0~1
---- @param pos? number -1~1
---- @param pitch? number +12 for an octave
+---Play a SFX
+---@param name string
+---@param vol? number 0~1
+---@param pos? number -1~1
+---@param pitch? number +12 for an octave
 function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
     if vol<=0 then return end
@@ -223,7 +223,7 @@ function SFX.play(name,vol,pos,pitch)
     S:play()
 end
 
---- Remove references of stopped SFX sources
+---Remove references of stopped SFX sources
 function SFX.releaseFree()
     for _,L in next,srcMap do
         for i,src in next,L do

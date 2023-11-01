@@ -32,27 +32,27 @@ local function link(A,B)
     end
 end
 
---- Initialize IMG lib (only once)
---- @param imgTable table<any, string|table>
---- ## Example
---- ```lua
---- IMG.init{
----     image1='.../image1.jpg',
----     image2='.../image2.png',
----     imagePack={
----         image3_1='.../image3/1.jpg',
----         image3_2='.../image3/2.jpg',
----         image4={
----             '.../image4/1.png',
----             '.../image4/2.png',
----         },
----     },
---- }
---- -- Then you can get image objects same as with get things from table, like this:
---- local image1=IMG.image1
---- local image3_1=IMG.imagePack.image3_1
---- local image4_1=IMG.imagePack.image4[1]
---- ```
+---Initialize IMG lib (only once)
+---@param imgTable table<any, string|table>
+---## Example
+---```lua
+---IMG.init{
+---    image1='.../image1.jpg',
+---    image2='.../image2.png',
+---    imagePack={
+---        image3_1='.../image3/1.jpg',
+---        image3_2='.../image3/2.jpg',
+---        image4={
+---            '.../image4/1.png',
+---            '.../image4/2.png',
+---        },
+---    },
+---}
+----- Then you can get image objects same as with get things from table, like this:
+---local image1=IMG.image1
+---local image3_1=IMG.imagePack.image3_1
+---local image4_1=IMG.imagePack.image4[1]
+---```
 function IMG.init(imgTable)
     if initialized then
         MSG.new('info',"Achievement: attempt to initialize IMG lib twice")

@@ -1,24 +1,24 @@
 local fs=love.filesystem
 local FILE={}
 
---- Check if a file exists
+---Check if a file exists
 ---@param path string
 ---@param filterType? love.FileType
 function FILE.exist(path,filterType)
     return not not fs.getInfo(path,filterType)
 end
 
---- Check if a file is safe to read/write (not in save directory)
---- @param file string
+---Check if a file is safe to read/write (not in save directory)
+---@param file string
 function FILE.isSafe(file)
     return fs.getRealDirectory(file)~=fs.getSaveDirectory()
 end
 
---- Load a file with a specified mode
---- (Auto detect if mode not given, not accurate)
---- @param path string
---- @param args? string|'-luaon'|'-lua'|'-json'|'-string'|'-canskip'
---- @return any
+---Load a file with a specified mode
+---(Auto detect if mode not given, not accurate)
+---@param path string
+---@param args? string|'-luaon'|'-lua'|'-json'|'-string'|'-canskip'
+---@return any
 function FILE.load(path,args)
     if not args then args='' end
     if fs.getInfo(path) then
@@ -67,11 +67,11 @@ function FILE.load(path,args)
     end
 end
 
---- Save a file with a specified mode
---- (Default to JSON, then LuaON, then string)
---- @param data any
---- @param path string
---- @param args? string|'-d'|'-luaon'|'-expand'
+---Save a file with a specified mode
+---(Default to JSON, then LuaON, then string)
+---@param data any
+---@param path string
+---@param args? string|'-d'|'-luaon'|'-expand'
 function FILE.save(data,path,args)
     if not args then args='' end
     if STRING.sArg(args,'-d') and fs.getInfo(path) then
@@ -105,8 +105,8 @@ function FILE.save(data,path,args)
     F:close()
 end
 
---- Clear a directory
---- @param path string
+---Clear a directory
+---@param path string
 function FILE.clear(path)
     if not FILE.isSafe(path) and fs.getInfo(path).type=='directory' then
         for _,name in next,fs.getDirectoryItems(path) do
@@ -121,8 +121,8 @@ function FILE.clear(path)
     end
 end
 
---- Delete a directory recursively
---- @param path string|''
+---Delete a directory recursively
+---@param path string|''
 function FILE.clear_s(path)
     if path=='' or (not FILE.isSafe(path) and fs.getInfo(path).type=='directory') then
         for _,name in next,fs.getDirectoryItems(path) do

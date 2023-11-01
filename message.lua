@@ -39,10 +39,10 @@ local backColors={
     other={COLOR.hex"787878"},
 }
 
---- Create a new message popup at up-left corner
---- @param icon string|love.Canvas
---- @param str string
---- @param time? number
+---Create a new message popup at up-left corner
+---@param icon string|love.Canvas
+---@param str string
+---@param time? number
 function MSG.new(icon,str,time)
     local color=backColors.other
     if type(icon)=='string' then
@@ -66,14 +66,14 @@ function MSG.new(icon,str,time)
     })
 end
 
---- Set the y position of message popup
---- @param y number
+---Set the y position of message popup
+---@param y number
 function MSG.setSafeY(y)
     assert(type(y)=='number' and y>=0,"startY must be nonnegative number")
     startY=y
 end
 
---- Show a traceback message
+---Show a traceback message
 function MSG.traceback()
     local msg=
         debug.traceback('',1)
@@ -86,13 +86,13 @@ function MSG.traceback()
     ),5)
 end
 
---- Clear all messages
+---Clear all messages
 function MSG.clear()
     TABLE.cut(mesList)
 end
 
---- Update all messages (called by Zenitha)
---- @param dt number
+---Update all messages (called by Zenitha)
+---@param dt number
 function MSG._update(dt)
     for i=#mesList,1,-1 do
         local m=mesList[i]
@@ -115,7 +115,7 @@ function MSG._update(dt)
     end
 end
 
---- Draw all messages (called by Zenitha)
+---Draw all messages (called by Zenitha)
 function MSG._draw()
     if #mesList>0 then
         GC.translate(0,startY)

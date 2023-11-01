@@ -43,7 +43,7 @@ local function _comp(a,b)
     return dt==0 and _ncalls[b]<_ncalls[a] or dt<0
 end
 
---- Starts collecting data.
+---Starts collecting data.
 function profile.start()
     if jit then
         jit.off()
@@ -52,7 +52,7 @@ function profile.start()
     debug.sethook(_hooker,'cr')
 end
 
---- Stops collecting data.
+---Stops collecting data.
 function profile.stop()
     debug.sethook()
     for f in next,_tcalled do
@@ -77,7 +77,7 @@ function profile.stop()
     collectgarbage()
 end
 
---- Resets all collected data.
+---Resets all collected data.
 function profile.reset()
     for f in next,_ncalls do
         _ncalls[f]=0
@@ -87,8 +87,8 @@ function profile.reset()
     collectgarbage()
 end
 
---- Iterates all functions that have been called since the profile was started.
---- @param limit? number limit the number of functions to return
+---Iterates all functions that have been called since the profile was started.
+---@param limit? number limit the number of functions to return
 function profile.query(limit)
     local t={}
     for f,n in next,_ncalls do
@@ -111,9 +111,9 @@ function profile.query(limit)
 end
 
 local cols={3,20,8,6,32}
---- Generate the datasheet
---- @param limit? number limit the number of functions to return
---- @return string
+---Generate the datasheet
+---@param limit? number limit the number of functions to return
+---@return string
 function profile.report(limit)
     local out={}
     local report=profile.query(limit)
@@ -141,10 +141,10 @@ function profile.report(limit)
 end
 
 local switch=false
---- Turn profile mode on/off
+---Turn profile mode on/off
 ---
---- Automatically copy the report to clipboard when turned off
---- @return boolean current state
+---Automatically copy the report to clipboard when turned off
+---@return boolean current state
 function profile.switch()
     switch=not switch
     if not switch then

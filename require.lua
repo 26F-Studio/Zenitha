@@ -14,8 +14,8 @@ end
 
 local loaded={}
 
---- A more powerful require function, allow loading dynamic libraries
---- @param libName string
+---A more powerful require function, allow loading dynamic libraries
+---@param libName string
 return function(libName)
     local _require=require
     if love.system.getOS()=='OS X' then

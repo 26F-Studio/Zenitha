@@ -11,61 +11,61 @@ local sourceBank={} -- {vocName1={SRC1s}, vocName2={SRC2s}, ...}
 
 local VOC={}
 
---- Set the cross time of voice, make voices more continuous
---- @param time number
+---Set the cross time of voice, make voices more continuous
+---@param time number
 function VOC.setCrossTime(time)
     assert(type(time)=='number' and time>=0,"Crosstime must be positive number")
     crossTime=time
 end
 
---- Set the diversion range of voice, make voices more natural
---- @param range number
+---Set the diversion range of voice, make voices more natural
+---@param range number
 function VOC.setDiversion(range)
     assert(type(range)=='number' and range>=0 and range<12,"Diversion must in [0,12)")
     diversion=range
 end
 
---- Set the volume of voice module
---- @param vol number
+---Set the volume of voice module
+---@param vol number
 function VOC.setVol(vol)
     assert(type(vol)=='number' and vol>=0 and vol<=1,"Volume must in [0,1]")
     volume=vol
 end
 
---- Get the number of voice files in the bank
---- @return number
+---Get the number of voice files in the bank
+---@return number
 function VOC.getCount() return 0 end
 
---- Get the number of voice files in the bank
---- @return number
+---Get the number of voice files in the bank
+---@return number
 function VOC.getQueueCount() return 0 end
 
---- Get the number of voice files in the bank
---- @return number Free channel id
+---Get the number of voice files in the bank
+---@return number Free channel id
 function VOC.getFreeChannel() return 0 end
 
---- Load voice files from specified path
+---Load voice files from specified path
 ---
---- Only available after VOC.init()
---- @param path string Path to the folder contains voice files, including the last '/'
---- @diagnostic disable-next-line: unused-local
+---Only available after VOC.init()
+---@param path string Path to the folder contains voice files, including the last '/'
+---@diagnostic disable-next-line: unused-local
 function VOC.load(path) error("Cannot VOC.load() before VOC.init()") end
 
---- Add a voice to specified (or a free) queue
+---Add a voice to specified (or a free) queue
 ---
---- Only available after VOC.load()
---- @param name string
---- @param channelID? number
---- @diagnostic disable-next-line: unused-local
+---Only available after VOC.load()
+---@param name string
+---@param channelID? number
+---@diagnostic disable-next-line: unused-local
 function VOC.play(name,channelID) end
 
---- Update all voice channels (called by Zenitha)
+---Update all voice channels (called by Zenitha)
 ---
---- For each channel, play next voice if current ended
+---For each channel, play next voice if current ended
 function VOC._update() end
 
---- Initialize the voice module, must be called before use
---- @param list table
+---Initialize the voice module, must be called before use
+---@param list table
 function VOC.init(list)
     if initialized then
         MSG.new('info',"Achievement: attempt to initialize VLC lib twice")

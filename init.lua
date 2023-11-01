@@ -883,41 +883,41 @@ end
 -- Zenitha framework & methods
 Zenitha={}
 
---- Go to quit scene then terminate the application
---- @param style? string Choose a scene swapping style
+---Go to quit scene then terminate the application
+---@param style? string Choose a scene swapping style
 function Zenitha._quit(style)
     onQuit()
     SCN.swapTo('_quit',style or 'slowFade')
 end
 
---- Set the application name string
---- @param name string
+---Set the application name string
+---@param name string
 function Zenitha.setAppName(name)
     assert(type(name)=='string','App name must be string')
     appName=name
 end
 
---- Get the application name
---- @return string
+---Get the application name
+---@return string
 function Zenitha.getAppName() return appName end
 
---- Set the application version text
---- @param text string
+---Set the application version text
+---@param text string
 function Zenitha.setVersionText(text)
     assert(type(text)=='string','Version text must be string')
     versionText=text
 end
 
---- Get the application version text
---- @return string
+---Get the application version text
+---@return string
 function Zenitha.getVersionText() return versionText end
 
---- Get the joysticks' state table
+---Get the joysticks' state table
 function Zenitha.getJsState() return jsState end
 
---- Get the error info
---- @param i number Index of error info
---- @return table Error info table
+---Get the error info
+---@param i number Index of error info
+---@return table Error info table
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]
@@ -928,8 +928,8 @@ function Zenitha.getErr(i)
     end
 end
 
---- Set the debug info list
---- @param list table<number,  table<string|function>>[]
+---Set the debug info list
+---@param list table<number,  table<string|function>>[]
 function Zenitha.setDebugInfo(list)
     assert(type(list)=='table',"Zenitha.setDebugInfo(list): list must be table")
     for i=1,#list do
@@ -939,53 +939,53 @@ function Zenitha.setDebugInfo(list)
     debugInfos=list
 end
 
---- Set the first scene to load
---- @param name string|any
+---Set the first scene to load
+---@param name string|any
 function Zenitha.setFirstScene(name)
     assert(type(name)=='string',"Zenitha.setFirstScene(name): name must be string")
     firstScene=name
 end
 
---- Set whether to discard canvas buffer after drawing each frame
---- @param b boolean
+---Set whether to discard canvas buffer after drawing each frame
+---@param b boolean
 function Zenitha.setCleanCanvas(b)
     assert(type(b)=='boolean',"Zenitha.setCleanCanvas(b): b must be boolean")
     discardCanvas=b
 end
 
---- Set the updating rate of the application
+---Set the updating rate of the application
 ---
---- Default value is 100(%), all *.update(dt) will be called every main loop
+---Default value is 100(%), all *.update(dt) will be called every main loop
 ---
---- If set to 50(%), all *.update(dt) will be called every 2 main loop
---- @param rate number Updating rate percentage, range from 0 to 100
+---If set to 50(%), all *.update(dt) will be called every 2 main loop
+---@param rate number Updating rate percentage, range from 0 to 100
 function Zenitha.setUpdateFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setUpdateFreq(rate): rate must in (0,100]")
     updateFreq=rate
 end
 
---- Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
---- @param rate number Drawing rate percentage, range from 0 to 100
+---Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
+---@param rate number Drawing rate percentage, range from 0 to 100
 function Zenitha.setDrawFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setDrawFreq(rate): rate must in (0,100]")
     drawFreq=rate
 end
 
---- Set the max update rate of main loop
+---Set the max update rate of main loop
 ---
---- Default value is 60
---- @param fps number
+---Default value is 60
+---@param fps number
 function Zenitha.setMaxFPS(fps)
     assert(type(fps)=='number' and fps>0,"Zenitha.setMaxFPS(fps): fps must be positive number")
     sleepInterval=1/fps
 end
 
---- Set click effect
+---Set click effect
 ---
---- Boolean: switch on/off
+---Boolean: switch on/off
 ---
---- Function: trigger custom function after every clicks (pass x,y as arguments)
---- @param fx false|true|function
+---Function: trigger custom function after every clicks (pass x,y as arguments)
+---@param fx false|true|function
 function Zenitha.setClickFX(fx)
     assert(type(fx)=='boolean' or type(fx)=='function',"Zenitha.setClickFX(fx): fx must be boolean or function")
     if fx==false then fx=NULL end
@@ -993,18 +993,18 @@ function Zenitha.setClickFX(fx)
     clickFX=fx
 end
 
---- Set click distance threshold
+---Set click distance threshold
 ---
---- Default value is 62
---- @param dist number Distance threshold
+---Default value is 62
+---@param dist number Distance threshold
 function Zenitha.setClickDist(dist)
     assert(type(dist)=='number' and dist>0,"Zenitha.setClickDist(dist): dist must be positive number")
     clickDist2=dist^2
 end
 
---- Set highest priority global key-pressing event listener
---- @param key string Key name
---- @param func function|false Function to be called when key is pressed, false to remove
+---Set highest priority global key-pressing event listener
+---@param key string Key name
+---@param func function|false Function to be called when key is pressed, false to remove
 function Zenitha.setOnGlobalKey(key,func)
     assert(type(key)=='string',"Zenitha.setOnFnKeys(key,func): key must be string")
     if func==false then
@@ -1015,8 +1015,8 @@ function Zenitha.setOnGlobalKey(key,func)
     end
 end
 
---- Set Fn keys' event listener (for debugging)
---- @param list function[] @Function list, [1~7]=function
+---Set Fn keys' event listener (for debugging)
+---@param list function[] @Function list, [1~7]=function
 function Zenitha.setOnFnKeys(list)
     assert(type(list)=='table',"Zenitha.setOnFnKeys(list): list must be table, [1~7]=function")
     for i=1,7 do
@@ -1026,46 +1026,46 @@ function Zenitha.setOnFnKeys(list)
     end
 end
 
---- Set global onFocus event listener
---- @param func function Function to be called when window focus changed
+---Set global onFocus event listener
+---@param func function Function to be called when window focus changed
 function Zenitha.setOnFocus(func)
     assert(type(func)=='function',"Zenitha.setOnFocus(func): func must be function")
     onFocus=func
 end
 
---- Set global onResize event listener
---- @param func function Function to be called when window resized
+---Set global onResize event listener
+---@param func function Function to be called when window resized
 function Zenitha.setOnResize(func)
     assert(type(func)=='function',"Zenitha.setOnResize(func): func must be function")
     onResize=func
 end
 
---- Set global onQuit event listener
---- @param func function Function to be called when application is about to quit
+---Set global onQuit event listener
+---@param func function Function to be called when application is about to quit
 function Zenitha.setOnQuit(func)
     assert(type(func)=='function',"Zenitha.setOnQuit(func): func must be function")
     onQuit=func
 end
 
---- Set cursor drawing function (pass time,x,y as arguments)
+---Set cursor drawing function (pass time,x,y as arguments)
 ---
---- Color and line width is uncertain, set it yourself in the function.
---- @param func function Function to be called when drawing cursor
+---Color and line width is uncertain, set it yourself in the function.
+---@param func function Function to be called when drawing cursor
 function Zenitha.setDrawCursor(func)
     assert(type(func)=='function',"Zenitha.setDrawCursor(func): func must be function")
     drawCursor=func
 end
 
---- Set system info drawing function (default transform is SCR.xOy_ul)
---- @param func function Function to be called when drawing system info
+---Set system info drawing function (default transform is SCR.xOy_ul)
+---@param func function Function to be called when drawing system info
 function Zenitha.setDrawSysInfo(func)
     assert(type(func)=='function',"Zenitha.setDrawSysInfo(func): func must be function")
     drawSysInfo=func
 end
 
---- Get a big canvas which is as big as the screen
---- @param id string Canvas ID
---- @return love.Canvas
+---Get a big canvas which is as big as the screen
+---@param id string Canvas ID
+---@return love.Canvas
 function Zenitha.getBigCanvas(id)
     return bigCanvases[id]
 end

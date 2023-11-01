@@ -1,29 +1,29 @@
---- @class Zenitha.textAnim
---- @field text? string
---- @field _t number
---- @field x? number
---- @field y? number
---- @field color number[]
---- @field r? number
---- @field g? number
---- @field b? number
---- @field a? number
---- @field fontSize? number
---- @field fontType? string|nil
---- @field duration? number
---- @field inPoint? number
---- @field outPoint? number
---- @field style? string
---- @field styleArg? any
---- @field draw function
+---@class Zenitha.textAnim
+---@field text? string
+---@field _t number
+---@field x? number
+---@field y? number
+---@field color number[]
+---@field r? number
+---@field g? number
+---@field b? number
+---@field a? number
+---@field fontSize? number
+---@field fontType? string|nil
+---@field duration? number
+---@field inPoint? number
+---@field outPoint? number
+---@field style? string
+---@field styleArg? any
+---@field draw function
 
---- @class Zenitha.Text
---- @field _texts Zenitha.textAnim[]
---- @field add function
---- @field update function
---- @field draw function
---- @field new function
---- @field clear function
+---@class Zenitha.Text
+---@field _texts Zenitha.textAnim[]
+---@field add function
+---@field update function
+---@field draw function
+---@field new function
+---@field clear function
 
 local setColor=GC.setColor
 local draw=GC.draw
@@ -116,31 +116,31 @@ function textFX.score(T)
     )
 end
 
---- @type Zenitha.Text
+---@type Zenitha.Text
 local TEXT={_texts={}}
 
---- Clear text container
+---Clear text container
 function TEXT:clear()
     self._texts={}
 end
 
---- Add text to container
---- @param data Zenitha.textAnim
---- ```lua
---- default={
----     text="Example Text",
----     x=0,y=0,
----     r=1,g=1,b=1,a=1,
----     fontSize=40,
----     fontType=nil,
+---Add text to container
+---@param data Zenitha.textAnim
+---```lua
+---default={
+---    text="Example Text",
+---    x=0,y=0,
+---    r=1,g=1,b=1,a=1,
+---    fontSize=40,
+---    fontType=nil,
 ---
----     style='appear', -- Check declaration to learn more
----     duration=1,
----     inPoint=0.2,
----     outPoint=0.2,
----     styleArg=...,
---- }
---- ```
+---    style='appear', -- Check declaration to learn more
+---    duration=1,
+---    inPoint=0.2,
+---    outPoint=0.2,
+---    styleArg=...,
+---}
+---```
 function TEXT:add(data)
     local T={
         _t=0, -- Timer
@@ -164,8 +164,8 @@ function TEXT:add(data)
     ins(self._texts,T)
 end
 
---- Update text container
---- @param dt number
+---Update text container
+---@param dt number
 function TEXT:update(dt)
     local list=self._texts
     for i=#list,1,-1 do
@@ -177,14 +177,14 @@ function TEXT:update(dt)
     end
 end
 
---- Draw text container
+---Draw text container
 function TEXT:draw()
     local list=self._texts
     for i=1,#list do list[i]:draw() end
 end
 
---- Create new text container
---- @return Zenitha.Text
+---Create new text container
+---@return Zenitha.Text
 function TEXT.new()
     return setmetatable({_texts={}},{__index=TEXT})
 end

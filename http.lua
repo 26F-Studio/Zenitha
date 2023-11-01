@@ -1,12 +1,12 @@
---- @class Zenitha.httpRequest
---- @field body? table|nil|string must be table if given, will be encoded to json
---- @field pool? string default to '_default' if not given
---- @field method? string|nil default to 'POST' if body is given, 'GET' otherwise
---- @field headers? table|nil
---- @field url? string default to the url set with HTTP.setHost
---- @field path? string|nil append to url
---- @field _poolPtr string internal use only
---- @field _destroy true internal use only
+---@class Zenitha.httpRequest
+---@field body? table|nil|string must be table if given, will be encoded to json
+---@field pool? string default to '_default' if not given
+---@field method? string|nil default to 'POST' if body is given, 'GET' otherwise
+---@field headers? table|nil
+---@field url? string default to the url set with HTTP.setHost
+---@field path? string|nil append to url
+---@field _poolPtr string internal use only
+---@field _destroy true internal use only
 
 local sendCHN=love.thread.getChannel('inputChannel')
 local recvCHN=love.thread.getChannel('outputChannel')
@@ -16,7 +16,7 @@ local getCount=sendCHN.getCount
 local threads={}
 local threadCount=0
 
---- @language LUA
+---@language LUA
 local threadCode=[[
     local id=...
 
@@ -84,8 +84,8 @@ local function addThread(num)
     end
 end
 
---- Send a HTTP request
---- @param arg Zenitha.httpRequest
+---Send a HTTP request
+---@param arg Zenitha.httpRequest
 function HTTP.request(arg)
     arg.method=arg.method or arg.body and 'POST' or 'GET'
     if arg.url then
@@ -116,7 +116,7 @@ function HTTP.request(arg)
     sendCHN:push(arg)
 end
 
---- Kill all threads and clear all message pool
+---Kill all threads and clear all message pool
 function HTTP.reset()
     for i=1,#threads do
         threads[i]:release()
@@ -128,8 +128,8 @@ function HTTP.reset()
     addThread(threadCount)
 end
 
---- Set thread count
---- @param n number 1~26
+---Set thread count
+---@param n number 1~26
 function HTTP.setThreadCount(n)
     assert(type(n)=='number' and n>=1 and n<=26 and n%1==0,"HTTP.setThreadCount(n): n must be integer from 1 to 26")
     if n>threadCount then
@@ -141,14 +141,14 @@ function HTTP.setThreadCount(n)
     end
 end
 
---- Get thread count
---- @return number
+---Get thread count
+---@return number
 function HTTP.getThreadCount()
     return threadCount
 end
 
---- Clear a message pool
---- @param pool string|nil pool name
+---Clear a message pool
+---@param pool string|nil pool name
 function HTTP.clearPool(pool)
     if pool==nil then pool='_default' end
     assert(type(pool)=='string',"Pool must be nil or string")
@@ -156,8 +156,8 @@ function HTTP.clearPool(pool)
     msgPool[pool]={}
 end
 
---- Delete a message pool
---- @param pool string pool name
+---Delete a message pool
+---@param pool string pool name
 function HTTP.deletePool(pool)
     assert(type(pool)=='string',"Pool must be nil or string")
     assert(pool~='_default',"Cannot delete _default pool. What are you doing?")
@@ -165,9 +165,9 @@ function HTTP.deletePool(pool)
     msgPool[pool]=nil
 end
 
---- Poll a message from pool (specifiedif given)
---- @param pool string|nil pool name
---- @return table|nil
+---Poll a message from pool (specifiedif given)
+---@param pool string|nil pool name
+---@return table|nil
 function HTTP.pollMsg(pool)
     if not (type(pool)=='nil' or type(pool)=='string') then error("Pool must be nil or string") end
     HTTP._update()
@@ -178,15 +178,15 @@ function HTTP.pollMsg(pool)
     end
 end
 
---- Set default host
---- @param host string host url
+---Set default host
+---@param host string host url
 function HTTP.setHost(host)
     assert(type(host)=='string',"Host must be string")
     if host:sub(1,7)~='http://' then host='http://'..host end
     HTTP._host=host
 end
 
---- Update receiving channel and put results into pool (called by Zenitha)
+---Update receiving channel and put results into pool (called by Zenitha)
 function HTTP._update()
     while getCount(recvCHN)>0 do
         local m=recvCHN:pop()

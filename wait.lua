@@ -27,21 +27,21 @@ local defaultDraw=function(a,t)
     end
 end
 
---- @class Zenitha.waitObj
---- @field init?            function
---- @field update?          function
---- @field quit?            function
---- @field draw?            function
---- @field timeout?         number
---- @field escapable?       boolean
---- @field coverAlpha?      number
---- @field noDefaultInit?   boolean
---- @field noDefaultUpdate? boolean
---- @field noDefaultDraw?   boolean
---- @field noDefaultQuit?   boolean
+---@class Zenitha.waitObj
+---@field init?            function
+---@field update?          function
+---@field quit?            function
+---@field draw?            function
+---@field timeout?         number
+---@field escapable?       boolean
+---@field coverAlpha?      number
+---@field noDefaultInit?   boolean
+---@field noDefaultUpdate? boolean
+---@field noDefaultDraw?   boolean
+---@field noDefaultQuit?   boolean
 
---- Start a new Wait Modal
---- @param data Zenitha.waitObj
+---Start a new Wait Modal
+---@param data Zenitha.waitObj
 function WAIT.new(data)
     if WAIT.state then return end
 
@@ -66,7 +66,7 @@ function WAIT.new(data)
     WAIT.totalTimer=0
 end
 
---- Interrupt the current
+---Interrupt the current
 function WAIT.interrupt()
     if WAIT.state and WAIT.state~='leave' then
         WAIT.state='leave'
@@ -74,8 +74,8 @@ function WAIT.interrupt()
     end
 end
 
---- Update Wait Modal (called by Zenitha)
---- @param dt number
+---Update Wait Modal (called by Zenitha)
+---@param dt number
 function WAIT._update(dt)
     if WAIT.state then
         WAIT.totalTimer=WAIT.totalTimer+dt
@@ -100,7 +100,7 @@ function WAIT._update(dt)
     end
 end
 
---- Draw Wait Modal (called by Zenitha)
+---Draw Wait Modal (called by Zenitha)
 function WAIT._draw()
     if WAIT.state then
         local alpha=(
@@ -123,31 +123,31 @@ function WAIT._draw()
     end
 end
 
---- Set the time of entering animation
---- @param t number
+---Set the time of entering animation
+---@param t number
 function WAIT.setEnterTime(t)
     assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.enterTime=t
 end
 
---- Set the time of leaving animation
---- @param t number
+---Set the time of leaving animation
+---@param t number
 function WAIT.setLeaveTime(t)
     assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.leaveTime=t
 end
 
---- Set the time of timeout
---- @param t number
+---Set the time of timeout
+---@param t number
 function WAIT.setTimeout(t)
     assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.timeout=t
 end
 
---- Set the color of background cover
---- @param r number
---- @param g number
---- @param b number
+---Set the color of background cover
+---@param r number
+---@param g number
+---@param b number
 function WAIT.setCoverColor(r,g,b)
     if type(r)=='table' then
         r,g,b=r[1],r[2],r[3]
@@ -163,36 +163,36 @@ function WAIT.setCoverColor(r,g,b)
     end
 end
 
---- Set the alpha of background cover
---- @param alpha number
+---Set the alpha of background cover
+---@param alpha number
 function WAIT.setCoverAlpha(alpha)
     assert(type(alpha)=='number' and alpha>=0 and alpha<=1,"Alpha must be number between 0~1")
     WAIT.coverAlpha=alpha
 end
 
---- Set the default init function
---- @param func function
+---Set the default init function
+---@param func function
 function WAIT.setDefaultInit(func)
     assert(type(func)=='function',"func must be function")
     WAIT.defaultInit=func
 end
 
---- Set the default update function
---- @param func function
+---Set the default update function
+---@param func function
 function WAIT.setDefaultUpdate(func)
     assert(type(func)=='function',"func must be function")
     WAIT.defaultUpdate=func
 end
 
---- Set the default draw function
---- @param func function
+---Set the default draw function
+---@param func function
 function WAIT.setDefaultDraw(func)
     assert(type(func)=='function',"func must be function")
     defaultDraw=func
 end
 
---- Set the default quit function
---- @param func function
+---Set the default quit function
+---@param func function
 function WAIT.setDefaultQuit(func)
     assert(type(func)=='function',"func must be function")
     WAIT.defaultQuit=func

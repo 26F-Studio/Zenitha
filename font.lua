@@ -1,42 +1,42 @@
 local set=love.graphics.setFont
 
---- @type love.File[], love.Font[][]
+---@type love.File[], love.Font[][]
 local fontFiles,fontCache={},{}
 
---- @type string, string
+---@type string, string
 local defaultFont,defaultFallBack
 
---- @type table<string, string>
+---@type table<string, string>
 local fallbackMap={}
 
---- @type love.Font
+---@type love.Font
 local curFont=nil -- Current using font object
 
 local FONT={}
 
---- Set default font type
---- @param name string
+---Set default font type
+---@param name string
 function FONT.setDefaultFont(name)
     defaultFont=name
 end
 
---- Set default fallback font type
---- @param name string
+---Set default fallback font type
+---@param name string
 function FONT.setDefaultFallback(name)
     defaultFallBack=name
 end
 
---- Set fallback font for an exist font
---- @param font string
---- @param fallback string
+---Set fallback font for an exist font
+---@param font string
+---@param fallback string
 function FONT.setFallback(font,fallback)
     fallbackMap[font]=fallback
 end
 
 
---- Get love's default font object
---- @param size number
---- @return love.Font
+---Get love's default font object
+---@param size number
+---@return love.Font
 local function _rawget(size)
     if not fontCache[size] then
         assert(type(size)=='number' and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
@@ -46,17 +46,17 @@ local function _rawget(size)
 end
 FONT.rawget=_rawget
 
---- Set love's default font
---- @param size number
+---Set love's default font
+---@param size number
 local function _rawset(size)
     set(fontCache[size] or _rawget(size))
 end
 FONT.rawset=_rawset
 
---- Load font(s) from file(s)
---- @param name string|string[]|any
---- @param path string
---- @overload fun(map:table<string, string>)
+---Load font(s) from file(s)
+---@param name string|string[]|any
+---@param path string
+---@overload fun(map:table<string, string>)
 function FONT.load(name,path)
     if type(name)=='table' then
         for k,v in next,name do
@@ -69,12 +69,12 @@ function FONT.load(name,path)
     end
 end
 
---- Get font object with font size, use default font name if not given
+---Get font object with font size, use default font name if not given
 ---
---- Warning: any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
---- @param size number
---- @param name? string
---- @return love.Font
+---Warning: any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
+---@param size number
+---@param name? string
+---@return love.Font
 local function _get(size,name)
     if not name then name=defaultFont end
 
@@ -95,11 +95,11 @@ local function _get(size,name)
 end
 FONT.get=_get
 
---- Set font with font size, use default font name if not given
+---Set font with font size, use default font name if not given
 ---
---- Warning: any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
---- @param size number
---- @param name? string
+---Warning: any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
+---@param size number
+---@param name? string
 local function _set(size,name)
     if not name then name=defaultFont end
 

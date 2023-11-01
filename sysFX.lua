@@ -203,8 +203,8 @@ end
 
 local SYSFX={}
 
---- Update all FXs (called by Zenitha)
---- @param dt number
+---Update all FXs (called by Zenitha)
+---@param dt number
 function SYSFX._update(dt)
     for i=#FXlist,1,-1 do
         if FXlist[i]:update(dt) then
@@ -213,31 +213,31 @@ function SYSFX._update(dt)
     end
 end
 
---- Draw all FXs (called by Zenitha)
+---Draw all FXs (called by Zenitha)
 function SYSFX._draw()
     for i=1,#FXlist do
         FXlist[i]:draw()
     end
 end
 
---- Create a new systemFX, used in UI
---- @param name 'beam'|'tap'|'glow'|'ripple'|'rectRipple'|'rect'|'particle'|'line'
---- @param ... any Arguments related to specific FX type
---- beam: rate,x1,y1,x2,y2,wid,r,g,b,a
+---Create a new systemFX, used in UI
+---@param name 'beam'|'tap'|'glow'|'ripple'|'rectRipple'|'rect'|'particle'|'line'
+---@param ... any Arguments related to specific FX type
+---beam: rate,x1,y1,x2,y2,wid,r,g,b,a
 ---
---- tap: rate,x,y
+---tap: rate,x,y
 ---
---- glow: rate,x,y,r
+---glow: rate,x,y,r
 ---
---- ripple: rate,x,y,r
+---ripple: rate,x,y,r
 ---
---- rectRipple: rate,x,y,w,h
+---rectRipple: rate,x,y,w,h
 ---
---- rect: rate,x,y,w,h,r,g,b
+---rect: rate,x,y,w,h,r,g,b
 ---
---- particle: rate,obj,size,x,y,vx,vy,ax,ay
+---particle: rate,obj,size,x,y,vx,vy,ax,ay
 ---
---- line: rate,x1,y1,x2,y2,r,g,b,a
+---line: rate,x1,y1,x2,y2,r,g,b,a
 function SYSFX.new(name,...)
     assert(FX[name],"No FX type: "..name)
     ins(FXlist,FX[name].new(...))

@@ -1,14 +1,14 @@
---- @class Zenitha.background
---- @field init function
---- @field resize function
---- @field update function
---- @field draw function
---- @field event function
---- @field discard function
+---@class Zenitha.background
+---@field init function
+---@field resize function
+---@field update function
+---@field draw function
+---@field event function
+---@field discard function
 
 local gc_clear=love.graphics.clear
 
---- @type Zenitha.background[]
+---@type Zenitha.background[]
 local BGs={} -- Stored backgrounds
 
 local BG={
@@ -19,15 +19,15 @@ local BG={
 
 local fields={'init','resize','update','draw','event','discard'}
 
---- Lock the background, forbid changing with BG.set() until call BG.unlock()
+---Lock the background, forbid changing with BG.set() until call BG.unlock()
 function BG.lock() BG.locked=true end
 
---- Unlock the background, allow changing with BG.set()
+---Unlock the background, allow changing with BG.set()
 function BG.unlock() BG.locked=false end
 
---- Add a background
---- @param name string
---- @param bg {init:function, resize:function, update:function, draw:function, event:function, discard:function}
+---Add a background
+---@param name string
+---@param bg {init:function, resize:function, update:function, draw:function, event:function, discard:function}
 function BG.add(name,bg)
     assert(type(name)=='string',"BG name must be string")
     assert(not BGs[name],"BG name '"..name.."' already exists")
@@ -39,9 +39,9 @@ function BG.add(name,bg)
     BGs[name]=bg
 end
 
---- Send data to a background (trigger its 'event' function)
---- @param name? string
---- @param ... any Arguments passed to background's 'event' function
+---Send data to a background (trigger its 'event' function)
+---@param name? string
+---@param ... any Arguments passed to background's 'event' function
 function BG.send(name,...)
     if BGs[name] then
         BGs[name].event(...)
@@ -50,14 +50,14 @@ function BG.send(name,...)
     end
 end
 
---- Set the default background, used when BG.set() is called without argument
---- @param name string
+---Set the default background, used when BG.set() is called without argument
+---@param name string
 function BG.setDefault(name)
     BG.default=name
 end
 
---- Set a addeed background (when not locked), use default background if name not given
---- @param name? string
+---Set a addeed background (when not locked), use default background if name not given
+---@param name? string
 function BG.set(name)
     name=name or BG.default
     if BG.locked then return end
@@ -73,20 +73,20 @@ function BG.set(name)
     return true
 end
 
---- Get the current background name
---- @return string|false
+---Get the current background name
+---@return string|false
 function BG.get() return BG.cur end
 
---- Trigger when resize
---- @param w number
---- @param h number
+---Trigger when resize
+---@param w number
+---@param h number
 function BG._resize(w,h) BGs[BG.cur].resize(w,h) end
 
---- Update current BG (called by Zenitha)
---- @param dt number
+---Update current BG (called by Zenitha)
+---@param dt number
 function BG._update(dt) BGs[BG.cur].update(dt) end
 
---- Draw current BG (called by Zenitha)
+---Draw current BG (called by Zenitha)
 function BG._draw() BGs[BG.cur].draw() end
 
 do -- Built-in: None

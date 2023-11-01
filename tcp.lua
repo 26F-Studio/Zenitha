@@ -1,16 +1,16 @@
---- @alias Zenitha.TCP.sendID '0'|string 0 = server/broadcast, 1+ = client id
---- @alias Zenitha.TCP.recvID Zenitha.TCP.sendID|string[] 0 = server/broadcast, 1+ = client id
+---@alias Zenitha.TCP.sendID '0'|string 0 = server/broadcast, 1+ = client id
+---@alias Zenitha.TCP.recvID Zenitha.TCP.sendID|string[] 0 = server/broadcast, 1+ = client id
 
---- @class Zenitha.TCP.Client
---- @field conn LuaSocket.master
---- @field id string '1'|'2'|...
---- @field sockname string
---- @field timestamp number
+---@class Zenitha.TCP.Client
+---@field conn LuaSocket.master
+---@field id string '1'|'2'|...
+---@field sockname string
+---@field timestamp number
 
---- @class Zenitha.TCP.MsgPack
---- @field data string
---- @field receiver Zenitha.TCP.recvID
---- @field sender? Zenitha.TCP.sendID
+---@class Zenitha.TCP.MsgPack
+---@field data string
+---@field receiver Zenitha.TCP.recvID
+---@field sender? Zenitha.TCP.sendID
 
 local TCP={}
 
@@ -29,13 +29,13 @@ local function S_daemonFunc()
     end
 end
 
---- Get client connection status
+---Get client connection status
 function TCP.S_isRunning()
     return S_running
 end
 
---- Start server
---- @param port number
+---Start server
+---@param port number
 function TCP.S_start(port)
     TASK.removeTask_code(S_daemonFunc)
     TASK.new(S_daemonFunc)
@@ -48,7 +48,7 @@ function TCP.S_start(port)
     end
 end
 
---- Stop the TCP server
+---Stop the TCP server
 function TCP.S_stop()
     S_confCHN:push{action='close'}
     S_sendCHN:clear()
@@ -56,19 +56,19 @@ function TCP.S_stop()
     S_running=false
 end
 
---- Disconnect a client
---- @param id Zenitha.TCP.recvID
+---Disconnect a client
+---@param id Zenitha.TCP.recvID
 function TCP.S_kick(id)
     if S_running then
         S_confCHN:push{action='kick',id=id}
     end
 end
 
---- Send data to client(s)
---- @param data table
---- @param id Zenitha.TCP.recvID
+---Send data to client(s)
+---@param data table
+---@param id Zenitha.TCP.recvID
 function TCP.S_send(data,id)
-    --- @type Zenitha.TCP.MsgPack
+    ---@type Zenitha.TCP.MsgPack
     local pack={
         data=STRING.packTable(data),
         receiver=id,
@@ -76,8 +76,8 @@ function TCP.S_send(data,id)
     S_sendCHN:push(pack)
 end
 
---- Receive data from client(s)
---- @return Zenitha.TCP.MsgPack
+---Receive data from client(s)
+---@return Zenitha.TCP.MsgPack
 function TCP.S_receive()
     return S_recvCHN:pop()
 end
@@ -99,14 +99,14 @@ local function C_daemonFunc()
     end
 end
 
---- Get client connection status
+---Get client connection status
 function TCP.C_isRunning()
     return C_running
 end
 
---- Connect to server
---- @param ip string
---- @param port number
+---Connect to server
+---@param ip string
+---@param port number
 function TCP.C_connect(ip,port)
     TASK.removeTask_code(C_daemonFunc)
     TASK.new(C_daemonFunc)
@@ -120,7 +120,7 @@ function TCP.C_connect(ip,port)
     end
 end
 
---- Disconnect from the server
+---Disconnect from the server
 function TCP.C_disconnect()
     C_confCHN:push{action='close'}
     C_sendCHN:clear()
@@ -128,11 +128,11 @@ function TCP.C_disconnect()
     C_running=false
 end
 
---- Send data to server
---- @param data table
---- @param id Zenitha.TCP.recvID
+---Send data to server
+---@param data table
+---@param id Zenitha.TCP.recvID
 function TCP.C_send(data,id)
-    --- @type Zenitha.TCP.MsgPack
+    ---@type Zenitha.TCP.MsgPack
     local pack={
         data=STRING.packTable(data),
         receiver=id,
@@ -140,8 +140,8 @@ function TCP.C_send(data,id)
     C_sendCHN:push(pack)
 end
 
---- Receive data from server
---- @return Zenitha.TCP.MsgPack
+---Receive data from server
+---@return Zenitha.TCP.MsgPack
 function TCP.C_receive()
     return C_recvCHN:pop()
 end

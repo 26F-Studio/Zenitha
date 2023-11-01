@@ -33,25 +33,25 @@ socket.connect6=socket.connect
 ---@param timeout? number?
 function socket.select(recvt, sendt, timeout) end
 
---- Throw an exception, like assert
+---Throw an exception, like assert
 function socket.try(ret1, ret2, ...) end
 
---- Patch a function to be the finalizer of a SAFE function, if the SAFE function crashed, the finalizer function will be called
+---Patch a function to be the finalizer of a SAFE function, if the SAFE function crashed, the finalizer function will be called
 ---@param finalizer function
 function socket.newtry(finalizer) end
 
---- Create a SAFE function which calling it is silimar to pcall the original function, but can only handle try/assert/error
+---Create a SAFE function which calling it is silimar to pcall the original function, but can only handle try/assert/error
 ---@param func function
 function socket.protect(func) end
 
---- Return retD+1, retD+2, ...
+---Return retD+1, retD+2, ...
 ---@param D number
 ---@param ret1 any
 ---@param ret2 any
 ---@param ... any
 function socket.skip(D, ret1, ret2, ...) end
 
---- LTN12
+---LTN12
 ---@param mode string
 ---@param sock LuaSocket.master
 ---@return LTN12.Sink
@@ -63,11 +63,11 @@ function socket.sink(mode, sock) end
 ---@return LTN12.Source
 function socket.source(mode, sock, length) end
 
---- Just sleep
+---Just sleep
 ---@param time number
 function socket.sleep(time) end
 
---- Just getTime
+---Just getTime
 ---@return number ms
 function socket.gettime() end
 
@@ -100,11 +100,11 @@ function master:getstats() end
 ---@return number
 function master:gettimeout() end
 
---- Wait for a connection, then transform into a server object
+---Wait for a connection, then transform into a server object
 ---@param backlog number
 function master:listen(backlog) end
 
---- For throttling of bandwidth
+---For throttling of bandwidth
 ---@param received number bytes
 ---@param sent number bytes
 ---@param age number seconds
@@ -154,12 +154,12 @@ function client:getpeername() end
 ---@param prefix? string
 function client:receive(pattern, prefix) end
 
---- Send data string between i and j (byte) if given
+---Send data string between i and j (byte) if given
 ---@param data string
 ---@param i? number
 ---@param j? number
 function client:send(data, i, j) end
 
---- Close one side of a full-duplex connection
+---Close one side of a full-duplex connection
 ---@param mode? 'both'|'send'|'receive'
 function client:shutdown(mode) end

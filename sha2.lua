@@ -1,4 +1,4 @@
---- @diagnostic disable
+---@diagnostic disable
 
 --------------------------------------------------------------------------------------------------------------------------
 -- sha2.lua
@@ -42,7 +42,7 @@
 --
 -- CHANGELOG:
 --  version     date      description
---  -------  ----------   -----------
+--  ------- ----------  -----------
 --    12     2022-02-23   Now works in Luau (but NOT optimized for speed)
 --    11     2022-01-09   BLAKE3 added
 --    10     2022-01-02   BLAKE2 functions added

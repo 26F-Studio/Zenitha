@@ -17,14 +17,14 @@ local LOG=setmetatable({},{
     __metatable=true,
 })
 
---- Get raw logs data
---- @return string[] @READ ONLY, DO NOT MODIFY
+---Get raw logs data
+---@return string[] @READ ONLY, DO NOT MODIFY
 function LOG.getLogs()
     return logs
 end
 
---- Get all logged strings as a big string
---- @return string
+---Get all logged strings as a big string
+---@return string
 function LOG.getString()
     return
         STRING.repD("$1 $2  logs  $3\n",

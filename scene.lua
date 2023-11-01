@@ -1,34 +1,34 @@
---- @class Zenitha.Scene
---- @field widgetList? Zenitha.widgetArg[]|Zenitha.widget.base[]
---- @field scrollHeight? number|nil
+---@class Zenitha.Scene
+---@field widgetList? Zenitha.widgetArg[]|Zenitha.widget.base[]
+---@field scrollHeight? number|nil
 ---
---- @field enter? function
---- @field leave? function
---- @field mouseDown? function
---- @field mouseMove? function
---- @field mouseUp? function
---- @field mouseClick? function
---- @field wheelMoved? function
---- @field touchDown? function
---- @field touchUp? function
---- @field touchMove? function
---- @field touchClick? function
---- @field keyDown? function
---- @field keyUp? function
---- @field gamepadDown? function
---- @field gamepadUp? function
---- @field fileDropped? function
---- @field directoryDropped? function
---- @field resize? function
---- @field update? function
---- @field draw? function
+---@field enter? function
+---@field leave? function
+---@field mouseDown? function
+---@field mouseMove? function
+---@field mouseUp? function
+---@field mouseClick? function
+---@field wheelMoved? function
+---@field touchDown? function
+---@field touchUp? function
+---@field touchMove? function
+---@field touchClick? function
+---@field keyDown? function
+---@field keyUp? function
+---@field gamepadDown? function
+---@field gamepadUp? function
+---@field fileDropped? function
+---@field directoryDropped? function
+---@field resize? function
+---@field update? function
+---@field draw? function
 
---- @class Zenitha.SceneSwap
---- @field duration number
---- @field timeChange number
---- @field draw function
+---@class Zenitha.SceneSwap
+---@field duration number
+---@field timeChange number
+---@field draw function
 
---- @type Zenitha.Scene[]
+---@type Zenitha.Scene[]
 local scenes={}
 
 local eventNames={
@@ -126,9 +126,9 @@ local swap={
     },
 }
 
---- Add a scene
---- @param name string
---- @param scene Zenitha.Scene
+---Add a scene
+---@param name string
+---@param scene Zenitha.Scene
 function SCN.add(name,scene)
     assert(type(scene)=='table',"scene must be table")
     assert(not scenes[name],"scene '"..tostring(name).."' already exists")
@@ -158,9 +158,9 @@ function SCN.add(name,scene)
     scenes[name]=scene
 end
 
---- Add a scene swapping animation
---- @param name string
---- @param swp Zenitha.SceneSwap
+---Add a scene swapping animation
+---@param name string
+---@param swp Zenitha.SceneSwap
 function SCN.addSwap(name,swp)
     assert(type(name)=='string',"Arg name must be string")
     assert(not swap[name],"Swap '"..name.."' already exist")
@@ -171,15 +171,15 @@ function SCN.addSwap(name,swp)
     swap[name]=swp
 end
 
---- Set max scroll area of current scene, default to 0
---- @param height? number
+---Set max scroll area of current scene, default to 0
+---@param height? number
 function SCN.setScroll(height)
     SCN.maxScroll=height or 0
     SCN.curScroll=MATH.clamp(SCN.curScroll,0,SCN.maxScroll)
 end
 
---- Update scene swapping animation (called by Zenitha)
---- @param dt number
+---Update scene swapping animation (called by Zenitha)
+---@param dt number
 function SCN._swapUpdate(dt)
     local S=SCN.state
     S.timeRem=S.timeRem-dt
@@ -195,8 +195,8 @@ function SCN._swapUpdate(dt)
     end
 end
 
---- Load a scene, replace all events and fresh scrolling, widgets
---- @param name string
+---Load a scene, replace all events and fresh scrolling, widgets
+---@param name string
 function SCN._load(name)
     love.keyboard.setTextInput(false)
 
@@ -211,21 +211,21 @@ function SCN._load(name)
     if S.enter then S.enter() end
 end
 
---- Push a scene to stack
---- @param tar? string
+---Push a scene to stack
+---@param tar? string
 function SCN._push(tar)
     table.insert(SCN.stack,tar or SCN.stack[#SCN.stack-1])
 end
 
---- Pop a scene from stack
+---Pop a scene from stack
 function SCN._pop()
     table.remove(SCN.stack)
 end
 
---- Swap to a sceene without add current scene to stack (cannot go back)
---- @param tar string
---- @param style? string
---- @param ... any Arguments passed to new scene
+---Swap to a sceene without add current scene to stack (cannot go back)
+---@param tar string
+---@param style? string
+---@param ... any Arguments passed to new scene
 function SCN.swapTo(tar,style,...)
     if scenes[tar] then
         if not SCN.swapping then
@@ -249,10 +249,10 @@ function SCN.swapTo(tar,style,...)
     end
 end
 
---- Go to a scene
---- @param tar string
---- @param style? string
---- @param ... any Arguments passed to new scene
+---Go to a scene
+---@param tar string
+---@param style? string
+---@param ... any Arguments passed to new scene
 function SCN.go(tar,style,...)
     if scenes[tar] then
         if not SCN.swapping then
@@ -264,9 +264,9 @@ function SCN.go(tar,style,...)
     end
 end
 
---- Back to previous scene
---- @param style? string
---- @param ... any Arguments passed to previous scene
+---Back to previous scene
+---@param style? string
+---@param ... any Arguments passed to previous scene
 function SCN.back(style,...)
     if SCN.swapping then return end
 
@@ -283,10 +283,10 @@ function SCN.back(style,...)
     end
 end
 
---- Back to a specific scene
---- @param tar string
---- @param style? string
---- @param ... any Arguments passed to target scene
+---Back to a specific scene
+---@param tar string
+---@param style? string
+---@param ... any Arguments passed to target scene
 function SCN.backTo(tar,style,...)
     if SCN.swapping then return end
 
@@ -297,7 +297,7 @@ function SCN.backTo(tar,style,...)
     SCN.swapTo(SCN.stack[#SCN.stack],style,...)
 end
 
---- Print current scene stack to console
+---Print current scene stack to console
 function SCN.printStack()
     for i=1,#SCN.stack do print(SCN.stack[i]) end
 end

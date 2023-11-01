@@ -4,10 +4,10 @@ local rem=table.remove
 local next,type,select=next,type,select
 local TABLE={}
 
---- Get a new filled table
---- @param val any value to fill
---- @param count number how many elements
---- @return any[]
+---Get a new filled table
+---@param val any value to fill
+---@param count number how many elements
+---@return any[]
 function TABLE.new(val,count)
     local L={}
     for i=1,count do
@@ -16,9 +16,9 @@ function TABLE.new(val,count)
     return L
 end
 
---- Get a new table with __index metatable
---- @param indexFunc fun(self:table, key:any):any
---- @return table
+---Get a new table with __index metatable
+---@param indexFunc fun(self:table, key:any):any
+---@return table
 function TABLE.newPool(indexFunc)
     return setmetatable({},{
         __call=function(self,k) return self[k] end,
@@ -26,9 +26,9 @@ function TABLE.newPool(indexFunc)
     })
 end
 
---- Make a table to be able to auto filled from a source
---- @param t table
---- @param source table
+---Make a table to be able to auto filled from a source
+---@param t table
+---@param source table
 function TABLE.setAutoFill(t,source)
     setmetatable(t,{__index=function(self,k)
         self[k]=source[k]
@@ -36,10 +36,10 @@ function TABLE.setAutoFill(t,source)
     end})
 end
 
---- Get a copy of [1~#] elements
---- @param org any[] original table
---- @param depth? number how many layers will be recreate, default to inf
---- @return any[]
+---Get a copy of [1~#] elements
+---@param org any[] original table
+---@param depth? number how many layers will be recreate, default to inf
+---@return any[]
 function TABLE.shift(org,depth)
     if not depth then depth=1e99 end
     local L={}
@@ -53,10 +53,10 @@ function TABLE.shift(org,depth)
     return L
 end
 
---- Connect [1~#] elements of new to the end of org
---- @param org any[] original list
---- @param new any[] new list
---- @return any[] org with new data
+---Connect [1~#] elements of new to the end of org
+---@param org any[] original list
+---@param new any[] new list
+---@return any[] org with new data
 function TABLE.connect(org,new)
     local l0=#org
     for i=1,#new do
@@ -65,10 +65,10 @@ function TABLE.connect(org,new)
     return org
 end
 
---- Get a table of two lists connected
---- @param L1 any[] list 1
---- @param L2 any[] list 2
---- @return any[]
+---Get a table of two lists connected
+---@param L1 any[] list 1
+---@param L2 any[] list 2
+---@return any[]
 function TABLE.combine(L1,L2)
     local l={}
     local l0=#L1
@@ -77,10 +77,10 @@ function TABLE.combine(L1,L2)
     return l
 end
 
---- Get a full copy of org, depth = how many layers will be recreate, default to inf
---- @param org table original table
---- @param depth? number how many layers will be recreate, default to inf
---- @return table
+---Get a full copy of org, depth = how many layers will be recreate, default to inf
+---@param org table original table
+---@param depth? number how many layers will be recreate, default to inf
+---@return table
 function TABLE.copy(org,depth)
     if not depth then depth=1e99 end
     local L={}
@@ -94,18 +94,18 @@ function TABLE.copy(org,depth)
     return L
 end
 
---- For all things in new, push to old
---- @param new table
---- @param old table
+---For all things in new, push to old
+---@param new table
+---@param old table
 function TABLE.cover(new,old)
     for k,v in next,new do
         old[k]=v
     end
 end
 
---- For all things in new, push to old, recursive
---- @param new table
---- @param old table
+---For all things in new, push to old, recursive
+---@param new table
+---@param old table
 function TABLE.coverR(new,old)
     for k,v in next,new do
         if type(v)=='table' and type(old[k])=='table' then
@@ -116,9 +116,9 @@ function TABLE.coverR(new,old)
     end
 end
 
---- For all things in org, delete them if it's in sub
---- @param org table original table
---- @param sub table
+---For all things in org, delete them if it's in sub
+---@param org table original table
+---@param sub table
 function TABLE.subtract(org,sub)
     for _,v in next,sub do
         while true do
@@ -132,9 +132,9 @@ function TABLE.subtract(org,sub)
     end
 end
 
---- For all things in new if same type in old, push to old
---- @param new table
---- @param old table
+---For all things in new if same type in old, push to old
+---@param new table
+---@param old table
 function TABLE.update(new,old)
     for k,v in next,new do
         if type(v)==type(old[k]) then
@@ -147,9 +147,9 @@ function TABLE.update(new,old)
     end
 end
 
---- For all things in new if no val in old, push to old
---- @param new table
---- @param old table
+---For all things in new if no val in old, push to old
+---@param new table
+---@param old table
 function TABLE.complete(new,old)
     for k,v in next,new do
         if type(v)=='table' then
@@ -163,9 +163,9 @@ end
 
 --------------------------------------------------------------
 
---- Pop & return random [1~#] of table
---- @param t any[]
---- @return any
+---Pop & return random [1~#] of table
+---@param t any[]
+---@return any
 function TABLE.popRandom(t)
     local l=#t
     if l>0 then
@@ -176,24 +176,24 @@ function TABLE.popRandom(t)
     end
 end
 
---- Remove [1~#] of a table
---- @param t table
+---Remove [1~#] of a table
+---@param t table
 function TABLE.cut(t)
     for i=1,#t do
         t[i]=nil
     end
 end
 
---- Clear table
---- @param t table
+---Clear table
+---@param t table
 function TABLE.clear(t)
     for k in next,t do
         t[k]=nil
     end
 end
 
---- Remove duplicated value of [1~#]
---- @param org any[]
+---Remove duplicated value of [1~#]
+---@param org any[]
 function TABLE.remDup(org)
     local cache={}
     local len=#org
@@ -209,8 +209,8 @@ function TABLE.remDup(org)
     end
 end
 
---- Remove duplicated value
---- @param org table
+---Remove duplicated value
+---@param org table
 function TABLE.remDupAll(org)
     local cache={}
     for k,v in next,org do
@@ -222,8 +222,8 @@ function TABLE.remDupAll(org)
     end
 end
 
---- Reverse [1~#]
---- @param org any[]
+---Reverse [1~#]
+---@param org any[]
 function TABLE.reverse(org)
     local l=#org
     for i=1,floor(l/2) do
@@ -231,9 +231,9 @@ function TABLE.reverse(org)
     end
 end
 
---- Get a rotated copy of a matrix
---- @param matrix any[][]
---- @return any[][]
+---Get a rotated copy of a matrix
+---@param matrix any[][]
+---@return any[][]
 function TABLE.rotate(matrix,dir)
     local icb={}
     if dir=='R' then -- Rotate CW
@@ -272,10 +272,10 @@ end
 
 --------------------------------------------------------------
 
---- Check if two list have same elements
---- @param a any[]
---- @param b any[]
---- @return boolean
+---Check if two list have same elements
+---@param a any[]
+---@param b any[]
+---@return boolean
 function TABLE.compare(a,b)
     if #a~=#b then return false end
     if a==b then return true end
@@ -285,10 +285,10 @@ function TABLE.compare(a,b)
     return true
 end
 
---- Check if two table have same elements
---- @param a table
---- @param b table
---- @return boolean
+---Check if two table have same elements
+---@param a table
+---@param b table
+---@return boolean
 function TABLE.equal(a,b)
     if #a~=#b then return false end
     if a==b then return true end
@@ -300,19 +300,19 @@ end
 
 --------------------------------------------------------------
 
---- Find value in [1~#], like string.find
---- @param t any[]
---- @param val any
---- @param start? number
---- @return number|nil
+---Find value in [1~#], like string.find
+---@param t any[]
+---@param val any
+---@param start? number
+---@return number|nil
 function TABLE.find(t,val,start)
     for i=start or 1,#t do if t[i]==val then return i end end
 end
 
---- TABLE.find, but for ordered list only
---- @param t any[]
---- @param val any
---- @return number|nil
+---TABLE.find, but for ordered list only
+---@param t any[]
+---@param val any
+---@return number|nil
 function TABLE.findOrdered(t,val)
     if val<t[1] or val>t[#t] then return end
     local i,j=1,#t
@@ -328,19 +328,19 @@ function TABLE.findOrdered(t,val)
     end
 end
 
---- Find value in whole table
---- @param t table
---- @param val any
---- @return any
+---Find value in whole table
+---@param t table
+---@param val any
+---@return any
 function TABLE.findAll(t,val)
     for k,v in next,t do if v==val then return k end end
 end
 
---- Replace value in [1~#], like string.gsub
---- @param t any[]
---- @param v_old any
---- @param v_new any
---- @param start? number
+---Replace value in [1~#], like string.gsub
+---@param t any[]
+---@param v_old any
+---@param v_new any
+---@param start? number
 function TABLE.replace(t,v_old,v_new,start)
     for i=start or 1,#t do
         if t[i]==v_old then
@@ -349,10 +349,10 @@ function TABLE.replace(t,v_old,v_new,start)
     end
 end
 
---- Replace value in whole table
---- @param t table
---- @param v_old any
---- @param v_new any
+---Replace value in whole table
+---@param t table
+---@param v_old any
+---@param v_new any
 function TABLE.replaceAll(t,v_old,v_new)
     for k,v in next,t do
         if v==v_old then
@@ -361,10 +361,10 @@ function TABLE.replaceAll(t,v_old,v_new)
     end
 end
 
---- Count value in [1~#]
---- @param t any[]
---- @param val any
---- @return number
+---Count value in [1~#]
+---@param t any[]
+---@param val any
+---@return number
 function TABLE.count(t,val)
     local count=0
     for i=1,#t do
@@ -375,10 +375,10 @@ function TABLE.count(t,val)
     return count
 end
 
---- Count value
---- @param t table
---- @param val any
---- @return number
+---Count value
+---@param t table
+---@param val any
+---@return number
 function TABLE.countAll(t,val)
     local count=0
     for _,v in next,t do
@@ -389,9 +389,9 @@ function TABLE.countAll(t,val)
     return count
 end
 
---- Sum table in [1~#]
---- @param t number[]
---- @return number
+---Sum table in [1~#]
+---@param t number[]
+---@return number
 function TABLE.sum(t)
     local s=0
     for i=1,#t do
@@ -400,34 +400,34 @@ function TABLE.sum(t)
     return s
 end
 
---- Sum table
---- @param t table<any, number>
---- @return number
+---Sum table
+---@param t table<any, number>
+---@return number
 function TABLE.sumAll(t)
     local s=0
     for _,v in next,t do s=s+v end
     return s
 end
 
---- Return next value of [1~#] (by value)
---- @param t any[]
---- @param val any
---- @return any
+---Return next value of [1~#] (by value)
+---@param t any[]
+---@param val any
+---@return any
 function TABLE.next(t,val)
     for i=1,#t do if t[i]==val then return t[i%#t+1] end end
 end
 
---- Get element count of table
---- @param t table
---- @return number
+---Get element count of table
+---@param t table
+---@return number
 function TABLE.getSize(t)
     local size=0
     for _ in next,t do size=size+1 end
     return size
 end
 
---- Re-index string value of a table
---- @param org table
+---Re-index string value of a table
+---@param org table
 function TABLE.reIndex(org)
     for k,v in next,org do
         if type(v)=='string' then
@@ -438,26 +438,26 @@ end
 
 --------------------------------------------------------------
 
---- Return a function that return a value of table
---- @param t table
---- @param k any
---- @return fun():any
+---Return a function that return a value of table
+---@param t table
+---@param k any
+---@return fun():any
 function TABLE.func_getVal(t,k)
     return function() return t[k] end
 end
 
---- Return a function that reverse a value of table
---- @param t table
---- @param k any
---- @return fun()
+---Return a function that reverse a value of table
+---@param t table
+---@param k any
+---@return fun()
 function TABLE.func_revVal(t,k)
     return function() t[k]=not t[k] end
 end
 
---- Return a function that set a value of table
---- @param t table
---- @param k any
---- @return fun()
+---Return a function that set a value of table
+---@param t table
+---@param k any
+---@return fun()
 function TABLE.func_setVal(t,k)
     return function(v) t[k]=v end
 end
@@ -505,10 +505,10 @@ do -- function TABLE.dumpDeflate(t,depth)
         end
         return s..'}'
     end
-    --- Dump a simple lua table (no whitespaces)
-    --- @param t table
-    --- @param depth? number how many layers will enter, default to inf
-    --- @return string
+    ---Dump a simple lua table (no whitespaces)
+    ---@param t table
+    ---@param depth? number how many layers will enter, default to inf
+    ---@return string
     function TABLE.dumpDeflate(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
         return dump(t,1,depth or 1e99)
@@ -571,10 +571,10 @@ do -- function TABLE.dump(t,depth)
         end
         return s..tabs[t-1]..'}'
     end
-    --- Dump a simple lua table
-    --- @param t table
-    --- @param depth? number how many layers will enter, default to inf
-    --- @return string
+    ---Dump a simple lua table
+    ---@param t table
+    ---@param depth? number how many layers will enter, default to inf
+    ---@return string
     function TABLE.dump(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
         return dump(t,1,depth or 1e99)
@@ -601,11 +601,11 @@ do -- function TABLE.newResourceTable(src,loadFunc)
             end
         end
     end
-    --- Create a new table with lazy load feature
-    --- @param src table
-    --- @param loadFunc fun(resID:any):any should receive a resource identifier from src table, then return a non-nil value
-    --- @param lazy? boolean
-    --- @return table
+    ---Create a new table with lazy load feature
+    ---@param src table
+    ---@param loadFunc fun(resID:any):any should receive a resource identifier from src table, then return a non-nil value
+    ---@param lazy? boolean
+    ---@return table
     function TABLE.newResourceTable(src,loadFunc,lazy)
         local new={}
         link(new,src,loadFunc)

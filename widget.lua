@@ -62,41 +62,41 @@ local Widgets={}
 
 --------------------------------------------------------------
 
---- @class Zenitha.widget.base not used by user
---- @field _widget true
---- @field type string
---- @field name string|false
+---@class Zenitha.widget.base not used by user
+---@field _widget true
+---@field type string
+---@field name string|false
 ---
---- @field color Zenitha.ColorStr|Zenitha.Color
---- @field textColor Zenitha.ColorStr|Zenitha.Color
---- @field fillColor Zenitha.ColorStr|Zenitha.Color
---- @field frameColor Zenitha.ColorStr|Zenitha.Color
---- @field activeColor Zenitha.ColorStr|Zenitha.Color
---- @field idleColor Zenitha.ColorStr|Zenitha.Color
+---@field color Zenitha.ColorStr|Zenitha.Color
+---@field textColor Zenitha.ColorStr|Zenitha.Color
+---@field fillColor Zenitha.ColorStr|Zenitha.Color
+---@field frameColor Zenitha.ColorStr|Zenitha.Color
+---@field activeColor Zenitha.ColorStr|Zenitha.Color
+---@field idleColor Zenitha.ColorStr|Zenitha.Color
 ---
---- @field sound_press string|false
---- @field sound_hover string|false
+---@field sound_press string|false
+---@field sound_hover string|false
 ---
---- @field _text love.Drawable|false
---- @field _image love.Drawable|false
---- @field _hoverTime number
---- @field _hoverTimeMax number
---- @field _pressed boolean
---- @field _pressTime number
---- @field _pressTimeMax number
---- @field _visible boolean|nil
+---@field _text love.Drawable|false
+---@field _image love.Drawable|false
+---@field _hoverTime number
+---@field _hoverTimeMax number
+---@field _pressed boolean
+---@field _pressTime number
+---@field _pressTimeMax number
+---@field _visible boolean|nil
 ---
---- @field reset function
---- @field press function
---- @field release function
---- @field scroll function
---- @field drag function
---- @field update function
---- @field draw function
---- @field isAbove function
---- @field arrowKey function
---- @field keypress function
---- @field code function
+---@field reset function
+---@field press function
+---@field release function
+---@field scroll function
+---@field drag function
+---@field update function
+---@field draw function
+---@field isAbove function
+---@field arrowKey function
+---@field keypress function
+---@field code function
 Widgets.base={
     _widget=true,
     type='null',
@@ -247,7 +247,7 @@ function Widgets.base.drag()    end
 function Widgets.base.scroll()  end
 
 
---- @class Zenitha.widget.text: Zenitha.widget.base
+---@class Zenitha.widget.text: Zenitha.widget.base
 Widgets.text=setmetatable({
     type='text',
 
@@ -281,7 +281,7 @@ function Widgets.text:draw()
 end
 
 
---- @class Zenitha.widget.image: Zenitha.widget.base
+---@class Zenitha.widget.image: Zenitha.widget.base
 Widgets.image=setmetatable({
     type='image',
     ang=0,k=1,
@@ -311,10 +311,10 @@ function Widgets.image:draw()
 end
 
 
---- @class Zenitha.widget.button: Zenitha.widget.base
---- @field w number
---- @field h number
---- @field sound_trigger string|false
+---@class Zenitha.widget.button: Zenitha.widget.base
+---@field w number
+---@field h number
+---@field sound_trigger string|false
 Widgets.button=setmetatable({
     type='button',
     w=40,h=false,
@@ -411,7 +411,7 @@ function Widgets.button:draw()
     gc_pop()
 end
 
---- @class Zenitha.widget.button_fill: Zenitha.widget.button
+---@class Zenitha.widget.button_fill: Zenitha.widget.button
 Widgets.button_fill=setmetatable({
     type='button_fill',
     textColor='D',
@@ -447,7 +447,7 @@ function Widgets.button_fill:draw()
     gc_pop()
 end
 
---- @class Zenitha.widget.button_invis: Zenitha.widget.button
+---@class Zenitha.widget.button_invis: Zenitha.widget.button
 Widgets.button_invis=setmetatable({
     type='button_invis',
     sound_trigger=false,
@@ -478,10 +478,10 @@ function Widgets.button_invis:draw()
 end
 
 
---- @class Zenitha.widget.checkBox: Zenitha.widget.base
---- @field w number
---- @field sound_on string|false
---- @field sound_off string|false
+---@class Zenitha.widget.checkBox: Zenitha.widget.base
+---@field w number
+---@field sound_on string|false
+---@field sound_off string|false
 Widgets.checkBox=setmetatable({
     type='checkBox',
     w=30,
@@ -600,8 +600,8 @@ function Widgets.checkBox:draw()
 end
 
 
---- @class Zenitha.widget.switch: Zenitha.widget.checkBox
---- @field _slideTime number
+---@class Zenitha.widget.switch: Zenitha.widget.checkBox
+---@field _slideTime number
 Widgets.switch=setmetatable({
     type='switch',
     h=30,
@@ -714,18 +714,18 @@ function Widgets.switch:draw()
 end
 
 
---- @class Zenitha.widget.slider: Zenitha.widget.base
---- @field w number
---- @field valueShow false|'int'|'float'|'percent'|function
---- @field _showFunc function
---- @field _pos number
---- @field _pos0 number
---- @field _rangeL number
---- @field _rangeR number
---- @field _rangeWidth number
---- @field _unit number
---- @field _smooth boolean
---- @field _textShowTime number
+---@class Zenitha.widget.slider: Zenitha.widget.base
+---@field w number
+---@field valueShow false|'int'|'float'|'percent'|function
+---@field _showFunc function
+---@field _pos number
+---@field _pos0 number
+---@field _rangeL number
+---@field _rangeR number
+---@field _rangeWidth number
+---@field _unit number
+---@field _smooth boolean
+---@field _textShowTime number
 Widgets.slider=setmetatable({
     type='slider',
     w=100,
@@ -960,9 +960,9 @@ function Widgets.slider:arrowKey(k)
 end
 
 
---- @class Zenitha.widget.slider_fill: Zenitha.widget.slider
---- @field w number
---- @field h number
+---@class Zenitha.widget.slider_fill: Zenitha.widget.slider
+---@field w number
+---@field h number
 Widgets.slider_fill=setmetatable({
     type='slider_fill',
     w=100,h=40,
@@ -1087,9 +1087,9 @@ function Widgets.slider_fill:draw()
 end
 
 
---- @class Zenitha.widget.slider_progress: Zenitha.widget.slider
---- @field w number
---- @field h number
+---@class Zenitha.widget.slider_progress: Zenitha.widget.slider
+---@field w number
+---@field h number
 Widgets.slider_progress=setmetatable({
     type='slider_progress',
     w=100,h=10,
@@ -1191,10 +1191,10 @@ function Widgets.slider_progress:draw()
 end
 
 
---- @class Zenitha.widget.selector: Zenitha.widget.base
---- @field w number
---- @field _select number|false
---- @field _selText love.Text
+---@class Zenitha.widget.selector: Zenitha.widget.base
+---@field w number
+---@field _select number|false
+---@field _selText love.Text
 Widgets.selector=setmetatable({
     type='selector',
     w=100,
@@ -1365,13 +1365,13 @@ function Widgets.selector:arrowKey(k)
 end
 
 
---- @class Zenitha.widget.inputBox: Zenitha.widget.base
---- @field w number
---- @field h number
---- @field sound_input string|false
---- @field sound_bksp string|false
---- @field sound_clear string|false
---- @field sound_fail string|false
+---@class Zenitha.widget.inputBox: Zenitha.widget.base
+---@field w number
+---@field h number
+---@field sound_input string|false
+---@field sound_bksp string|false
+---@field sound_clear string|false
+---@field sound_fail string|false
 Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
@@ -1545,12 +1545,12 @@ function Widgets.inputBox:keypress(k)
 end
 
 
---- @class Zenitha.widget.textBox: Zenitha.widget.base
---- @field w number
---- @field h number
---- @field scrollBarColor Zenitha.ColorStr|Zenitha.Color
---- @field sound_clear string|false
---- @field _texts table
+---@class Zenitha.widget.textBox: Zenitha.widget.base
+---@field w number
+---@field h number
+---@field scrollBarColor Zenitha.ColorStr|Zenitha.Color
+---@field sound_clear string|false
+---@field _texts table
 Widgets.textBox=setmetatable({
     type='textBox',
     keepFocus=true,
@@ -1743,12 +1743,12 @@ function Widgets.textBox:draw()
 end
 
 
---- @class Zenitha.widget.listBox: Zenitha.widget.base
---- @field w number
---- @field h number
---- @field sound_click string|false
---- @field sound_select string|false
---- @field _list table List of items
+---@class Zenitha.widget.listBox: Zenitha.widget.base
+---@field w number
+---@field h number
+---@field sound_click string|false
+---@field sound_select string|false
+---@field _list table List of items
 Widgets.listBox=setmetatable({
     type='listBox',
     w=100,h=40,
@@ -1963,7 +1963,7 @@ function Widgets.listBox:draw()
         local pos=floor(scroll/lineH)
         local cap=self._capacity
         local sel=self._selected
-        --- @type function
+        ---@type function
         local drawFunc=self.drawFunc
         if self.stencilMode=='single' then
             local modH=scroll%lineH
@@ -2006,21 +2006,21 @@ end
 -- Widget module
 local WIDGET={_prototype=Widgets}
 
---- @type Zenitha.widget.base[]
+---@type Zenitha.widget.base[]
 WIDGET.active={} -- Table contains all active widgets
 
---- @type Zenitha.widget.base|false
+---@type Zenitha.widget.base|false
 WIDGET.sel=false -- Selected widget
 
---- Reset all widgets (called by Zenitha when scene changed and window resized or something)
+---Reset all widgets (called by Zenitha when scene changed and window resized or something)
 function WIDGET._reset()
     for i=1,#WIDGET.active do
         WIDGET.active[i]:reset()
     end
 end
 
---- Set WIDGET.active to widget list (called by Zenitha when scene changed)
---- @param list Zenitha.widget.base[]
+---Set WIDGET.active to widget list (called by Zenitha when scene changed)
+---@param list Zenitha.widget.base[]
 function WIDGET._setWidgetList(list)
     WIDGET.unFocus(true)
     WIDGET.active=list or NONE
@@ -2038,15 +2038,15 @@ function WIDGET._setWidgetList(list)
     end
 end
 
---- Get selected widget
---- @return Zenitha.widget.base|false
+---Get selected widget
+---@return Zenitha.widget.base|false
 function WIDGET.getSelected()
     return WIDGET.sel
 end
 
---- Check if widget W is focused, or check if any widget is focused if given false|nil
---- @param W? Zenitha.widget.base|false
---- @return boolean
+---Check if widget W is focused, or check if any widget is focused if given false|nil
+---@param W? Zenitha.widget.base|false
+---@return boolean
 function WIDGET.isFocus(W)
     if W then
         return W and WIDGET.sel==W
@@ -2055,9 +2055,9 @@ function WIDGET.isFocus(W)
     end
 end
 
---- Focus widget W
---- @param W Zenitha.widget.base
---- @param reason? 'init'|'press'|'move'|'release'
+---Focus widget W
+---@param W Zenitha.widget.base
+---@param reason? 'init'|'press'|'move'|'release'
 function WIDGET.focus(W,reason)
     if WIDGET.sel==W then return end
     if W.sound_hover then
@@ -2082,10 +2082,10 @@ function WIDGET.focus(W,reason)
     end
 end
 
---- Unfocus widget
+---Unfocus widget
 ---
---- soft unfocus like moving mouse, won't unfocus some widget with `keepFocus` tag, like inputBox.
---- @param force? boolean
+---soft unfocus like moving mouse, won't unfocus some widget with `keepFocus` tag, like inputBox.
+---@param force? boolean
 function WIDGET.unFocus(force)
     local W=WIDGET.sel
     if W and (force or not W.keepFocus) then
@@ -2097,10 +2097,10 @@ function WIDGET.unFocus(force)
     end
 end
 
---- Update widget states with cursor move event (called by Zenitha)
---- @param x number
---- @param y number
---- @param reason 'init'|'press'|'move'|'release'
+---Update widget states with cursor move event (called by Zenitha)
+---@param x number
+---@param y number
+---@param reason 'init'|'press'|'move'|'release'
 function WIDGET._cursorMove(x,y,reason)
     for _,W in next,WIDGET.active do
         if W._visible and W:isAbove(x,y+SCN.curScroll) then
@@ -2113,10 +2113,10 @@ function WIDGET._cursorMove(x,y,reason)
     end
 end
 
---- Update widget states with press event (called by Zenitha)
---- @param x number
---- @param y number
---- @param k number
+---Update widget states with press event (called by Zenitha)
+---@param x number
+---@param y number
+---@param k number
 function WIDGET._press(x,y,k)
     WIDGET._cursorMove(x,y,'press')
     local W=WIDGET.sel
@@ -2133,21 +2133,21 @@ function WIDGET._press(x,y,k)
     end
 end
 
---- Update widget states with release event (called by Zenitha)
---- @param x number
---- @param y number
---- @param k number
+---Update widget states with release event (called by Zenitha)
+---@param x number
+---@param y number
+---@param k number
 function WIDGET._release(x,y,k)
     if WIDGET.sel then
         WIDGET.sel:release(x,y+SCN.curScroll,k)
     end
 end
 
---- Update widget states with drag event (called by Zenitha)
---- @param x number
---- @param y number
---- @param dx number
---- @param dy number
+---Update widget states with drag event (called by Zenitha)
+---@param x number
+---@param y number
+---@param dx number
+---@param dy number
 function WIDGET._drag(x,y,dx,dy)
     local W=WIDGET.sel
     if W then
@@ -2157,9 +2157,9 @@ function WIDGET._drag(x,y,dx,dy)
     end
 end
 
---- Update widget states with scroll event (called by Zenitha)
---- @param dx number
---- @param dy number
+---Update widget states with scroll event (called by Zenitha)
+---@param dx number
+---@param dy number
 function WIDGET._scroll(dx,dy)
     local W=WIDGET.sel
     if W then
@@ -2169,10 +2169,10 @@ function WIDGET._scroll(dx,dy)
     end
 end
 
---- Update widget states with drag event (called by Zenitha)
---- @param texts string
+---Update widget states with drag event (called by Zenitha)
+---@param texts string
 function WIDGET._textinput(texts)
-    --- @type Zenitha.widget.inputBox
+    ---@type Zenitha.widget.inputBox
     local W=WIDGET.sel
     if W and W.type=='inputBox' then
         if not W.regex or texts:match(W.regex) then
@@ -2185,8 +2185,8 @@ function WIDGET._textinput(texts)
     end
 end
 
---- Update all widgets (called by Zenitha)
---- @param dt number
+---Update all widgets (called by Zenitha)
+---@param dt number
 function WIDGET._update(dt)
     for _,W in next,WIDGET.active do
         if W.visibleTick then
@@ -2208,16 +2208,16 @@ function WIDGET._update(dt)
     end
 end
 
---- Draw all widgets (called by Zenitha)
+---Draw all widgets (called by Zenitha)
 function WIDGET._draw()
     for _,W in next,WIDGET.active do
         if W._visible then W:draw() end
     end
 end
 
---- Draw widgets
---- @param widgetList Zenitha.widget.base[]
---- @param scroll? number
+---Draw widgets
+---@param widgetList Zenitha.widget.base[]
+---@param scroll? number
 function WIDGET.draw(widgetList,scroll)
     if scroll then gc_translate(0,-scroll) end
     for _,W in next,widgetList do
@@ -2225,96 +2225,96 @@ function WIDGET.draw(widgetList,scroll)
     end
 end
 
---- @class Zenitha.widgetArg: table
+---@class Zenitha.widgetArg: table
 ---
---- General
---- @field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
---- @field name? string
---- @field pos? table
+---General
+---@field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
+---@field name? string
+---@field pos? table
 ---
---- @field x? number
---- @field y? number
---- @field w? number
---- @field h? number
---- @field widthLimit? number
+---@field x? number
+---@field y? number
+---@field w? number
+---@field h? number
+---@field widthLimit? number
 ---
---- @field color? Zenitha.ColorStr|Zenitha.Color
---- @field text? string|function
---- @field fontSize? number
---- @field fontType? string
---- @field image? string|love.Drawable
---- @field alignX? 'left'|'center'|'right'
---- @field alignY? 'up'|'center'|'down'
---- @field labelPos? 'left'|'right'|'up'|'down'
---- @field labelDistance? number
---- @field disp? function
---- @field code? function
---- @field visibleFunc? function Used to determine if widget is visible when scene changed
---- @field visibleTick? function Used to change widget's visibility every frame
+---@field color? Zenitha.ColorStr|Zenitha.Color
+---@field text? string|function
+---@field fontSize? number
+---@field fontType? string
+---@field image? string|love.Drawable
+---@field alignX? 'left'|'center'|'right'
+---@field alignY? 'up'|'center'|'down'
+---@field labelPos? 'left'|'right'|'up'|'down'
+---@field labelDistance? number
+---@field disp? function
+---@field code? function
+---@field visibleFunc? function Used to determine if widget is visible when scene changed
+---@field visibleTick? function Used to change widget's visibility every frame
 ---
---- @field lineWidth? number
---- @field cornerR? number
+---@field lineWidth? number
+---@field cornerR? number
 ---
---- @field textColor? Zenitha.ColorStr|Zenitha.Color
---- @field fillColor? Zenitha.ColorStr|Zenitha.Color
---- @field frameColor? Zenitha.ColorStr|Zenitha.Color
---- @field activeColor? Zenitha.ColorStr|Zenitha.Color
---- @field idleColor? Zenitha.ColorStr|Zenitha.Color
+---@field textColor? Zenitha.ColorStr|Zenitha.Color
+---@field fillColor? Zenitha.ColorStr|Zenitha.Color
+---@field frameColor? Zenitha.ColorStr|Zenitha.Color
+---@field activeColor? Zenitha.ColorStr|Zenitha.Color
+---@field idleColor? Zenitha.ColorStr|Zenitha.Color
 ---
---- @field sound_press? string
---- @field sound_hover? string
+---@field sound_press? string
+---@field sound_hover? string
 ---
---- Image
---- @field ang? number
---- @field k? number
+---Image
+---@field ang? number
+---@field k? number
 ---
---- Check box
---- @field sound_on? string
---- @field sound_off? string
+---Check box
+---@field sound_on? string
+---@field sound_off? string
 ---
---- Slider
---- @field axis? {x:number, y:number, unit?:number}
---- @field smooth? boolean
---- @field valueShow? false|'int'|'float'|'percent'|function
+---Slider
+---@field axis? {x:number, y:number, unit?:number}
+---@field smooth? boolean
+---@field valueShow? false|'int'|'float'|'percent'|function
 ---
---- @field lineDist? number
+---@field lineDist? number
 ---
---- Selector
---- @field selFontSize? number
---- @field selFontType? string
---- @field list? table
---- @field show? function
+---Selector
+---@field selFontSize? number
+---@field selFontType? string
+---@field list? table
+---@field show? function
 ---
---- Input box
---- @field secret? boolean
---- @field regex? string
---- @field maxInputLength? number
---- @field sound_input? string
---- @field sound_bksp? string
---- @field sound_clear? string
---- @field sound_fail? string
+---Input box
+---@field secret? boolean
+---@field regex? string
+---@field maxInputLength? number
+---@field sound_input? string
+---@field sound_bksp? string
+---@field sound_clear? string
+---@field sound_fail? string
 ---
---- Scrolling boxes
---- @field scrollBarPos? number
---- @field scrollBarWidth? number
---- @field scrollBarDist? number
---- @field scrollBarColor? Zenitha.ColorStr|Zenitha.Color
---- @field lineHeight? number
+---Scrolling boxes
+---@field scrollBarPos? number
+---@field scrollBarWidth? number
+---@field scrollBarDist? number
+---@field scrollBarColor? Zenitha.ColorStr|Zenitha.Color
+---@field lineHeight? number
 ---
---- Text box
---- @field yOffset? number
---- @field fixContent? boolean
+---Text box
+---@field yOffset? number
+---@field fixContent? boolean
 ---
---- List box
---- @field drawFunc? function
---- @field releaseDist? number
---- @field stencilMode? 'total'|'single'|false
---- @field sound_click? string
---- @field sound_select? string
+---List box
+---@field drawFunc? function
+---@field releaseDist? number
+---@field stencilMode? 'total'|'single'|false
+---@field sound_click? string
+---@field sound_select? string
 
---- Create new widget
---- @param args Zenitha.widgetArg Arguments to create widget, check declare widget class for more info
---- @return Zenitha.widget.base
+---Create new widget
+---@param args Zenitha.widgetArg Arguments to create widget, check declare widget class for more info
+---@return Zenitha.widget.base
 function WIDGET.new(args)
     local t=args.type
     args.type=nil
@@ -2341,9 +2341,9 @@ end
 -- Widget function shortcuts
 local c_cache={}
 
---- Widget shortcut function of SCN.back()
---- @param style? string
---- @return function
+---Widget shortcut function of SCN.back()
+---@param style? string
+---@return function
 function WIDGET.c_backScn(style)
     local hash='c_backScn/'..tostring(style)
     if not c_cache[hash] then
@@ -2352,10 +2352,10 @@ function WIDGET.c_backScn(style)
     return c_cache[hash]
 end
 
---- Widget shortcut function of SCN.go()
---- @param name string
---- @param style? string
---- @return function
+---Widget shortcut function of SCN.go()
+---@param name string
+---@param style? string
+---@return function
 function WIDGET.c_goScn(name,style)
     local hash='c_goScn/'..(style and name..','..style or name)
     if not c_cache[hash] then
@@ -2364,10 +2364,10 @@ function WIDGET.c_goScn(name,style)
     return c_cache[hash]
 end
 
---- Widget shortcut function of SCN.swapTo()
---- @param name string
---- @param style? string
---- @return function
+---Widget shortcut function of SCN.swapTo()
+---@param name string
+---@param style? string
+---@return function
 function WIDGET.c_swapScn(name,style)
     local hash='c_swapScn/'..(style and name..','..style or name)
     if not c_cache[hash] then
@@ -2376,9 +2376,9 @@ function WIDGET.c_swapScn(name,style)
     return c_cache[hash]
 end
 
---- Widget shortcut function of SCN.swapTo()
---- @param key string
---- @return function
+---Widget shortcut function of SCN.swapTo()
+---@param key string
+---@return function
 function WIDGET.c_pressKey(key)
     local hash='c_pressKey/'..key
     if not c_cache[hash] then
@@ -2388,10 +2388,10 @@ function WIDGET.c_pressKey(key)
 end
 --------------------------------------------------------------
 
---- Get custom new widget (not guaranteed to work)
---- @param name string
---- @param parent string
---- @return Zenitha.widget.base
+---Get custom new widget (not guaranteed to work)
+---@param name string
+---@param parent string
+---@return Zenitha.widget.base
 function WIDGET.newClass(name,parent)
     if not parent then parent='base' end
     assert(type(name)=='string',"Widget name must be string")

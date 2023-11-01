@@ -4,10 +4,10 @@ local C_confCHN=love.thread.getChannel("tcp_c_config")
 local C_sendCHN=love.thread.getChannel("tcp_c_send")
 local C_recvCHN=love.thread.getChannel("tcp_c_receive")
 
---- @type LuaSocket.master
+---@type LuaSocket.master
 local client
 
---- @return Zenitha.TCP.MsgPack
+---@return Zenitha.TCP.MsgPack
 local function parseMessage(message)
     local sep=message:find('|')
     return sep and {
@@ -34,7 +34,7 @@ local function clientLoop()
             return
         end
 
-        --- @type Zenitha.TCP.MsgPack
+        ---@type Zenitha.TCP.MsgPack
         local data=C_sendCHN:pop()
         if data then
             if type(data.receiver)=='table' then data.receiver=table.concat(data.receiver,',') end
