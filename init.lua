@@ -53,6 +53,7 @@ local versionText='V0.1'
 local firstScene=false
 local clickFX=function(x,y) SYSFX.new('tap',3,x,y) end
 local discardCanvas=false
+local showFPS=true
 local updateFreq=100
 local drawFreq=100
 local sleepInterval=1/60
@@ -811,9 +812,11 @@ function love.run()
                     local safeX=SCR.safeX/SCR.k
 
                     -- FPS
-                    setFont(15,'_norm')
-                    gc_setColor(COLOR.L)
-                    gc_print(FPS(),safeX+5,-20)
+                    if showFPS then
+                        setFont(15,'_norm')
+                        gc_setColor(COLOR.L)
+                        gc_print(FPS(),safeX+5,-20)
+                    end
 
                     -- Debug info.
                     if devMode then
@@ -969,6 +972,13 @@ end
 function Zenitha.setDrawFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setDrawFreq(rate): rate must in (0,100]")
     drawFreq=rate
+end
+
+---Set whether to show FPS at left-down corner
+---@param b boolean
+function Zenitha.setShowFPS(b)
+    assert(type(b)=='boolean',"Zenitha.setShowFPS(b): b must be boolean")
+    showFPS=b
 end
 
 ---Set the max update rate of main loop
