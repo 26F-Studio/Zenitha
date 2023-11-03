@@ -717,6 +717,8 @@ end
 ---@class Zenitha.widget.slider: Zenitha.widget.base
 ---@field w number
 ---@field valueShow false|'int'|'float'|'percent'|function
+---@field numFontSize number
+---@field numFontType false|string
 ---@field _showFunc function
 ---@field _pos number
 ---@field _pos0 number
@@ -770,6 +772,7 @@ Widgets.slider=setmetatable({
         'color','textColor','fillColor',
         'text',
         'fontSize','fontType',
+        'numFontSize','numFontType',
         'widthLimit',
         'textAlwaysShow',
 
@@ -797,6 +800,8 @@ function Widgets.slider:reset()
     Widgets.base.reset(self)
 
     assert(self.w and type(self.w)=='number','[slider].w must be number')
+    assert(type(self.numFontSize)=='number','[widget].numFontSize must be number')
+    assert(type(self.numFontType)=='string' or self.numFontType==false,'[widget].numFontType must be string')
     assert(type(self.disp)=='function','[slider].disp must be function')
     assert(
         type(self.axis)=='table' and (#self.axis==2 or #self.axis==3) and
