@@ -1,13 +1,12 @@
----@class Zenitha.textAnim
+---@class Zenitha.textAnimArg
 ---@field text? string
----@field _t number
 ---@field x? number
 ---@field y? number
----@field color number[]
 ---@field r? number
 ---@field g? number
 ---@field b? number
 ---@field a? number
+---@field color? number[]
 ---@field fontSize? number
 ---@field fontType? string|nil
 ---@field duration? number
@@ -15,15 +14,6 @@
 ---@field outPoint? number
 ---@field style? string
 ---@field styleArg? any
----@field draw function
-
----@class Zenitha.Text
----@field _texts Zenitha.textAnim[]
----@field add function
----@field update function
----@field draw function
----@field new function
----@field clear function
 
 local setColor=GC.setColor
 local draw=GC.draw
@@ -116,7 +106,7 @@ function textFX.score(T)
     )
 end
 
----@type Zenitha.Text
+---@class Zenitha.Text
 local TEXT={_texts={}}
 
 ---Clear text container
@@ -125,7 +115,7 @@ function TEXT:clear()
 end
 
 ---Add text to container
----@param data Zenitha.textAnim
+---@param data Zenitha.textAnimArg
 ---```lua
 ---default={
 ---    text="Example Text",
@@ -143,7 +133,6 @@ end
 ---```
 function TEXT:add(data)
     local T={
-        _t=0, -- Timer
         text=GC.newText(FONT.get(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),
         x=data.x or 0,y=data.y or 0,
         r=data.r,g=data.g,b=data.b,a=data.a,
@@ -154,6 +143,7 @@ function TEXT:add(data)
         draw=assert(textFX[data.style or 'appear'],"No text type:"..tostring(data.style)),
         arg=data.styleArg,
     }
+    T._t=0 -- Timer
     T._ox,T._oy=T.text:getWidth()*.5,T.text:getHeight()*.5
     if type(data.color)=='string' then data.color=COLOR[data.color] end
     if data.color then T.r,T.g,T.b,T.a=data.color[1],data.color[2],data.color[3],data.color[4] end

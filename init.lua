@@ -35,11 +35,11 @@ EDITING=""
 -- Inside values
 local mainLoopStarted=false
 local autoGCcount=0
-local devMode
+local devMode=false ---@type false|1|2|3|4
 local mx,my,mouseShow,cursorSpd=640,360,false,0
-local lastClicks={}
-local jsState={} -- map, joystickID->axisStates: {axisName->axisVal}
-local errData={} -- list, each error create {msg={errMsg strings},scene=sceneNameStr}
+local lastClicks={} ---@type table<any,{x:number,y:number}>
+local jsState={} ---@type table<number,{_id:number, _jsObj:love.Joystick, leftx:number, lefty:number, rightx:number, righty:number, triggerleft:number, triggerright:number}>
+local errData={} ---@type Zenitha.exception[]
 local bigCanvases=setmetatable({},{
     __index=function(self,k)
         self[k]=gc.newCanvas(nil,nil,{msaa=select(3,love.window.getMode()).msaa})
@@ -50,7 +50,7 @@ local bigCanvases=setmetatable({},{
 -- User-changeable values
 local appName='Zenitha'
 local versionText='V0.1'
-local firstScene=false
+local firstScene=false ---@type string|false
 local clickFX=function(x,y) SYSFX.new('tap',3,x,y) end
 local discardCanvas=false
 local showFPS=true
@@ -173,6 +173,13 @@ FONT.load({
 })
 FONT.setDefaultFont('_norm')
 FONT.setDefaultFallback('_norm')
+
+--------------------------------------------------------------
+
+---@class Zenitha.exception
+---@field msg string
+---@field scene string
+---@field shot? love.ImageData
 
 --------------------------------------------------------------
 
@@ -338,11 +345,11 @@ local function noDevkeyPressed(key)
     elseif key=='f5' then  devFnKey[5]()
     elseif key=='f6' then  devFnKey[6]()
     elseif key=='f7' then  devFnKey[7]()
-    elseif key=='f8' then  devMode=nil MSG.new('info',"DEBUG OFF",.2)
-    elseif key=='f9' then  devMode=1   MSG.new('info',"DEBUG 1")
-    elseif key=='f10' then devMode=2   MSG.new('info',"DEBUG 2")
-    elseif key=='f11' then devMode=3   MSG.new('info',"DEBUG 3")
-    elseif key=='f12' then devMode=4   MSG.new('info',"DEBUG 4")
+    elseif key=='f8' then  devMode=false MSG.new('info',"DEBUG OFF",.2)
+    elseif key=='f9' then  devMode=1     MSG.new('info',"DEBUG 1")
+    elseif key=='f10' then devMode=2     MSG.new('info',"DEBUG 2")
+    elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3")
+    elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4")
     elseif devMode==2 then
         local W=WIDGET.sel
         if W then
@@ -919,8 +926,8 @@ function Zenitha.getVersionText() return versionText end
 function Zenitha.getJsState() return jsState end
 
 ---Get the error info
----@param i number Index of error info
----@return table Error info table
+---@param i number|'#' Index of error info, '#' for the last one
+---@return Zenitha.exception|table<number,Zenitha.exception>
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]

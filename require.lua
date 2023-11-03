@@ -3,7 +3,7 @@ package.cpath=package.cpath..';'..love.filesystem.getSaveDirectory()..'/lib/lib?
 local _androidPlatform='armeabi-v7a'
 if love.system.getOS()=='Android' then
     local p=io.popen('uname -m')
-    if type(p)=='userdata' then
+    if p then
         local arch=p:read('*a'):lower()
         p:close()
         if arch:find('v8') or arch:find('64') then

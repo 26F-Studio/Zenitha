@@ -457,7 +457,7 @@ end
 ---Return a function that set a value of table
 ---@param t table
 ---@param k any
----@return fun()
+---@return fun(v:any)
 function TABLE.func_setVal(t,k)
     return function(v) t[k]=v end
 end
