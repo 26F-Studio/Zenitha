@@ -6,7 +6,7 @@ local S_recvCHN=love.thread.getChannel("tcp_s_receive")
 
 ---@type LuaSocket.master
 local server
----@type table<string,Zenitha.TCP.Client>
+---@type table<string, Zenitha.TCP.Client>
 local clients
 
 ---@return Zenitha.TCP.MsgPack

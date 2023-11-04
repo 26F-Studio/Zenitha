@@ -23,13 +23,18 @@ kb.setKeyRepeat(true)
 --------------------------------------------------------------
 
 -- Useful global values/variables
+---@type table Empty table used as placeholder
 NONE=setmetatable({},{__newindex=function() error("Attempt to modify a constant table") end,__metatable=true})
+---@type function Empty function used as placeholder
 NULL=function(...) end
+---@type love.Canvas Empty canvas used as placeholder
 PAPER=love.graphics.newCanvas(1,1)
 
-SYSTEM=love.system.getOS()
-if SYSTEM=='OS X' then SYSTEM='macOS' end
+---@type 'macOS'|'Windows'|'Linux'|'Android'|'iOS'
+SYSTEM=love.system.getOS():gsub('OS X','macOS')
+---@type boolean (NOT RELIABLE) true if the system is Android or iOS
 MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
+---@type string Editting text, used by inputBox widget
 EDITING=""
 
 -- Inside values

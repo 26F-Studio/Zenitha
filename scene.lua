@@ -28,7 +28,7 @@
 ---@field timeChange number
 ---@field draw function
 
----@type Zenitha.Scene[]
+---@type table<string, Zenitha.Scene>
 local scenes={}
 
 local eventNames={
@@ -130,7 +130,8 @@ local swap={
 ---@param name string
 ---@param scene Zenitha.Scene
 function SCN.add(name,scene)
-    assert(type(scene)=='table',"scene must be table")
+    assert(type(name)=='string',"SCN.add(name,scene): name must be string")
+    assert(type(scene)=='table',"SCN.add(name,scene): scene must be table")
     assert(not scenes[name],"scene '"..tostring(name).."' already exists")
 
     if scene.widgetList==nil then scene.widgetList={} end
