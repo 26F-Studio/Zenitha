@@ -15,7 +15,7 @@ local GC=setmetatable({},{
 
 --------------------------------------------------------------
 ---Printf a string with 'center'
----@param obj string
+---@param obj string|number
 ---@param x number
 ---@param y number
 function GC.mStr(obj,x,y) printf(obj,x-1260,y,2520,'center') end
@@ -117,12 +117,12 @@ function GC.mulAlpha(k)
     setColor(r,g,b,a*k)
 end
 
----Just GC.print with protect call
+---GC.print with protect call
 function GC.safePrint(...)
     return pcall(prints,...)
 end
 
----Just GC.printf with protect call
+---GC.printf with protect call
 function GC.safePrintf(...)
     return pcall(printf,...)
 end
@@ -152,7 +152,7 @@ function GC.outDraw(obj,x,y,a,k,d,shadeCount)
 end
 
 ---Print a string with shade around
----@param str string
+---@param str string|number
 ---@param x number
 ---@param y number
 ---@param mode 'center'|'right'|'left'
