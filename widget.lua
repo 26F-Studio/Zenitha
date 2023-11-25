@@ -2341,6 +2341,13 @@ function WIDGET.new(args)
     return w
 end
 
+---@param protocol table
+---@return nil
+---Override default option of widget
+function WIDGET.setDefaultOption(protocol)
+    TABLE.coverR(protocol,Widgets)
+end
+
 --------------------------------------------------------------
 -- User funcs
 
