@@ -74,6 +74,9 @@ local Widgets={}
 ---@field activeColor Zenitha.ColorStr|Zenitha.Color
 ---@field idleColor Zenitha.ColorStr|Zenitha.Color
 ---
+---@field lineWidth number
+---@field cornerR number
+---
 ---@field sound_press string|false
 ---@field sound_hover string|false
 ---
@@ -115,7 +118,7 @@ Widgets.base={
     activeColor='LY',
     idleColor='L',
     pos=false,
-    lineWidth=4,
+    lineWidth=4,cornerR=3,
     fontSize=30,fontType=false,
     widthLimit=1e99,
     alignX='center',alignY='center',
@@ -161,6 +164,9 @@ function Widgets.base:reset()
     assert(type(self.activeColor)=='table','[widget].activeColor must be table')
     if type(self.idleColor)=='string' then self.idleColor=COLOR[self.idleColor] end
     assert(type(self.idleColor)=='table','[widget].idleColor must be table')
+
+    assert(type(self.lineWidth)=='number','[widget].lineWidth must be number')
+    assert(type(self.cornerR)=='number','[widget].cornerR must be number')
 
     if self.pos then
         assert(
@@ -490,7 +496,6 @@ Widgets.checkBox=setmetatable({
     image=false,
     labelPos='left',
     labelDistance=20,
-    cornerR=3,
     sound_on=false,sound_off=false,
 
     disp=false, -- function return a boolean
@@ -739,7 +744,6 @@ Widgets.slider=setmetatable({
     labelPos='left',
     labelDistance=20,
     numFontSize=25,numFontType=false,
-    cornerR=3,
     valueShow=nil,
     textAlwaysShow=false,
 
@@ -1388,7 +1392,6 @@ Widgets.inputBox=setmetatable({
     regex=false,
     labelPos='left',
     labelDistance=20,
-    cornerR=3,
 
     maxInputLength=1e99,
     sound_input=false,sound_bksp=false,sound_clear=false,sound_fail=false,
@@ -1568,7 +1571,6 @@ Widgets.textBox=setmetatable({
     scrollBarColor='L',
     lineHeight=30,
     yOffset=-2,
-    cornerR=3,
     activeColor='LY',
     idleColor='L',
     fixContent=true,
@@ -1764,7 +1766,6 @@ Widgets.listBox=setmetatable({
     scrollBarDist=3,
     scrollBarColor='L',
     lineHeight=30,
-    cornerR=3,
     activeColor='LI',
     idleColor='L',
     drawFunc=false, -- function that draw items. Input: item,id,isSelect
