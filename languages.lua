@@ -76,6 +76,12 @@ function LANG.setTextFuncSrc(newSrc)
     assert(type(newSrc)=='table','LANG.setTextFuncSrc(newPool): newPool must be table')
     textSrc=newSrc
 end
+---Set the language table from the set of added language tables
+---@param name string
+function LANG.set(name)
+    if not langPaths[name] then MSG.new('error',"No/wrong language: "..name) return end
+    LANG.setTextFuncSrc(langLib[name])
+end
 
 local textFuncs=setmetatable({},{
     __index=function(self,k)
