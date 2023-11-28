@@ -18,7 +18,7 @@ local WAIT={
 }
 
 local arcAlpha={1,.6,.4,.3}
-function WAIT.defaultDraw(a,t)
+local defaultDraw=function(a,t)
     GC.setLineWidth(SCR.h/26)
     t=t*2.6
     for i=1,4 do
@@ -27,29 +27,46 @@ function WAIT.defaultDraw(a,t)
     end
 end
 
-function WAIT.new(arg)
+---@class Zenitha.waitObj
+---@field init?            function
+---@field update?          function
+---@field quit?            function
+---@field draw?            function
+---@field timeout?         number
+---@field escapable?       boolean
+---@field coverAlpha?      number
+---@field noDefaultInit?   boolean
+---@field noDefaultUpdate? boolean
+---@field noDefaultDraw?   boolean
+---@field noDefaultQuit?   boolean
+
+---Start a new Wait Modal
+---@param data Zenitha.waitObj
+function WAIT.new(data)
     if WAIT.state then return end
 
-    assert(type(arg)=='table',"arg must be table")
-    assert(arg.init==nil            or type(arg.init)            =='function',"Field 'enter' must be function")
-    assert(arg.update==nil          or type(arg.update)          =='function',"Field 'update' must be function")
-    assert(arg.quit==nil            or type(arg.quit)            =='function',"Field 'leave' must be function")
-    assert(arg.draw==nil            or type(arg.draw)            =='function',"Field 'draw' must be function")
-    assert(arg.escapable==nil       or type(arg.escapable)       =='boolean', "Field 'escapable' must be boolean")
-    assert(arg.coverAlpha==nil      or type(arg.coverAlpha)      =='number',  "Field 'coverAlpha' must be number")
-    assert(arg.noDefaultInit==nil   or type(arg.noDefaultInit)   =='boolean', "Field 'noDefaultInit' must be boolean")
-    assert(arg.noDefaultUpdate==nil or type(arg.noDefaultUpdate) =='boolean', "Field 'noDefaultUpdate' must be boolean")
-    assert(arg.noDefaultDraw==nil   or type(arg.noDefaultDraw)   =='boolean', "Field 'noDefaultDraw' must be boolean")
-    assert(arg.noDefaultQuit==nil   or type(arg.noDefaultQuit)   =='boolean', "Field 'noDefaultQuit' must be boolean")
-    if not arg.noDefaultInit then WAIT.defaultInit() end
-    if arg.init then arg.init() end
+    assert(type(data)=='table',"arg must be table")
+    assert(data.init==nil            or type(data.init)            =='function',"Field 'enter' must be function")
+    assert(data.update==nil          or type(data.update)          =='function',"Field 'update' must be function")
+    assert(data.quit==nil            or type(data.quit)            =='function',"Field 'leave' must be function")
+    assert(data.draw==nil            or type(data.draw)            =='function',"Field 'draw' must be function")
+    assert(data.timeout==nil         or type(data.timeout)         =='number',  "Field 'timeout' must be number")
+    assert(data.escapable==nil       or type(data.escapable)       =='boolean', "Field 'escapable' must be boolean")
+    assert(data.coverAlpha==nil      or type(data.coverAlpha)      =='number',  "Field 'coverAlpha' must be number")
+    assert(data.noDefaultInit==nil   or type(data.noDefaultInit)   =='boolean', "Field 'noDefaultInit' must be boolean")
+    assert(data.noDefaultUpdate==nil or type(data.noDefaultUpdate) =='boolean', "Field 'noDefaultUpdate' must be boolean")
+    assert(data.noDefaultDraw==nil   or type(data.noDefaultDraw)   =='boolean', "Field 'noDefaultDraw' must be boolean")
+    assert(data.noDefaultQuit==nil   or type(data.noDefaultQuit)   =='boolean', "Field 'noDefaultQuit' must be boolean")
+    if not data.noDefaultInit then WAIT.defaultInit() end
+    if data.init then data.init() end
 
-    WAIT.arg=arg
+    WAIT.arg=data
     WAIT.state='enter'
     WAIT.timer=0
     WAIT.totalTimer=0
 end
 
+---Interrupt the current
 function WAIT.interrupt()
     if WAIT.state and WAIT.state~='leave' then
         WAIT.state='leave'
@@ -57,7 +74,9 @@ function WAIT.interrupt()
     end
 end
 
-function WAIT.update(dt)
+---Update Wait Modal (called by Zenitha)
+---@param dt number
+function WAIT._update(dt)
     if WAIT.state then
         WAIT.totalTimer=WAIT.totalTimer+dt
         if not WAIT.arg.noDefaultUpdate then WAIT.defaultUpdate(dt,WAIT.totalTimer) end
@@ -81,7 +100,8 @@ function WAIT.update(dt)
     end
 end
 
-function WAIT.draw()
+---Draw Wait Modal (called by Zenitha)
+function WAIT._draw()
     if WAIT.state then
         local alpha=(
             WAIT.state=='enter' and WAIT.timer/WAIT.enterTime or
@@ -95,26 +115,39 @@ function WAIT.draw()
                 WAIT.coverColor[3],
                 alpha*(WAIT.arg.coverAlpha or WAIT.coverAlpha)
             )
-            GC.rectangle('fill',0,0,SCR.w,SCR.h);
+            GC.rectangle('fill',0,0,SCR.w,SCR.h)
         end
 
-        if not WAIT.arg.noDefaultDraw then WAIT.defaultDraw(alpha,WAIT.totalTimer) end
+        if not WAIT.arg.noDefaultDraw then defaultDraw(alpha,WAIT.totalTimer) end
         if WAIT.arg.draw then WAIT.arg.draw(alpha,WAIT.totalTimer) end
     end
 end
 
+---Set the time of entering animation
+---@param t number
 function WAIT.setEnterTime(t)
     assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.enterTime=t
 end
+
+---Set the time of leaving animation
+---@param t number
 function WAIT.setLeaveTime(t)
     assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.leaveTime=t
 end
+
+---Set the time of timeout
+---@param t number
 function WAIT.setTimeout(t)
     assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
     WAIT.timeout=t
 end
+
+---Set the color of background cover
+---@param r number
+---@param g number
+---@param b number
 function WAIT.setCoverColor(r,g,b)
     if type(r)=='table' then
         r,g,b=r[1],r[2],r[3]
@@ -126,32 +159,51 @@ function WAIT.setCoverColor(r,g,b)
     then
         WAIT.coverColor[1],WAIT.coverColor[2],WAIT.coverColor[3]=r,g,b
     else
-        error("Arg must be r,g,b or {r,g,b}")
+        error("Arg must be r,g,b or {r,g,b} and all between 0~1")
     end
 end
-function WAIT.setCoverAlpha(a)
-    assert(type(a)=='number',"Arg must be number between 0~1")
-    WAIT.coverAlpha=a
-end
-function WAIT.setDefaultInit(f)
-    assert(type(f)=='function',"Arg must be function")
-    WAIT.defaultInit=f
-end
-function WAIT.setDefaultUpdate(f)
-    assert(type(f)=='function',"Arg must be function")
-    WAIT.defaultUpdate=f
-end
-function WAIT.setDefaultDraw(f)
-    assert(type(f)=='function',"Arg must be function")
-    WAIT.defaultDraw=f
-end
-function WAIT.setDefaultQuit(f)
-    assert(type(f)=='function',"Arg must be function")
-    WAIT.defaultQuit=f
+
+---Set the alpha of background cover
+---@param alpha number
+function WAIT.setCoverAlpha(alpha)
+    assert(type(alpha)=='number' and alpha>=0 and alpha<=1,"Alpha must be number between 0~1")
+    WAIT.coverAlpha=alpha
 end
 
-setmetatable(WAIT,{__call=function(self,arg)
-    self.new(arg)
-end,__metatable=true})
+---Set the default init function
+---@param func function
+function WAIT.setDefaultInit(func)
+    assert(type(func)=='function',"func must be function")
+    WAIT.defaultInit=func
+end
+
+---Set the default update function
+---@param func function
+function WAIT.setDefaultUpdate(func)
+    assert(type(func)=='function',"func must be function")
+    WAIT.defaultUpdate=func
+end
+
+---Set the default draw function
+---@param func function
+function WAIT.setDefaultDraw(func)
+    assert(type(func)=='function',"func must be function")
+    defaultDraw=func
+end
+
+---Set the default quit function
+---@param func function
+function WAIT.setDefaultQuit(func)
+    assert(type(func)=='function',"func must be function")
+    WAIT.defaultQuit=func
+end
+
+-- Allow simply calling WAIT(arg) to create a new Wait Modal
+setmetatable(WAIT,{
+    __call=function(self,data)
+        self.new(data)
+    end,
+    __metatable=true,
+})
 
 return WAIT

@@ -1,12 +1,13 @@
-local gc_translate,gc_scale,gc_replaceTransform=GC.translate,GC.scale,GC.replaceTransform
+local gc_translate,gc_scale=GC.translate,GC.scale
 local gc_push,gc_pop=GC.push,GC.pop
 local gc_setColor,gc_setLineWidth=GC.setColor,GC.setLineWidth
 local gc_draw,gc_line=GC.draw,GC.line
 local gc_rectangle,gc_circle=GC.rectangle,GC.circle
 local gc_print,gc_printf=GC.print,GC.printf
 local gc_mStr=GC.mStr
-local gc_stc_reset,gc_stc_setComp,gc_stc_stop=GC.stc_reset,GC.stc_setComp,GC.stc_stop
+local gc_stc_reset,gc_stc_stop=GC.stc_reset,GC.stc_stop
 local gc_stc_circ,gc_stc_rect=GC.stc_circ,GC.stc_rect
+local gc_mRect=GC.mRect
 
 local kb=love.keyboard
 local timer=love.timer.getTime
@@ -14,11 +15,12 @@ local timer=love.timer.getTime
 local assert,next=assert,next
 local floor,ceil=math.floor,math.ceil
 local max,min=math.max,math.min
-local abs=math.abs
+local abs,clamp=math.abs,MATH.clamp
 local sub,ins,rem=string.sub,table.insert,table.remove
 
 local SCN,SCR,xOy=SCN,SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
+local utf8=require('utf8')
 
 local indexMeta={
     __index=function(L,k)
@@ -27,10 +29,8 @@ local indexMeta={
                 return L[i]
             end
         end
-    end
+    end,
 }
-local onChange=NULL
-local widgetCanvas
 
 local function updateWheel(self,d)
     self._floatWheel=self._floatWheel+(d or 0)
@@ -49,36 +49,96 @@ local function alignDraw(self,drawable,x,y,ang,image_k)
     gc_draw(drawable,x,y,ang,k,1,ox,oy)
 end
 
+local leftAngle=GC.load{20,20,
+    {'setLW',5},
+    {'line', 18,2,1,10,18,18},
+}
+local rightAngle=GC.load{20,20,
+    {'setLW',5},
+    {'line', 2,2,19,10,2,18},
+}
+
 local Widgets={}
-local WIDGET={_prototype=Widgets}
 
 --------------------------------------------------------------
 
--- base (not used by user)
+---@class Zenitha.widget.base not used by user
+---@field _widget true
+---@field type string
+---@field name string|false
+---
+---@field color Zenitha.ColorStr|Zenitha.Color
+---@field textColor Zenitha.ColorStr|Zenitha.Color
+---@field fillColor Zenitha.ColorStr|Zenitha.Color
+---@field frameColor Zenitha.ColorStr|Zenitha.Color
+---@field activeColor Zenitha.ColorStr|Zenitha.Color
+---@field idleColor Zenitha.ColorStr|Zenitha.Color
+---
+---@field lineWidth number
+---@field cornerR number
+---
+---@field sound_press string|false
+---@field sound_hover string|false
+---
+---@field _text love.Drawable|false
+---@field _image love.Drawable|false
+---@field _hoverTime number
+---@field _hoverTimeMax number
+---@field _pressed boolean
+---@field _pressTime number
+---@field _pressTimeMax number
+---@field _visible boolean|nil
+---
+---@field reset function
+---@field press function
+---@field release function
+---@field scroll function
+---@field drag function
+---@field update function
+---@field draw function
+---@field isAbove function
+---@field arrowKey function
+---@field keypress function
+---@field code function
 Widgets.base={
+    _widget=true,
     type='null',
     name=false,
+
+    text=false,
+    image=false,
+
     keepFocus=false,
     x=0,y=0,
 
     color='L',
-    color_fill='lS',
+    textColor='L',
+    fillColor='L',
+    frameColor='L',
+    activeColor='LY',
+    idleColor='L',
     pos=false,
-    lineWidth=4,
+    lineWidth=4,cornerR=3,
     fontSize=30,fontType=false,
     widthLimit=1e99,
     alignX='center',alignY='center',
     sound_press=false,sound_hover=false,
 
     isAbove=NULL,
-    visibleFunc=false,-- function return a boolean
+    draw=NULL,
+    visibleFunc=false, -- function return a boolean
+    visibleTick=false, -- function return a boolean
 
+    _text=false,
+    _image=false,
     _hoverTime=0,
     _hoverTimeMax=.1,
     _pressed=false,
     _pressTime=0,
     _pressTimeMax=.05,
     _visible=nil,
+
+    buildArgs={},
 }
 function Widgets.base:getInfo()
     local str=''
@@ -94,15 +154,26 @@ function Widgets.base:reset()
     assert(type(self.y)=='number','[widget].y must be number')
     if type(self.color)=='string' then self.color=COLOR[self.color] end
     assert(type(self.color)=='table','[widget].color must be table')
-    if type(self.color_fill)=='string' then self.color_fill=COLOR[self.color_fill] end
-    assert(type(self.color_fill)=='table','[widget].color_fill must be table')
+    if type(self.textColor)=='string' then self.textColor=COLOR[self.textColor] end
+    assert(type(self.textColor)=='table','[widget].textColor must be table')
+    if type(self.fillColor)=='string' then self.fillColor=COLOR[self.fillColor] end
+    assert(type(self.fillColor)=='table','[widget].fillColor must be table')
+    if type(self.frameColor)=='string' then self.frameColor=COLOR[self.frameColor] end
+    assert(type(self.frameColor)=='table','[widget].frameColor must be table')
+    if type(self.activeColor)=='string' then self.activeColor=COLOR[self.activeColor] end
+    assert(type(self.activeColor)=='table','[widget].activeColor must be table')
+    if type(self.idleColor)=='string' then self.idleColor=COLOR[self.idleColor] end
+    assert(type(self.idleColor)=='table','[widget].idleColor must be table')
+
+    assert(type(self.lineWidth)=='number','[widget].lineWidth must be number')
+    assert(type(self.cornerR)=='number','[widget].cornerR must be number')
 
     if self.pos then
         assert(
             type(self.pos)=='table' and
             (type(self.pos[1])=='number' or self.pos[1]==false) and
             (type(self.pos[2])=='number' or self.pos[2]==false),
-            "[widget].pos[1] and [2] must be [number] or false}"
+            "[widget].pos[1] and [2] must be number or false}"
         )
         self._x=self.x+(self.pos[1] and self.pos[1]*(SCR.w0+2*SCR.x/SCR.k)-SCR.x/SCR.k or 0)
         self._y=self.y+(self.pos[2] and self.pos[2]*(SCR.h0+2*SCR.y/SCR.k)-SCR.y/SCR.k or 0)
@@ -115,8 +186,8 @@ function Widgets.base:reset()
     assert(type(self.fontType)=='string' or self.fontType==false,'[widget].fontType must be string')
     assert(type(self.widthLimit)=='number','[widget].widthLimit must be number')
     assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc must be function')
+    assert(not self.visibleTick or type(self.visibleTick)=='function','[widget].visibleTick must be function')
 
-    assert(not self.sound or type(self.sound)=='string','[widget].sound must be string')
     assert(not self.sound_press or type(self.sound_press)=='string','[widget].sound_press must be string')
     assert(not self.sound_hover or type(self.sound_hover)=='string','[widget].sound_hover must be string')
 
@@ -133,7 +204,7 @@ function Widgets.base:reset()
         self._text=PAPER
     end
 
-    self._image=nil
+    self._image=false
     if self.image then
         if type(self.image)=='string' then
             self._image=IMG[self.image] or PAPER
@@ -144,14 +215,25 @@ function Widgets.base:reset()
 
     self._hoverTime=0
 
+    if self._visible==nil then
+        self._visible=true
+    end
     if self.visibleFunc then
         self._visible=self.visibleFunc()
-    elseif self._visible==nil then
-        self._visible=true
+    elseif self.visibleTick then
+        self._visible=self.visibleTick()
     end
 end
 function Widgets.base:setVisible(bool)
-    self._visible=bool and true or false
+    if bool==nil then
+        if self.visibleFunc then
+            self._visible=self.visibleFunc()
+        elseif self.visibleTick then
+            self._visible=self.visibleTick()
+        end
+    else
+        self._visible=bool and true or false
+    end
 end
 function Widgets.base:update(dt)
     if self._pressed then
@@ -171,13 +253,13 @@ function Widgets.base.drag()    end
 function Widgets.base.scroll()  end
 
 
--- text
+---@class Zenitha.widget.text: Zenitha.widget.base
 Widgets.text=setmetatable({
     type='text',
 
     text=false,
 
-    _text=nil,
+    _text=false,
 
     buildArgs={
         'name',
@@ -191,7 +273,8 @@ Widgets.text=setmetatable({
         'widthLimit',
 
         'visibleFunc',
-    }
+        'visibleTick',
+    },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.text:reset()
     Widgets.base.reset(self)
@@ -204,14 +287,14 @@ function Widgets.text:draw()
 end
 
 
--- image
+---@class Zenitha.widget.image: Zenitha.widget.base
 Widgets.image=setmetatable({
     type='image',
     ang=0,k=1,
 
     image=false,
 
-    _image=nil,
+    _image=false,
 
     buildArgs={
         'name',
@@ -223,6 +306,7 @@ Widgets.image=setmetatable({
         'alignX','alignY',
 
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.image:draw()
@@ -233,7 +317,10 @@ function Widgets.image:draw()
 end
 
 
--- button
+---@class Zenitha.widget.button: Zenitha.widget.base
+---@field w number
+---@field h number
+---@field sound_trigger string|false
 Widgets.button=setmetatable({
     type='button',
     w=40,h=false,
@@ -241,12 +328,12 @@ Widgets.button=setmetatable({
     text=false,
     image=false,
     cornerR=10,
-    sound=false,
+    sound_trigger=false,
 
     code=NULL,
 
-    _text=nil,
-    _image=nil,
+    _text=false,
+    _image=false,
     _pressed=false,
 
     buildArgs={
@@ -254,22 +341,25 @@ Widgets.button=setmetatable({
         'pos',
         'x','y','w','h',
         'lineWidth','cornerR',
+
         'alignX','alignY',
         'text','image',
         'color',
         'fontSize','fontType',
-        'sound',
+        'sound_trigger',
         'sound_press','sound_hover',
 
         'code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.button:reset()
     Widgets.base.reset(self)
     if not self.h then self.h=self.w end
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
+    assert(self.w and type(self.w)=='number','[button].w must be number')
+    assert(self.h and type(self.h)=='number','[button].h must be number')
+    assert(not self.sound_trigger or type(self.sound_trigger)=='string','[button].sound_trigger must be string')
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
@@ -281,11 +371,13 @@ function Widgets.button:press()
     self._pressed=true
 end
 function Widgets.button:release(_,_,k)
-    self._pressed=false
-    if self.sound then
-        SFX.play(self.sound)
+    if self._pressed then
+        self._pressed=false
+        if self.sound_trigger then
+            SFX.play(self.sound_trigger)
+        end
+        self.code(k)
     end
-    self.code(k)
 end
 function Widgets.button:drag(x,y)
     if not self:isAbove(x,y) and self==WIDGET.sel then
@@ -306,12 +398,12 @@ function Widgets.button:draw()
 
     -- Background
     gc_setColor(c[1],c[2],c[3],.1+.2*self._hoverTime/self._hoverTimeMax)
-    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
+    gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
     gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.95)
-    gc_rectangle('line',-w*.5,-h*.5,w,h,self.cornerR)
+    gc_mRect('line',0,0,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
@@ -325,11 +417,11 @@ function Widgets.button:draw()
     gc_pop()
 end
 
--- button_fill
+---@class Zenitha.widget.button_fill: Zenitha.widget.button
 Widgets.button_fill=setmetatable({
     type='button_fill',
-    color_text=TABLE.shift(COLOR.L),
-    buildArgs=TABLE.combine(Widgets.button.buildArgs,{'color_text'}),
+    textColor='D',
+    buildArgs=TABLE.combine(Widgets.button.buildArgs,{'textColor'}),
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_fill:draw()
     gc_push('transform')
@@ -347,7 +439,7 @@ function Widgets.button_fill:draw()
 
     -- Rectangle
     gc_setColor(.15+r*.7*(1-HOV*.26),.15+g*.7*(1-HOV*.26),.15+b*.7*(1-HOV*.26),.9)
-    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
+    gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
@@ -355,16 +447,16 @@ function Widgets.button_fill:draw()
         alignDraw(self,self._image)
     end
     if self._text then
-        gc_setColor(self.color_text)
+        gc_setColor(self.textColor)
         alignDraw(self,self._text)
     end
     gc_pop()
 end
 
--- button_invis
+---@class Zenitha.widget.button_invis: Zenitha.widget.button
 Widgets.button_invis=setmetatable({
     type='button_invis',
-    sound=false,
+    sound_trigger=false,
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_invis:draw()
     gc_push('transform')
@@ -377,7 +469,7 @@ function Widgets.button_invis:draw()
 
     -- Rectangle
     gc_setColor(c[1],c[2],c[3],HOV*.16)
-    gc_rectangle('fill',-w*.5,-h*.5,w,h,self.cornerR)
+    gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
@@ -392,7 +484,10 @@ function Widgets.button_invis:draw()
 end
 
 
--- checkBox
+---@class Zenitha.widget.checkBox: Zenitha.widget.base
+---@field w number
+---@field sound_on string|false
+---@field sound_off string|false
 Widgets.checkBox=setmetatable({
     type='checkBox',
     w=30,
@@ -401,14 +496,13 @@ Widgets.checkBox=setmetatable({
     image=false,
     labelPos='left',
     labelDistance=20,
-    cornerR=3,
     sound_on=false,sound_off=false,
 
-    disp=false,-- function return a boolean
+    disp=false, -- function return a boolean
     code=NULL,
 
-    _text=nil,
-    _image=nil,
+    _text=false,
+    _image=false,
 
     buildArgs={
         'name',
@@ -426,10 +520,16 @@ Widgets.checkBox=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.checkBox:reset()
     Widgets.base.reset(self)
+
+    assert(type(self.disp)=='function','[checkBox].disp must be function')
+    assert(not self.sound_on or type(self.sound_on)=='string','[checkBox].sound_on must be string')
+    assert(not self.sound_off or type(self.sound_off)=='string','[checkBox].sound_off must be string')
+
     if self.labelPos=='left' then
         self.alignX='right'
     elseif self.labelPos=='right' then
@@ -444,7 +544,6 @@ function Widgets.checkBox:reset()
 end
 function Widgets.checkBox:isAbove(x,y)
     return
-        self.disp and
         abs(x-self._x)<self.w*.5 and
         abs(y-self._y)<self.w*.5
 end
@@ -468,21 +567,19 @@ function Widgets.checkBox:draw()
 
     local c=self.color
 
-    if self.disp then
-        -- Background
-        gc_setColor(c[1],c[2],c[3],.3*HOV)
-        gc_rectangle('fill',-w*.5,-w*.5,w,w,self.cornerR)
+    -- Background
+    gc_setColor(c[1],c[2],c[3],.3*HOV)
+    gc_mRect('fill',0,0,w,w,self.cornerR)
 
-        -- Frame
-        gc_setLineWidth(self.lineWidth)
-        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8)
-        gc_rectangle('line',-w*.5,-w*.5,w,w,self.cornerR)
-        if self.disp() then
-            gc_scale(.5*w)
-            gc_setLineWidth(self.lineWidth*2/w)
-            gc_line(-.7,.05,-.2,.5,.7,-.55)
-            gc_scale(2/w)
-        end
+    -- Frame
+    gc_setLineWidth(self.lineWidth)
+    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8)
+    gc_mRect('line',0,0,w,w,self.cornerR)
+    if self.disp() then
+        gc_scale(.5*w)
+        gc_setLineWidth(self.lineWidth*2/w)
+        gc_line(-.7,.05,-.2,.5,.7,-.55)
+        gc_scale(2/w)
     end
 
     -- Drawable
@@ -508,23 +605,25 @@ function Widgets.checkBox:draw()
 end
 
 
--- switch
+---@class Zenitha.widget.switch: Zenitha.widget.checkBox
+---@field _slideTime number
 Widgets.switch=setmetatable({
     type='switch',
     h=30,
 
+    fillColor='lS',
     text=false,
     image=false,
     labelPos='left',
     labelDistance=20,
 
-    disp=false,-- function return a boolean
+    disp=false, -- function return a boolean
     code=NULL,
 
-    _text=nil,
-    _image=nil,
+    _text=false,
+    _image=false,
 
-    _slideTime=nil,
+    _slideTime=false,
 
     buildArgs={
         'name',
@@ -533,7 +632,7 @@ Widgets.switch=setmetatable({
 
         'labelPos',
         'labelDistance',
-        'color','color_fill',
+        'color','fillColor',
         'text','fontSize','fontType',
         'lineWidth','widthLimit',
         'sound_on','sound_off',
@@ -541,10 +640,13 @@ Widgets.switch=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.checkBox,__metatable=true})
 function Widgets.switch:reset()
     Widgets.base.reset(self)
+
+    assert(type(self.disp)=='function','[switch].disp must be function')
 
     self._slideTime=0
     if self.labelPos=='left' then
@@ -581,20 +683,18 @@ function Widgets.switch:draw()
 
     local c=self.color
 
-    if self.disp then
-        -- Background
-        gc_setColor(self.color_fill[1],self.color_fill[2],self.color_fill[3],self._slideTime/self._hoverTimeMax+.5)
-        gc_rectangle('fill',-h,-h*.5,h*2,h,h*.5)
+    -- Background
+    gc_setColor(self.fillColor[1],self.fillColor[2],self.fillColor[3],self._slideTime/self._hoverTimeMax+.5)
+    gc_mRect('fill',0,0,h*2,h,h*.5)
 
-        -- Frame
-        gc_setLineWidth(self.lineWidth)
-        gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*HOV)
-        gc_rectangle('line',-h,-h*.5,h*2,h,h*.5)
+    -- Frame
+    gc_setLineWidth(self.lineWidth)
+    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*HOV)
+    gc_mRect('line',0,0,h*2,h,h*.5)
 
-        -- Axis
-        gc_setColor(1,1,1,.8+.2*HOV)
-        gc_circle('fill',h*(self._slideTime/self._hoverTimeMax),0,h*(.35+HOV*.05))
-    end
+    -- Axis
+    gc_setColor(1,1,1,.8+.2*HOV)
+    gc_circle('fill',h*(self._slideTime/self._hoverTimeMax),0,h*(.35+HOV*.05))
 
     -- Drawable
     local x2,y2=0,0
@@ -619,35 +719,50 @@ function Widgets.switch:draw()
 end
 
 
--- slider
+---@class Zenitha.widget.slider: Zenitha.widget.base
+---@field w number
+---@field valueShow false|'int'|'float'|'percent'|function
+---@field numFontSize number
+---@field numFontType false|string
+---@field _showFunc function
+---@field _pos number
+---@field _pos0 number
+---@field _rangeL number
+---@field _rangeR number
+---@field _rangeWidth number
+---@field _unit number
+---@field _smooth boolean
+---@field _textShowTime number
 Widgets.slider=setmetatable({
     type='slider',
     w=100,
     axis={0,1},
-    smooth=nil,
+    smooth=false,
 
     text=false,
     image=false,
     labelPos='left',
     labelDistance=20,
-    cornerR=3,
+    numFontSize=25,numFontType=false,
     valueShow=nil,
+    textAlwaysShow=false,
 
-    disp=false,-- function return the displaying _value
+    disp=false, -- function return the displaying _value
     code=NULL,
 
     _floatWheel=0,
-    _text=nil,
-    _image=nil,
-    _showFunc=nil,
-    _pos=nil,
-    _pos0=nil,
-    _rangeL=nil,
-    _rangeR=nil,
-    _rangeWidth=nil,-- just _rangeR-_rangeL, for convenience
-    _unit=nil,
-    _smooth=nil,
-    _textShowTime=nil,
+    _text=false,
+    _image=false,
+    _showFunc=false,
+    _pos=false,
+    _pos0=false,
+    _rangeL=false,
+    _rangeR=false,
+    _rangeWidth=false, -- just _rangeR-_rangeL, for convenience
+    _unit=false,
+    _smooth=false,
+    _textShowTime=false,
+    _approachSpeed=26,
 
     buildArgs={
         'name',
@@ -658,13 +773,17 @@ Widgets.slider=setmetatable({
         'axis','smooth',
         'labelPos',
         'labelDistance',
-        'color','text',
+        'color','textColor','fillColor',
+        'text',
         'fontSize','fontType',
+        'numFontSize','numFontType',
         'widthLimit',
+        'textAlwaysShow',
 
         'valueShow',
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 local sliderShowFunc={
@@ -684,8 +803,10 @@ local sliderShowFunc={
 function Widgets.slider:reset()
     Widgets.base.reset(self)
 
+    assert(self.w and type(self.w)=='number','[slider].w must be number')
+    assert(type(self.numFontSize)=='number','[widget].numFontSize must be number')
+    assert(type(self.numFontType)=='string' or self.numFontType==false,'[widget].numFontType must be string')
     assert(type(self.disp)=='function','[slider].disp must be function')
-
     assert(
         type(self.axis)=='table' and (#self.axis==2 or #self.axis==3) and
         type(self.axis[1])=='number' and
@@ -693,14 +814,16 @@ function Widgets.slider:reset()
         (not self.axis[3] or type(self.axis[3])=='number'),
         "[slider].axis must be {low,high} or {low,high,unit}"
     )
+    assert(self.smooth==nil or type(self.smooth)=='boolean','[slider].smooth must be boolean')
+
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
     self._rangeWidth=self._rangeR-self._rangeL
     self._unit=self.axis[3]
-    if self.smooth~=nil then
-        self._smooth=self.smooth
-    else
+    if self.smooth==nil then
         self._smooth=not self.axis[3]
+    else
+        self._smooth=self.smooth
     end
     self._pos=self._rangeL
     self._pos0=self._rangeL
@@ -712,9 +835,9 @@ function Widgets.slider:reset()
         elseif type(self.valueShow)=='string' then
             self._showFunc=assert(sliderShowFunc[self.valueShow],"[slider].valueShow must be function, or 'int', 'float', or 'percent'")
         end
-    elseif self.valueShow==false then-- Show nothing if false
+    elseif self.valueShow==false then -- Show nothing if false
         self._showFunc=sliderShowFunc.null
-    else-- Use default if nil
+    else -- Use default if nil
         if self._unit and self._unit%1==0 then
             self._showFunc=sliderShowFunc.int
         else
@@ -743,12 +866,14 @@ function Widgets.slider:update(dt)
     Widgets.base.update(self,dt)
     if self._visible then
         self._pos0=self.disp()
-        self._pos=MATH.expApproach(self._pos,self._pos0,dt*26)
+        self._pos=MATH.expApproach(self._pos,self._pos0,dt*self._approachSpeed)
     end
     if WIDGET.sel==self then
         self._textShowTime=2
     end
-    self._textShowTime=max(self._textShowTime-dt,0)
+    if not self.textAlwaysShow then
+        self._textShowTime=max(self._textShowTime-dt,0)
+    end
 end
 function Widgets.slider:draw()
     local x,y=self._x,self._y
@@ -756,10 +881,14 @@ function Widgets.slider:draw()
     local x2=x+self.w
     local rangeL,rangeR=self._rangeL,self._rangeR
 
-    gc_setColor(1,1,1,.5+HOV*.36)
+    local c=self.color
+    local fc=self.fillColor
+    local r,g,b=c[1],c[2],c[3]
+    local fr,fg,fb=fc[1],fc[2],fc[3]
+    gc_setColor(r,g,b,.5+HOV*.36)
 
     -- Units
-    if not self._smooth then
+    if not self._smooth and self._unit then
         gc_setLineWidth(self.lineWidth)
         for p=rangeL,rangeR,self._unit do
             local X=x+(x2-x)*(p-rangeL)/self._rangeWidth
@@ -772,30 +901,30 @@ function Widgets.slider:draw()
     gc_line(x,y,x2,y)
 
     -- Block
-    local pos=MATH.clamp(self._pos,rangeL,rangeR)
+    local pos=clamp(self._pos,rangeL,rangeR)
     local cx=x+(x2-x)*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
-    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or COLOR.DL)
+    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or self.fillColor)
     gc_rectangle('fill',bx,by,bw,bh,self.cornerR)
 
     -- Glow
     if HOV>0 then
         gc_setLineWidth(self.lineWidth*.5)
-        gc_setColor(1,1,1,HOV*.8)
+        gc_setColor(r,g,b,HOV*.8)
         gc_rectangle('line',bx+1,by+1,bw-2,bh-2,self.cornerR)
     end
 
     -- Float text
     if self._textShowTime>0 then
-        setFont(25)
-        gc_setColor(1,1,1,min(self._textShowTime/2,1))
-        gc_mStr(self:_showFunc(),cx,by-30)
+        setFont(self.numFontSize,self.numFontType)
+        gc_setColor(fr,fg,fb,min(self._textShowTime/2,1))
+        gc_mStr(self:_showFunc(),cx,by-self.numFontSize-10)
     end
 
     -- Drawable
     if self._text then
-        gc_setColor(COLOR.L)
+        gc_setColor(self.textColor)
         if self.labelPos=='left' then
             alignDraw(self,self._text,x-self.labelDistance,y)
         elseif self.labelPos=='right' then
@@ -805,32 +934,34 @@ function Widgets.slider:draw()
         end
     end
 end
+function Widgets.slider:trigger(x,mode)
+    if not x then return end
+    local pos=clamp((x-self._x)/self.w,0,1)
+    local newVal=
+        self._unit and self._rangeL+floor(pos*self._rangeWidth/self._unit+.5)*self._unit
+        or (1-pos)*self._rangeL+pos*self._rangeR
+    if mode~='drag' or newVal~=self.disp() then
+        self.code(newVal,mode)
+    end
+end
 function Widgets.slider:press(x)
-    self:drag(x)
+    self:trigger(x,'press')
 end
 function Widgets.slider:drag(x)
-    if not x then return end
-    x=x-self._x
-    local newPos=MATH.clamp(x/self.w,0,1)
-    local newVal
-    if not self._unit then
-        newVal=(1-newPos)*self._rangeL+newPos*self._rangeR
-    else
-        newVal=newPos*self._rangeWidth
-        newVal=self._rangeL+floor(newVal/self._unit+.5)*self._unit
-    end
-    if newVal~=self.disp() then
-        self.code(newVal)
-    end
+    self:trigger(x,'drag')
+end
+function Widgets.slider:release(x)
+    self:trigger(x,'release')
 end
 function Widgets.slider:scroll(dx,dy)
     local n=updateWheel(self,(dx+dy)*self._rangeWidth/(self._unit or .01)/20)
     if n then
         local p=self._pos0
         local u=self._unit or .01
-        local P=MATH.clamp(p+u*n,self._rangeL,self._rangeR)
-        if p==P or not P then return end
-        self.code(P)
+        local P=clamp(p+u*n,self._rangeL,self._rangeR)
+        if P and p~=P then
+            self.code(P)
+        end
     end
 end
 function Widgets.slider:arrowKey(k)
@@ -838,7 +969,9 @@ function Widgets.slider:arrowKey(k)
 end
 
 
--- slider_fill
+---@class Zenitha.widget.slider_fill: Zenitha.widget.slider
+---@field w number
+---@field h number
 Widgets.slider_fill=setmetatable({
     type='slider_fill',
     w=100,h=40,
@@ -853,12 +986,12 @@ Widgets.slider_fill=setmetatable({
     disp=false,
     code=NULL,
 
-    _text=nil,
-    _image=nil,
-    _pos=nil,
-    _rangeL=nil,
-    _rangeR=nil,
-    _rangeWidth=nil,-- just _rangeR-_rangeL, for convenience
+    _text=false,
+    _image=false,
+    _pos=false,
+    _rangeL=false,
+    _rangeR=false,
+    _rangeWidth=false, -- just _rangeR-_rangeL, for convenience
 
     buildArgs={
         'name',
@@ -874,20 +1007,21 @@ Widgets.slider_fill=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_fill:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
-    assert(type(self.disp)=='function','[slider].disp must be function')
+    assert(self.w and type(self.w)=='number','[slider_fill].w must be number')
+    assert(self.h and type(self.h)=='number','[slider_fill].h must be number')
+    assert(type(self.disp)=='function','[slider_fill].disp must be function')
 
     assert(
         type(self.axis)=='table' and #self.axis==2 and
         type(self.axis[1])=='number' and
         type(self.axis[2])=='number',
-        "[slider].axis must be {number,number}"
+        "[slider_fill].axis must be {number,number}"
     )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -923,10 +1057,10 @@ function Widgets.slider_fill:draw()
     -- Capsule
     gc_setColor(1,1,1,.6+HOV*.26)
     gc_setLineWidth(self.lineWidth+HOV)
-    gc_rectangle('line',x-self.lineDist,y-r-self.lineDist,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
+    gc_mRect('line',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     if HOV>0 then
         gc_setColor(1,1,1,HOV*.12)
-        gc_rectangle('fill',x-self.lineDist,y-r-self.lineDist,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
+        gc_mRect('fill',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     end
 
     -- Stenciled capsule and text
@@ -935,15 +1069,15 @@ function Widgets.slider_fill:draw()
     gc_stc_circ(x+r,y,r)
     gc_stc_circ(x+w-r,y,r)
 
-    setFont(30)
+    setFont(self.numFontSize,self.numFontType)
     gc_setColor(1,1,1,.75+HOV*.26)
-    gc_mStr(num,x+w*.5,y-18)
+    gc_mStr(num,x+w*.5,y-self.numFontSize*.7)
     gc_rectangle('fill',x,y-r,w*rate,h)
 
     gc_stc_reset()
     gc_stc_rect(x,y-r,w*rate,h)
     gc_setColor(0,0,0,.9)
-    gc_mStr(num,x+w*.5,y-18)
+    gc_mStr(num,x+w*.5,y-self.numFontSize*.7)
     gc_stc_stop()
 
     -- Drawable
@@ -962,7 +1096,9 @@ function Widgets.slider_fill:draw()
 end
 
 
--- slider_progress
+---@class Zenitha.widget.slider_progress: Zenitha.widget.slider
+---@field w number
+---@field h number
 Widgets.slider_progress=setmetatable({
     type='slider_progress',
     w=100,h=10,
@@ -976,12 +1112,12 @@ Widgets.slider_progress=setmetatable({
     disp=false,
     code=NULL,
 
-    _text=nil,
-    _image=nil,
-    _pos=nil,
-    _rangeL=nil,
-    _rangeR=nil,
-    _rangeWidth=nil,
+    _text=false,
+    _image=false,
+    _pos=false,
+    _rangeL=false,
+    _rangeR=false,
+    _rangeWidth=false,
 
     buildArgs={
         'name',
@@ -996,20 +1132,21 @@ Widgets.slider_progress=setmetatable({
 
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_progress:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
-    assert(type(self.disp)=='function','[slider].disp must be function')
+    assert(self.w and type(self.w)=='number','[slider_progress].w must be number')
+    assert(self.h and type(self.h)=='number','[slider_progress].h must be number')
+    assert(type(self.disp)=='function','[slider_progress].disp must be function')
 
     assert(
         type(self.axis)=='table' and #self.axis==2 and
         type(self.axis[1])=='number' and
         type(self.axis[2])=='number',
-        "[slider].axis must be {number,number}"
+        "[slider_progress].axis must be {number,number}"
     )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -1063,32 +1200,27 @@ function Widgets.slider_progress:draw()
 end
 
 
--- selector
-local leftAngle=GC.load{20,20,
-    {'setLW',5},
-    {'line',18,2,1,10,18,18},
-}
-local rightAngle=GC.load{20,20,
-    {'setLW',5},
-    {'line',2,2,19,10,2,18},
-}
+---@class Zenitha.widget.selector: Zenitha.widget.base
+---@field w number
+---@field _select number|false
+---@field _selText love.Text
 Widgets.selector=setmetatable({
     type='selector',
-
     w=100,
+
     labelPos='left',
     labelDistance=20,
-    sound=false,
 
-    disp=false,-- function return a boolean
+    list=false, -- table of items
+    disp=false, -- function return a boolean
     show=function(v) return v end,
     code=NULL,
 
     _floatWheel=0,
-    _text=nil,
-    _image=nil,
-    _select=false,-- Selected item ID
-    _selText=false,-- Selected item name
+    _text=false,
+    _image=false,
+    _select=false, -- Selected item ID
+    _selText=false, -- Selected item name
     selFontSize=30,selFontType=false,
 
     buildArgs={
@@ -1103,12 +1235,12 @@ Widgets.selector=setmetatable({
 
         'labelPos',
         'labelDistance',
-        'sound',
         'sound_press','sound_hover',
 
         'list','disp','show',
         'code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.selector:reset()
@@ -1212,8 +1344,8 @@ function Widgets.selector:press(x)
             self.code(self.list[s])
             self._select=s
             self._selText:set(self.show(self.list[s]))
-            if self.sound then
-                SFX.play(self.sound)
+            if self.sound_press then
+                SFX.play(self.sound_press)
             end
         end
     end
@@ -1232,8 +1364,8 @@ function Widgets.selector:scroll(dx,dy)
         self.code(self.list[s])
         self._select=s
         self._selText:set(self.show(self.list[s]))
-        if self.sound then
-            SFX.play(self.sound)
+        if self.sound_press then
+            SFX.play(self.sound_press)
         end
     end
 end
@@ -1242,43 +1374,49 @@ function Widgets.selector:arrowKey(k)
 end
 
 
--- inputBox
+---@class Zenitha.widget.inputBox: Zenitha.widget.base
+---@field w number
+---@field h number
+---@field sound_input string|false
+---@field sound_bksp string|false
+---@field sound_clear string|false
+---@field sound_fail string|false
 Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
+    w=100,h=40,
 
-    w=100,
-    h=40,
-
+    frameColor='L',
+    fillColor={0,0,0,.3},
     secret=false,
     regex=false,
     labelPos='left',
     labelDistance=20,
-    cornerR=3,
 
     maxInputLength=1e99,
-    sound_input=false,sound_bksp=false,sound_delete=false,sound_clear=false,
+    sound_input=false,sound_bksp=false,sound_clear=false,sound_fail=false,
 
-    _value='',-- Text contained
+    _value='', -- Text contained
 
     buildArgs={
         'name',
         'pos',
         'x','y','w','h',
+        'lineWidth','cornerR',
+        'frameColor','fillColor',
 
         'text','fontSize','fontType',
         'secret',
         'regex',
         'labelPos',
         'labelDistance',
-        'lineWidth','cornerR',
         'maxInputLength',
-        'sound_input','sound_bksp','sound_delete','sound_clear',
+        'sound_input','sound_bksp','sound_clear','sound_fail',
         'sound_press','sound_hover',
 
-        'list',
         'disp','code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.inputBox:reset()
@@ -1286,8 +1424,9 @@ function Widgets.inputBox:reset()
     assert(self.w and type(self.w)=='number','[inputBox].w must be number')
     assert(self.h and type(self.h)=='number','[inputBox].h must be number')
     assert(not self.sound_input or type(self.sound_input)=='string','[inputBox].sound_input must be string')
-    assert(not self.sound_delete or type(self.sound_delete)=='string','[inputBox].sound_delete must be string')
+    assert(not self.sound_bksp or type(self.sound_bksp)=='string','[inputBox].sound_bksp must be string')
     assert(not self.sound_clear or type(self.sound_clear)=='string','[inputBox].sound_clear must be string')
+    assert(not self.sound_fail or type(self.sound_fail)=='string','[inputBox].sound_fail must be string')
     if self.labelPos=='left' then
         self.alignX,self.alignY='right','center'
     elseif self.labelPos=='right' then
@@ -1300,6 +1439,12 @@ function Widgets.inputBox:reset()
         error("[inputBox].labelPos must be 'left', 'right', 'up', or 'down'")
     end
 end
+function Widgets.inputBox:_cutTooLong()
+    local extra=utf8.offset(self._value,self.maxInputLength+1)
+    if extra then
+        self._value=sub(self._value,1,extra-1)
+    end
+end
 function Widgets.inputBox:hasText()
     return #self._value>0
 end
@@ -1310,11 +1455,13 @@ function Widgets.inputBox:setText(str)
     if not str then str="" end
     assert(type(str)=='string',"Arg must be string")
     self._value=str
+    self:_cutTooLong()
 end
 function Widgets.inputBox:addText(str)
     if not str then str="" end
     assert(type(str)=='string',"Arg must be string")
     self._value=self._value..str
+    self:_cutTooLong()
 end
 function Widgets.inputBox:clear()
     self._value=''
@@ -1334,7 +1481,7 @@ function Widgets.inputBox:draw()
     local HOV=self._hoverTime/self._hoverTimeMax
 
     -- Background
-    gc_setColor(0,0,0,.3)
+    gc_setColor(self.fillColor)
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Highlight
@@ -1342,7 +1489,7 @@ function Widgets.inputBox:draw()
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
-    gc_setColor(COLOR.L)
+    gc_setColor(self.frameColor)
     gc_setLineWidth(self.lineWidth)
     gc_rectangle('line',x,y,w,h,self.cornerR)
 
@@ -1396,59 +1543,71 @@ function Widgets.inputBox:keypress(k)
             end
         elseif k=='delete' then
             t=''
-            if self.sound_delete then
-                SFX.play(self.sound_delete)
+            if self.sound_clear then
+                SFX.play(self.sound_clear)
             end
         end
         self._value=t
+        self:_cutTooLong()
     end
 end
 
 
--- textBox
+---@class Zenitha.widget.textBox: Zenitha.widget.base
+---@field w number
+---@field h number
+---@field scrollBarColor Zenitha.ColorStr|Zenitha.Color
+---@field sound_clear string|false
+---@field _texts table
 Widgets.textBox=setmetatable({
     type='textBox',
     keepFocus=true,
+    w=100,h=40,
 
-    w=100,
-    h=40,
-
+    fillColor={0,0,0,.3},
     scrollBarPos='left',
+    scrollBarWidth=8,
+    scrollBarDist=3,
+    scrollBarColor='L',
     lineHeight=30,
     yOffset=-2,
-    cornerR=3,
-    activeColor=TABLE.shift(COLOR.LY),
-    idleColor=TABLE.shift(COLOR.L),
+    activeColor='LY',
+    idleColor='L',
     fixContent=true,
     sound_clear=false,
 
     _floatWheel=0,
     _texts=false,
-    _scrollPos=0,-- Scroll-down-distance
+    _scrollPos=0, -- Scroll-down-distance
     _scrollPos1=0,
-    _sure=0,-- Sure-timer for clear history
+    _sure=0, -- Sure-timer for clear history
 
     buildArgs={
         'name',
         'pos',
         'x','y','w','h',
+        'lineWidth','cornerR',
 
+        'fillColor',
         'fontSize','fontType',
-        'scrollBarPos',
+        'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
         'lineHeight',
         'yOffset',
-        'lineWidth','cornerR',
         'activeColor','idleColor',
         'fixContent',
         'sound_clear',
 
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.textBox:reset()
     Widgets.base.reset(self)
+    if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
+    assert(type(self.scrollBarColor)=='table','[textBox].scrollBarColor must be table')
     assert(self.w and type(self.w)=='number','[textBox].w must be number')
     assert(self.h and type(self.h)=='number','[textBox].h must be number')
+    assert(not self.sound_clear or type(self.sound_clear)=='string','[textBox].sound_clear must be string')
     for _,v in next,{'activeColor','idleColor'} do
         if type(self[v])=='string' then self[v]=COLOR[self[v]] end
         assert(type(self[v])=='table','[textBox].'..v..' must be table')
@@ -1473,7 +1632,7 @@ function Widgets.textBox:setTexts(t)
 end
 function Widgets.textBox:push(t)
     ins(self._texts,t)
-    if self._scrollPos==(#self._texts-1)*self.lineHeight-self.h then-- minus 1 for the new message
+    if self._scrollPos==(#self._texts-1)*self.lineHeight-self.h then -- minus 1 for the new message
         self._scrollPos=min(self._scrollPos+self.lineHeight,#self._texts*self.lineHeight-self.h)
     end
 end
@@ -1504,19 +1663,19 @@ function Widgets.textBox:press(x,y)
     end
 end
 function Widgets.textBox:drag(_,_,_,dy)
-    self._scrollPos=MATH.clamp(
+    self._scrollPos=clamp(
         self._scrollPos-dy,
         0,max(#self._texts*self.lineHeight-self.h,0)
     )
 end
 function Widgets.textBox:scroll(dx,dy)
-    self._scrollPos=MATH.clamp(
+    self._scrollPos=clamp(
         self._scrollPos-(dx+dy)*self.lineHeight,
         0,max(#self._texts*self.lineHeight-self.h,0)
     )
 end
 function Widgets.textBox:arrowKey(k)
-    self:scroll(0,k =='up' and -1 or k=='down' and 1 or 0)
+    self:scroll(0,k=='up' and -1 or k=='down' and 1 or 0)
 end
 function Widgets.textBox:update(dt)
     if self._sure>0 then
@@ -1534,7 +1693,7 @@ function Widgets.textBox:draw()
     local scroll=self._scrollPos1
 
     -- Background
-    gc_setColor(0,0,0,.3)
+    gc_setColor(self.fillColor)
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
@@ -1548,15 +1707,17 @@ function Widgets.textBox:draw()
         gc_translate(x,y)
 
         -- Slider
-        gc_setColor(COLOR.L)
         if #list>self._capacity then
+            gc_setColor(self.scrollBarColor)
             local len=h*h/H
             if self.scrollBarPos=='left' then
-                gc_rectangle('fill',-15,(h-len)*scroll/(H-h),10,len,self.cornerR)
+                gc_rectangle('fill',-self.scrollBarWidth-self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
             elseif self.scrollBarPos=='right' then
-                gc_rectangle('fill',w+5,(h-len)*scroll/(H-h),10,len,self.cornerR)
+                gc_rectangle('fill',w+self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
             end
         end
+
+        gc_setColor(COLOR.L)
 
         -- Clear button
         if not self.fixContent then
@@ -1566,15 +1727,15 @@ function Widgets.textBox:draw()
                 gc_rectangle('fill',w-40+8,8,24,3)
                 gc_rectangle('fill',w-40+11,14,18,21)
             else
-                setFont(40,'_basic')
+                setFont(40,'_norm')
                 gc_mStr('?',w-40+21,-8)
             end
         end
 
         -- Texts
         setFont(self.fontSize,self.fontType)
+        gc_stc_reset()
         gc_stc_rect(0,0,w,h)
-        gc_stc_setComp()
         gc_translate(0,-(scroll%lineH))
         local pos=floor(scroll/lineH)
         for i=1,self._capacity+1 do
@@ -1589,19 +1750,29 @@ function Widgets.textBox:draw()
 end
 
 
--- listBox
+---@class Zenitha.widget.listBox: Zenitha.widget.base
+---@field w number
+---@field h number
+---@field sound_click string|false
+---@field sound_select string|false
+---@field _list table List of items
 Widgets.listBox=setmetatable({
     type='listBox',
-    w=100,
-    h=40,
+    w=100,h=40,
 
+    fillColor={0,0,0,.3},
     scrollBarPos='left',
+    scrollBarWidth=8,
+    scrollBarDist=3,
+    scrollBarColor='L',
     lineHeight=30,
-    cornerR=3,
-    activeColor=TABLE.shift(COLOR.LI),
-    idleColor=TABLE.shift(COLOR.L),
-    drawFunc=false,-- function that draw options. Input: option,id,ifSelected
+    activeColor='LI',
+    idleColor='L',
+    drawFunc=false, -- function that draw items. Input: item,id,isSelect
     releaseDist=10,
+    stencilMode='total',
+    sound_click=false,
+    sound_select=false,
 
     _floatWheel=0,
     _list=false,
@@ -1616,20 +1787,27 @@ Widgets.listBox=setmetatable({
         'name',
         'pos',
         'x','y','w','h',
-
-        'scrollBarPos',
-        'lineHeight',
         'lineWidth','cornerR',
+
+        'fillColor',
+        'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
+        'lineHeight',
         'activeColor','idleColor',
         'drawFunc',
         'releaseDist',
-
+        'stencilMode',
+        'sound_click','sound_select',
         'code',
         'visibleFunc',
+        'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.listBox:reset()
     Widgets.base.reset(self)
+    if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
+    assert(type(self.scrollBarColor)=='table','[listBox].scrollBarColor must be table')
+    assert(not self.sound_click or type(self.sound_click)=='string','[listBox].sound_click must be string')
+    assert(not self.sound_select or type(self.sound_select)=='string','[listBox].sound_select must be string')
     assert(self.w and type(self.w)=='number','[listBox].w must be number')
     assert(self.h and type(self.h)=='number','[listBox].h must be number')
     for _,v in next,{'activeColor','idleColor'} do
@@ -1639,6 +1817,8 @@ function Widgets.listBox:reset()
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[listBox].scrollBarPos must be 'left' or 'right'")
 
     assert(type(self.drawFunc)=='function',"[listBox].drawFunc must be function")
+    assert(type(self.releaseDist)=='number' and self.releaseDist>=0,"[listBox].drawFunc must >=0")
+    assert(self.stencilMode=='total' or self.stencilMode=='single' or self.stencilMode==false,"[listBox].stencilMode must be 'total' or 'single' or false")
     if not self._list then self._list={} end
     self._capacity=ceil(self.h/self.lineHeight)
     self._scrollPos1=-2*self.h
@@ -1678,7 +1858,7 @@ end
 function Widgets.listBox:pop()
     if #self._list>0 then
         rem(self._list)
-        Widgets.listBox:drag(0,0,0,0)
+        self:drag(0,0,0,0)
     end
 end
 function Widgets.listBox:remove()
@@ -1706,19 +1886,20 @@ function Widgets.listBox:release(x,y)
             if self._selected~=y then
                 self._selected=y
                 self:_moveScroll(0,true)
-                SFX.play('selector',.8,0,12)
+                SFX.play(self.sound_select)
             else
                 if self.code then
                     self:code(self:getSelect(),self:getItem())
+                    SFX.play(self.sound_click)
                 end
             end
         end
     end
 end
 function Widgets.listBox:_moveScroll(dy,selInSight)
-    self._scrollPos=MATH.clamp(
+    self._scrollPos=clamp(
         not selInSight and self._scrollPos+dy or
-        MATH.clamp(self._scrollPos+dy,
+        clamp(self._scrollPos+dy,
             (self._selected+1)*self.lineHeight-self.h,
             (self._selected-2)*self.lineHeight
         ),
@@ -1745,7 +1926,7 @@ function Widgets.listBox:arrowKey(dir)
     self:_moveScroll(0,true)
 end
 function Widgets.listBox:select(i)
-    self._selected=i
+    self._selected=clamp(i,1,#self._list)
     self:arrowKey('autofresh')
 end
 function Widgets.listBox:update(dt)
@@ -1764,33 +1945,63 @@ function Widgets.listBox:draw()
         gc_translate(x,y)
 
         -- Background
-        gc_setColor(0,0,0,.4)
+        gc_setColor(self.fillColor)
         gc_rectangle('fill',0,0,w,h,self.cornerR)
 
         -- Frame
         gc_setColor(WIDGET.sel==self and self.activeColor or self.idleColor)
         local lw=self.lineWidth
         gc_setLineWidth(lw)
-        gc_rectangle('line',-lw*.5,-lw*.5,w+lw,h+lw,self.cornerR)
+        gc_mRect('line',w*.5,h*.5,w+lw,h+lw,self.cornerR)
 
         -- Slider
         if h<H then
             local len=h*h/H
-            gc_setColor(COLOR.L)
-            gc_rectangle('fill',-15,max((h-len)*scroll/(H-h),0),12,len,self.cornerR)
+            gc_setColor(self.scrollBarColor)
+            if self.scrollBarPos=='left' then
+                gc_rectangle('fill',-self.scrollBarWidth-self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
+            elseif self.scrollBarPos=='right' then
+                gc_rectangle('fill',w+self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
+            end
         end
 
         -- List
-        gc_stc_rect(0,0,w,h)
-        gc_stc_setComp()
         local pos=floor(scroll/lineH)
-        gc_translate(0,-(scroll%lineH))
-        for i=1,self._capacity+1 do
-            i=pos+i
-            if list[i]~=nil then
-                self.drawFunc(list[i],i,i==self._selected)
+        local cap=self._capacity
+        local sel=self._selected
+        ---@type function
+        local drawFunc=self.drawFunc
+        if self.stencilMode=='single' then
+            local modH=scroll%lineH
+            gc_translate(0,-modH)
+            for i=1,cap+1 do
+                gc_stc_reset()
+                if i==1 then
+                    gc_stc_rect(0,modH,w,lineH-modH)
+                elseif i==cap+1 then
+                    gc_stc_rect(0,0,w,modH)
+                else
+                    gc_stc_rect(0,0,w,lineH)
+                end
+                i=pos+i
+                if list[i]~=nil then
+                    drawFunc(list[i],i,i==sel)
+                end
+                gc_translate(0,lineH)
             end
-            gc_translate(0,lineH)
+        else
+            if self.stencilMode then
+                gc_stc_reset()
+                gc_stc_rect(0,0,w,h)
+            end
+            gc_translate(0,-(scroll%lineH))
+            for i=1,cap+1 do
+                i=pos+i
+                if list[i]~=nil then
+                    drawFunc(list[i],i,i==sel)
+                end
+                gc_translate(0,lineH)
+            end
         end
         gc_stc_stop()
     gc_pop()
@@ -1798,21 +2009,31 @@ end
 
 --------------------------------------------------------------
 
-
 -- Widget module
-WIDGET.active={}-- Table contains all active widgets
-WIDGET.sel=false-- Selected widget
+local WIDGET={_prototype=Widgets}
+
+---@type Zenitha.widget.base[]
+WIDGET.active={} -- Table contains all active widgets
+
+---@type Zenitha.widget.base|false
+WIDGET.sel=false -- Selected widget
+
+---Reset all widgets (called by Zenitha when scene changed and window resized or something)
 function WIDGET._reset()
     for i=1,#WIDGET.active do
         WIDGET.active[i]:reset()
     end
 end
-function WIDGET.setWidgetList(list)
+
+---Set WIDGET.active to widget list (called by Zenitha when scene changed)
+---@param list Zenitha.widget.base[]
+function WIDGET._setWidgetList(list)
     WIDGET.unFocus(true)
     WIDGET.active=list or NONE
 
     if list then
-        WIDGET.cursorMove(xOy:inverseTransformPoint(love.mouse.getPosition()))
+        local x,y=xOy:inverseTransformPoint(love.mouse.getPosition())
+        WIDGET._cursorMove(x,y,'init')
 
         -- Set metatable for new widget lists
         if getmetatable(list)~=indexMeta then
@@ -1821,11 +2042,17 @@ function WIDGET.setWidgetList(list)
 
         WIDGET._reset()
     end
-    onChange()
 end
+
+---Get selected widget
+---@return Zenitha.widget.base|false
 function WIDGET.getSelected()
     return WIDGET.sel
 end
+
+---Check if widget W is focused, or check if any widget is focused if given false|nil
+---@param W? Zenitha.widget.base|false
+---@return boolean
 function WIDGET.isFocus(W)
     if W then
         return W and WIDGET.sel==W
@@ -1833,7 +2060,11 @@ function WIDGET.isFocus(W)
         return WIDGET.sel~=false
     end
 end
-function WIDGET.focus(W)
+
+---Focus widget W
+---@param W Zenitha.widget.base
+---@param reason? 'init'|'press'|'move'|'release'
+function WIDGET.focus(W,reason)
     if WIDGET.sel==W then return end
     if W.sound_hover then
         SFX.play(W.sound_hover)
@@ -1843,13 +2074,24 @@ function WIDGET.focus(W)
         EDITING=''
     end
     if W and W._visible then
-        WIDGET.sel=W
-        if W.type=='inputBox' and not kb.hasTextInput() then
-            local _,y1=xOy:transformPoint(0,W.y+W.h)
-            kb.setTextInput(true,0,y1,1,1)
+        if W.type=='inputBox' then
+            if reason~='move' and reason~='init' then
+                WIDGET.sel=W
+                if not kb.hasTextInput() then
+                    local _,y1=xOy:transformPoint(0,W.y+W.h)
+                    kb.setTextInput(true,0,y1,1,1)
+                end
+            end
+        else
+            WIDGET.sel=W
         end
     end
 end
+
+---Unfocus widget
+---
+---soft unfocus like moving mouse, won't unfocus some widget with `keepFocus` tag, like inputBox.
+---@param force? boolean
 function WIDGET.unFocus(force)
     local W=WIDGET.sel
     if W and (force or not W.keepFocus) then
@@ -1861,10 +2103,14 @@ function WIDGET.unFocus(force)
     end
 end
 
-function WIDGET.cursorMove(x,y)
+---Update widget states with cursor move event (called by Zenitha)
+---@param x number
+---@param y number
+---@param reason 'init'|'press'|'move'|'release'
+function WIDGET._cursorMove(x,y,reason)
     for _,W in next,WIDGET.active do
         if W._visible and W:isAbove(x,y+SCN.curScroll) then
-            WIDGET.focus(W)
+            WIDGET.focus(W,reason)
             return
         end
     end
@@ -1872,7 +2118,13 @@ function WIDGET.cursorMove(x,y)
         WIDGET.unFocus()
     end
 end
-function WIDGET.press(x,y,k)
+
+---Update widget states with press event (called by Zenitha)
+---@param x number
+---@param y number
+---@param k number
+function WIDGET._press(x,y,k)
+    WIDGET._cursorMove(x,y,'press')
     local W=WIDGET.sel
     if W then
         if not W:isAbove(x,y+SCN.curScroll) then
@@ -1886,48 +2138,70 @@ function WIDGET.press(x,y,k)
         end
     end
 end
-function WIDGET.release(x,y,k)
+
+---Update widget states with release event (called by Zenitha)
+---@param x number
+---@param y number
+---@param k number
+function WIDGET._release(x,y,k)
     if WIDGET.sel then
-        WIDGET.sel:release(x,y+SCN.curScroll)
+        WIDGET.sel:release(x,y+SCN.curScroll,k)
     end
 end
-function WIDGET.drag(x,y,dx,dy)
+
+---Update widget states with drag event (called by Zenitha)
+---@param x number
+---@param y number
+---@param dx number
+---@param dy number
+function WIDGET._drag(x,y,dx,dy)
     local W=WIDGET.sel
     if W then
         W:drag(x,y+SCN.curScroll,dx,dy)
     else
-        SCN.curScroll=MATH.clamp(SCN.curScroll-dy,0,SCN.maxScroll)
+        SCN.curScroll=clamp(SCN.curScroll-dy,0,SCN.maxScroll)
     end
 end
-function WIDGET.scroll(dx,dy)
+
+---Update widget states with scroll event (called by Zenitha)
+---@param dx number
+---@param dy number
+function WIDGET._scroll(dx,dy)
     local W=WIDGET.sel
     if W then
         W:scroll(dx,dy)
     else
-        SCN.curScroll=MATH.clamp(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
+        SCN.curScroll=clamp(SCN.curScroll-dy*SCR.h0/6.26,0,SCN.maxScroll)
     end
 end
-function WIDGET.textinput(texts)
+
+---Update widget states with drag event (called by Zenitha)
+---@param texts string
+function WIDGET._textinput(texts)
+    ---@type Zenitha.widget.inputBox
     local W=WIDGET.sel
     if W and W.type=='inputBox' then
-        if (not W.regex or texts:match(W.regex)) and (not W.limit or #(WIDGET.sel._value..texts)<=W.limit) then
-            WIDGET.sel._value=WIDGET.sel._value..texts
-            SFX.play(Widgets.inputBox.sound_input)
+        if not W.regex or texts:match(W.regex) then
+            W._value=W._value..texts
+            W:_cutTooLong()
+            SFX.play(W.sound_input)
         else
-            SFX.play('drop_cancel')
+            SFX.play(W.sound_fail)
         end
     end
 end
 
-function WIDGET.update(dt)
+---Update all widgets (called by Zenitha)
+---@param dt number
+function WIDGET._update(dt)
     for _,W in next,WIDGET.active do
-        if W.visibleFunc then
-            local v=W.visibleFunc()
+        if W.visibleTick then
+            local v=W.visibleTick()
             if W._visible~=v then
                 W._visible=v
                 if v then
                     if W:isAbove(xOy:inverseTransformPoint(love.mouse.getPosition())) then
-                        WIDGET.focus(W)
+                        WIDGET.focus(W,'move')
                     end
                 else
                     if W==WIDGET.sel then
@@ -1939,21 +2213,114 @@ function WIDGET.update(dt)
         if W.update then W:update(dt) end
     end
 end
-function WIDGET.resize(w,h)
-    if widgetCanvas then widgetCanvas:release() end
-    widgetCanvas=GC.newCanvas(w,h)
-    WIDGET._reset()
-end
-function WIDGET.draw()
-    gc_translate(0,-SCN.curScroll)
+
+---Draw all widgets (called by Zenitha)
+function WIDGET._draw()
     for _,W in next,WIDGET.active do
         if W._visible then W:draw() end
     end
-    gc_setColor(1,1,1)
-    gc_draw(widgetCanvas)
-    gc_replaceTransform(xOy)
 end
 
+---Draw widgets
+---@param widgetList Zenitha.widget.base[]
+---@param scroll? number
+function WIDGET.draw(widgetList,scroll)
+    if scroll then gc_translate(0,-scroll) end
+    for _,W in next,widgetList do
+        if W._visible then W:draw() end
+    end
+end
+
+---@class Zenitha.widgetArg: table
+---
+---General
+---@field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
+---@field name? string
+---@field pos? table
+---
+---@field x? number
+---@field y? number
+---@field w? number
+---@field h? number
+---@field widthLimit? number
+---
+---@field color? Zenitha.ColorStr|Zenitha.Color
+---@field text? string|function
+---@field fontSize? number
+---@field fontType? string
+---@field image? string|love.Drawable
+---@field alignX? 'left'|'center'|'right'
+---@field alignY? 'up'|'center'|'down'
+---@field labelPos? 'left'|'right'|'up'|'down'
+---@field labelDistance? number
+---@field disp? function
+---@field code? function
+---@field visibleFunc? function Used to determine if widget is visible when scene changed
+---@field visibleTick? function Used to change widget's visibility every frame
+---
+---@field lineWidth? number
+---@field cornerR? number
+---
+---@field textColor? Zenitha.ColorStr|Zenitha.Color
+---@field fillColor? Zenitha.ColorStr|Zenitha.Color
+---@field frameColor? Zenitha.ColorStr|Zenitha.Color
+---@field activeColor? Zenitha.ColorStr|Zenitha.Color
+---@field idleColor? Zenitha.ColorStr|Zenitha.Color
+---
+---@field sound_press? string
+---@field sound_hover? string
+---
+---Image
+---@field ang? number
+---@field k? number
+---
+---Check box
+---@field sound_on? string
+---@field sound_off? string
+---
+---Slider
+---@field axis? {x:number, y:number, unit?:number}
+---@field smooth? boolean
+---@field valueShow? false|'int'|'float'|'percent'|function
+---
+---@field lineDist? number
+---
+---Selector
+---@field selFontSize? number
+---@field selFontType? string
+---@field list? table
+---@field show? function
+---
+---Input box
+---@field secret? boolean
+---@field regex? string
+---@field maxInputLength? number
+---@field sound_input? string
+---@field sound_bksp? string
+---@field sound_clear? string
+---@field sound_fail? string
+---
+---Scrolling boxes
+---@field scrollBarPos? number
+---@field scrollBarWidth? number
+---@field scrollBarDist? number
+---@field scrollBarColor? Zenitha.ColorStr|Zenitha.Color
+---@field lineHeight? number
+---
+---Text box
+---@field yOffset? number
+---@field fixContent? boolean
+---
+---List box
+---@field drawFunc? function
+---@field releaseDist? number
+---@field stencilMode? 'total'|'single'|false
+---@field sound_click? string
+---@field sound_select? string
+
+---Create new widget
+---@param args Zenitha.widgetArg Arguments to create widget, check declare widget class for more info
+---@return Zenitha.widget.base
 function WIDGET.new(args)
     local t=args.type
     args.type=nil
@@ -1976,62 +2343,68 @@ end
 
 --------------------------------------------------------------
 -- User funcs
-function WIDGET.setOnChange(func)
-    assert(type(func)=='function',"WIDGET.setOnChange(func): func must be function")
-    onChange=func
-end
 
 -- Widget function shortcuts
-do-- function WIDGET.c_backScn(style)
-    local cache={}
-    function WIDGET.c_backScn(style)
-        if not style then style='fade' end
-        if not cache[style] then
-            cache[style]=function() SCN.back(style) end
-        end
-        return cache[style]
+local c_cache={}
+
+---Widget shortcut function of SCN.back()
+---@param style? string
+---@return function
+function WIDGET.c_backScn(style)
+    local hash='c_backScn/'..tostring(style)
+    if not c_cache[hash] then
+        c_cache[hash]=function() SCN.back(style) end
     end
+    return c_cache[hash]
 end
-do-- function WIDGET.c_goScn(name,style)
-    local cache={}
-    function WIDGET.c_goScn(name,style)
-        local hash=style and name..style or name
-        if not cache[hash] then
-            cache[hash]=function() SCN.go(name,style) end
-        end
-        return cache[hash]
+
+---Widget shortcut function of SCN.go()
+---@param name string
+---@param style? string
+---@return function
+function WIDGET.c_goScn(name,style)
+    local hash='c_goScn/'..(style and name..','..style or name)
+    if not c_cache[hash] then
+        c_cache[hash]=function() SCN.go(name,style) end
     end
+    return c_cache[hash]
 end
-do-- function WIDGET.c_swapScn(name,style)
-    local cache={}
-    function WIDGET.c_swapScn(name,style)
-        local hash=style and name..style or name
-        if not cache[hash] then
-            cache[hash]=function() SCN.swapTo(name,style) end
-        end
-        return cache[hash]
+
+---Widget shortcut function of SCN.swapTo()
+---@param name string
+---@param style? string
+---@return function
+function WIDGET.c_swapScn(name,style)
+    local hash='c_swapScn/'..(style and name..','..style or name)
+    if not c_cache[hash] then
+        c_cache[hash]=function() SCN.swapTo(name,style) end
     end
+    return c_cache[hash]
 end
-do-- function WIDGET.c_pressKey(k)
-    local cache={}
-    function WIDGET.c_pressKey(k)
-        if not cache[k] then
-            cache[k]=function() love.keypressed(k) end
-        end
-        return cache[k]
+
+---Widget shortcut function of SCN.swapTo()
+---@param key string
+---@return function
+function WIDGET.c_pressKey(key)
+    local hash='c_pressKey/'..key
+    if not c_cache[hash] then
+        c_cache[hash]=function() love.keypressed(key) end
     end
+    return c_cache[hash]
 end
 --------------------------------------------------------------
 
+---Get custom new widget (not guaranteed to work)
+---@param name string
+---@param parent string
+---@return Zenitha.widget.base
 function WIDGET.newClass(name,parent)
-    assert(type(name)=='string',"WIDGET.newClass(name,parent): name must be string")
-    assert(not Widgets[name],"Widget class "..name.." already exists")
     if not parent then parent='base' end
-    assert(type(parent)=='string',"WIDGET.newClass(name,parent): name must be string")
+    assert(type(name)=='string',"Widget name must be string")
+    assert(type(parent)=='string',"Widget name must be string")
+    assert(not Widgets[name],"Widget class "..name.." already exists")
     assert(Widgets[parent],"Parent widget class "..parent.." does not exist")
-    Widgets[name]=setmetatable({
-        type=name,
-    },{__index=Widgets[parent],__metatable=true})
+    Widgets[name]=setmetatable({type=name},{__index=Widgets[parent],__metatable=true})
     return Widgets[name]
 end
 

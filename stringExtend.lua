@@ -1,13 +1,21 @@
 local data=love.data
 local assert,tostring,tonumber=assert,tostring,tonumber
-local floor,format=math.floor,string.format
-local find,sub,gsub=string.find,string.sub,string.gsub
-local rep,upper=string.rep,string.upper
+local floor,lg=math.floor,math.log10
+local min,max=math.min,math.max
+local find,format=string.find,string.format
+local sub,gsub=string.sub,string.gsub
+local match,gmatch=string.match,string.gmatch
+local rep,reverse=string.rep,string.reverse
+local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
 
+local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
+
+---@class stringlib
 local STRING={}
 
-function STRING.install()-- Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
+---Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
+function STRING.install()
     function STRING.install()
         error("attempt to install stringExtend library multiple times")
     end
@@ -16,7 +24,11 @@ function STRING.install()-- Install stringExtend into the lua basic "string libr
     end
 end
 
-function STRING.repD(str,...)-- "Replace dollars". Replace all $n with ..., like string.format
+---"Replace dollars". Replace all $n with ..., like string.format
+---@param str string
+---@param ... any
+---@return string
+function STRING.repD(str,...)
     local l={...}
     for i=#l,1,-1 do
         str=gsub(str,'$'..i,l[i])
@@ -24,36 +36,110 @@ function STRING.repD(str,...)-- "Replace dollars". Replace all $n with ..., like
     return str
 end
 
-function STRING.sArg(str,switch)-- "Scan arg", scan if str has the arg (format of str is like '-json -q', arg is like '-q')
+---"Scan arg", scan if str has the arg (format of str is like '-json -q', arg is like '-q')
+---@param str string
+---@param switch string
+---@return boolean
+function STRING.sArg(str,switch)
     if find(str..' ',switch..' ') then
         return true
+    else
+        return false
     end
 end
 
-do-- function STRING.shiftChar(c)-- "Capitalize" a character like string.upper, but can also shift numbers to signs
-    local shiftMap={
-        ['1']='!',['2']='@',['3']='#',['4']='$',['5']='%',
-        ['6']='^',['7']='&',['8']='*',['9']='(',['0']=')',
-        ['`']='~',['-']='_',['=']='+',
-        ['[']='{',[']']='}',['\\']='|',
-        [';']=':',['\'']='"',
-        [',']='<',['.']='>',['/']='?',
-    }
-    function STRING.shiftChar(c)
-        return shiftMap[c] or upper(c)
+---Paste new string into original string, won't exceed the length of original string
+---@param str string
+---@param str2 string
+---@param pos number
+---@return string
+function STRING.paste(str,str2,pos)
+    local mPos=#str-#str2+1
+    if pos<0 then pos=pos+#str+1 end
+    if pos<1 then
+        str2=sub(str2,2-pos)
+        return str2..sub(str,1+#str2)
+    elseif pos>mPos then
+        return sub(str,1,pos-1)..sub(str2,1,mPos-pos-1)
+    else
+        return sub(str,1,pos-1)..str2..sub(str,pos+#str2)
     end
 end
 
-function STRING.trim(str)-- Trim %s at both ends of the string
-    if not str:find('%S') then return'' end
-    str=str:sub((str:find('%S'))):reverse()
-    return str:sub((str:find('%S'))):reverse()
+
+local shiftMap={
+    ['1']='!',['2']='@',['3']='#',['4']='$',['5']='%',
+    ['6']='^',['7']='&',['8']='*',['9']='(',['0']=')',
+    ['`']='~',['-']='_',['=']='+',
+    ['[']='{',[']']='}',['\\']='|',
+    [';']=':',['\'']='"',
+    [',']='<',['.']='>',['/']='?',
+}
+---string.upper, but can also shift numbers to signs
+---@param str string
+---@return string
+function STRING.shift(str)
+    return shiftMap[str] or upper(str)
 end
 
-function STRING.split(str,sep,regex)-- Split a string by sep
+local unshiftMap={
+    ['!']='1',['@']='2',['#']='3',['$']='4',['%']='5',
+    ['^']='6',['&']='7',['*']='8',['(']='9',[')']='0',
+    ['~']='`',['_']='-',['+']='=',
+    ['{']='[',['}']=']',['|']='\\',
+    [':']=';',['"']='\'',
+    ['<']=',',['>']='.',['?']='/',
+}
+---string.lower, but can also unshift signs to numbers
+---@param str string
+---@return string
+function STRING.unshift(str)
+    return unshiftMap[str] or lower(str)
+end
+
+local upperData,lowerData={},{} -- Data is filled later in this file
+
+---string.upper with utf8 support, warning: low performance
+---@param str string
+---@return string
+function STRING.upperUTF8(str)
+    for i=1,#upperData do
+        local pair=upperData[i]
+        str=gsub(str,pair[1],pair[2])
+    end
+    return str
+end
+---string.lower with utf8 support, warning: low performance
+---@param str string
+---@return string
+function STRING.lowerUTF8(str)
+    for i=1,#lowerData do
+        local pair=lowerData[i]
+        str=gsub(str,pair[1],pair[2])
+    end
+    return str
+end
+
+---Trim %s at both ends of the string
+---@param str string
+---@return string
+function STRING.trim(str)
+    -- local p=find(str,'%S')
+    -- if not p then return '' end
+    -- str=reverse(sub(str,p))
+    -- return reverse(sub(str,assert(find(str,'%S'))))
+    return match(str,"%s*(.+)%s*") or ""
+end
+
+---Split a string by sep
+---@param str string
+---@param sep string
+---@param regex? boolean
+---@return string[]
+function STRING.split(str,sep,regex)
     local L={}
-    local p1=1-- start
-    local p2-- target
+    local p1=1 -- start
+    local p2 -- target
     if regex then
         while p1<=#str do
             p2=find(str,sep,p1) or #str+1
@@ -70,42 +156,83 @@ function STRING.split(str,sep,regex)-- Split a string by sep
     return L
 end
 
-function STRING.simpEmailCheck(str)-- Check if the string is a valid email address
-    str=STRING.split(str,'@')
-    if #str~=2 then return false end
-    if str[1]:sub(-1)=='.' or str[2]:sub(-1)=='.' then return false end
-    local e1,e2=STRING.split(str[1],'.'),STRING.split(str[2],'.')
+---Calculate the edit distance between two strings
+---@param s1 string
+---@param s2 string
+---@return number
+function STRING.editDist(s1,s2) -- By Copilot
+    local len1,len2=#s1,#s2
+    local t1,t2={},{}
+    for i=1,len1 do t1[i]=s1:sub(i,i) end
+    for i=1,len2 do t2[i]=s2:sub(i,i) end
+
+    local dp={}
+    for i=0,len1 do dp[i]=TABLE.new(0,len2) end
+    dp[0][0]=0
+    for i=1,len1 do dp[i][0]=i end
+    for i=1,len2 do dp[0][i]=i end
+
+    for i=1,len1 do
+        for j=1,len2 do
+            dp[i][j]=t1[i]==t2[j] and dp[i-1][j-1] or min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1])+1
+        end
+    end
+    return dp[len1][len2]
+end
+
+---Check if the string is a valid email address
+---@param str string
+---@return boolean
+function STRING.simpEmailCheck(str)
+    local list=STRING.split(str,'@')
+    if #list~=2 then return false end
+    if sub(list[1],-1)=='.' or sub(list[2],-1)=='.' then return false end
+    local e1,e2=STRING.split(list[1],'.'),STRING.split(list[2],'.')
     if #e1*#e2==0 then return false end
     for _,v in next,e1 do if #v==0 then return false end end
     for _,v in next,e2 do if #v==0 then return false end end
     return true
 end
 
-function STRING.time_simp(t)-- Convert time (second) to MM:SS
+---Convert time (second) to "MM:SS"
+---@param t number
+---@return string
+function STRING.time_simp(t)
     return format('%02d:%02d',floor(t/60),floor(t%60))
 end
 
-function STRING.time(t)-- Convert time (second) to SS or MM:SS or HH:MM:SS
-    if t<60 then
-        return format('%.3f″',t)
-    elseif t<3600 then
-        return format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100)
+---Convert time (second) to seconds~year string (max 3 units)
+---@param t number
+---@return string
+function STRING.time(t)
+    return
+        t<=0 and "-0.00″" or
+        t<60 and format('%.3f″',t) or
+        t<3600 and format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100) or
+        t<86400 and format('%d:%.2d′%05.1f″',floor(t/3600),floor(t/60%60),floor(t%60*10)/10) or
+        t<2629728 and format('%dd %d:%.2d′',floor(t/86400),floor(t/3600%3600),floor(t/60%60)) or
+        t<31556736 and format('%dm%dd%dh',floor(t/2629728),floor(t/86400%86400),floor(t/3600%3600)) or
+        t<3155673600 and format('%dy%dm%dd',floor(t/31556736),floor(t/2629728%2629728),floor(t/86400%86400)) or
+        format('%.2fcentury',floor(t/3155673600))
+end
+
+---Warning: don't support number format like .26, must have digits before the dot, like 0.26
+---@param str string
+---@return number|nil, string|nil
+function STRING.cutUnit(str)
+    local _s,_e=find(str,'^-?%d+%.?%d*')
+    if _e==#str then -- All numbers
+        return tonumber(str),nil
+    elseif not _s then -- No numbers
+        return nil,str
     else
-        return format('%d:%.2d′%05.2f″',floor(t/3600),floor(t/60%60),floor(t%60*100)/100)
+        return tonumber(sub(str,_s,_e)),sub(str,_e+1)
     end
 end
 
-function STRING.cutUnit(s)-- Warning: don't support number format like .26, must have digits before the dot, like 0.26
-    local _s,_e=s:find('^-?%d+%.?%d*')
-    if _e==#s then-- All numbers
-        return tonumber(s),nil
-    elseif not _s then-- No numbers
-        return nil,s
-    else
-        return tonumber(s:sub(_s,_e)),s:sub(_e+1)
-    end
-end
-
+---Get the type of a character
+---@param c string
+---@return 'space'|'word'|'sign'|'other'
 function STRING.type(c)
     assert(type(c)=='string' and #c==1,'function STRING.type(c): c must be a single-charater string')
     local t=byte(c)
@@ -120,100 +247,109 @@ function STRING.type(c)
     end
 end
 
-do-- function STRING.base64(num)-- Convert one number to base64
-    STRING.base64={} for c in string.gmatch('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','.') do
-        table.insert(STRING.base64,c)
-    end
-    setmetatable(STRING.base64,{
-        __call=function(self,k)
-            return self[k]
-        end,
-        __index=function()
-            error("function STRING.base64(num): num must be 1~64")
-        end,
-        __newindex=function()
-            error("STRING.base64 is read-only")
-        end,
-        __metatable=true,
-    })
+---Base64 character list
+---@type string[]
+STRING.base64={} for c in gmatch('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','.') do
+    table.insert(STRING.base64,c)
 end
 
-function STRING.UTF8(num)-- Simple utf8 coding
+---Simple utf8 coding
+---@param num number
+---@return string
+function STRING.UTF8(num)
     assert(type(num)=='number','Wrong type ('..type(num)..')')
-    assert(num>=0 and num<2^31,'Out of range ('..num..')')
-    if num<2^7 then return char(num)
+    if num<=0 then
+        error('Out of range ('..num..')')
+    elseif num<2^7  then return char(num)
     elseif num<2^11 then return char(192+floor(num/2^06),128+num%2^6)
     elseif num<2^16 then return char(224+floor(num/2^12),128+floor(num/2^06)%2^6,128+num%2^6)
     elseif num<2^21 then return char(240+floor(num/2^18),128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     elseif num<2^26 then return char(248+floor(num/2^24),128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     elseif num<2^31 then return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
+    else
+        error('Out of range ('..num..')')
     end
 end
 
-do-- function STRING.bigInt(num)-- Convert a number to a approximate integer with large unit
-    local lg=math.log10
-    local units={'','K','M','B','T','Qa','Qt','Sx','Sp','Oc','No'}
-    local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}
-    local secUnits={'Dc','Vg','Tg','Qd','Qi','Se','St','Og','Nn','Ce'}-- Ce is next-level unit, but DcCe is not used so used here
-    for _,preU in next,preUnits do for _,secU in next,secUnits do table.insert(units,preU..secU) end end
-    function STRING.bigInt(num)
-        if num<1000 then
-            return tostring(num)
-        elseif num~=1e999 then
-            local e=floor(lg(num)/3)
-            return (num/10^(e*3))..units[e+1]
+local units={'','K','M','B','T','Qa','Qt','Sx','Sp','Oc','No'}
+local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}
+local secUnits={'Dc','Vg','Tg','Qd','Qi','Se','St','Og','Nn','Ce'} -- Ce is next-level unit, but DcCe is not used so used here
+for _,preU in next,preUnits do for _,secU in next,secUnits do table.insert(units,preU..secU) end end
+---Convert a number to a approximate integer with large unit
+---@param num number
+---@return string
+function STRING.bigInt(num)
+    if num<1000 then
+        return tostring(num)
+    elseif num~=1e999 then
+        local e=floor(lg(num)/3)
+        return (num/10^(e*3))..units[e+1]
+    else
+        return 'INF'
+    end
+end
+
+---Convert a number to binary string
+---@param num number
+---@param len? number
+---@return string
+function STRING.toBin(num,len)
+    local s=''
+    while num>0 do
+        s=(num%2)..s
+        num=floor(num/2)
+    end
+    return tonumber(len) and rep('0',tonumber(len)-#s)..s or s
+end
+
+---Convert a number to octal string
+---@param num number
+---@param len? number
+---@return string
+function STRING.toOct(num,len)
+    local s=''
+    while num>0 do
+        s=(num%8)..s
+        num=floor(num/8)
+    end
+    return tonumber(len) and rep('0',tonumber(len)-#s)..s or s
+end
+
+---Convert a number to hexadecimal string
+---@param num number
+---@param len? number
+---@return string
+function STRING.toHex(num,len)
+    local s=''
+    while num>0 do
+        s=b16[num%16]..s
+        num=floor(num/16)
+    end
+    return tonumber(len) and rep('0',tonumber(len)-#s)..s or s
+end
+
+local rshift=bit.rshift
+---Simple url encoding
+---@param str string
+---@return string
+function STRING.urlEncode(str)
+    local out=''
+    for i=1,#str do
+        if match(sub(str,i,i),'[a-zA-Z0-9]') then
+            out=out..sub(str,i,i)
         else
-            return 'INF'
+            local b=byte(str,i)
+            out=out..'%'..b16[rshift(b,4)]..b16[b%16]
         end
     end
+    return out
 end
 
-do-- function STRING.toBin, STRING.toOct, STRING.toHex(num,len)
-    function STRING.toBin(num,len)
-        local s=''
-        while num>0 do
-            s=(num%2)..s
-            num=floor(num/2)
-        end
-        return len and rep('0',len-#s)..s or s
-    end
-    function STRING.toOct(num,len)
-        local s=''
-        while num>0 do
-            s=(num%8)..s
-            num=floor(num/8)
-        end
-        return len and rep('0',len-#s)..s or s
-    end
-    local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
-    function STRING.toHex(num,len)
-        local s=''
-        while num>0 do
-            s=b16[num%16]..s
-            num=floor(num/16)
-        end
-        return len and rep('0',len-#s)..s or s
-    end
-end
-
-do-- function STRING.urlEncode(str)-- Simple url encoding
-    local rshift=bit.rshift
-    local b16={[0]='0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'}
-    function STRING.urlEncode(str)
-        local out=''
-        for i=1,#str do
-            if str:sub(i,i):match('[a-zA-Z0-9]') then
-                out=out..str:sub(i,i)
-            else
-                local b=str:byte(i)
-                out=out..'%'..b16[rshift(b,4)]..b16[b%16]
-            end
-        end
-        return out
-    end
-end
-
-function STRING.vcsEncrypt(text,key)-- Simple vcs encryption
+---Simple vcs encryption
+---@param text string
+---@param key string
+---@return string
+function STRING.vcsEncrypt(text,key)
     local keyLen=#key
     local result=''
     local buffer=''
@@ -226,7 +362,12 @@ function STRING.vcsEncrypt(text,key)-- Simple vcs encryption
     end
     return result..buffer
 end
-function STRING.vcsDecrypt(text,key)-- Simple vcs decryption
+
+---Simple vcs decryption
+---@param text string
+---@param key string
+---@return string
+function STRING.vcsDecrypt(text,key)
     local keyLen=#key
     local result=''
     local buffer=''
@@ -239,12 +380,20 @@ function STRING.vcsDecrypt(text,key)-- Simple vcs decryption
     end
     return result..buffer
 end
-function STRING.digezt(text)-- Return 16 byte string. Not powerful hash, just simply protect the original text
+
+---Return 16 byte string. Not powerful hash, just simply protect the original text
+---@param text string
+---@param seedRange? number default to 26
+---@param seed? number default to 0
+---@return string
+function STRING.digezt(text,seedRange,seed)
+    if not seed then seed=0 end
+    if not seedRange then seedRange=26 end
     local out={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
-    local seed=26
+
     for i=1,#text do
         local c=byte(text,i)
-        seed=(seed+c)%26
+        seed=(seed+c)%seedRange
         c=c+seed
         local pos=c*i%16
         local step=(c+i)%4+1
@@ -259,49 +408,108 @@ function STRING.digezt(text)-- Return 16 byte string. Not powerful hash, just si
     return result
 end
 
-function STRING.readLine(str)-- Return [a line], [the rest of the string]
-    local p=str:find('\n')
+---Cut a line off a string
+---@param str string
+---@return string, string one line (do not include \n), and the rest of string
+function STRING.readLine(str)
+    local p=find(str,'\n')
     if p then
-        return str:sub(1,p-1),str:sub(p+1)
+        return sub(str,1,p-1),sub(str,p+1)
     else
         return str,''
     end
 end
-function STRING.readChars(str,n)-- Return [n characters], [the rest of the string]
+
+---Cut n bytes off a string
+---@param str string
+---@param n number
+---@return string, string n bytes, and the rest of string
+function STRING.readChars(str,n)
     return sub(str,1,n),sub(str,n+1)
 end
 
+---Shorten a path by cutting off long directory name
+---## Example
+---```lua
+---STRING.simplifyPath('Documents/Project/xxx.lua') --> 'D/P/xxx.lua'
+---STRING.simplifyPath('Documents/Project/xxx.lua',3) --> 'Doc/Pro/xxx.lua'
+---```
 function STRING.simplifyPath(path,len)
     local l=STRING.split(path,'/')
-    for i=1,#l-1 do l[i]=l[i]:sub(1,len or 1) end
+    for i=1,#l-1 do l[i]=sub(l[i],1,len or 1) end
     return table.concat(l,'/')
 end
 
-function STRING.packBin(str)-- Zlib+Base64
+---Pack binary data into string (Zlib+Base64)
+---@param str string
+---@return string
+function STRING.packBin(str)
+    ---@type string
     return data.encode('string','base64',data.compress('string','zlib',str))
 end
+
+---Unpack binary data from string (Zlib+Base64)
+---@param str string
+---@return string|any
 function STRING.unpackBin(str)
-    local res
-    res,str=pcall(data.decode,'string','base64',str)
-    if not res then return end
-    res,str=pcall(data.decompress,'string','zlib',str)
-    if res then return str end
+    local success,res
+    success,res=pcall(data.decode,'string','base64',str)
+    if not success then return end
+    success,res=pcall(data.decompress,'string','zlib',str)
+    if success then return res end
 end
-function STRING.packText(str)-- Gzip+Base64
+
+---Pack text data into string (Gzip+Base64)
+---@param str string
+---@return string
+function STRING.packText(str)
+    ---@type string
     return data.encode('string','base64',data.compress('string','gzip',str))
 end
+
+---Unpack text data from string (Gzip+Base64)
+---@param str string
+---@return string|any
 function STRING.unpackText(str)
-    local res
-    res,str=pcall(data.decode,'string','base64',str)
-    if not res then return end
-    res,str=pcall(data.decompress,'string','gzip',str)
-    if res then return str end
+    local success,res
+    success,res=pcall(data.decode,'string','base64',str)
+    if not success then return end
+    success,res=pcall(data.decompress,'string','gzip',str)
+    if success then return res end
 end
-function STRING.packTable(t)-- JSON+Gzip+Base64
+
+---Pack table into string (JSON+Gzip+Base64)
+---@param t table
+---@return string
+function STRING.packTable(t)
+    ---@type string
     return STRING.packText(JSON.encode(t))
 end
-function STRING.unpackTable(t)
-    return JSON.decode(STRING.unpackText(t))
+
+---Unpack table from string (JSON+Gzip+Base64)
+---@param str string
+---@return table|any
+function STRING.unpackTable(str)
+    return JSON.decode(STRING.unpackText(str))
 end
+
+repeat
+    local f=io.open('Zenitha/upcaser.txt','r')
+    if not f then break end
+    local upperFileData=STRING.split(gsub(f:read('a'),'\n',','),',')
+    f:close()
+    for i=1,#upperFileData do
+        local pair=STRING.split(upperFileData[i],'=')
+        upperData[i]=pair
+    end
+    f=io.open('Zenitha/lowcaser.txt','r')
+    if not f then break end
+    local lowerFileData=STRING.split(gsub(f:read('a'),'\n',','),',')
+    f:close()
+    for i=1,#lowerFileData do
+        local pair=STRING.split(lowerFileData[i],'=')
+        lowerData[i]=pair
+    end
+until true
 
 return STRING

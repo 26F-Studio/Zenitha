@@ -1,12 +1,14 @@
 local audio=love.audio
 local effectsSupported=audio.isEffectsSupported()
+local ins=table.insert
 
 local nameList={}
-local srcLib={}-- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
+local srcLib={}     -- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
 local lastLoadNames={}
-local nowPlay={}
-local lastPlay=NONE-- Directly stored last played bgm name(s)
+local nowPlay={}    -- Playing bgm objects
+local lastPlay=NONE -- Directly stored last played bgm name(s)
 
+---@type false|string|string[]
 local defaultBGM=false
 local maxLoadedCount=3
 local volume=1
@@ -16,7 +18,7 @@ local function task_setVolume(obj,ve,time,stop)
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
-        local v=MATH.mix(vs,ve,t)
+        local v=MATH.lerp(vs,ve,t)
         obj.vol=v
         obj.source:setVolume(v*volume)
         if t==1 then
@@ -35,7 +37,7 @@ local function task_setPitch(obj,pe,time)
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
-        local p=MATH.mix(ps,pe,t)
+        local p=MATH.lerp(ps,pe,t)
         obj.pitch=p
         obj.source:setPitch(p)
         if t==1 then
@@ -49,7 +51,7 @@ local function task_setLowgain(obj,pe,time)
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
-        local p=MATH.mix(ps,pe,t)
+        local p=MATH.lerp(ps,pe,t)
         obj.lowgain=p
         obj.source:setFilter{type='bandpass',lowgain=obj.lowgain^9.42,highgain=obj.highgain^9.42,volume=1}
         if t==1 then
@@ -63,7 +65,7 @@ local function task_setHighgain(obj,pe,time)
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
-        local p=MATH.mix(ps,pe,t)
+        local p=MATH.lerp(ps,pe,t)
         obj.highgain=p
         obj.source:setFilter{type='bandpass',lowgain=obj.lowgain^9.42,highgain=obj.highgain^9.42,volume=1}
         if t==1 then
@@ -97,13 +99,19 @@ local function _updateSources()
 end
 local function _addFile(name,path)
     if not srcLib[name] then
-        table.insert(nameList,name)
+        ins(nameList,name)
         srcLib[name]={
-            name=name,path=path,source=false,
-            vol=0,volChanging=false,
-            pitch=1,pitchChanging=false,
-            lowgain=1,lowgainChanging=false,
-            highgain=1,highgainChanging=false,
+            name=name,
+            path=path,
+            source=false,
+            vol=0,
+            volChanging=false,
+            pitch=1,
+            pitchChanging=false,
+            lowgain=1,
+            lowgainChanging=false,
+            highgain=1,
+            highgainChanging=false,
         }
     end
 end
@@ -115,7 +123,7 @@ local function _tryLoad(name)
         elseif love.filesystem.getInfo(obj.path) then
             obj.source=audio.newSource(obj.path,'stream')
             obj.source:setLooping(true)
-            table.insert(lastLoadNames,1,name)
+            ins(lastLoadNames,1,name)
             return true
         else
             LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
@@ -127,26 +135,41 @@ end
 
 local BGM={}
 
+---Get the loaded BGMs' name list, READ ONLY
+---@return table
 function BGM.getList() return nameList end
+
+---Get the loaded BGMs' count
+---@return number
 function BGM.getCount() return #nameList end
 
+---Set the default BGM(s) to play when BGM.play() is called without arguments
+---@param bgms string|string[]
 function BGM.setDefault(bgms)
     if type(bgms)=='string' then
         bgms={bgms}
     elseif type(bgms)=='table' then
         for i=1,#bgms do assert(type(bgms[i])=='string',"BGM list must be list of strings") end
     else
-        error("BGM.setDefault(bgms): bgms must be string or table")
+        error("BGM must be string or table")
     end
     defaultBGM=bgms
 end
+
+---Set the max count of loaded BGMs
+---
+---When loaded BGMs' count exceeds this value, some not-playing BGM source will be released
+---@param count number
 function BGM.setMaxSources(count)
-    assert(type(count)=='number' and count>0 and count%1==0,"BGM.setMaxSources(count): count must be positive integer")
+    assert(type(count)=='number' and count>0 and count%1==0,"Source count must be positive integer")
     maxLoadedCount=count
     _updateSources()
 end
+
+---Set BGM volume
+---@param vol number
 function BGM.setVol(vol)
-    assert(type(vol)=='number' and vol>=0 and vol<=1,"BGM.setVol(vol): count must be in range 0~1")
+    assert(type(vol)=='number' and vol>=0 and vol<=1,"Volume must be in range 0~1")
     volume=vol
     for i=1,#nowPlay do
         local bgm=nowPlay[i]
@@ -155,7 +178,12 @@ function BGM.setVol(vol)
         end
     end
 end
-function BGM.init(name,path)
+
+---Load BGM(s) from file(s)
+---@param name string|string[]
+---@param path string
+---@overload fun(map:table<string, string>)
+function BGM.load(name,path)
     if type(name)=='table' then
         for k,v in next,name do
             _addFile(k,v)
@@ -167,13 +195,17 @@ function BGM.init(name,path)
     LOG(BGM.getCount().." BGM files added")
 end
 
+---Play BGM(s), stop previous playing BGM(s) if exists
+---Multi-channel BGMs must be exactly same length, all sources will be set to loop mode
+---@param bgms? false|string|string[]
+---@param args? string|'-preLoad'|'-noloop'|'-sdin'
 function BGM.play(bgms,args)
-    if not args then args='' end
     if not bgms then bgms=defaultBGM end
     if not bgms then return end
+    if not args then args='' end
 
     if type(bgms)=='string' then bgms={bgms} end
-    assert(type(bgms)=='table',"BGM.play(name,args): name must be string or table")
+    assert(type(bgms)=='table',"BGM must be string or table")
 
     if
         TABLE.compare(lastPlay,bgms) and
@@ -189,44 +221,59 @@ function BGM.play(bgms,args)
         lastPlay=bgms
     end
 
-    for i=1,#bgms do
-        local bgm=bgms[i]
-        assert(type(bgm)=='string',"BGM list can only be list of string")
-        if _tryLoad(bgm) and not STRING.sArg(args,'-preLoad') then
-            local obj=srcLib[bgms[i]]
-            obj.vol=0
-            obj.pitch=1
-            obj.lowgain=1
-            obj.highgain=1
-            obj.volChanging=false
-            obj.pitchChanging=false
-            obj.lowgainChanging=false
-            obj.highgainChanging=false
+    if STRING.sArg(args,'-preLoad') then
+        for _,bgm in next,bgms do
+            assert(type(bgm)=='string',"BGM list can only be list of string")
+            _tryLoad(bgm)
+        end
+    else
+        local sourceReadyToPlay={}
+        for _,bgm in next,bgms do
+            assert(type(bgm)=='string',"BGM list can only be list of string")
+            if _tryLoad(bgm) then
+                local obj=srcLib[bgm]
+                obj.vol=0
+                obj.pitch=1
+                obj.lowgain=1
+                obj.highgain=1
+                obj.volChanging=false
+                obj.pitchChanging=false
+                obj.lowgainChanging=false
+                obj.highgainChanging=false
 
-            _clearTask(obj)
+                _clearTask(obj)
 
-            local source=obj.source
-            source:setLooping(not STRING.sArg(args,'-noloop'))
-            source:setPitch(1)
-            source:seek(0)
-            source:setFilter()
-            if STRING.sArg(args,'-sdin') then
-                obj.vol=1
-                source:setVolume(volume)
-                BGM.set(bgm,'volume',1,0)
-            else
-                source:setVolume(0)
-                BGM.set(bgm,'volume',1,.626)
+                local source=obj.source
+                source:setLooping(not STRING.sArg(args,'-noloop'))
+                source:setPitch(1)
+                source:seek(0)
+                source:setFilter()
+                if STRING.sArg(args,'-sdin') then
+                    obj.vol=1
+                    source:setVolume(volume)
+                    BGM.set(bgm,'volume',1,0)
+                else
+                    source:setVolume(0)
+                    BGM.set(bgm,'volume',1,.626)
+                end
+                ins(sourceReadyToPlay,source)
+
+                table.insert(nowPlay,obj)
             end
-            source:play()
-
-            table.insert(nowPlay,obj)
+        end
+        for i=1,#sourceReadyToPlay do
+            sourceReadyToPlay[i]:play()
         end
     end
+
     _updateSources()
     return true
 end
+
+---Stop current playing BGM(s), fade out if time is given
+---@param time? nil|number
 function BGM.stop(time)
+    assert(time==nil or type(time)=='number' and time>=0,"Given stopping time must be positive number, but got "..tostring(time))
     if #nowPlay>0 then
         for i=1,#nowPlay do
             local obj=nowPlay[i]
@@ -244,13 +291,9 @@ function BGM.stop(time)
     end
 end
 
----@param mode
----| 'volume'
----| 'lowgain'
----| 'highgain'
----| 'volume'
----| 'pitch'
----| 'seek'
+---Set (current playing) BGM(s) states
+---@param mode 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'
+---@param ... any
 function BGM.set(bgms,mode,...)
     if type(bgms)=='string' then
         if bgms=='all' then
@@ -269,7 +312,7 @@ function BGM.set(bgms,mode,...)
     end
     for i=1,#bgms do
         local obj=bgms[i]
-        if obj.source then
+        if obj and obj.source then
             if mode=='volume' then
                 _clearTask(obj,'volume')
 
@@ -283,14 +326,14 @@ function BGM.set(bgms,mode,...)
             elseif mode=='pitch' then
                 _clearTask(obj,'pitch')
 
-                local pitch,changeTime=...
+                local pitch,timeUse=...
                 if not pitch then pitch=1 end
-                if not changeTime then changeTime=1 end
+                if not timeUse then timeUse=1 end
 
                 assert(type(pitch)=='number' and pitch>0 and pitch<=32,"BGM.set(...,pitch): pitch must be in range 0~32")
-                assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
+                assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
 
-                TASK.new(task_setPitch,obj,pitch,changeTime)
+                TASK.new(task_setPitch,obj,pitch,timeUse)
             elseif mode=='seek' then
                 local time=...
                 assert(type(time)=='number',"BGM.set(...,time): time must be number")
@@ -298,28 +341,28 @@ function BGM.set(bgms,mode,...)
             elseif mode=='lowgain' then
                 if effectsSupported then
                     _clearTask(obj,'lowgain')
-                    local lowgain,changeTime=...
+                    local lowgain,timeUse=...
                     if not lowgain then lowgain=1 end
-                    if not changeTime then changeTime=1 end
+                    if not timeUse then timeUse=1 end
 
                     assert(type(lowgain)=='number' and lowgain>=0 and lowgain<=1,"BGM.set(...,lowgain,highgain): lowgain must be in range 0~1")
-                    assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
+                    assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
 
-                    TASK.new(task_setLowgain,obj,lowgain,changeTime)
+                    TASK.new(task_setLowgain,obj,lowgain,timeUse)
                     obj.lowgain=lowgain
                     obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
                 end
             elseif mode=='highgain' then
                 if effectsSupported then
                     _clearTask(obj,'highgain')
-                    local highgain,changeTime=...
+                    local highgain,timeUse=...
                     if not highgain then highgain=1 end
-                    if not changeTime then changeTime=1 end
+                    if not timeUse then timeUse=1 end
 
                     assert(type(highgain)=='number' and highgain>=0 and highgain<=1,"BGM.set(...,lowgain,highgain): highgain must be in range 0~1")
-                    assert(type(changeTime)=='number' and changeTime>=0,"BGM.set(...,time): time must be positive number")
+                    assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
 
-                    TASK.new(task_setHighgain,obj,highgain,changeTime)
+                    TASK.new(task_setHighgain,obj,highgain,timeUse)
                     obj.highgain=highgain
                     obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
                 end
@@ -330,17 +373,25 @@ function BGM.set(bgms,mode,...)
     end
 end
 
+---Get (current playing) BGM(s) name list
 function BGM.getPlaying()
     return TABLE.shift(lastPlay)
 end
+
+---Get if BGM playing now
 function BGM.isPlaying()
     return #nowPlay>0 and nowPlay[1].source:isPlaying()
 end
+
+---Get time of BGM playing now
 function BGM.tell()
     if nowPlay[1] then
-        return nowPlay[1].source:tell()
+        local src=nowPlay[1].source
+        return src:tell()%src:getDuration() -- bug of love2d, tell() may return value greater than duration
     end
 end
+
+---Get duration of BGM playing now
 function BGM.getDuration()
     if nowPlay[1] then
         return nowPlay[1].source:getDuration()

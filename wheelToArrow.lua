@@ -1,6 +1,11 @@
 local love=love
 local max,min=math.max,math.min
 local trigDist=0
+
+---Convert wheel movement to arrow key presses by trigger love.keypressed event
+---@param y number wheel movement
+---@param key1 string key name when scroll up ('up')
+---@param key2 string key name when scroll down ('down')
 return function(y,key1,key2)
     if y>0 then
         trigDist=max(trigDist,0)+y^1.2

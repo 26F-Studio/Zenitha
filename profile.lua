@@ -10,11 +10,12 @@ local _ncalls={}   -- number of calls
 local _internal={} -- list of internal profiler functions
 
 local getInfo=debug.getinfo
-function profile.hooker(event,line,info)
+local _hooker
+_hooker=function(event,line,info)
     info=info or getInfo(2,'fnS')
     local f=info.func
-    if _internal[f] then return end-- ignore the profiler itself
-    if info.name then _labeled[f]=info.name end-- get the function name if available
+    if _internal[f] then return end -- ignore the profiler itself
+    if info.name then _labeled[f]=info.name end -- get the function name if available
 
     -- find the line definition
     if not _defined[f] then
@@ -29,25 +30,29 @@ function profile.hooker(event,line,info)
     end
     if event=='tail call' then
         local prev=getInfo(3,'fnS')
-        profile.hooker('return',line,prev)
-        profile.hooker('call',line,info)
+        _hooker('return',line,prev)
+        _hooker('call',line,info)
     elseif event=='call' then
         _tcalled[f]=clock()
     else
         _ncalls[f]=_ncalls[f]+1
     end
 end
+local function _comp(a,b)
+    local dt=_telapsed[b]-_telapsed[a]
+    return dt==0 and _ncalls[b]<_ncalls[a] or dt<0
+end
 
---- Starts collecting data.
+---Starts collecting data.
 function profile.start()
     if jit then
         jit.off()
         jit.flush()
     end
-    debug.sethook(profile.hooker,'cr')
+    debug.sethook(_hooker,'cr')
 end
 
---- Stops collecting data.
+---Stops collecting data.
 function profile.stop()
     debug.sethook()
     for f in next,_tcalled do
@@ -72,7 +77,7 @@ function profile.stop()
     collectgarbage()
 end
 
---- Resets all collected data.
+---Resets all collected data.
 function profile.reset()
     for f in next,_ncalls do
         _ncalls[f]=0
@@ -82,12 +87,8 @@ function profile.reset()
     collectgarbage()
 end
 
-local function _comp(a,b)
-    local dt=_telapsed[b]-_telapsed[a]
-    return dt==0 and _ncalls[b]<_ncalls[a] or dt<0
-end
-
---- Iterates all functions that have been called since the profile was started.
+---Iterates all functions that have been called since the profile was started.
+---@param limit? number limit the number of functions to return
 function profile.query(limit)
     local t={}
     for f,n in next,_ncalls do
@@ -110,9 +111,12 @@ function profile.query(limit)
 end
 
 local cols={3,20,8,6,32}
-function profile.report(n)
+---Generate the datasheet
+---@param limit? number limit the number of functions to return
+---@return string
+function profile.report(limit)
     local out={}
-    local report=profile.query(n)
+    local report=profile.query(limit)
     for i,row in ipairs(report) do
         for j=1,5 do
             local s=tostring(row[j])
@@ -137,6 +141,10 @@ function profile.report(n)
 end
 
 local switch=false
+---Turn profile mode on/off
+---
+---Automatically copy the report to clipboard when turned off
+---@return boolean current state
 function profile.switch()
     switch=not switch
     if not switch then

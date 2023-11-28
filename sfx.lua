@@ -1,10 +1,15 @@
-local type,rem=type,table.remove
+local type=type
+local ins,rem=table.insert,table.remove
 local floor,rnd=math.floor,math.random
 local clamp=MATH.clamp
 
-local sfxList={}
+---@type string[]
+local nameList={}
+---@type table<string, love.Source[]>
+local srcMap={}
+---@type table<string, {base:number, top:number}>
 local packSetting={}
-local Sources={}
+
 local volume=1
 local stereo=1
 
@@ -37,41 +42,70 @@ end
 
 local SFX={}
 
-function SFX.init(list)
-    assert(type(list)=='table',"Initialize SFX lib with a list of filenames!")
-    for i=1,#list do table.insert(sfxList,list[i]) end
-end
-function SFX.load(path)
-    local c=0
-    local missing=0
-    for i=1,#sfxList do
-        local fullPath=path..sfxList[i]..'.ogg'
-        if love.filesystem.getInfo(fullPath) then
-            if Sources[sfxList[i]] then
-                for j=1,#Sources[sfxList[i]] do
-                    Sources[sfxList[i]][j]:release()
+---@param name string
+---@param path string
+---@param lazyLoad? boolean
+local function loadOne(name,path,lazyLoad)
+    assert(type(name)=='string',"name must be string")
+    assert(type(path)=='string',"path must be string")
+    if love.filesystem.getInfo(path) and FILE.isSafe(path) then
+        if srcMap[name] then
+            rem(nameList,TABLE.find(nameList,name))
+            for _,src in next,srcMap[name] do
+                if type(src)=='userdata' then
+                    src:release()
                 end
             end
-            Sources[sfxList[i]]={love.audio.newSource(fullPath,'static')}
-            c=c+1
+        end
+        ins(nameList,name)
+        srcMap[name]={lazyLoad and path or love.audio.newSource(path,'static')}
+        return true
+    end
+end
+
+---Load SFX name-path pairs
+---@overload fun(pathTable:table,lazyLoad?:boolean)
+---@param name string
+---@param path string
+---@param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
+function SFX.load(name,path,lazyLoad)
+    if type(name)=='table' then
+        local success=0
+        local fail=0
+        for k,v in next,name do
+            if loadOne(k,v,path) then
+                success=success+1
+            else
+                fail=fail+1
+            end
+        end
+        if fail>0 then
+            LOG(fail.." SFX files missing")
+        end
+        LOG(("%d SFX files added, total %d"):format(success,#nameList))
+    else
+        if loadOne(name,path,lazyLoad) then
+            LOG("SFX loaded: "..name)
         else
-            LOG("No SFX: "..sfxList[i]..'.ogg',.1)
-            missing=missing+1
+            LOG("No SFX: "..path)
         end
     end
-    LOG(("%d/%d SFX files loaded (%d missing)"):format(c,#sfxList,missing))
-    if missing>0 then
-        MES.new('info',missing.." SFX files missing")
-    end
-    collectgarbage()
+    table.sort(nameList)
 end
+
+---Load SFX samples from specified directory
+---@param pack {name:string, path:string, base:string}
+---## Example
+---```lua
+---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
+---```
 function SFX.loadSample(pack)
-    assert(type(pack)=='table',"Usage: SFX.loadsample([table])")
+    assert(type(pack)=='table',"Usage: SFX.loadsample(table)")
     assert(pack.name,"No field: name")
     assert(pack.path,"No field: path")
     local num=1
     while love.filesystem.getInfo(pack.path..'/'..num..'.ogg') do
-        Sources[pack.name..num]={love.audio.newSource(pack.path..'/'..num..'.ogg','static')}
+        srcMap[pack.name..num]={love.audio.newSource(pack.path..'/'..num..'.ogg','static')}
         num=num+1
     end
     local base=(_getTuneHeight(pack.base) or 37)-1
@@ -80,18 +114,32 @@ function SFX.loadSample(pack)
     LOG((num-1).." "..pack.name.." samples loaded")
 end
 
+---Get the number of SFX files loaded (not include SFX samples)
+---@return number
 function SFX.getCount()
-    return #sfxList
+    return #nameList
 end
+
+---Set the volume of SFX module
+---@param vol number
 function SFX.setVol(vol)
     assert(type(vol)=='number' and vol>=0 and vol<=1,"SFX.setVol(vol): vol must be number in range 0~1")
     volume=vol
 end
+
+---Set the stereo of SFX module
+---@param s number 0~1
 function SFX.setStereo(s)
     assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): s must be number in range 0~1")
     stereo=s
 end
 
+---Get note name with note number
+---
+---1 --> ' C1'
+---13 --> 'C#2'
+---@param note number Note number, 1~127
+---@return string Note name, e.g. 'C4'
 function SFX.getNoteName(note)
     if note<1 then
         return '---'
@@ -101,7 +149,15 @@ function SFX.getNoteName(note)
         return noteName[note%12+1]..octave
     end
 end
-function SFX.playSample(pack,...)-- vol-1, sampSet1, vol-2, sampSet2
+
+---Play a sample
+---@param pack string
+---@param ... string|number 0~1 number for volume, big integer and string for tune
+---## Example
+---```lua
+---SFX.playSample('piano', .7,'C4','E4', .9,'G4')
+---```
+function SFX.playSample(pack,...)
     if ... then
         local arg={...}
         local vol
@@ -112,11 +168,11 @@ function SFX.playSample(pack,...)-- vol-1, sampSet1, vol-2, sampSet2
             else
                 local base=packSetting[pack].base
                 local top=packSetting[pack].top
-                local tune=type(a)=='string' and _getTuneHeight(a) or a-- Absolute tune in number
+                local tune=type(a)=='string' and _getTuneHeight(a) or a -- Absolute tune in number
                 local playTune=tune+rnd(-2,2)
-                if playTune<=base then-- Too low notes
+                if playTune<=base then -- Too low notes
                     playTune=base+1
-                elseif playTune>top then-- Too high notes
+                elseif playTune>top then -- Too high notes
                     playTune=top
                 end
                 SFX.play(pack..playTune-base,vol,nil,tune-playTune)
@@ -124,12 +180,24 @@ function SFX.playSample(pack,...)-- vol-1, sampSet1, vol-2, sampSet2
         end
     end
 end
+
+---Play a SFX
+---@param name string
+---@param vol? number 0~1
+---@param pos? number -1~1
+---@param pitch? number +12 for an octave
 function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
     if vol<=0 then return end
 
-    local S=Sources[name]-- Source list
+    local S=srcMap[name] -- Source list
     if not S then return end
+    if type(S[1])=='string' then -- Do the lazy load
+        local path=tostring(S[1]) -- to avoid syntax checker error
+        local src=love.filesystem.getInfo(path) and FILE.isSafe(path) and love.audio.newSource(path,'static')
+        assert(src,"WTF why path data can be bad")
+        S[1]=src
+    end
 
     local n=1
     while S[n]:isPlaying() do
@@ -141,7 +209,7 @@ function SFX.play(name,vol,pos,pitch)
         end
     end
 
-    S=S[n]-- AU_SRC
+    S=S[n] -- AU_SRC
     if S:getChannelCount()==1 then
         if pos then
             pos=clamp(pos,-1,1)*stereo
@@ -154,13 +222,14 @@ function SFX.play(name,vol,pos,pitch)
     S:setPitch(pitch and 1.0594630943592953^pitch or 1)
     S:play()
 end
-function SFX.reset()
-    for _,L in next,Sources do
-        if type(L)=='table' then
-            for i=#L,1,-1 do
-                if not L[i]:isPlaying() then
-                    rem(L,i)
-                end
+
+---Remove references of stopped SFX sources
+function SFX.releaseFree()
+    for _,L in next,srcMap do
+        for i,src in next,L do
+            if not src:isPlaying() then
+                src:release()
+                rem(L,i)
             end
         end
     end
