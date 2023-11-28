@@ -314,9 +314,9 @@ local commands={} do
     -- System
     commands.crash={
         code=function() error("Manually triggered error from Zenitha Console") end,
-        description="Manually crash the game",
+        description="Manually crash the app",
         details={
-            "Manually crash the game",
+            "Manually crash the app",
             "",
             "Usage: crash",
         },
@@ -378,7 +378,7 @@ local commands={} do
         end,
         description="Display window info.",
         details={
-            "Display information about the game window.",
+            "Display information about the app window.",
             "",
             "Usage: scrinfo",
         },
@@ -525,14 +525,14 @@ local commands={} do
                 ins(WIDGET.active,button)
             else
                 log"Are you sure you want to reset everything?"
-                log"This will delete EVERYTHING in your saved game data, just like factory reset."
+                log"This will delete EVERYTHING in your saved app data, just like factory reset."
                 log"This cannot be undone."
                 log"Type: resetall sure"
             end
         end,
         description="Reset everything and delete all saved data.",
         details={
-            "Hard resets the game and delete everything in the save directory, like a fresh install.",
+            "Hard resets the app and delete everything in the save directory, like a fresh install.",
             "There WILL be a confirmation for this.",
             "",
             "Usage: resetall",
