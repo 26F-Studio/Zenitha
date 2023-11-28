@@ -16,7 +16,7 @@ local sumode=false
 local commands={} do
     --[[ format of table 'commands':
         key: the command name
-        value: a table containing the following two elements:
+        value: a table containing the following three elements:
             code: code to run when call
             description: a string that shows when user types 'help'.
             details: an array of strings containing documents, shows when user types 'help [command]'.
@@ -133,7 +133,7 @@ local commands={} do
             end,
             description="List all files & directories",
             details={
-                "List all files & directories in saving directory",
+                "List all files & directories in save directory",
                 "",
                 "Usage: tree",
             },
@@ -214,7 +214,8 @@ local commands={} do
             end,
             description="Delete a file or directory",
             details={
-                "Attempt to delete a file or directory (in saving directory)",
+                "Attempt to delete a file or directory (in save directory).",
+                "Include the -s flag to recursively delete a directory (i.e. delete all its contents too)."
                 "",
                 "Aliases: del rm",
                 "",
@@ -312,10 +313,10 @@ local commands={} do
 
     -- System
     commands.crash={
-        code=function() error("ERROR") end,
-        description="Manually crash the game",
+        code=function() error("Manually triggered error from Zenitha Console") end,
+        description="Manually crash the app",
         details={
-            "Manually crash the game",
+            "Manually crash the app",
             "",
             "Usage: crash",
         },
@@ -334,7 +335,7 @@ local commands={} do
         details={
             "Show a message on the up-left corner",
             "",
-            "Usage: msg <check|info|warn|error>",
+            "Usage: mes <check|info|warn|error|other>",
         },
     }
     commands.log={
@@ -377,7 +378,7 @@ local commands={} do
         end,
         description="Display window info.",
         details={
-            "Display information about the game window.",
+            "Display information about the app window.",
             "",
             "Usage: scrinfo",
         },
@@ -524,12 +525,18 @@ local commands={} do
                 ins(WIDGET.active,button)
             else
                 log"Are you sure you want to reset everything?"
-                log"This will delete EVERYTHING in your saved game data, just like factory reset."
+                log"This will delete EVERYTHING in your saved app data, just like factory reset."
                 log"This cannot be undone."
                 log"Type: resetall sure"
             end
         end,
         description="Reset everything and delete all saved data.",
+        details={
+            "Hard resets the app and delete everything in the save directory, like a fresh install.",
+            "There WILL be a confirmation for this.",
+            "",
+            "Usage: resetall",
+        },
     }
     commands.su={
         code=function(code)
