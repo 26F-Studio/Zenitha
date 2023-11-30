@@ -215,7 +215,7 @@ local commands={} do
             description="Delete a file or directory",
             details={
                 "Attempt to delete a file or directory (in save directory).",
-                "Include the -s flag to recursively delete a directory (i.e. delete all its contents too)."
+                "Include the -s flag to recursively delete a directory (i.e. delete all its contents too).",
                 "",
                 "Aliases: del rm",
                 "",

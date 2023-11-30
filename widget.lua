@@ -2341,11 +2341,16 @@ function WIDGET.new(args)
     return w
 end
 
----@param protocol table
----@return nil
----Override default option of widget
-function WIDGET.setDefaultOption(protocol)
-    TABLE.coverR(protocol,Widgets)
+---Adjust default widget option
+---@param opt table
+function WIDGET.setDefaultOption(opt)
+    for t,data in next,opt do
+        assert(Widgets[t],"Widget type '"..tostring(t).."' does not exist")
+        for k,v in next,data do
+            assert(Widgets[t][k]~=nil,"Widget type '"..tostring(t).."' doesn't have option "..tostring(k))
+            Widgets[t][k]=v
+        end
+    end
 end
 
 --------------------------------------------------------------

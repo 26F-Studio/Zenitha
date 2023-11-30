@@ -76,11 +76,13 @@ function LANG.setTextFuncSrc(newSrc)
     assert(type(newSrc)=='table','LANG.setTextFuncSrc(newPool): newPool must be table')
     textSrc=newSrc
 end
----Set the language table from the set of added language tables
+
+---Shortcut of LANG.get+LANG.setTextFuncSrc, return the language table like LANG.get
 ---@param name string
+---@return table
 function LANG.set(name)
-    if not langPaths[name] then MSG.new('error',"No/wrong language: "..name) return end
-    LANG.setTextFuncSrc(langLib[name])
+    LANG.setTextFuncSrc(LANG.get(name))
+    return textSrc
 end
 
 local textFuncs=setmetatable({},{
