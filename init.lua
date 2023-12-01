@@ -753,11 +753,11 @@ function love.run()
 
         -- EVENT
         PUMP()
-        for N,a,b,c,d,e in POLL() do
+        for N,A,B,C,D,E in POLL() do
             if love[N] then
-                love[N](a,b,c,d,e)
+                love[N](A,B,C,D,E)
             elseif N=='quit' then
-                return a or true
+                return A or true
             end
         end
 
