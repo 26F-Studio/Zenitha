@@ -480,14 +480,14 @@ do -- function TABLE.dumpDeflate(t,depth)
                 end
             elseif T=='string' then
                 if find(k,'[^0-9a-zA-Z_]') then
-                    k='[\"'..gsub(k,'"','\\"')..'\"]='
+                    k='["'..gsub(k,'"','\\"')..'"]='
                 else
                     k=k..'='
                 end
             elseif T=='boolean' then
                 k='['..k..']='
             else
-                k='[\"*'..tostring(k)..'\"]='
+                k='["*'..tostring(k)..'"]='
             end
 
             -- Value part
@@ -495,9 +495,9 @@ do -- function TABLE.dumpDeflate(t,depth)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
             elseif T=='string' then
-                v='\"'..gsub(v,'"','\\"')..'\"'
+                v='"'..gsub(v,'"','\\"')..'"'
             elseif T=='table' then
-                if t>lim then v=tostring(v) else v=dump(v,t+1,lim) end
+                if t>=lim then v=tostring(v) else v=dump(v,t+1,lim) end
             else
                 v='*'..tostring(v)
             end
@@ -507,7 +507,7 @@ do -- function TABLE.dumpDeflate(t,depth)
     end
     ---Dump a simple lua table (no whitespaces)
     ---@param t table
-    ---@param depth? number how many layers will enter, default to inf
+    ---@param depth? number how many layers will be dumped, default to inf
     ---@return string
     function TABLE.dumpDeflate(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
@@ -546,14 +546,14 @@ do -- function TABLE.dump(t,depth)
                 end
             elseif T=='string' then
                 if find(k,'[^0-9a-zA-Z_]') then
-                    k='[\"'..gsub(k,'"','\\"')..'\"]='
+                    k='["'..gsub(k,'"','\\"')..'"]='
                 else
                     k=k..'='
                 end
             elseif T=='boolean' then
                 k='['..k..']='
             else
-                k='["*'..tostring(k)..'\"]='
+                k='["*'..tostring(k)..'"]='
             end
 
             -- Value part
@@ -561,9 +561,9 @@ do -- function TABLE.dump(t,depth)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
             elseif T=='string' then
-                v='\"'..gsub(v,'"','\\"')..'\"'
+                v='"'..gsub(v,'"','\\"')..'"'
             elseif T=='table' then
-                if t>lim then v=tostring(v) else v=dump(v,t+1,lim) end
+                if t>=lim then v=tostring(v) else v=dump(v,t+1,lim) end
             else
                 v='*'..tostring(v)
             end
@@ -573,7 +573,7 @@ do -- function TABLE.dump(t,depth)
     end
     ---Dump a simple lua table
     ---@param t table
-    ---@param depth? number how many layers will enter, default to inf
+    ---@param depth? number how many layers will be dumped, default to inf
     ---@return string
     function TABLE.dump(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
