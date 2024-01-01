@@ -97,7 +97,7 @@ function STRING.unshift(str)
     return unshiftMap[str] or lower(str)
 end
 
-local upperData,lowerData={},{} -- Data is filled later in this file
+local upperData,lowerData,diaData -- Data is filled later in this file
 
 ---string.upper with utf8 support, warning: low performance
 ---@param str string
@@ -116,6 +116,15 @@ function STRING.lowerUTF8(str)
     for i=1,#lowerData do
         local pair=lowerData[i]
         str=gsub(str,pair[1],pair[2])
+    end
+    return str
+end
+---remove diacritics, warning: low performance
+---@param str string
+---@return string
+function STRING.remDiacritics(str)
+    for _,pair in next,diaData do
+        str=str:gsub(pair[1],pair[2])
     end
     return str
 end
@@ -493,23 +502,33 @@ function STRING.unpackTable(str)
     return JSON.decode(STRING.unpackText(str))
 end
 
-repeat
-    local f=io.open('Zenitha/upcaser.txt','r')
-    if not f then break end
-    local upperFileData=STRING.split(gsub(f:read('a'),'\n',','),',')
-    f:close()
-    for i=1,#upperFileData do
-        local pair=STRING.split(upperFileData[i],'=')
-        upperData[i]=pair
+do
+    local split=STRING.split
+    local function parseFile(fname)
+        local d
+        if love and love.filesystem and type(love.filesystem.read)=='function' then
+            d=love.filesystem.read(fname)
+        else
+            local f=io.open(fname,'r')
+            if f then
+                d=f:read('a')
+                f:close()
+            end
+        end
+
+        if not d then
+            print("ERROR: Failed to read the data from "..fname)
+            return {}
+        end
+        d=split(gsub(d,'\n',','),',')
+        for i=1,#d do
+            d[i]=split(d[i],'=')
+        end
+        return d
     end
-    f=io.open('Zenitha/lowcaser.txt','r')
-    if not f then break end
-    local lowerFileData=STRING.split(gsub(f:read('a'),'\n',','),',')
-    f:close()
-    for i=1,#lowerFileData do
-        local pair=STRING.split(lowerFileData[i],'=')
-        lowerData[i]=pair
-    end
-until true
+    upperData=parseFile('Zframework/upcaser.txt')
+    lowerData=parseFile('Zframework/lowcaser.txt')
+    diaData=parseFile('Zframework/diacritics.txt')
+end
 
 return STRING
