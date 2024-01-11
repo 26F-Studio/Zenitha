@@ -526,9 +526,9 @@ do
         end
         return d
     end
-    upperData=parseFile('Zframework/upcaser.txt')
-    lowerData=parseFile('Zframework/lowcaser.txt')
-    diaData=parseFile('Zframework/diacritics.txt')
+    upperData=parseFile('Zenitha/upcaser.txt')
+    lowerData=parseFile('Zenitha/lowcaser.txt')
+    diaData=parseFile('Zenitha/diacritics.txt')
 end
 
 return STRING
