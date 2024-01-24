@@ -42,8 +42,8 @@ local mainLoopStarted=false
 local autoGCcount=0
 local devMode=false ---@type false|1|2|3|4
 local mx,my,mouseShow,cursorSpd=640,360,false,0
-local lastClicks={} ---@type table<any,{x:number,y:number}>
-local jsState={} ---@type table<number,{_id:number, _jsObj:love.Joystick, leftx:number, lefty:number, rightx:number, righty:number, triggerleft:number, triggerright:number}>
+local lastClicks={} ---@type table<any, {x:number, y:number}>
+local jsState={} ---@type table<number, {_id:number, _jsObj:love.Joystick, leftx:number, lefty:number, rightx:number, righty:number, triggerleft:number, triggerright:number}>
 local errData={} ---@type Zenitha.exception[]
 local bigCanvases=setmetatable({},{
     __index=function(self,k)
@@ -926,7 +926,7 @@ function Zenitha.getJsState() return jsState end
 
 ---Get the error info
 ---@param i number|'#' Index of error info, '#' for the last one
----@return Zenitha.exception|table<number,Zenitha.exception>
+---@return Zenitha.exception|table<number, Zenitha.exception>
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]
