@@ -2,11 +2,33 @@ local audio=love.audio
 local effectsSupported=audio.isEffectsSupported()
 local ins=table.insert
 
+---@class Zenitha.bgmObj
+---@field name string
+---@field path string
+---@field source love.Source|false
+---@field vol number
+---@field volChanging boolean
+---@field pitch number
+---@field pitchChanging boolean
+---@field lowgain number
+---@field lowgainChanging boolean
+---@field highgain number
+---@field highgainChanging boolean
+
+---@type string[]
 local nameList={}
-local srcLib={}     -- Stored bgm objects: {name='foo', source=bar, ...}, more info at function _addFile()
+
+---@type string[]
 local lastLoadNames={}
-local nowPlay={}    -- Playing bgm objects
-local lastPlay=NONE -- Directly stored last played bgm name(s)
+
+---@type string[]
+local lastPlay=NONE
+
+---@type table<string, Zenitha.bgmObj>
+local srcLib={}
+
+---@type Zenitha.bgmObj[]
+local nowPlay={}
 
 ---@type false|string|string[]
 local defaultBGM=false
@@ -91,7 +113,8 @@ local function _updateSources()
     while #lastLoadNames>maxLoadedCount and n>0 do
         local name=lastLoadNames[n]
         if srcLib[name].source and not srcLib[name].source:isPlaying() then
-            srcLib[name].source=srcLib[name].source:release() and nil
+            srcLib[name].source:release()
+            srcLib[name].source=false
             _clearTask(srcLib[name],'any')
         end
         n=n-1
@@ -243,6 +266,7 @@ function BGM.play(bgms,args)
 
                 _clearTask(obj)
 
+                ---@type love.Source
                 local source=obj.source
                 source:setLooping(not STRING.sArg(args,'-noloop'))
                 source:setPitch(1)
@@ -292,6 +316,7 @@ function BGM.stop(time)
 end
 
 ---Set (current playing) BGM(s) states
+---@param bgms 'all'|string|string[]
 ---@param mode 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'
 ---@param ... any
 function BGM.set(bgms,mode,...)
@@ -374,16 +399,19 @@ function BGM.set(bgms,mode,...)
 end
 
 ---Get (current playing) BGM(s) name list
+---@return string[]
 function BGM.getPlaying()
     return TABLE.shift(lastPlay)
 end
 
 ---Get if BGM playing now
+---@return boolean
 function BGM.isPlaying()
     return #nowPlay>0 and nowPlay[1].source:isPlaying()
 end
 
 ---Get time of BGM playing now
+---@return number
 function BGM.tell()
     if nowPlay[1] then
         local src=nowPlay[1].source
@@ -392,6 +420,7 @@ function BGM.tell()
 end
 
 ---Get duration of BGM playing now
+---@return number
 function BGM.getDuration()
     if nowPlay[1] then
         return nowPlay[1].source:getDuration()
