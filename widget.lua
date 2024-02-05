@@ -207,7 +207,12 @@ function Widgets.base:reset()
     self._image=false
     if self.image then
         if type(self.image)=='string' then
-            self._image=IMG[self.image] or PAPER
+            local path=STRING.split(self.image,'/')
+            local _img=IMG
+            repeat
+                _img=_img[rem(path,1)]
+            until not (path[1] and _img)
+            self._image=_img or PAPER
         else
             self._image=self.image
         end
@@ -312,7 +317,7 @@ Widgets.image=setmetatable({
 function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._text,self._x,self._y,self.ang,self.k)
+        alignDraw(self,self._image,self._x,self._y,self.ang,self.k)
     end
 end
 
@@ -2248,7 +2253,7 @@ end
 ---@field text? string|function
 ---@field fontSize? number
 ---@field fontType? string
----@field image? string|love.Drawable
+---@field image? string|love.Drawable Can use slash-path to read from IMG lib
 ---@field alignX? 'left'|'center'|'right'
 ---@field alignY? 'up'|'center'|'down'
 ---@field labelPos? 'left'|'right'|'up'|'down'
