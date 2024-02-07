@@ -84,7 +84,7 @@ local function _get(size,name)
 
     if not f then
         assert(type(size)=='number' and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
-        f=love.graphics.setNewFont(fontFiles[name],size,'normal',love.graphics.getDPIScale()*SCR.k*2)
+        f=love.graphics.newFont(fontFiles[name],size,'normal',love.graphics.getDPIScale()*SCR.k*2)
         local fallbackName=fallbackMap[name] or defaultFallBack and name~=defaultFallBack and defaultFallBack
         if fallbackName then
             f:setFallbacks(_get(size,fallbackName))
