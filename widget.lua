@@ -297,8 +297,8 @@ end
 
 
 ---@field w number|false
----@field h number|false
----@field keepAspectRatio boolean|true
+---@field h? number|false
+---@field keepAspectRatio? boolean|true
 ---@class Zenitha.widget.image: Zenitha.widget.base
 Widgets.image=setmetatable({
     type='image',
@@ -308,7 +308,6 @@ Widgets.image=setmetatable({
     image=false,
 
     _image=false,
-    _r=1, -- Aspect ratio
     _scaleW=1,_scaleH=1,
 
     buildArgs={
@@ -355,7 +354,6 @@ function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
         gc_push()
-            -- love.graphics.applyTransform(SCR.xOy)
             gc_translate(self._x,self._y)
             gc_scale(self._scaleW,self._scaleH)
             alignDraw(self,self._image,0,0,self.ang,self.k)
