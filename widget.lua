@@ -207,11 +207,15 @@ function Widgets.base:reset()
     self._image=false
     if self.image then
         if type(self.image)=='string' then
-            local path=STRING.split(self.image,'/')
-            local _img=IMG
-            repeat
-                _img=_img[rem(path,1)]
-            until not (path[1] and _img)
+            local success,_img=pcall(function()
+                local path=STRING.split(self.image,'/')
+                local _img=IMG
+                repeat
+                    _img=_img[rem(path,1)]
+                until not (path[1] and _img)
+                return _img
+            end)
+            if not success then _img=nil end
             self._image=_img or PAPER
         else
             self._image=self.image
@@ -292,19 +296,26 @@ function Widgets.text:draw()
 end
 
 
+---@field w number|false
+---@field h number|false
+---@field keepAspectRatio boolean|true
 ---@class Zenitha.widget.image: Zenitha.widget.base
 Widgets.image=setmetatable({
     type='image',
     ang=0,k=1,
+    keepAspectRatio=true,
 
     image=false,
 
     _image=false,
+    _r=1, -- Aspect ratio
+    _scaleW=1,_scaleH=1,
 
     buildArgs={
         'name',
         'pos',
-        'x','y',
+        'x','y','w','h',
+        'keepAspectRatio',
 
         'ang','k',
         'image',
@@ -314,10 +325,41 @@ Widgets.image=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
+function Widgets.image:reset()
+    Widgets.base.reset(self)
+
+    if self.keepAspectRatio then
+        assert(not (self.w and self.h), '[image].keepAspectRatio is on, only a positive integer must be passed to either [image].w or [image].h; but two positive numbers are passed to both parameters')
+    elseif not (self.w and self.h) then
+        self.w=self._image:getWidth()
+        self.h=self._image:getHeight()
+    else
+        assert(self.w and self.h,'[image].keepAspectRatio is off, [image].w and [image].h must be 2 positive integers, but only one of them is passed.')
+    end
+
+    if self.keepAspectRatio then
+        if self.w then
+            self._scaleW=self.w/self._image:getWidth()
+            self._scaleH=self._scaleW
+        else
+            self._scaleH=self.h/self._image:getHeight()
+            self._scaleW=self._scaleH
+        end
+    else
+        self._scaleW=self.w/self._image:getWidth()
+        self._scaleH=self.h/self._image:getHeight()
+    end
+
+end
 function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,self._x,self._y,self.ang,self.k)
+        gc_push()
+            -- love.graphics.applyTransform(SCR.xOy)
+            gc_translate(self._x,self._y)
+            gc_scale(self._scaleW,self._scaleH)
+            alignDraw(self,self._image,0,0,self.ang,self.k)
+        gc_pop()
     end
 end
 
