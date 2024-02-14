@@ -328,12 +328,12 @@ function Widgets.image:reset()
     Widgets.base.reset(self)
 
     if self.keepAspectRatio then
-        assert(not (self.w and self.h), '[image].keepAspectRatio is on, only a positive integer must be passed to either [image].w or [image].h; but two positive numbers are passed to both parameters')
+        assert(not (self.w and self.h), '[image].keepAspectRatio is on, only a positive integer must be passed to either [image].w or [image].h; but two numbers are passed to both parameters!')
     elseif not (self.w and self.h) then
         self.w=self._image:getWidth()
         self.h=self._image:getHeight()
     else
-        assert(self.w and self.h,'[image].keepAspectRatio is off, [image].w and [image].h must be 2 positive integers, but only one of them is passed.')
+        assert(self.w and self.h,'[image].keepAspectRatio is off, [image].w and [image].h must be 2 integers, but only one of them is passed.')
     end
 
     if self.keepAspectRatio then
