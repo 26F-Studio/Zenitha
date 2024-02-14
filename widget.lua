@@ -352,12 +352,10 @@ function Widgets.image:reset()
 end
 function Widgets.image:draw()
     if self._image then
-        gc_setColor(1,1,1)
-        gc_push()
-            gc_translate(self._x,self._y)
-            gc_scale(self._scaleW,self._scaleH)
-            alignDraw(self,self._image,0,0,self.ang,self.k)
-        gc_pop()
+        gc_setColor(1,1,1,1)
+        gc_translate(self._x,self._y)
+        gc_scale(self._scaleW,self._scaleH)
+        alignDraw(self,self._image,0,0,self.ang,self.k)
     end
 end
 
