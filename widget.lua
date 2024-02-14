@@ -148,32 +148,32 @@ function Widgets.base:getInfo()
     return str
 end
 function Widgets.base:reset()
-    assert(not self.name or type(self.name)=='string','[widget].name must be string')
+    assert(not self.name or type(self.name)=='string',"[widget].name need string")
 
-    assert(type(self.x)=='number','[widget].x must be number')
-    assert(type(self.y)=='number','[widget].y must be number')
+    assert(type(self.x)=='number',"[widget].x need number")
+    assert(type(self.y)=='number',"[widget].y need number")
     if type(self.color)=='string' then self.color=COLOR[self.color] end
-    assert(type(self.color)=='table','[widget].color must be table')
+    assert(type(self.color)=='table',"[widget].color need table")
     if type(self.textColor)=='string' then self.textColor=COLOR[self.textColor] end
-    assert(type(self.textColor)=='table','[widget].textColor must be table')
+    assert(type(self.textColor)=='table',"[widget].textColor need table")
     if type(self.fillColor)=='string' then self.fillColor=COLOR[self.fillColor] end
-    assert(type(self.fillColor)=='table','[widget].fillColor must be table')
+    assert(type(self.fillColor)=='table',"[widget].fillColor need table")
     if type(self.frameColor)=='string' then self.frameColor=COLOR[self.frameColor] end
-    assert(type(self.frameColor)=='table','[widget].frameColor must be table')
+    assert(type(self.frameColor)=='table',"[widget].frameColor need table")
     if type(self.activeColor)=='string' then self.activeColor=COLOR[self.activeColor] end
-    assert(type(self.activeColor)=='table','[widget].activeColor must be table')
+    assert(type(self.activeColor)=='table',"[widget].activeColor need table")
     if type(self.idleColor)=='string' then self.idleColor=COLOR[self.idleColor] end
-    assert(type(self.idleColor)=='table','[widget].idleColor must be table')
+    assert(type(self.idleColor)=='table',"[widget].idleColor need table")
 
-    assert(type(self.lineWidth)=='number','[widget].lineWidth must be number')
-    assert(type(self.cornerR)=='number','[widget].cornerR must be number')
+    assert(type(self.lineWidth)=='number',"[widget].lineWidth need number")
+    assert(type(self.cornerR)=='number',"[widget].cornerR need number")
 
     if self.pos then
         assert(
             type(self.pos)=='table' and
             (type(self.pos[1])=='number' or self.pos[1]==false) and
             (type(self.pos[2])=='number' or self.pos[2]==false),
-            "[widget].pos[1] and [2] must be number or false}"
+            "[widget].pos[1] and [2] need number|false}"
         )
         self._x=self.x+(self.pos[1] and self.pos[1]*(SCR.w0+2*SCR.x/SCR.k)-SCR.x/SCR.k or 0)
         self._y=self.y+(self.pos[2] and self.pos[2]*(SCR.h0+2*SCR.y/SCR.k)-SCR.y/SCR.k or 0)
@@ -182,23 +182,21 @@ function Widgets.base:reset()
         self._y=self.y
     end
 
-    assert(type(self.fontSize)=='number','[widget].fontSize must be number')
-    assert(type(self.fontType)=='string' or self.fontType==false,'[widget].fontType must be string')
-    assert(type(self.widthLimit)=='number','[widget].widthLimit must be number')
-    assert(not self.visibleFunc or type(self.visibleFunc)=='function','[widget].visibleFunc must be function')
-    assert(not self.visibleTick or type(self.visibleTick)=='function','[widget].visibleTick must be function')
+    assert(type(self.fontSize)=='number',"[widget].fontSize need number")
+    assert(type(self.fontType)=='string' or self.fontType==false,"[widget].fontType need string")
+    assert(type(self.widthLimit)=='number',"[widget].widthLimit need number")
+    assert(not self.visibleFunc or type(self.visibleFunc)=='function',"[widget].visibleFunc need function")
+    assert(not self.visibleTick or type(self.visibleTick)=='function',"[widget].visibleTick need function")
 
-    assert(not self.sound_press or type(self.sound_press)=='string','[widget].sound_press must be string')
-    assert(not self.sound_hover or type(self.sound_hover)=='string','[widget].sound_hover must be string')
+    assert(not self.sound_press or type(self.sound_press)=='string',"[widget].sound_press need string")
+    assert(not self.sound_hover or type(self.sound_hover)=='string',"[widget].sound_hover need string")
 
-    self._text=self.text or self.name and ('['..self.name..']')
+    self._text=self.text or self.name and ("['..self.name..']")
     if self._text then
         if type(self._text)=='function' then
             self._text=self._text()
-            assert(type(self._text)=='string','function text must return a string')
-        else
-            assert(type(self._text)=='string','[widget].text must be string or function return a string')
         end
+        assert(type(self._text)=='string',"[widget].text need string|fun():string")
         self._text=GC.newText(getFont(self.fontSize,self.fontType),self._text)
     else
         self._text=PAPER
@@ -362,9 +360,9 @@ Widgets.button=setmetatable({
 function Widgets.button:reset()
     Widgets.base.reset(self)
     if not self.h then self.h=self.w end
-    assert(self.w and type(self.w)=='number','[button].w must be number')
-    assert(self.h and type(self.h)=='number','[button].h must be number')
-    assert(not self.sound_trigger or type(self.sound_trigger)=='string','[button].sound_trigger must be string')
+    assert(self.w and type(self.w)=='number',"[button].w need number")
+    assert(self.h and type(self.h)=='number',"[button].h need number")
+    assert(not self.sound_trigger or type(self.sound_trigger)=='string',"[button].sound_trigger need string")
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
@@ -531,9 +529,9 @@ Widgets.checkBox=setmetatable({
 function Widgets.checkBox:reset()
     Widgets.base.reset(self)
 
-    assert(type(self.disp)=='function','[checkBox].disp must be function')
-    assert(not self.sound_on or type(self.sound_on)=='string','[checkBox].sound_on must be string')
-    assert(not self.sound_off or type(self.sound_off)=='string','[checkBox].sound_off must be string')
+    assert(type(self.disp)=='function',"[checkBox].disp need function")
+    assert(not self.sound_on or type(self.sound_on)=='string',"[checkBox].sound_on need string")
+    assert(not self.sound_off or type(self.sound_off)=='string',"[checkBox].sound_off need string")
 
     if self.labelPos=='left' then
         self.alignX='right'
@@ -544,7 +542,7 @@ function Widgets.checkBox:reset()
     elseif self.labelPos=='down' then
         self.alignY='up'
     else
-        error("[checkBox].labelPos must be 'left', 'right', 'up', or 'down'")
+        error("[checkBox].labelPos need 'left', 'right', 'up', or 'down'")
     end
 end
 function Widgets.checkBox:isAbove(x,y)
@@ -651,7 +649,7 @@ Widgets.switch=setmetatable({
 function Widgets.switch:reset()
     Widgets.base.reset(self)
 
-    assert(type(self.disp)=='function','[switch].disp must be function')
+    assert(type(self.disp)=='function',"[switch].disp need function")
 
     self._slideTime=0
     if self.labelPos=='left' then
@@ -663,7 +661,7 @@ function Widgets.switch:reset()
     elseif self.labelPos=='down' then
         self.alignY='up'
     else
-        error("[switch].labelPos must be 'left', 'right', 'up', or 'down'")
+        error("[switch].labelPos need 'left', 'right', 'up', or 'down'")
     end
 end
 function Widgets.switch:isAbove(x,y)
@@ -808,18 +806,18 @@ local sliderShowFunc={
 function Widgets.slider:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[slider].w must be number')
-    assert(type(self.numFontSize)=='number','[widget].numFontSize must be number')
-    assert(type(self.numFontType)=='string' or self.numFontType==false,'[widget].numFontType must be string')
-    assert(type(self.disp)=='function','[slider].disp must be function')
+    assert(self.w and type(self.w)=='number',"[slider].w need number")
+    assert(type(self.numFontSize)=='number',"[widget].numFontSize need number")
+    assert(type(self.numFontType)=='string' or self.numFontType==false,"[widget].numFontType need string")
+    assert(type(self.disp)=='function',"[slider].disp need function")
     assert(
         type(self.axis)=='table' and (#self.axis==2 or #self.axis==3) and
         type(self.axis[1])=='number' and
         type(self.axis[2])=='number' and
         (not self.axis[3] or type(self.axis[3])=='number'),
-        "[slider].axis must be {low,high} or {low,high,unit}"
+        "[slider].axis need {low,high} or {low,high,unit}"
     )
-    assert(self.smooth==nil or type(self.smooth)=='boolean','[slider].smooth must be boolean')
+    assert(self.smooth==nil or type(self.smooth)=='boolean',"[slider].smooth need boolean")
 
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -838,7 +836,7 @@ function Widgets.slider:reset()
         if type(self.valueShow)=='function' then
             self._showFunc=self.valueShow
         elseif type(self.valueShow)=='string' then
-            self._showFunc=assert(sliderShowFunc[self.valueShow],"[slider].valueShow must be function, or 'int', 'float', or 'percent'")
+            self._showFunc=assert(sliderShowFunc[self.valueShow],"[slider].valueShow need function, or 'int', 'float', or 'percent'")
         end
     elseif self.valueShow==false then -- Show nothing if false
         self._showFunc=sliderShowFunc.null
@@ -858,7 +856,7 @@ function Widgets.slider:reset()
         self.alignY='up'
         self.labelDistance=max(self.labelDistance,20)
     else
-        error("[slider].labelPos must be 'left', 'right', or 'down'")
+        error("[slider].labelPos need 'left', 'right', or 'down'")
     end
 end
 function Widgets.slider:isAbove(x,y)
@@ -1018,15 +1016,15 @@ Widgets.slider_fill=setmetatable({
 function Widgets.slider_fill:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[slider_fill].w must be number')
-    assert(self.h and type(self.h)=='number','[slider_fill].h must be number')
-    assert(type(self.disp)=='function','[slider_fill].disp must be function')
+    assert(self.w and type(self.w)=='number',"[slider_fill].w need number")
+    assert(self.h and type(self.h)=='number',"[slider_fill].h need number")
+    assert(type(self.disp)=='function',"[slider_fill].disp need function")
 
     assert(
         type(self.axis)=='table' and #self.axis==2 and
         type(self.axis[1])=='number' and
         type(self.axis[2])=='number',
-        "[slider_fill].axis must be {number,number}"
+        "[slider_fill].axis need {number,number}"
     )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -1042,7 +1040,7 @@ function Widgets.slider_fill:reset()
         self.alignY='up'
         self.labelDistance=max(self.labelDistance,20)
     else
-        error("[slider_fill].labelPos must be 'left','right' or 'down'")
+        error("[slider_fill].labelPos need 'left','right' or 'down'")
     end
 end
 function Widgets.slider_fill:isAbove(x,y)
@@ -1143,15 +1141,15 @@ Widgets.slider_progress=setmetatable({
 function Widgets.slider_progress:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[slider_progress].w must be number')
-    assert(self.h and type(self.h)=='number','[slider_progress].h must be number')
-    assert(type(self.disp)=='function','[slider_progress].disp must be function')
+    assert(self.w and type(self.w)=='number',"[slider_progress].w need number")
+    assert(self.h and type(self.h)=='number',"[slider_progress].h need number")
+    assert(type(self.disp)=='function',"[slider_progress].disp need function")
 
     assert(
         type(self.axis)=='table' and #self.axis==2 and
         type(self.axis[1])=='number' and
         type(self.axis[2])=='number',
-        "[slider_progress].axis must be {number,number}"
+        "[slider_progress].axis need {number,number}"
     )
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -1167,7 +1165,7 @@ function Widgets.slider_progress:reset()
         self.alignY='up'
         self.labelDistance=max(self.labelDistance,20)
     else
-        error("[slider_progress].labelPos must be 'left','right' or 'down'")
+        error("[slider_progress].labelPos need 'left','right' or 'down'")
     end
 end
 function Widgets.slider_progress:isAbove(x,y)
@@ -1251,10 +1249,10 @@ Widgets.selector=setmetatable({
 function Widgets.selector:reset()
     Widgets.base.reset(self)
 
-    assert(self.w and type(self.w)=='number','[selector].w must be number')
-    assert(type(self.list)=='table','[selector].list must be table')
-    assert(type(self.disp)=='function','[selector].disp must be function')
-    assert(type(self.show)=='function','[selector].show must be function')
+    assert(self.w and type(self.w)=='number',"[selector].w need number")
+    assert(type(self.list)=='table',"[selector].list need table")
+    assert(type(self.disp)=='function',"[selector].disp need function")
+    assert(type(self.show)=='function',"[selector].show need function")
 
     if self.labelPos=='left' then
         self.alignX='right'
@@ -1265,7 +1263,7 @@ function Widgets.selector:reset()
     elseif self.labelPos=='up' then
         self.alignY='down'
     else
-        error("[selector].labelPos must be 'left','right','down' or 'up'")
+        error("[selector].labelPos need 'left','right','down' or 'up'")
     end
 
     local V=self.disp()
@@ -1426,12 +1424,12 @@ Widgets.inputBox=setmetatable({
 },{__index=Widgets.base,__metatable=true})
 function Widgets.inputBox:reset()
     Widgets.base.reset(self)
-    assert(self.w and type(self.w)=='number','[inputBox].w must be number')
-    assert(self.h and type(self.h)=='number','[inputBox].h must be number')
-    assert(not self.sound_input or type(self.sound_input)=='string','[inputBox].sound_input must be string')
-    assert(not self.sound_bksp or type(self.sound_bksp)=='string','[inputBox].sound_bksp must be string')
-    assert(not self.sound_clear or type(self.sound_clear)=='string','[inputBox].sound_clear must be string')
-    assert(not self.sound_fail or type(self.sound_fail)=='string','[inputBox].sound_fail must be string')
+    assert(self.w and type(self.w)=='number',"[inputBox].w need number")
+    assert(self.h and type(self.h)=='number',"[inputBox].h need number")
+    assert(not self.sound_input or type(self.sound_input)=='string',"[inputBox].sound_input need string")
+    assert(not self.sound_bksp or type(self.sound_bksp)=='string',"[inputBox].sound_bksp need string")
+    assert(not self.sound_clear or type(self.sound_clear)=='string',"[inputBox].sound_clear need string")
+    assert(not self.sound_fail or type(self.sound_fail)=='string',"[inputBox].sound_fail need string")
     if self.labelPos=='left' then
         self.alignX,self.alignY='right','center'
     elseif self.labelPos=='right' then
@@ -1441,7 +1439,7 @@ function Widgets.inputBox:reset()
     elseif self.labelPos=='down' then
         self.alignX,self.alignY='center','up'
     else
-        error("[inputBox].labelPos must be 'left', 'right', 'up', or 'down'")
+        error("[inputBox].labelPos need 'left', 'right', 'up', or 'down'")
     end
 end
 function Widgets.inputBox:_cutTooLong()
@@ -1458,13 +1456,13 @@ function Widgets.inputBox:getText()
 end
 function Widgets.inputBox:setText(str)
     if not str then str="" end
-    assert(type(str)=='string',"Arg must be string")
+    assert(type(str)=='string',"Arg need string")
     self._value=str
     self:_cutTooLong()
 end
 function Widgets.inputBox:addText(str)
     if not str then str="" end
-    assert(type(str)=='string',"Arg must be string")
+    assert(type(str)=='string',"Arg need string")
     self._value=self._value..str
     self:_cutTooLong()
 end
@@ -1609,17 +1607,17 @@ Widgets.textBox=setmetatable({
 function Widgets.textBox:reset()
     Widgets.base.reset(self)
     if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
-    assert(type(self.scrollBarColor)=='table','[textBox].scrollBarColor must be table')
-    assert(self.w and type(self.w)=='number','[textBox].w must be number')
-    assert(self.h and type(self.h)=='number','[textBox].h must be number')
-    assert(not self.sound_clear or type(self.sound_clear)=='string','[textBox].sound_clear must be string')
+    assert(type(self.scrollBarColor)=='table',"[textBox].scrollBarColor need table")
+    assert(self.w and type(self.w)=='number',"[textBox].w need number")
+    assert(self.h and type(self.h)=='number',"[textBox].h need number")
+    assert(not self.sound_clear or type(self.sound_clear)=='string',"[textBox].sound_clear need string")
     for _,v in next,{'activeColor','idleColor'} do
         if type(self[v])=='string' then self[v]=COLOR[self[v]] end
-        assert(type(self[v])=='table','[textBox].'..v..' must be table')
+        assertf(type(self[v])=='table',"[textBox].%s need table",v)
     end
 
-    assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos must be 'left' or 'right'")
-    assert(type(self.yOffset)=='number',"[textBox].yOffset must be number")
+    assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos need 'left' or 'right'")
+    assert(type(self.yOffset)=='number',"[textBox].yOffset need number")
 
     if not self._texts then self._texts={} end
     self._capacity=ceil(self.h/self.lineHeight)
@@ -1630,7 +1628,7 @@ function Widgets.textBox:replaceTexts(newList)
     self._scrollPos=0
 end
 function Widgets.textBox:setTexts(t)
-    assert(type(t)=='table',"Arg must be table")
+    assert(type(t)=='table',"Arg need table")
     TABLE.clear(self._texts)
     TABLE.connect(self._texts,t)
     self._scrollPos=0
@@ -1810,20 +1808,20 @@ Widgets.listBox=setmetatable({
 function Widgets.listBox:reset()
     Widgets.base.reset(self)
     if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
-    assert(type(self.scrollBarColor)=='table','[listBox].scrollBarColor must be table')
-    assert(not self.sound_click or type(self.sound_click)=='string','[listBox].sound_click must be string')
-    assert(not self.sound_select or type(self.sound_select)=='string','[listBox].sound_select must be string')
-    assert(self.w and type(self.w)=='number','[listBox].w must be number')
-    assert(self.h and type(self.h)=='number','[listBox].h must be number')
+    assert(type(self.scrollBarColor)=='table',"[listBox].scrollBarColor need table")
+    assert(not self.sound_click or type(self.sound_click)=='string',"[listBox].sound_click need string")
+    assert(not self.sound_select or type(self.sound_select)=='string',"[listBox].sound_select need string")
+    assert(self.w and type(self.w)=='number',"[listBox].w need number")
+    assert(self.h and type(self.h)=='number',"[listBox].h need number")
     for _,v in next,{'activeColor','idleColor'} do
         if type(self[v])=='string' then self[v]=COLOR[self[v]] end
-        assert(type(self[v])=='table','[listBox].'..v..' must be table')
+        assert(type(self[v])=='table',"[listBox].%s need table",v)
     end
-    assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[listBox].scrollBarPos must be 'left' or 'right'")
+    assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[listBox].scrollBarPos need 'left' or 'right'")
 
-    assert(type(self.drawFunc)=='function',"[listBox].drawFunc must be function")
-    assert(type(self.releaseDist)=='number' and self.releaseDist>=0,"[listBox].drawFunc must >=0")
-    assert(self.stencilMode=='total' or self.stencilMode=='single' or self.stencilMode==false,"[listBox].stencilMode must be 'total' or 'single' or false")
+    assert(type(self.drawFunc)=='function',"[listBox].drawFunc need function")
+    assert(type(self.releaseDist)=='number' and self.releaseDist>=0,"[listBox].drawFunc need >=0")
+    assert(self.stencilMode=='total' or self.stencilMode=='single' or self.stencilMode==false,"[listBox].stencilMode need 'total' or 'single' or false")
     if not self._list then self._list={} end
     self._capacity=ceil(self.h/self.lineHeight)
     self._scrollPos1=-2*self.h
@@ -1833,7 +1831,7 @@ function Widgets.listBox:clear()
     self._scrollPos=0
 end
 function Widgets.listBox:setList(t)
-    assert(type(t)=='table',"Arg must be table")
+    assert(type(t)=='table',"Arg need table")
     self._list=t
     self._selected=1
     self._scrollPos=0
@@ -2331,14 +2329,14 @@ function WIDGET.new(args)
     args.type=nil
 
     local W=Widgets[t]
-    assert(W,'Widget type '..tostring(t)..' does not exist')
+    assert(W,("Widget type '%s' does not exist"):format(t))
     local w=setmetatable({},{__index=W,__metatable=true})
 
     for k,v in next,args do
         if TABLE.find(W.buildArgs,k) then
             w[k]=v
         else
-            error("Illegal argument "..k.." for widget "..t)
+            errorf("WIDGET.new(args): Illegal argument %s for widget %s",k,t)
         end
     end
     w:reset()
@@ -2350,9 +2348,9 @@ end
 ---@param opt table
 function WIDGET.setDefaultOption(opt)
     for t,data in next,opt do
-        assert(Widgets[t],"Widget type '"..tostring(t).."' does not exist")
+        assertf(Widgets[t],"Widget type '%s' does not exist",t)
         for k,v in next,data do
-            assert(Widgets[t][k]~=nil,"Widget type '"..tostring(t).."' doesn't have option "..tostring(k))
+            assertf(Widgets[t][k]~=nil,"Widget type '%s' doesn't have option %s",t,k)
             Widgets[t][k]=v
         end
     end
@@ -2417,10 +2415,10 @@ end
 ---@return Zenitha.widget.base
 function WIDGET.newClass(name,parent)
     if not parent then parent='base' end
-    assert(type(name)=='string',"Widget name must be string")
-    assert(type(parent)=='string',"Widget name must be string")
-    assert(not Widgets[name],"Widget class "..name.." already exists")
-    assert(Widgets[parent],"Parent widget class "..parent.." does not exist")
+    assertf(type(name)=='string',"Widget name need string")
+    assertf(type(parent)=='string',"Widget name need string")
+    assertf(not Widgets[name],"Widget class %s already exists",name)
+    assertf(Widgets[parent],"Parent widget class %s does not exist",parent)
     Widgets[name]=setmetatable({type=name},{__index=Widgets[parent],__metatable=true})
     return Widgets[name]
 end

@@ -29,12 +29,12 @@ function BG.unlock() BG.locked=false end
 ---@param name string
 ---@param bg {init:function, resize:function, update:function, draw:function, event:function, discard:function}
 function BG.add(name,bg)
-    assert(type(name)=='string',"BG name must be string")
-    assert(not BGs[name],"BG name '"..name.."' already exists")
-    assert(type(bg)=='table',"BG must be table, got "..type(bg))
+    assertf(type(name)=='string',"BG.add(name,bg): name must be string")
+    assertf(not BGs[name],"BG.add(name,bg): name '%s' already exists",name)
+    assertf(type(bg)=='table',"BG.add(name,bg): bg must be table")
     for i=1,#fields do
         if bg[fields[i]]==nil then bg[fields[i]]=NULL end
-        assert(type(bg[fields[i]])=='function',"BG."..fields[i].." must be function")
+        assertf(type(bg[fields[i]])=='function',"BG.add(name,bg): BG.%s must be function",fields[i])
     end
     BGs[name]=bg
 end

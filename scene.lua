@@ -26,7 +26,7 @@
 ---@class Zenitha.SceneSwap
 ---@field duration number
 ---@field timeChange number
----@field draw function
+---@field draw function called with timeRemain(duration~0)
 
 ---@type table<string, Zenitha.Scene>
 local scenes={}
@@ -130,31 +130,29 @@ local swap={
 ---@param name string
 ---@param scene Zenitha.Scene
 function SCN.add(name,scene)
-    assert(type(name)=='string',"SCN.add(name,scene): name must be string")
-    assert(type(scene)=='table',"SCN.add(name,scene): scene must be table")
-    assert(not scenes[name],"scene '"..tostring(name).."' already exists")
+    assertf(type(name)=='string',"SCN.add(name,scene): name must be string, got %s",type(name))
+    assertf(type(scene)=='table',"SCN.add(name,scene): scene must be table, got %s",type(scene))
+    assertf(not scenes[name],"SCN.add(name,scene): scene '%s' already exists",name)
 
     if scene.widgetList==nil then scene.widgetList={} end
 
     -- Check each field in scene object
     for k,v in next,scene do
         if k=='widgetList' then
-            assert(type(scene.widgetList)=='table',"[scene].widgetList must be table")
+            assertf(type(scene.widgetList)=='table',"SCN.add: scene[%s].widgetList must be table",name)
             for kw,w in next,scene.widgetList do
-                assert(type(w)=='table',"[scene].widgetList[...] must be widget args table or widget object")
+                assertf(type(w)=='table',"SCN.add: scene[%s].widgetList must be list<widgetArgTable|widgetObj>",name)
                 if not w._widget then
                     scene.widgetList[kw]=WIDGET.new(w)
                 end
             end
         elseif k=='scrollHeight' then
-            assert(type(scene.scrollHeight)=='number' and scene.scrollHeight>0,"[scene].scrollHeight must be positive number")
-        elseif TABLE.find(eventNames,k) then
-            assert(type(v)=='function',"Scene '"..name.."'."..k.." must be function")
-        else
-            error("Invalid key '"..k.."' in scene '"..name.."'")
+            assertf(type(scene.scrollHeight)=='number' and scene.scrollHeight>0,"SCN.add: scene[%s].scrollHeight must be >0",name)
+        elseif not TABLE.find(eventNames,k) then
+            errorf("SCN.add(name,scene): Invalid key '%s' in scene[%s]",k,name)
         end
     end
-    for i=1,#eventNames do assert(not scene[eventNames[i]] or type(scene[eventNames[i]])=='function',"[scene]."..eventNames[i].." must be function") end
+    for i=1,#eventNames do assertf(scene[eventNames[i]]==nil or type(scene[eventNames[i]])=='function',"SCN.add: scene[%s].%s must be function",name,eventNames[i]) end
 
     scenes[name]=scene
 end
@@ -163,12 +161,12 @@ end
 ---@param name string
 ---@param swp Zenitha.SceneSwap
 function SCN.addSwap(name,swp)
-    assert(type(name)=='string',"Arg name must be string")
-    assert(not swap[name],"Swap '"..name.."' already exist")
-    assert(type(swp)=='table',"Arg swp must be table")
-    assert(type(swp.duration)=='number' and swp.duration>=0,"swp.duration must be nonnegative number")
-    assert(type(swp.timeChange)=='number' and swp.timeChange>=0,"swp.timeChange must be nonnegative number")
-    assert(type(swp.draw)=='function',"swp.draw must be function")
+    assertf(type(name)=='string',"SCN.addSwap(name,swp): name must be string")
+    assertf(not swap[name],"SCN.addSwap(name,swp): Swap '%s' already exist",name)
+    assertf(type(swp)=='table',"SCN.addSwap(name,swp): swp must be table")
+    assertf(type(swp.duration)=='number' and swp.duration>=0,"SCN.addSwap(name,swp): swp.duration must be >=0")
+    assertf(type(swp.timeChange)=='number' and swp.timeChange>=0,"SCN.addSwap(name,swp): swp.timeChange must be >=0")
+    assertf(type(swp.draw)=='function',"SCN.addSwap(name,swp): swp.draw must be function")
     swap[name]=swp
 end
 
@@ -304,8 +302,8 @@ function SCN.printStack()
 end
 
 function SCN.setDefaultSwap(anim)
-    assert(type(anim)=='string',"swap style must be string")
-    assert(swap[anim],"No swap style named '"..anim.."'")
+    assertf(type(anim)=='string',"SCN.setDefaultSwap(anim): Need string, got %s",anim)
+    assertf(swap[anim],"SCN.setDefaultSwap(anim): No swap style '%s'",anim)
     defaultSwap=anim
 end
 

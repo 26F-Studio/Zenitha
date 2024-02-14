@@ -14,21 +14,21 @@ local VOC={}
 ---Set the cross time of voice, make voices more continuous
 ---@param time number
 function VOC.setCrossTime(time)
-    assert(type(time)=='number' and time>=0,"Crosstime must be positive number")
+    assert(type(time)=='number' and time>=0,"VOC.setCrossTime(time): Need >=0")
     crossTime=time
 end
 
 ---Set the diversion range of voice, make voices more natural
 ---@param range number
 function VOC.setDiversion(range)
-    assert(type(range)=='number' and range>=0 and range<12,"Diversion must in [0,12)")
+    assert(type(range)=='number' and range>=0 and range<12,"VOC.setDiversion(range): Need in [0,12)")
     diversion=range
 end
 
 ---Set the volume of voice module
 ---@param vol number
 function VOC.setVol(vol)
-    assert(type(vol)=='number' and vol>=0 and vol<=1,"Volume must in [0,1]")
+    assert(type(vol)=='number' and vol>=0 and vol<=1,"VOC.setVol(vol): Need in [0,1]")
     volume=vol
 end
 
@@ -49,7 +49,7 @@ function VOC.getFreeChannel() return 0 end
 ---Only available after VOC.init()
 ---@param path string Path to the folder contains voice files, including the last '/'
 ---@diagnostic disable-next-line: unused-local
-function VOC.load(path) error("Cannot VOC.load() before VOC.init()") end
+function VOC.load(path) error("VOC.load(path): Call VOC.init() first") end
 
 ---Add a voice to specified (or a free) queue
 ---
@@ -68,7 +68,7 @@ function VOC._update() end
 ---@param list table
 function VOC.init(list)
     if initialized then
-        MSG.new('info',"Achievement: attempt to initialize VLC lib twice")
+        MSG.new('info',"VOC.init(): Attempt to initialize VLC lib twice")
         return
     end
     initialized,VOC.init=true,nil

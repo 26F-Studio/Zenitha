@@ -89,7 +89,7 @@ function MATH.randFreq(fList)
         r=r-fList[i]
         if r<0 then return i end
     end
-    error("Frequency list should be a simple positive number list")
+    error("MATH.randFreq(fList): Frequency list should be a simple positive number list")
 end
 
 ---Get a random key with specified frequency table
@@ -102,7 +102,7 @@ function MATH.randFreqAll(fList)
         r=r-v
         if r<0 then return k end
     end
-    error("Frequency list should be a simple positive number list")
+    error("MATH.randFreqAll(fList): Frequency list should be a simple positive number list")
 end
 
 ---Get a random numbers in gaussian distribution (Box-Muller algorithm + stream buffer)
@@ -186,7 +186,7 @@ function MATH.listLerp(list,ratio)
     return lerp(list[floor(index)],list[ceil(index)],index%1)
 end
 
----Specify a line pass (x1,y1) and (x2,y2), get the y value when x=t
+---Specify a line pass (x1,y1) and (x2,y2), got the y value when x=t
 ---
 ---Same to the combination of MATH.iLerp and MATH.lerp
 ---@param x1 number
@@ -255,7 +255,7 @@ end
 ---@param v1 number[]
 ---@param v2 number[]
 function MATH.mDistV(p,v1,v2)
-    assert(#v1==#v2,"Vector length not match")
+    assert(#v1==#v2,"MATH.mDistV(p,v1,v2): Need #v1==#v2")
     if p==0 then
         local maxD=0
         for i=1,#v1 do

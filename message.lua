@@ -69,7 +69,7 @@ end
 ---Set the y position of message popup
 ---@param y number
 function MSG.setSafeY(y)
-    assert(type(y)=='number' and y>=0,"startY must be nonnegative number")
+    assert(type(y)=='number' and y>=0,"MSG.setSafeY(y): Need >=0")
     startY=y
 end
 

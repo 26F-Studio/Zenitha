@@ -17,7 +17,7 @@ local STRING={}
 ---Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
 function STRING.install()
     function STRING.install()
-        error("attempt to install stringExtend library multiple times")
+        error("STRING.install(): Attempt to install stringExtend library multiple times")
     end
     for k,v in next,STRING do
         string[k]=v
@@ -243,7 +243,7 @@ end
 ---@param c string
 ---@return 'space'|'word'|'sign'|'other'
 function STRING.type(c)
-    assert(type(c)=='string' and #c==1,'function STRING.type(c): c must be a single-charater string')
+    assert(type(c)=='string' and #c==1,"Need single-charater string")
     local t=byte(c)
     if t==9 or t==10 or t==13 or t==32 then
         return 'space'
@@ -266,9 +266,9 @@ end
 ---@param num number
 ---@return string
 function STRING.UTF8(num)
-    assert(type(num)=='number','Wrong type ('..type(num)..')')
+    assertf(type(num)=='number',"Wrong type (%s)",type(num))
     if num<=0 then
-        error('Out of range ('..num..')')
+        errorf("STRING.UTF8(num): Out of range (%d)",num)
     elseif num<2^7  then return char(num)
     elseif num<2^11 then return char(192+floor(num/2^06),128+num%2^6)
     elseif num<2^16 then return char(224+floor(num/2^12),128+floor(num/2^06)%2^6,128+num%2^6)
@@ -276,7 +276,7 @@ function STRING.UTF8(num)
     elseif num<2^26 then return char(248+floor(num/2^24),128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     elseif num<2^31 then return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     else
-        error('Out of range ('..num..')')
+        errorf("STRING.UTF8(num): Out of range (%d)",num)
     end
 end
 

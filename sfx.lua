@@ -46,8 +46,8 @@ local SFX={}
 ---@param path string
 ---@param lazyLoad? boolean
 local function loadOne(name,path,lazyLoad)
-    assert(type(name)=='string',"name must be string")
-    assert(type(path)=='string',"path must be string")
+    assert(type(name)=='string',"SFX.load: name must be string")
+    assert(type(path)=='string',"SFX.load: path must be string")
     if love.filesystem.getInfo(path) and FILE.isSafe(path) then
         if srcMap[name] then
             rem(nameList,TABLE.find(nameList,name))
@@ -123,14 +123,14 @@ end
 ---Set the volume of SFX module
 ---@param vol number
 function SFX.setVol(vol)
-    assert(type(vol)=='number' and vol>=0 and vol<=1,"SFX.setVol(vol): vol must be number in range 0~1")
+    assert(type(vol)=='number' and vol>=0 and vol<=1,"SFX.setVol(vol): Need in [0,1]")
     volume=vol
 end
 
 ---Set the stereo of SFX module
 ---@param s number 0~1
 function SFX.setStereo(s)
-    assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): s must be number in range 0~1")
+    assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): Need in [0,1]")
     stereo=s
 end
 

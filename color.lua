@@ -12,7 +12,7 @@ local rnd,sin,abs=math.random,math.sin,math.abs
 ---@param str string
 ---@return number, number, number, number|nil
 local function hex(str)
-    assert(type(str)=='string',"COLOR.hex(str): str must be string")
+    assert(type(str)=='string',"COLOR.hex(str): Need string")
     str=str:match('#?(%x%x?%x?%x?%x?%x?%x?%x?)') or '000000'
     local r=(tonumber(str:sub(1,2),16) or 0)/255
     local g=(tonumber(str:sub(3,4),16) or 0)/255
@@ -94,8 +94,8 @@ do
     end
 end
 setmetatable(COLOR,{__index=function(_,k)
-    assert(type(k)=='string', "COLOR[name]: name must be string")
-    error("No color: "..tostring(k))
+    assert(type(k)=='string', "COLOR[name]: Need string")
+    errorf("COLOR[name]:  No color '%s'",k)
 end,__metatable=true})
 
 local colorStrings={'R','F','O','Y','A','K','G','J','C','I','S','B','P','V','M','W'}

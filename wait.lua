@@ -41,26 +41,26 @@ end
 ---@field noDefaultQuit?   boolean
 
 ---Start a new Wait Modal
----@param data Zenitha.waitObj
-function WAIT.new(data)
+---@param args Zenitha.waitObj
+function WAIT.new(args)
     if WAIT.state then return end
 
-    assert(type(data)=='table',"arg must be table")
-    assert(data.init==nil            or type(data.init)            =='function',"Field 'enter' must be function")
-    assert(data.update==nil          or type(data.update)          =='function',"Field 'update' must be function")
-    assert(data.quit==nil            or type(data.quit)            =='function',"Field 'leave' must be function")
-    assert(data.draw==nil            or type(data.draw)            =='function',"Field 'draw' must be function")
-    assert(data.timeout==nil         or type(data.timeout)         =='number',  "Field 'timeout' must be number")
-    assert(data.escapable==nil       or type(data.escapable)       =='boolean', "Field 'escapable' must be boolean")
-    assert(data.coverAlpha==nil      or type(data.coverAlpha)      =='number',  "Field 'coverAlpha' must be number")
-    assert(data.noDefaultInit==nil   or type(data.noDefaultInit)   =='boolean', "Field 'noDefaultInit' must be boolean")
-    assert(data.noDefaultUpdate==nil or type(data.noDefaultUpdate) =='boolean', "Field 'noDefaultUpdate' must be boolean")
-    assert(data.noDefaultDraw==nil   or type(data.noDefaultDraw)   =='boolean', "Field 'noDefaultDraw' must be boolean")
-    assert(data.noDefaultQuit==nil   or type(data.noDefaultQuit)   =='boolean', "Field 'noDefaultQuit' must be boolean")
-    if not data.noDefaultInit then WAIT.defaultInit() end
-    if data.init then data.init() end
+    assert(type(args)=='table',"WAIT.new(args): Need waitArgTable")
+    assert(args.init==nil            or type(args.init)            =='function',"WAIT.new: args.enter need function")
+    assert(args.update==nil          or type(args.update)          =='function',"WAIT.new: args.update need function")
+    assert(args.quit==nil            or type(args.quit)            =='function',"WAIT.new: args.leave need function")
+    assert(args.draw==nil            or type(args.draw)            =='function',"WAIT.new: args.draw need function")
+    assert(args.timeout==nil         or type(args.timeout)         =='number',  "WAIT.new: args.timeout need number")
+    assert(args.escapable==nil       or type(args.escapable)       =='boolean', "WAIT.new: args.escapable need boolean")
+    assert(args.coverAlpha==nil      or type(args.coverAlpha)      =='number',  "WAIT.new: args.coverAlpha need number")
+    assert(args.noDefaultInit==nil   or type(args.noDefaultInit)   =='boolean', "WAIT.new: args.noDefaultInit need boolean")
+    assert(args.noDefaultUpdate==nil or type(args.noDefaultUpdate) =='boolean', "WAIT.new: args.noDefaultUpdate need boolean")
+    assert(args.noDefaultDraw==nil   or type(args.noDefaultDraw)   =='boolean', "WAIT.new: args.noDefaultDraw need boolean")
+    assert(args.noDefaultQuit==nil   or type(args.noDefaultQuit)   =='boolean', "WAIT.new: args.noDefaultQuit need boolean")
+    if not args.noDefaultInit then WAIT.defaultInit() end
+    if args.init then args.init() end
 
-    WAIT.arg=data
+    WAIT.arg=args
     WAIT.state='enter'
     WAIT.timer=0
     WAIT.totalTimer=0
@@ -126,21 +126,21 @@ end
 ---Set the time of entering animation
 ---@param t number
 function WAIT.setEnterTime(t)
-    assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
+    assert(type(t)=='number' and t>0,"WAIT.setEnterTime(t): Need >0")
     WAIT.enterTime=t
 end
 
 ---Set the time of leaving animation
 ---@param t number
 function WAIT.setLeaveTime(t)
-    assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
+    assert(type(t)=='number' and t>0,"WAIT.setLeaveTime(t): Need >0")
     WAIT.leaveTime=t
 end
 
 ---Set the time of timeout
 ---@param t number
 function WAIT.setTimeout(t)
-    assert(type(t)=='number' and t>0,"Arg must be number larger then 0")
+    assert(type(t)=='number' and t>0,"WAIT.setTimeout(t): Need >0")
     WAIT.timeout=t
 end
 
@@ -148,6 +148,7 @@ end
 ---@param r number
 ---@param g number
 ---@param b number
+---@overload fun(color:{r:number, g:number, b:number})
 function WAIT.setCoverColor(r,g,b)
     if type(r)=='table' then
         r,g,b=r[1],r[2],r[3]
@@ -159,42 +160,42 @@ function WAIT.setCoverColor(r,g,b)
     then
         WAIT.coverColor[1],WAIT.coverColor[2],WAIT.coverColor[3]=r,g,b
     else
-        error("Arg must be r,g,b or {r,g,b} and all between 0~1")
+        error("WAIT.setCoverColor(r,g,b): Need r,g,b or {r,g,b} in [0,1]")
     end
 end
 
 ---Set the alpha of background cover
 ---@param alpha number
 function WAIT.setCoverAlpha(alpha)
-    assert(type(alpha)=='number' and alpha>=0 and alpha<=1,"Alpha must be number between 0~1")
+    assert(type(alpha)=='number' and alpha>=0 and alpha<=1,"WAIT.setCoverAlpha(alpha): Need in [0,1]")
     WAIT.coverAlpha=alpha
 end
 
 ---Set the default init function
 ---@param func function
 function WAIT.setDefaultInit(func)
-    assert(type(func)=='function',"func must be function")
+    assert(type(func)=='function',"WAIT.setDefaultInit(func): Need function")
     WAIT.defaultInit=func
 end
 
 ---Set the default update function
 ---@param func function
 function WAIT.setDefaultUpdate(func)
-    assert(type(func)=='function',"func must be function")
+    assert(type(func)=='function',"WAIT.setDefaultUpdate(func): Need function")
     WAIT.defaultUpdate=func
 end
 
 ---Set the default draw function
 ---@param func function
 function WAIT.setDefaultDraw(func)
-    assert(type(func)=='function',"func must be function")
+    assert(type(func)=='function',"WAIT.setDefaultDraw(func): Need function")
     defaultDraw=func
 end
 
 ---Set the default quit function
 ---@param func function
 function WAIT.setDefaultQuit(func)
-    assert(type(func)=='function',"func must be function")
+    assert(type(func)=='function',"WAIT.setDefaultQuit(func): Need function")
     WAIT.defaultQuit=func
 end
 

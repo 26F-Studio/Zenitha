@@ -6,7 +6,7 @@ local IMGlistMeta={
         local path=self.__source[k]
         local ok,res
         if type(path)=='string' then -- string, load image from path
-            assert(path,STRING.repD("No field '$1'",tostring(k)))
+            assert(path,STRING.repD("IMG[]: No field '$1'",tostring(k)))
             ok,res=pcall(love.graphics.newImage,path)
         else -- not string (neither table), keep the value
             ok,res=true,path
@@ -55,7 +55,7 @@ end
 ---```
 function IMG.init(imgTable)
     if initialized then
-        MSG.new('info',"Achievement: attempt to initialize IMG lib twice")
+        MSG.new('info',"IMG.init(): Attempt to initialize IMG lib twice")
         return
     end
     initialized,IMG.init=true,nil
