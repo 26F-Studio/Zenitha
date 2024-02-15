@@ -23,7 +23,7 @@ function FILE.load(path,args)
     if not args then args='' end
     if fs.getInfo(path) then
         local F=fs.newFile(path)
-        assert(F:open'r','open error')
+        assert(F:open'r',"FILE.load: Open error")
         local s=F:read()
         F:close()
         local mode=
@@ -39,31 +39,31 @@ function FILE.load(path,args)
             if func then
                 setfenv(func,{})
                 local res=func()
-                return assert(res,'decode error')
+                return assert(res,"FILE.load: Decode error")
             else
-                error("decode error: "..err_mes)
+                error("FILE.load: Decode error: "..err_mes)
             end
         elseif mode=='lua' then
             local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..']]'..s)
             if func then
                 local res=func()
-                return assert(res,'run error')
+                return assert(res,"FILE.load: run error")
             else
-                error("compile error: "..err_mes)
+                error("FILE.load: Compile error: "..err_mes)
             end
         elseif mode=='json' then
             local res=JSON.decode(s)
             if res then
                 return res
             end
-            error("decode error")
+            error("FILE.load: Decode error")
         elseif mode=='string' then
             return s
         else
-            error("unknown mode")
+            error("FILE.load: Unknown mode")
         end
     elseif not STRING.sArg(args,'-canskip') then
-        error("no file")
+        error("FILE.load: No file")
     end
 end
 
@@ -75,7 +75,7 @@ end
 function FILE.save(data,path,args)
     if not args then args='' end
     if STRING.sArg(args,'-d') and fs.getInfo(path) then
-        error("duplicate")
+        error("FILE.save: Duplicate")
     end
 
     if type(data)=='table' then
@@ -86,12 +86,12 @@ function FILE.save(data,path,args)
                 data='return'..TABLE.dumpDeflate(data)
             end
             if not data then
-                error("encode error")
+                error("FILE.save: Encode error")
             end
         else
             data=JSON.encode(data)
             if not data then
-                error("encode error")
+                error("FILE.save: Encode error")
             end
         end
     else
@@ -99,7 +99,7 @@ function FILE.save(data,path,args)
     end
 
     local F=fs.newFile(path)
-    assert(F:open('w'),'open error')
+    assert(F:open('w'),"FILE.save: Open error")
     F:write(data)
     F:flush()
     F:close()

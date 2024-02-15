@@ -36,7 +36,7 @@ local LANG={}
 ---Set the default language
 ---@param name string
 function LANG.setDefault(name)
-    assert(type(name)=='string','Invalid language name')
+    assert(type(name)=='string',"LANG.setDefault(name): Need string")
     defaultLang=name
     for k,v in next,langLib do
         if k~=false then
@@ -48,7 +48,7 @@ end
 ---Set the max loaded language count
 ---@param n number
 function LANG.setMaxLoaded(n)
-    assert(type(n)=='number' and n>=1 and n%1==0,'Invalid number')
+    assert(type(n)=='number' and n>=1 and n%1==0,"LANG.setMaxLoaded(n): Need int >1")
     maxLangLoaded=n
 end
 
@@ -56,7 +56,7 @@ end
 ---@param data table<string, string> name-path
 function LANG.add(data)
     for k,v in next,data do
-        assert(type(k)=='string' and type(v)=='string','Invalid language info list (need {zh="path1",en="path2",...})')
+        assert(type(k)=='string' and type(v)=='string',"LANG.add(data): Need {zh='path1',en='path2',...}")
         langPaths[k]=v
     end
 end
@@ -73,7 +73,7 @@ local textSrc=langLib[false]
 ---Set the text function source
 ---@param newSrc table
 function LANG.setTextFuncSrc(newSrc)
-    assert(type(newSrc)=='table','LANG.setTextFuncSrc(newPool): newPool must be table')
+    assert(type(newSrc)=='table',"LANG.setTextFuncSrc(newSrc): Need table")
     textSrc=newSrc
 end
 

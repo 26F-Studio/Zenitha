@@ -172,9 +172,9 @@ function BGM.setDefault(bgms)
     if type(bgms)=='string' then
         bgms={bgms}
     elseif type(bgms)=='table' then
-        for i=1,#bgms do assert(type(bgms[i])=='string',"BGM list must be list of strings") end
+        for i=1,#bgms do assert(type(bgms[i])=='string',"BGM.setDefault(bgms): Need string|list<string>") end
     else
-        error("BGM must be string or table")
+        error("BGM.setDefault(bgms): Need string|list<string>")
     end
     defaultBGM=bgms
 end
@@ -184,7 +184,7 @@ end
 ---When loaded BGMs' count exceeds this value, some not-playing BGM source will be released
 ---@param count number
 function BGM.setMaxSources(count)
-    assert(type(count)=='number' and count>0 and count%1==0,"Source count must be positive integer")
+    assert(type(count)=='number' and count>0 and count%1==0,"BGM.setMaxSources(count): Need int >=1")
     maxLoadedCount=count
     _updateSources()
 end
@@ -192,7 +192,7 @@ end
 ---Set BGM volume
 ---@param vol number
 function BGM.setVol(vol)
-    assert(type(vol)=='number' and vol>=0 and vol<=1,"Volume must be in range 0~1")
+    assert(type(vol)=='number' and vol>=0 and vol<=1,"BGM.setVol(vol): Need in [0,1]")
     volume=vol
     for i=1,#nowPlay do
         local bgm=nowPlay[i]
@@ -227,8 +227,12 @@ function BGM.play(bgms,args)
     if not bgms then return end
     if not args then args='' end
 
-    if type(bgms)=='string' then bgms={bgms} end
-    assert(type(bgms)=='table',"BGM must be string or table")
+    bgms=type(bgms)=='string' and {bgms} or type(bgms)=='table' and bgms or {false}
+    for i=1,#bgms do
+        if type(bgms[i])~='string' then
+            error("BGM.play(bgms,args): bgms must be string|list<string>")
+        end
+    end
 
     if
         TABLE.compare(lastPlay,bgms) and
@@ -246,13 +250,11 @@ function BGM.play(bgms,args)
 
     if STRING.sArg(args,'-preLoad') then
         for _,bgm in next,bgms do
-            assert(type(bgm)=='string',"BGM list can only be list of string")
             _tryLoad(bgm)
         end
     else
         local sourceReadyToPlay={}
         for _,bgm in next,bgms do
-            assert(type(bgm)=='string',"BGM list can only be list of string")
             if _tryLoad(bgm) then
                 local obj=srcLib[bgm]
                 obj.vol=0
@@ -297,7 +299,7 @@ end
 ---Stop current playing BGM(s), fade out if time is given
 ---@param time? nil|number
 function BGM.stop(time)
-    assert(time==nil or type(time)=='number' and time>=0,"Given stopping time must be positive number, but got "..tostring(time))
+    assert(time==nil or type(time)=='number' and time>=0,"BGM.stop(time): Need >=0")
     if #nowPlay>0 then
         for i=1,#nowPlay do
             local obj=nowPlay[i]
@@ -329,11 +331,13 @@ function BGM.set(bgms,mode,...)
     elseif type(bgms)=='table' then
         bgms=TABLE.shift(bgms)
         for i=1,#bgms do
-            assert(type(bgms[i])=='string',"BGM list must be list of strings")
+            if type(bgms[i])~='string' then
+                error("BGM.set(bgms,mode,...): bgms must be string|list<string>")
+            end
             bgms[i]=srcLib[bgms[i]]
         end
     else
-        error("BGM.play(name,args): name must be string or table")
+        error("BGM.set(bgms,mode,...): bgms must be string|list<string>")
     end
     for i=1,#bgms do
         local obj=bgms[i]
@@ -344,8 +348,8 @@ function BGM.set(bgms,mode,...)
                 local vol,time=...
                 if not time then time=1 end
 
-                assert(type(vol)=='number' and vol>=0 and vol<=1,"BGM.set(...,volume): volume must be in range 0~1")
-                assert(type(time)=='number' and time>=0,"BGM.set(...,time): time must be positive number")
+                assert(type(vol)=='number' and vol>=0 and vol<=1,"BGM.set(...,volume): Need in [0,1]")
+                assert(type(time)=='number' and time>=0,"BGM.set(...,time): Need >=0")
 
                 TASK.new(task_setVolume,obj,vol,time)
             elseif mode=='pitch' then
@@ -355,13 +359,13 @@ function BGM.set(bgms,mode,...)
                 if not pitch then pitch=1 end
                 if not timeUse then timeUse=1 end
 
-                assert(type(pitch)=='number' and pitch>0 and pitch<=32,"BGM.set(...,pitch): pitch must be in range 0~32")
-                assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
+                assert(type(pitch)=='number' and pitch>0 and pitch<=32,"BGM.set(...,pitch): Need in (0,32]")
+                assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
                 TASK.new(task_setPitch,obj,pitch,timeUse)
             elseif mode=='seek' then
                 local time=...
-                assert(type(time)=='number',"BGM.set(...,time): time must be number")
+                assert(type(time)=='number',"BGM.set(...,time): Need number")
                 obj.source:seek(MATH.clamp(time,0,obj.source:getDuration()))
             elseif mode=='lowgain' then
                 if effectsSupported then
@@ -370,8 +374,8 @@ function BGM.set(bgms,mode,...)
                     if not lowgain then lowgain=1 end
                     if not timeUse then timeUse=1 end
 
-                    assert(type(lowgain)=='number' and lowgain>=0 and lowgain<=1,"BGM.set(...,lowgain,highgain): lowgain must be in range 0~1")
-                    assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
+                    assert(type(lowgain)=='number' and lowgain>=0 and lowgain<=1,"BGM.set(...,lowgain): Need in [0,1]")
+                    assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
                     TASK.new(task_setLowgain,obj,lowgain,timeUse)
                     obj.lowgain=lowgain
@@ -384,15 +388,15 @@ function BGM.set(bgms,mode,...)
                     if not highgain then highgain=1 end
                     if not timeUse then timeUse=1 end
 
-                    assert(type(highgain)=='number' and highgain>=0 and highgain<=1,"BGM.set(...,lowgain,highgain): highgain must be in range 0~1")
-                    assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): time must be positive number")
+                    assert(type(highgain)=='number' and highgain>=0 and highgain<=1,"BGM.set(...,highgain): Need in [0,1]")
+                    assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
                     TASK.new(task_setHighgain,obj,highgain,timeUse)
                     obj.highgain=highgain
                     obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
                 end
             else
-                error("BGM.set(...,mode): mode must be 'volume', 'pitch', or 'seek'")
+                error("BGM.set(...,mode): Need 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'")
             end
         end
     end

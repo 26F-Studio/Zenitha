@@ -30,10 +30,12 @@ end
 ---@param t table
 ---@param source table
 function TABLE.setAutoFill(t,source)
-    setmetatable(t,{__index=function(self,k)
-        self[k]=source[k]
-        return source[k]
-    end})
+    setmetatable(t,{
+        __index=function(self,k)
+            self[k]=source[k]
+            return source[k]
+        end
+    })
 end
 
 ---Get a copy of [1~#] elements
@@ -265,7 +267,7 @@ function TABLE.rotate(matrix,dir)
             end
         end
     else
-        error("Invalid rotate direction: "..tostring(dir))
+        errorf("TABLE.rotate(matrix,dir): Invalid rotate direction '%s'",dir)
     end
     return icb
 end
@@ -518,7 +520,7 @@ end
 do -- function TABLE.dump(t,depth)
     local tabs=setmetatable({[0]='','\t'},{
         __index=function(self,k)
-            if k>=260 then error("Too many tabs!") end
+            if k>=260 then error("TABLE.dump(t,depth): Table depth over 260") end
             for i=#self+1,k do
                 self[i]=self[i-1]..'\t'
             end

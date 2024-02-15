@@ -239,7 +239,7 @@ end
 ---
 ---line: rate,x1,y1,x2,y2,r,g,b,a
 function SYSFX.new(name,...)
-    assert(FX[name],"No FX type: "..name)
+    assertf(FX[name],"No FX type: %s",name)
     ins(FXlist,FX[name].new(...))
 end
 

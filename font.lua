@@ -39,7 +39,7 @@ end
 ---@return love.Font
 local function _rawget(size)
     if not fontCache[size] then
-        assert(type(size)=='number' and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
+        assertf(type(size)=='number' and size>0 and size%1==0,"Need int >=1, got %s",size)
         fontCache[size]=love.graphics.setNewFont(size,'normal',love.graphics.getDPIScale()*SCR.k*2)
     end
     return fontCache[size]
@@ -63,7 +63,7 @@ function FONT.load(name,path)
             FONT.load(k,v)
         end
     else
-        assert(love.filesystem.getInfo(path),STRING.repD("Font file $1($2) not exist!",name,path))
+        assertf(love.filesystem.getInfo(path),"Font file %s(%s) not exist!",name,path)
         fontFiles[name]=love.filesystem.newFile(path)
         fontCache[name]={}
     end
@@ -83,7 +83,7 @@ local function _get(size,name)
     f=f[size]
 
     if not f then
-        assert(type(size)=='number' and size>0 and size%1==0,"Font size should be a positive integer, not "..tostring(size))
+        assertf(type(size)=='number' and size>0 and size%1==0,"Need int >=1, got %s",size)
         f=love.graphics.newFont(fontFiles[name],size,'normal',love.graphics.getDPIScale()*SCR.k*2)
         local fallbackName=fallbackMap[name] or defaultFallBack and name~=defaultFallBack and defaultFallBack
         if fallbackName then

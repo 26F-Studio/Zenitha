@@ -147,7 +147,7 @@ function GC.outDraw(obj,x,y,a,k,d,shadeCount)
         draw(obj,x,y-d,a,k,nil,w,h)
         draw(obj,x,y+d,a,k,nil,w,h)
     elseif shadeCount~=4 then
-        error("shadeCount must be 4 or 8")
+        errorf("GC.outDraw(...,shadeCount): Need 4 or 8, got %s",shadeCount)
     end
 end
 
@@ -179,7 +179,7 @@ function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
         printf(str,x,y-d,w,mode)
         printf(str,x,y+d,w,mode)
     elseif shadeCount~=4 then
-        error("shadeCount must be 4 or 8")
+        errorf("GC.shadedPrint(...,shadeCount,...): Need 4 or 8, got %s",shadeCount)
     end
     setColor(c2 or COLOR.L)
     printf(str,x,y,w,mode)
@@ -276,7 +276,7 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
         end
         polygon('fill',L)
     else
-        error("Draw mode should be 'line' or 'fill'")
+        error("GC.regRoundPolygon(mode,...): Draw mode should be 'line' or 'fill'")
     end
 end
 
@@ -529,7 +529,7 @@ do -- function GC.load(L), GC.execute(t)
         elseif type(t[1])=='function' then
             t[1](unpack(t,2))
         else
-            error("Wrong type of [1]")
+            error("GC_execute(...): Wrong type of [1]")
         end
     end
     ---Run a set of graphics commands in table-format
@@ -549,7 +549,7 @@ do -- function GC.load(L), GC.execute(t)
 
     local sizeLimit=gc.getSystemLimits().texturesize
     ---Similar to GC.execute, but draw on a canvas.
-    ---@param L number[]|number[][]|table[][]|string[][]
+    ---@param list number[]|number[][]|table[][]|string[][]
     ---## Example
     ---```lua
     ---GC.load{100,100 -- size of canvas
@@ -559,9 +559,9 @@ do -- function GC.load(L), GC.execute(t)
     ---    {'dCirc','fill',50,50,40},
     ---} --> canvas
     ---```
-    function GC.load(L)
-        local w,h=tonumber(L[1]),tonumber(L[2])
-        assert(w and h,"GC.load(L): L[1] and L[2] must be positive number")
+    function GC.load(list)
+        local w,h=tonumber(list[1]),tonumber(list[2])
+        assert(w and h and w>0 and h>0 and w%1==0 and h%1==0,"GC.load(L): L[1] and L[2] need int >=1")
         gc.push()
             local canvas
             while true do
@@ -571,7 +571,7 @@ do -- function GC.load(L), GC.execute(t)
                     break
                 else
                     sizeLimit=math.floor(sizeLimit*.8)
-                    assert(sizeLimit>=1,"WTF why can't I create a canvas?")
+                    assert(sizeLimit>=1,"GC.load(L): Failed to create canvas")
                 end
             end
             gc.setCanvas(canvas)
@@ -579,16 +579,16 @@ do -- function GC.load(L), GC.execute(t)
             gc.origin()
             gc.setColor(1,1,1)
             gc.setLineWidth(1)
-            for i=3,#L do
+            for i=3,#list do
                 ---@type any
-                local code=L[i]
+                local code=list[i]
                 local cmd=code[1]
                 if type(cmd)=='string' then
-                    cmd=assert(cmds[cmd],"No gc command: "..cmd)(unpack(code,2))
+                    cmd=assert(cmds[cmd],"GC.load(L): No gc command: "..cmd)(unpack(code,2))
                 elseif type(cmd)=='function' then
                     cmd(unpack(code,2))
                 else
-                    error("cmd must be string or function")
+                    error("GC.load: cmd must be string|function")
                 end
             end
             gc.setShader()

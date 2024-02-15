@@ -140,7 +140,7 @@ function TEXT:add(data)
         inPoint=data.inPoint or 0.2,
         outPoint=data.outPoint or 0.2,
 
-        draw=assert(textFX[data.style or 'appear'],"No text type:"..tostring(data.style)),
+        draw=assertf(textFX[data.style or 'appear'],"No text type: %s",data.style),
         arg=data.styleArg,
     }
     T._t=0 -- Timer

@@ -89,19 +89,19 @@ end
 function HTTP.request(arg)
     arg.method=arg.method or arg.body and 'POST' or 'GET'
     if arg.url then
-        assert(type(arg.url)=='string',"Field 'url' need string, get "..type(arg.url))
+        assertf(type(arg.url)=='string',"HTTP.request(arg): arg.url need string, got %s",arg.url)
         if arg.url:sub(1,7)~='http://' then arg.url='http://'..arg.url end
     else
-        arg.url=HTTP._host or error("Need url=<string> or set default host with HTTP.setHost")
+        arg.url=HTTP._host or error("HTTP.request(arg): arg.url need string, or set default host with HTTP.setHost")
     end
     if arg.path then
-        assert(type(arg.path)=='string',"Field 'path' need string, get "..type(arg.path))
+        assertf(type(arg.path)=='string',"HTTP.request(arg): arg.path need string, got %s",arg.path)
         arg.url=arg.url..arg.path
     end
-    assert(arg.headers==nil or type(arg.headers)=='table',"Field 'headers' need table, get "..type(arg.headers))
+    assertf(arg.headers==nil or type(arg.headers)=='table',"HTTP.request(arg): arg.headers need table, got %s",arg.headers)
 
     if arg.body~=nil then
-        assert(type(arg.body)=='table',"Field 'body' need table, get "..type(arg.body))
+        assertf(type(arg.body)=='table',"HTTP.request(arg): arg.body need table, got %s",arg.body)
         arg.body=JSON.encode(arg.body)
         if not arg.headers then arg.headers={} end
         TABLE.cover({
@@ -131,7 +131,7 @@ end
 ---Set thread count
 ---@param n number 1~26
 function HTTP.setThreadCount(n)
-    assert(type(n)=='number' and n>=1 and n<=26 and n%1==0,"HTTP.setThreadCount(n): n must be integer from 1 to 26")
+    assert(type(n)=='number' and n>=1 and n<=26 and n%1==0,"HTTP.setThreadCount(n): Need int in [1,26]")
     if n>threadCount then
         addThread(n-threadCount)
     else
@@ -151,7 +151,7 @@ end
 ---@param pool string|nil pool name
 function HTTP.clearPool(pool)
     if pool==nil then pool='_default' end
-    assert(type(pool)=='string',"Pool must be nil or string")
+    assert(type(pool)=='string',"HTTP.clearPool(pool): Need string|nil")
     HTTP._msgCount=HTTP._msgCount-#msgPool[pool]
     msgPool[pool]={}
 end
@@ -159,8 +159,8 @@ end
 ---Delete a message pool
 ---@param pool string pool name
 function HTTP.deletePool(pool)
-    assert(type(pool)=='string',"Pool must be nil or string")
-    assert(pool~='_default',"Cannot delete _default pool. What are you doing?")
+    assert(type(pool)=='string',"HTTP.deletePool(pool): Need string")
+    assert(pool~='_default',"HTTP.deletePool(pool): You cannot delete _default pool")
     HTTP._msgCount=HTTP._msgCount-#msgPool[pool]
     msgPool[pool]=nil
 end
@@ -169,7 +169,7 @@ end
 ---@param pool string|nil pool name
 ---@return table|nil
 function HTTP.pollMsg(pool)
-    if not (type(pool)=='nil' or type(pool)=='string') then error("Pool must be nil or string") end
+    if not (pool or type(pool)=='string') then error("HTTP.pollMsg(pool): Need string|nil") end
     HTTP._update()
     local p=msgPool[pool or '_default']
     if #p>0 then
@@ -181,7 +181,7 @@ end
 ---Set default host
 ---@param host string host url
 function HTTP.setHost(host)
-    assert(type(host)=='string',"Host must be string")
+    assert(type(host)=='string',"HTTP.setHost(host): Need string")
     if host:sub(1,7)~='http://' then host='http://'..host end
     HTTP._host=host
 end
