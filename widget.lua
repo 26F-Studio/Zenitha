@@ -325,13 +325,15 @@ Widgets.image=setmetatable({
 function Widgets.image:reset()
     Widgets.base.reset(self)
 
-    if self.keepAspectRatio then
-        assert(not (self.w and self.h), '[image].keepAspectRatio is on, only a positive integer must be passed to either [image].w or [image].h; but two numbers are passed to both parameters!')
-    elseif not (self.w and self.h) then
+    if not (self.w or self.h) then      -- self.w=nil and self.h=nil
         self.w=self._image:getWidth()
         self.h=self._image:getHeight()
+    end
+
+    if self.keepAspectRatio then
+        assert(not (self.w and self.h), '[image].keepAspectRatio==true, need a integer passed to [image].w or [image.h], got both nil')
     else
-        assert(self.w and self.h,'[image].keepAspectRatio is off, [image].w and [image].h must be 2 integers, but only one of them is passed.')
+        assertf(self.w and self.h,'[image].keepAspectRatio==false, [image].w & [image].h need number, got [image].w=%s and [image].h=%s',self.w,self.h)
     end
 
     if self.keepAspectRatio then
