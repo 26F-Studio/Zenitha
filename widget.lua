@@ -331,7 +331,7 @@ function Widgets.image:reset()
     end
 
     if self.keepAspectRatio then
-        assert(not (self.w and self.h), '[image].keepAspectRatio==true, need a integer passed to [image].w or [image.h], got both nil')
+        assert(self.w~=nil or self.h~=nil, '[image].keepAspectRatio==true, need a integer passed to [image].w or [image.h], got both nil')
     else
         assertf(self.w and self.h,'[image].keepAspectRatio==false, [image].w & [image].h need number, got [image].w=%s and [image].h=%s',self.w,self.h)
     end
