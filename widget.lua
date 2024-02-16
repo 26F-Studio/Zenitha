@@ -1074,6 +1074,7 @@ function Widgets.slider_fill:reset()
     self._rangeR=self.axis[2]
     self._rangeWidth=self._rangeR-self._rangeL
     self._pos=self._rangeL
+    self._pos0=self._rangeL
     self._textShowTime=3
 
     if self.labelPos=='left' then
