@@ -280,6 +280,27 @@ function STRING.UTF8(num)
     end
 end
 
+---Parse binary number from string
+---@param str string
+---@return number
+function STRING.binNum(str)
+    assert(type(str)=='string',"STRING.binNum: need string")
+    local size=#str
+    assert(size<=8,"Too long data")
+    local num=byte(str,1)
+    for i=2,size do
+        num=num*256+byte(str,i)
+    end
+    -- if signed then
+    --     local huge=2^(size*8-1)
+    --     if num>=huge then
+    --         num=num-huge*2
+    --     end
+    -- end
+    return num
+end
+print(STRING.binNum("\255\255\255\255\255\255"))
+
 local units={'','K','M','B','T','Qa','Qt','Sx','Sp','Oc','No'}
 local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}
 local secUnits={'Dc','Vg','Tg','Qd','Qi','Se','St','Og','Nn','Ce'} -- Ce is next-level unit, but DcCe is not used so used here
