@@ -127,28 +127,6 @@ REQUIRE=    require'Zenitha.require'
 PROFILE=    require'Zenitha.profile'
 TASK=       require'Zenitha.task'
 HASH=       require'Zenitha.sha2'
-do -- Add pbkdf2 for HASH lib
-    local bxor=require'bit'.bxor
-    local char=string.char
-    local function sxor(s1,s2)
-        local b3=''
-        for i=1,#s1 do
-            b3=b3..char(bxor(s1:byte(i),s2:byte(i)))
-        end
-        return b3
-    end
-    function HASH.pbkdf2(hashFunc,pw,salt,n)
-        local u=HASH.hex2bin(HASH.hmac(hashFunc, pw, salt..'\0\0\0\1'))
-        local t=u
-
-        for _=2,n do
-            u=HASH.hex2bin(HASH.hmac(hashFunc, pw, u))
-            t=sxor(t, u)
-        end
-
-        return HASH.bin2hex(t):upper()
-    end
-end
 
 -- Love-based modules (simple)
 VIB=        require'Zenitha.vibrate'
