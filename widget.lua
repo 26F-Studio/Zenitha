@@ -266,8 +266,6 @@ Widgets.text=setmetatable({
 
     text=false,
 
-    _text=false,
-
     buildArgs={
         'name',
         'pos',
@@ -304,8 +302,6 @@ Widgets.image=setmetatable({
     keepAspectRatio=true,
 
     image=false,
-
-    _image=false,
     _scaleW=1,_scaleH=1,
 
     buildArgs={
@@ -376,12 +372,9 @@ Widgets.button=setmetatable({
     image=false,
     cornerR=10,
     sound_trigger=false,
+    textColor=false,
 
     code=NULL,
-
-    _text=false,
-    _image=false,
-    _pressed=false,
 
     buildArgs={
         'name',
@@ -391,7 +384,7 @@ Widgets.button=setmetatable({
 
         'alignX','alignY',
         'text','image',
-        'color',
+        'color','textColor',
         'fontSize','fontType',
         'sound_trigger',
         'sound_press','sound_hover',
@@ -402,6 +395,7 @@ Widgets.button=setmetatable({
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.button:reset()
+    if self.textColor==false then self.textColor=self.color end
     Widgets.base.reset(self)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number',"[button].w need number")
@@ -458,7 +452,7 @@ function Widgets.button:draw()
         alignDraw(self,self._image)
     end
     if self._text then
-        gc_setColor(c)
+        gc_setColor(self.textColor)
         alignDraw(self,self._text)
     end
     gc_pop()
@@ -547,9 +541,6 @@ Widgets.checkBox=setmetatable({
 
     disp=false, -- function return a boolean
     code=NULL,
-
-    _text=false,
-    _image=false,
 
     buildArgs={
         'name',
@@ -667,9 +658,6 @@ Widgets.switch=setmetatable({
     disp=false, -- function return a boolean
     code=NULL,
 
-    _text=false,
-    _image=false,
-
     _slideTime=false,
 
     buildArgs={
@@ -771,15 +759,19 @@ end
 ---@field valueShow false|'int'|'float'|'percent'|function
 ---@field numFontSize number
 ---@field numFontType false|string
+---@field sound_drag string|false
+---@field soundInterval number
+---@field soundPitchRange number
 ---@field _showFunc function
 ---@field _pos number
 ---@field _pos0 number
----@field _rangeL number
----@field _rangeR number
+---@field _rangeL number|false
+---@field _rangeR number|false
 ---@field _rangeWidth number
 ---@field _unit number
 ---@field _smooth boolean
 ---@field _textShowTime number
+---@field _lastSoundTime number
 Widgets.slider=setmetatable({
     type='slider',
     w=100,
@@ -793,13 +785,14 @@ Widgets.slider=setmetatable({
     numFontSize=25,numFontType=false,
     valueShow=nil,
     textAlwaysShow=false,
+    sound_drag=false,
+    soundInterval=.0626,
+    soundPitchRange=0,
 
     disp=false, -- function return the displaying _value
     code=NULL,
 
     _floatWheel=0,
-    _text=false,
-    _image=false,
     _showFunc=false,
     _pos=false,
     _pos0=false,
@@ -810,6 +803,7 @@ Widgets.slider=setmetatable({
     _smooth=false,
     _textShowTime=false,
     _approachSpeed=26,
+    _lastSoundTime=0,
 
     buildArgs={
         'name',
@@ -826,6 +820,9 @@ Widgets.slider=setmetatable({
         'numFontSize','numFontType',
         'widthLimit',
         'textAlwaysShow',
+        'sound_drag',
+        'soundInterval',
+        'soundPitchRange',
 
         'valueShow',
         'disp','code',
@@ -862,6 +859,9 @@ function Widgets.slider:reset()
         "[slider].axis need {low,high} or {low,high,unit}"
     )
     assert(self.smooth==nil or type(self.smooth)=='boolean',"[slider].smooth need boolean")
+    assert(not self.sound_drag or type(self.sound_drag)=='string',"[slider].sound_drag need string")
+    assert(type(self.soundInterval)=='number',"[slider].soundInterval need number")
+    assert(type(self.soundPitchRange)=='number',"[slider].soundPitchRange need number")
 
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
@@ -987,6 +987,10 @@ function Widgets.slider:trigger(x,mode)
     local newVal=
         self._unit and self._rangeL+floor(pos*self._rangeWidth/self._unit+.5)*self._unit
         or (1-pos)*self._rangeL+pos*self._rangeR
+    if mode~='release' and self.sound_drag and timer()-self._lastSoundTime>self.soundInterval and newVal~=self.disp() then
+        SFX.play(self.sound_drag,nil,nil,(pos*2-1)*self.soundPitchRange)
+        self._lastSoundTime=timer()
+    end
     if mode~='drag' or newVal~=self.disp() then
         self.code(newVal,mode)
     end
@@ -1029,16 +1033,9 @@ Widgets.slider_fill=setmetatable({
     labelPos='left',
     labelDistance=20,
     lineDist=3,
-
-    disp=false,
-    code=NULL,
-
-    _text=false,
-    _image=false,
-    _pos=false,
-    _rangeL=false,
-    _rangeR=false,
-    _rangeWidth=false, -- just _rangeR-_rangeL, for convenience
+    sound_drag=false,
+    soundInterval=.0626,
+    soundPitchRange=0,
 
     buildArgs={
         'name',
@@ -1051,6 +1048,9 @@ Widgets.slider_fill=setmetatable({
         'lineWidth','lineDist',
         'text','fontSize','fontType',
         'widthLimit',
+        'sound_drag',
+        'soundInterval',
+        'soundPitchRange',
 
         'disp','code',
         'visibleFunc',
@@ -1063,6 +1063,9 @@ function Widgets.slider_fill:reset()
     assert(self.w and type(self.w)=='number',"[slider_fill].w need number")
     assert(self.h and type(self.h)=='number',"[slider_fill].h need number")
     assert(type(self.disp)=='function',"[slider_fill].disp need function")
+    assert(not self.sound_drag or type(self.sound_drag)=='string',"[slider_fill].sound_drag need string")
+    assert(type(self.soundInterval)=='number',"[slider_fill].soundInterval need number")
+    assert(type(self.soundPitchRange)=='number',"[slider_fill].soundPitchRange need number")
 
     assert(
         type(self.axis)=='table' and #self.axis==2 and
@@ -1156,16 +1159,9 @@ Widgets.slider_progress=setmetatable({
     labelPos='left',
     labelDistance=20,
     lineDist=3,
-
-    disp=false,
-    code=NULL,
-
-    _text=false,
-    _image=false,
-    _pos=false,
-    _rangeL=false,
-    _rangeR=false,
-    _rangeWidth=false,
+    sound_drag=false,
+    soundInterval=.0626,
+    soundPitchRange=0,
 
     buildArgs={
         'name',
@@ -1177,6 +1173,9 @@ Widgets.slider_progress=setmetatable({
         'lineWidth',
         'text','fontSize','fontType',
         'widthLimit',
+        'sound_drag',
+        'soundInterval',
+        'soundPitchRange',
 
         'disp','code',
         'visibleFunc',
@@ -1189,6 +1188,9 @@ function Widgets.slider_progress:reset()
     assert(self.w and type(self.w)=='number',"[slider_progress].w need number")
     assert(self.h and type(self.h)=='number',"[slider_progress].h need number")
     assert(type(self.disp)=='function',"[slider_progress].disp need function")
+    assert(not self.sound_drag or type(self.sound_drag)=='string',"[slider_progress].sound_drag need string")
+    assert(type(self.soundInterval)=='number',"[slider_progress].soundInterval need number")
+    assert(type(self.soundPitchRange)=='number',"[slider_progress].soundPitchRange need number")
 
     assert(
         type(self.axis)=='table' and #self.axis==2 and
@@ -1265,8 +1267,6 @@ Widgets.selector=setmetatable({
     code=NULL,
 
     _floatWheel=0,
-    _text=false,
-    _image=false,
     _select=false, -- Selected item ID
     _selText=false, -- Selected item name
     selFontSize=30,selFontType=false,

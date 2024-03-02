@@ -6,7 +6,9 @@
 -- #                                     #
 -- An awesome pure-lua framework using Love2D
 
--- #define (lol)
+--------------------------------------------------------------
+
+-- #define
 local ms,kb=love.mouse,love.keyboard
 local KBisDown=kb.isDown
 
@@ -19,6 +21,28 @@ local max,min=math.max,math.min
 local floor,abs=math.floor,math.abs
 math.randomseed(os.time()*2600)
 kb.setKeyRepeat(true)
+
+--------------------------------------------------------------
+
+-- typedef
+---@class Zenitha.Click
+---@field x number
+---@field y number
+
+---@class Zenitha.Exception
+---@field msg string
+---@field scene string
+---@field shot? love.ImageData
+
+---@class Zenitha.joyStickState
+---@field _id number
+---@field _jsObj love.Joystick
+---@field leftx number
+---@field lefty number
+---@field rightx number
+---@field righty number
+---@field triggerleft number
+---@field triggerright number
 
 --------------------------------------------------------------
 
@@ -37,6 +61,9 @@ MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
 ---@type string Editting text, used by inputBox widget
 EDITING=""
 
+---print with formatted string
+---@param str string
+function printf(str,...) print(str:format(...)) end
 ---error with formatted string
 ---@param str string
 function errorf(str,...) error(str:format(...)) end
@@ -51,9 +78,9 @@ local mainLoopStarted=false
 local autoGCcount=0
 local devMode=false ---@type false|1|2|3|4
 local mx,my,mouseShow,cursorSpd=640,360,false,0
-local lastClicks={} ---@type table<any, {x:number, y:number}>
-local jsState={} ---@type table<number, {_id:number, _jsObj:love.Joystick, leftx:number, lefty:number, rightx:number, righty:number, triggerleft:number, triggerright:number}>
-local errData={} ---@type Zenitha.exception[]
+local lastClicks={} ---@type Zenitha.Click[]
+local jsState={} ---@type Zenitha.joyStickState[]
+local errData={} ---@type Zenitha.Exception[]
 local bigCanvases=setmetatable({},{
     __index=function(self,k)
         self[k]=gc.newCanvas(nil,nil,{msaa=select(3,love.window.getMode()).msaa})
@@ -121,34 +148,12 @@ do -- Add pcall & MSG for JSON lib
     end
 end
 
--- Pure lua modules (complex)
+-- Pure lua modules (complex, with update/draw)
 LANG=       require'Zenitha.languages'
 REQUIRE=    require'Zenitha.require'
 PROFILE=    require'Zenitha.profile'
 TASK=       require'Zenitha.task'
 HASH=       require'Zenitha.sha2'
-do -- Add pbkdf2 for HASH lib
-    local bxor=require'bit'.bxor
-    local char=string.char
-    local function sxor(s1,s2)
-        local b3=''
-        for i=1,#s1 do
-            b3=b3..char(bxor(s1:byte(i),s2:byte(i)))
-        end
-        return b3
-    end
-    function HASH.pbkdf2(hashFunc,pw,salt,n)
-        local u=HASH.hex2bin(HASH.hmac(hashFunc, pw, salt..'\0\0\0\1'))
-        local t=u
-
-        for _=2,n do
-            u=HASH.hex2bin(HASH.hmac(hashFunc, pw, u))
-            t=sxor(t, u)
-        end
-
-        return HASH.bin2hex(t):upper()
-    end
-end
 
 -- Love-based modules (simple)
 VIB=        require'Zenitha.vibrate'
@@ -160,7 +165,7 @@ SCR=        require'Zenitha.screen'
 GC=         require'Zenitha.gcExtend'
 TCP=        require'Zenitha.tcp'
 
--- Love-based modules (complex)
+-- Love-based modules (complex, with update/draw)
 HTTP=       require'Zenitha.http'
 SCN=        require'Zenitha.scene'
 TEXT=       require'Zenitha.text'
@@ -187,13 +192,6 @@ FONT.load({
 })
 FONT.setDefaultFont('_norm')
 FONT.setDefaultFallback('_norm')
-
---------------------------------------------------------------
-
----@class Zenitha.exception
----@field msg string
----@field scene string
----@field shot? love.ImageData
 
 --------------------------------------------------------------
 
@@ -935,7 +933,7 @@ function Zenitha.getJsState() return jsState end
 
 ---Get the error info
 ---@param i number|'#' Index of error info, '#' for the last one
----@return Zenitha.exception|table<number, Zenitha.exception>
+---@return Zenitha.Exception|table<number, Zenitha.Exception>
 function Zenitha.getErr(i)
     if i=='#' then
         return errData[#errData]

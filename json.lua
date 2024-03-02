@@ -337,4 +337,5 @@ function json.decode(str)
     if idx <= #str then decode_error(str, idx, "trailing garbage") end
     return res
 end
+
 return json

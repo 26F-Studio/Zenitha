@@ -5672,4 +5672,25 @@ block_size_for_HMAC = {
 }
 
 
+-- Add pbkdf2 by MrZ_26(1046101471@qq.com)
+local function sxor(s1,s2)
+   local b3=''
+   for i=1,#s1 do
+      b3=b3..char(XOR(byte(s1,i),byte(s2,i)))
+   end
+   return b3
+end
+function sha.pbkdf2(hashFunc,pw,salt,n)
+   local u=hex_to_bin(hmac(hashFunc, pw, salt..'\0\0\0\1'))
+   local t=u
+
+   for _=2,n do
+      u=hex_to_bin(hmac(hashFunc, pw, u))
+      t=sxor(t, u)
+   end
+
+   return bin_to_hex(t):upper()
+end
+
+
 return sha

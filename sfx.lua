@@ -185,7 +185,7 @@ end
 ---@param name string
 ---@param vol? number 0~1
 ---@param pos? number -1~1
----@param pitch? number +12 for an octave
+---@param pitch? number 0 = default, 12 = an Oct. lower
 function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
     if vol<=0 then return end
