@@ -55,7 +55,7 @@ end
 ---```
 function IMG.init(imgTable)
     if initialized then
-        MSG.new('info',"IMG.init(): Attempt to initialize IMG lib twice")
+        MSG.new('info',"IMG.init: Attempt to initialize IMG lib twice")
         return
     end
     initialized,IMG.init=true,nil

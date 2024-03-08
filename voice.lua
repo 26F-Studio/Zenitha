@@ -68,7 +68,7 @@ function VOC._update() end
 ---@param list table
 function VOC.init(list)
     if initialized then
-        MSG.new('info',"VOC.init(): Attempt to initialize VLC lib twice")
+        MSG.new('info',"VOC.init: Attempt to initialize VLC lib twice")
         return
     end
     initialized,VOC.init=true,nil

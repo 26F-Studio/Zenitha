@@ -17,7 +17,7 @@ local STRING={}
 ---Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
 function STRING.install()
     function STRING.install()
-        error("STRING.install(): Attempt to install stringExtend library multiple times")
+        error("STRING.install: Attempt to install stringExtend library multiple times")
     end
     for k,v in next,STRING do
         string[k]=v
