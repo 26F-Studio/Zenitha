@@ -14,13 +14,32 @@ local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
 ---@class stringlib
 local STRING={}
 
----Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
+---Install stringExtend into the lua basic "string library",
+---so that you can use these extended functions with `str:xxx(...)` format
 function STRING.install()
-    function STRING.install()
-        error("STRING.install: Attempt to install stringExtend library multiple times")
-    end
+    function STRING.install() error("STRING.install: Attempt to install stringExtend library twice") end
     for k,v in next,STRING do
         string[k]=v
+    end
+end
+
+---Install str[n] and str[n]='c' syntax.
+---The editted string will be stored into STRING._
+---
+---Notice that str[n]='ccc' will removed the n-th character then put 'ccc' into it, changing string length
+function STRING.installIndex()
+    function STRING.installIndex() error("STRING.installIndex: Attempt to install stringIndex syntax twice") end
+    local meta=getmetatable('')
+    function meta.__index(str,n)
+        if type(n)~='number' then
+            return string[n]
+        else
+            return sub(str,n,n)
+        end
+    end
+    STRING._='' -- Editted string stored here
+    function meta.__newindex(str,n,c)
+        STRING._=sub(str,1,n-1)..c..sub(str,n+1)
     end
 end
 
