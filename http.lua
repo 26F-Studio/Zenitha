@@ -102,7 +102,9 @@ function HTTP.request(arg)
 
     if arg.body~=nil then
         assertf(type(arg.body)=='table',"HTTP.request(arg): arg.body need table, got %s",arg.body)
-        arg.body=JSON.encode(arg.body)
+        local res
+        res,arg.body=pcall(JSON.encode,arg.body)
+        assert(res,"HTTP.request(arg): arg.body json-encoding error")
         if not arg.headers then arg.headers={} end
         TABLE.cover({
             ['Content-Type']="application/json",

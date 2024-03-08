@@ -52,11 +52,8 @@ function FILE.load(path,args)
                 error("FILE.load: Compile error: "..err_mes)
             end
         elseif mode=='json' then
-            local res=JSON.decode(s)
-            if res then
-                return res
-            end
-            error("FILE.load: Decode error")
+            local res,data=pcall(JSON.decode,s)
+            return res and data or error("FILE.load: Decode error")
         elseif mode=='string' then
             return s
         else
@@ -75,7 +72,7 @@ end
 function FILE.save(data,path,args)
     if not args then args='' end
     if STRING.sArg(args,'-d') and fs.getInfo(path) then
-        error("FILE.save: Duplicate")
+        error("FILE.save: File already exist")
     end
 
     if type(data)=='table' then
@@ -86,13 +83,12 @@ function FILE.save(data,path,args)
                 data='return'..TABLE.dumpDeflate(data)
             end
             if not data then
-                error("FILE.save: Encode error")
+                error("FILE.save: Luaon-encoding error")
             end
         else
-            data=JSON.encode(data)
-            if not data then
-                error("FILE.save: Encode error")
-            end
+            local res
+            res,data=pcall(JSON.encode,data)
+            assert(res,"FILE.save: Json-encoding error")
         end
     else
         data=tostring(data)

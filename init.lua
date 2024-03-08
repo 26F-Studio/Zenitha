@@ -128,25 +128,6 @@ COLOR=      require'Zenitha.color'
 DEBUG=      require'Zenitha.debug'
 LOG=        require'Zenitha.log'
 JSON=       require'Zenitha.json'
-do -- Add pcall & MSG for JSON lib
-    local encode,decode=JSON.encode,JSON.decode
-    function JSON.encode(val)
-        local a,b=pcall(encode,val)
-        if a then
-            return b
-        elseif MSG then
-            MSG.traceback()
-        end
-    end
-    function JSON.decode(str)
-        local a,b=pcall(decode,str)
-        if a then
-            return b
-        elseif MSG then
-            MSG.traceback()
-        end
-    end
-end
 
 -- Pure lua modules (complex, with update/draw)
 LANG=       require'Zenitha.languages'
