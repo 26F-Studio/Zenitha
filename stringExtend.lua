@@ -27,6 +27,8 @@ end
 ---The editted string will be stored into STRING._
 ---
 ---Notice that str[n]='ccc' will removed the n-th character then put 'ccc' into it, changing string length
+---
+---And will potentially make `:` (like `str:find(...)`) slightly slower than before
 function STRING.installIndex()
     function STRING.installIndex() error("STRING.installIndex: Attempt to install stringIndex syntax twice") end
     local meta=getmetatable('')

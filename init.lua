@@ -48,7 +48,7 @@ kb.setKeyRepeat(true)
 
 -- Useful global values/variables
 ---@type table Empty table used as placeholder
-NONE=setmetatable({},{__newindex=function() error("Attempt to modify a constant table") end,__metatable=true})
+NONE=setmetatable({},{__newindex=function() error("NONE: Attempt to modify constant table") end,__metatable=true})
 ---@type function Empty function used as placeholder
 NULL=function(...) end
 ---@type love.Canvas Empty canvas used as placeholder
@@ -145,6 +145,7 @@ FILE=       require'Zenitha.file'
 SCR=        require'Zenitha.screen'
 GC=         require'Zenitha.gcExtend'
 TCP=        require'Zenitha.tcp'
+MIDI=       require'Zenitha.midi'
 
 -- Love-based modules (complex, with update/draw)
 HTTP=       require'Zenitha.http'
