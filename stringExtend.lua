@@ -43,6 +43,36 @@ function STRING.installIndex()
     end
 end
 
+---Install stringPath syntax. Warning: conflict with normal auto-tonumber operation
+---\- "script/main.lua" Get the file name from path
+---
+---"script" / "main.lua" Combine folder and file name
+---
+---"script/main.lua" - n Get the level n directory name
+---
+---"script/main.lua" % "lua,js" Check if the file has the postfix
+function STRING.installPath()
+    function STRING.installPath() error("STRING.installPath: Attempt to install stringPath syntax twice") end
+    local meta=getmetatable('')
+    function meta.__unm(path) return match(path,".+/(.+)$") or path end
+    function meta.__div(folder,file) return folder.."/"..file end
+    function meta.__sub(path,layer)
+        while layer>0 do
+            path=match(path,"(.+)/") or path
+            layer=layer-1
+        end
+        return path
+    end
+    function meta.__mod(file,postfixs)
+        local postfix=match(file,"%.(.-)$")
+        postfixs=STRING.split(postfixs,',')
+        for i=1,#postfixs do
+            if postfix==postfixs[i] then return true end
+        end
+        return false
+    end
+end
+
 ---"Replace dollars". Replace all $n with ..., like string.format
 ---@param str string
 ---@param ... any
