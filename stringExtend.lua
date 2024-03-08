@@ -299,7 +299,6 @@ function STRING.binNum(str)
     -- end
     return num
 end
-print(STRING.binNum("\255\255\255\255\255\255"))
 
 local units={'','K','M','B','T','Qa','Qt','Sx','Sp','Oc','No'}
 local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}
