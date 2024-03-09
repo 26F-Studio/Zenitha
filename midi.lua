@@ -16,7 +16,7 @@ local debug=false
 ---@field midFormat number
 ---@field trackCount number
 ---@field tickPerQuarterNote number
----@field beatPerMinute number|number[] list when has multiple SetTempo event
+---@field beatPerMinute string for storing multiple-tempo like "100,120"
 ---@field handler function
 ---@field playing boolean
 ---
@@ -51,22 +51,25 @@ function MIDI.newSong(sData,handler)
     assert(type(sData)=='string',"MIDI.newSong(songData,handler): songData need string")
     assert(type(handler)=='function',"MIDI.newSong(songData,handler): handler need function")
     local Song={
-        handler=handler,
         playing=true,
+        time=0,
+        handler=handler,
     }
-    local bpmList={}
+
+    local bpmEvents={}
 
     local sec
     assert(type(sData)=='string',"file not found")
 
     sec,sData=read(sData,8)
-    assert(sec=='MThd\0\0\0\6',"not a midi file")
+    assert(sec=='MThd\0\0\0\6',"File head missing")
 
     sec,sData=read(sData,2)
     Song.midFormat=STRING.binNum(sec)
 
     sec,sData=read(sData,2)
     Song.trackCount=STRING.binNum(sec)
+    Song.trackHeads=TABLE.new(1,Song.trackCount)
 
     sec,sData=read(sData,2)
     Song.tickPerQuarterNote=STRING.binNum(sec)
@@ -76,15 +79,13 @@ function MIDI.newSong(sData,handler)
         if debug then print("TRACK ".._..":") end
         local track={}
         sec,sData=read(sData,4)
-        assert(sec=='MTrk',"not a midi track")
+        assert(sec=='MTrk',"Track head missing")
 
         sec,sData=read(sData,4)
         local trackDataLen=STRING.binNum(sec)
         local tData
         tData,sData=read(sData,trackDataLen)
 
-        local tickAnchor,timeAnchor=0,0
-        local tickPerSecond=26
         local tick=0
         repeat
             local dTick
@@ -92,10 +93,8 @@ function MIDI.newSong(sData,handler)
             if debug and dTick>0 then print("D "..dTick) end
             tick=tick+dTick
 
-            local time=timeAnchor+(tick-tickAnchor)/tickPerSecond
-
             ---@type Zenitha.MIDI.Event
-            local event={tick=tick,time=time}
+            local event={tick=tick}
 
             sec,tData=read(tData,1)
             event.type=sec:byte()
@@ -134,16 +133,14 @@ function MIDI.newSong(sData,handler)
                 len,tData=VLQ(tData)
                 event.data,tData=read(tData,len)
                 if event.subType==0x51 then -- SetTempo
-                    timeAnchor=timeAnchor+(tick-tickAnchor)/tickPerSecond
-                    tickAnchor=tick
+                    -- For calculating all events' real time
                     local bpm=60000000/STRING.binNum(event.data)
-                    tickPerSecond=Song.tickPerQuarterNote*bpm/60
-                    table.insert(bpmList,bpm)
+                    table.insert(bpmEvents,{tick=tick,bpm=bpm})
                     if debug then print("MetaEvent: SetTempo",bpm) end
                 elseif event.subType==0x58 then -- TimeSignature
-                    if debug then print("MetaEvent: TimeSignature",event.data:byte(1),event.data:byte(2),event.data:byte(3),event.data:byte(4)) end
+                    if debug then print("MetaEvent: TimeSignature",event.data:byte(1,-1)) end
                 elseif event.subType==0x59 then -- KeySignature
-                    if debug then print("MetaEvent: KeySignature",event.data:byte(1),event.data:byte(2)) end
+                    if debug then print("MetaEvent: KeySignature",event.data:byte(1,-1)) end
                 end
             elseif debug then
                 print("UNK",event.type)
@@ -163,15 +160,37 @@ function MIDI.newSong(sData,handler)
         until #tData==0
         table.insert(Song.tracks,track)
     end
-    assert(#Song.tracks==Song.trackCount,"redundancy track")
-    assert(#sData==0,"redundancy data")
+    assert(#Song.tracks==Song.trackCount,"Track count doesn't match")
+    assert(#sData==0,"Redundancy data")
 
-    Song.time=0
-    Song.trackHeads=TABLE.new(1,Song.trackCount)
-    Song.beatPerMinute=
-        #bpmList==1 and bpmList[1] or
-        #bpmList>1 and bpmList or
-        0
+    -- Calculate time of each event
+    for i=1,Song.trackCount do
+        local bpmPointer=1
+        local tickPerSecond=Song.tickPerQuarterNote*120/60
+        local tickAnchor,timeAnchor=0,0
+        local track=Song.tracks[i]
+        for j=1,#track do
+            local event=track[j]
+            if bpmPointer>0 and event.tick>=bpmEvents[bpmPointer].tick then
+                timeAnchor,tickAnchor=timeAnchor+(event.tick-tickAnchor)/tickPerSecond,bpmEvents[bpmPointer].tick
+                tickPerSecond=Song.tickPerQuarterNote*bpmEvents[bpmPointer].bpm/60
+                bpmPointer=bpmPointer+1
+                if not bpmEvents[bpmPointer] then bpmPointer=-1 end -- No more bpm change
+            end
+            event.time=timeAnchor+(event.tick-tickAnchor)/tickPerSecond
+        end
+    end
+
+    -- Simplify bpmEvents to a bpm list
+    if #bpmEvents>0 then
+        for i=1,#bpmEvents do bpmEvents[i]=bpmEvents[i].bpm end
+        Song.beatPerMinute=table.concat(bpmEvents,',')
+    elseif bpmEvents[1] then
+        Song.beatPerMinute=tostring(bpmEvents[1].bpm)
+    else
+        Song.beatPerMinute="120"
+    end
+    if debug then print(Song.beatPerMinute) end
 
     return setmetatable(Song,MIDI)
 end
