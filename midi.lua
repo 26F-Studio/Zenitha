@@ -3,7 +3,7 @@ local debug=true
 ---@class Zenitha.MIDI.Event
 ---@field tick number tick
 ---@field type number midi-type number
----@field name string readable event type name
+---@field name "NoteStart" | "NoteEnd" | "ControlChange" | "ProgramChange" | "PitchBend" | "MetaEvent" readable event type name
 ---@field channel number? For all event except MetaEvent
 ---@field note number? NoteStart & NoteEnd
 ---@field velocity number? NoteStart & NoteEnd
@@ -17,6 +17,7 @@ local debug=true
 ---@field trackCount number
 ---@field tickPerQuarterNote number
 ---@field beatPerMinute number
+---@field handler function
 ---
 ---@field tracks Zenitha.MIDI.Event[]
 ---@field trackHeads number[]
@@ -41,8 +42,13 @@ local function VLQ(str)
 end
 
 local read=STRING.readChars
-function MIDI.newSong(sData)
-    local Song={}
+---@param sData string
+---@param handler fun(event:Zenitha.MIDI.Event)
+---@return Zenitha.MIDI
+function MIDI.newSong(sData,handler)
+    assert(type(sData)=='string',"MIDI.newSong(songData,handler): songData need string")
+    assert(type(handler)=='function',"MIDI.newSong(songData,handler): handler need function")
+    local Song={handler=handler}
 
     local sec
     assert(type(sData)=='string',"file not found")
@@ -61,7 +67,7 @@ function MIDI.newSong(sData)
 
     Song.tracks={}
     for _=1,Song.trackCount do
-        -- print("TRACK ".._..":")
+        if debug then print("TRACK ".._..":") end
         local track={}
         sec,sData=read(sData,4)
         assert(sec=="MTrk","not a midi track")
@@ -138,7 +144,7 @@ function MIDI.newSong(sData)
                 if debug then
                     local n=event.name
                     print(n,
-                        n=="NoteStart" or n=="NoteEnd" and event.note or
+                        (n=="NoteStart" or n=="NoteEnd") and event.note or
                         n=="ControlChange" and event.control or
                         n=="ProgramChange" or n=="PitchBend" and event.value or
                         n=="MetaEvent" and event.subType.." ["..event.data.."]"
@@ -154,11 +160,12 @@ function MIDI.newSong(sData)
 
     Song.time=0
     Song.trackHeads=TABLE.new(1,Song.trackCount)
-    Song.beatPerMinute=120
+    Song.beatPerMinute=0
 
     return setmetatable(Song,MIDI)
 end
 
+---@param t number
 function MIDI:seek(t)
     self.time=t
     for i=1,#self.trackHeads do
@@ -174,10 +181,6 @@ function MIDI:reset()
     end
 end
 
-function MIDI:doEvent(event)
-    print(event.name,event.tick)
-end
-
 function MIDI:update(dt)
     self.time=self.time+dt
     local tick=self.time*self.beatPerMinute/60*self.tickPerQuarterNote
@@ -186,7 +189,11 @@ function MIDI:update(dt)
         while true do
             local event=self.tracks[i][head]
             if event and tick>=event.tick then
-                self:doEvent(event)
+                if event.name=="MetaEvent" and event.subType==0x51 then
+                    self.beatPerMinute=60000000/STRING.binNum(event.data)
+                else
+                    self.handler(event)
+                end
                 head=head+1
             else
                 break
