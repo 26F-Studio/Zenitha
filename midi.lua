@@ -16,11 +16,12 @@ local debug=false
 ---@field midFormat number
 ---@field trackCount number
 ---@field tickPerQuarterNote number
----@field beatPerMinute number
+---@field beatPerMinute number|number[] list when has multiple SetTempo event
 ---@field handler function
+---@field playing boolean
 ---
 ---@field tracks Zenitha.MIDI.Event[]
----@field trackHeads number[]
+---@field trackHeads (number|false)[]
 ---@field time number
 local MIDI={}
 MIDI.__index=MIDI
@@ -49,7 +50,11 @@ local read=STRING.readChars
 function MIDI.newSong(sData,handler)
     assert(type(sData)=='string',"MIDI.newSong(songData,handler): songData need string")
     assert(type(handler)=='function',"MIDI.newSong(songData,handler): handler need function")
-    local Song={handler=handler}
+    local Song={
+        handler=handler,
+        playing=true,
+    }
+    local bpmList={}
 
     local sec
     assert(type(sData)=='string',"file not found")
@@ -131,9 +136,10 @@ function MIDI.newSong(sData,handler)
                 if event.subType==0x51 then -- SetTempo
                     timeAnchor=timeAnchor+(tick-tickAnchor)/tickPerSecond
                     tickAnchor=tick
-                    local beatPerMinute=60000000/STRING.binNum(event.data)
-                    tickPerSecond=Song.tickPerQuarterNote*beatPerMinute/60
-                    if debug then print("MetaEvent: SetTempo",beatPerMinute) end
+                    local bpm=60000000/STRING.binNum(event.data)
+                    tickPerSecond=Song.tickPerQuarterNote*bpm/60
+                    table.insert(bpmList,bpm)
+                    if debug then print("MetaEvent: SetTempo",bpm) end
                 elseif event.subType==0x58 then -- TimeSignature
                     if debug then print("MetaEvent: TimeSignature",event.data:byte(1),event.data:byte(2),event.data:byte(3),event.data:byte(4)) end
                 elseif event.subType==0x59 then -- KeySignature
@@ -162,13 +168,17 @@ function MIDI.newSong(sData,handler)
 
     Song.time=0
     Song.trackHeads=TABLE.new(1,Song.trackCount)
-    Song.beatPerMinute=0
+    Song.beatPerMinute=
+        #bpmList==1 and bpmList[1] or
+        #bpmList>1 and bpmList or
+        0
 
     return setmetatable(Song,MIDI)
 end
 
 ---@param t number
 function MIDI:seek(t)
+    self.playing=true
     self.time=t
     for i=1,#self.trackHeads do
         local p=1
@@ -177,6 +187,7 @@ function MIDI:seek(t)
 end
 
 function MIDI:reset()
+    self.playing=true
     self.time=0
     for i=1,#self.trackHeads do
         self.trackHeads[i]=1
@@ -184,25 +195,40 @@ function MIDI:reset()
 end
 
 function MIDI:update(dt)
+    if not self.playing then return end
     self.time=self.time+dt
-    local tick=self.time*self.beatPerMinute/60*self.tickPerQuarterNote
+    local heads=self.trackHeads
+    local dead=true
     for i=1,self.trackCount do
-        local head=self.trackHeads[i]
         while true do
-            local event=self.tracks[i][head]
-            if event and tick>=event.tick then
-                if event.name=='MetaEvent' and event.subType==0x51 then
-                    self.beatPerMinute=60000000/STRING.binNum(event.data)
-                else
+            local event=self.tracks[i][heads[i]]
+            if event then
+                dead=false
+                if self.time>=event.time then
                     self.handler(event)
+                    heads[i]=heads[i]+1
+                else
+                    break
                 end
-                head=head+1
             else
                 break
             end
         end
-        self.trackHeads[i]=head
     end
+    if dead then
+        self.playing=false
+    end
+end
+
+---Play the song with TASK.new
+function MIDI:play()
+    local upd=MIDI.update
+    local yield=coroutine.yield
+    TASK.new(function()
+        while self.playing do
+            upd(self,yield())
+        end
+    end)
 end
 
 return MIDI
