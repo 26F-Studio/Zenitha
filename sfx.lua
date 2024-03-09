@@ -14,13 +14,13 @@ local volume=1
 local stereo=1
 
 local noteVal={
-    C=1,c=1,
-    D=3,d=3,
-    E=5,e=5,
-    F=6,f=6,
-    G=8,g=8,
-    A=10,a=10,
-    B=12,b=12,
+    C=0,c=0,
+    D=2,d=2,
+    E=4,e=4,
+    F=5,f=5,
+    G=7,g=7,
+    A=9,a=9,
+    B=11,b=11,
 }
 local noteName={'C','C#','D','D#','E','F','F#','G','G#','A','A#','B'}
 local function _getTuneHeight(tune)
@@ -134,17 +134,16 @@ function SFX.setStereo(s)
     stereo=s
 end
 
----Get note name with note number
+---Get note name with note number (start from 0, like midi)
 ---
----1 --> ' C1'
----13 --> 'C#2'
----@param note number Note number, 1~127
+---0 --> ' C1'
+---12 --> 'C2'
+---@param note number Note number, start from 0
 ---@return string Note name, e.g. 'C4'
 function SFX.getNoteName(note)
     if note<1 then
         return '---'
     else
-        note=note-1
         local octave=floor(note/12)+1
         return noteName[note%12+1]..octave
     end

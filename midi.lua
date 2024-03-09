@@ -47,6 +47,14 @@ local read=STRING.readChars
 ---@param sData string
 ---@param handler fun(event:Zenitha.MIDI.Event)
 ---@return Zenitha.MIDI
+---## Example
+---```lua
+---MIDI.newSong(FILE.load("music.mid"),function(event)
+---    if event.name=='NoteStart' then
+---        SFX.playSample('lead',event.note)
+---    end
+---end):play()
+---```
 function MIDI.newSong(sData,handler)
     assert(type(sData)=='string',"MIDI.newSong(songData,handler): songData need string")
     assert(type(handler)=='function',"MIDI.newSong(songData,handler): handler need function")
