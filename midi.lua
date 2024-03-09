@@ -1,9 +1,9 @@
-local debug=true
+local debug=false
 
 ---@class Zenitha.MIDI.Event
 ---@field tick number tick
 ---@field type number midi-type number
----@field name "NoteStart" | "NoteEnd" | "ControlChange" | "ProgramChange" | "PitchBend" | "MetaEvent" readable event type name
+---@field name 'NoteStart' | 'NoteEnd' | 'ControlChange' | 'ProgramChange' | 'PitchBend' | 'MetaEvent' readable event type name
 ---@field channel number? For all event except MetaEvent
 ---@field note number? NoteStart & NoteEnd
 ---@field velocity number? NoteStart & NoteEnd
@@ -25,8 +25,8 @@ local debug=true
 local MIDI={}
 MIDI.__index=MIDI
 
-local r={0}
-for i=1,12 do r[i+1]=r[i]+2^(7*i) end -- Starting value of N-byte VLQ
+-- local r={0}
+-- for i=1,12 do r[i+1]=r[i]+2^(7*i) end -- Offset value of N-byte VLQ
 local function VLQ(str)
     local e=1
     while str:byte(e)>127 do e=e+1 end
@@ -37,7 +37,8 @@ local function VLQ(str)
         for i=1,e do
             sum=sum*2^7+str:byte(i)%128
         end
-        return sum+r[e],str:sub(e+1)
+        return sum,str:sub(e+1)
+        -- return sum+r[e],str:sub(e+1) -- why mid doesn't use real VLQ with offset
     end
 end
 
@@ -54,7 +55,7 @@ function MIDI.newSong(sData,handler)
     assert(type(sData)=='string',"file not found")
 
     sec,sData=read(sData,8)
-    assert(sec=="MThd\0\0\0\6","not a midi file")
+    assert(sec=='MThd\0\0\0\6',"not a midi file")
 
     sec,sData=read(sData,2)
     Song.midFormat=STRING.binNum(sec)
@@ -70,7 +71,7 @@ function MIDI.newSong(sData,handler)
         if debug then print("TRACK ".._..":") end
         local track={}
         sec,sData=read(sData,4)
-        assert(sec=="MTrk","not a midi track")
+        assert(sec=='MTrk',"not a midi track")
 
         sec,sData=read(sData,4)
         local trackDataLen=STRING.binNum(sec)
@@ -83,6 +84,7 @@ function MIDI.newSong(sData,handler)
         repeat
             local dTick
             dTick,tData=VLQ(tData)
+            if debug and dTick>0 then print("D "..dTick) end
             tick=tick+dTick
 
             local time=timeAnchor+(tick-tickAnchor)/tickPerSecond
@@ -93,35 +95,35 @@ function MIDI.newSong(sData,handler)
             sec,tData=read(tData,1)
             event.type=sec:byte()
             if event.type>=0x90 and event.type<=0x9F then
-                event.name="NoteStart"
+                event.name='NoteStart'
                 event.channel=event.type-0x90
                 sec,tData=read(tData,2)
                 event.note=sec:byte(1)
                 event.velocity=sec:byte(2)
             elseif event.type>=0x80 and event.type<=0x8F then
-                event.name="NoteEnd"
+                event.name='NoteEnd'
                 event.channel=event.type-0x80
                 sec,tData=read(tData,2)
                 event.note=sec:byte(1)
                 event.velocity=sec:byte(2)
             elseif event.type>=0xB0 and event.type<=0xBF then
-                event.name="ControlChange"
+                event.name='ControlChange'
                 event.channel=event.type-0xB0
                 sec,tData=read(tData,2)
                 event.control=sec:byte(1)
                 event.value=sec:byte(2)
             elseif event.type>=0xC0 and event.type<=0xCF then
-                event.name="ProgramChange"
+                event.name='ProgramChange'
                 event.channel=event.type-0xC0
                 sec,tData=read(tData,1)
                 event.value=sec:byte()
             elseif event.type>=0xE0 and event.type<=0xEF then
-                event.name="PitchBend"
+                event.name='PitchBend'
                 event.channel=event.type-0xE0
                 sec,tData=read(tData,2)
                 event.value=STRING.binNum(sec)
             elseif event.type==0xFF then
-                event.name="MetaEvent"
+                event.name='MetaEvent'
                 event.subType,tData=VLQ(tData)
                 local len
                 len,tData=VLQ(tData)
@@ -131,23 +133,23 @@ function MIDI.newSong(sData,handler)
                     tickAnchor=tick
                     local beatPerMinute=60000000/STRING.binNum(event.data)
                     tickPerSecond=Song.tickPerQuarterNote*beatPerMinute/60
-                    if debug then print("SetTempo",beatPerMinute) end
+                    if debug then print("MetaEvent: SetTempo",beatPerMinute) end
                 elseif event.subType==0x58 then -- TimeSignature
-                    if debug then print("TimeSignature",event.data:byte(1),event.data:byte(2),event.data:byte(3),event.data:byte(4)) end
+                    if debug then print("MetaEvent: TimeSignature",event.data:byte(1),event.data:byte(2),event.data:byte(3),event.data:byte(4)) end
                 elseif event.subType==0x59 then -- KeySignature
-                    if debug then print("KeySignature",event.data:byte(1),event.data:byte(2)) end
+                    if debug then print("MetaEvent: KeySignature",event.data:byte(1),event.data:byte(2)) end
                 end
             elseif debug then
                 print("UNK",event.type)
             end
             if event.name then
-                if debug then
+                if debug and event.name~='MetaEvent' then
                     local n=event.name
                     print(n,
-                        (n=="NoteStart" or n=="NoteEnd") and event.note or
-                        n=="ControlChange" and event.control or
-                        n=="ProgramChange" or n=="PitchBend" and event.value or
-                        n=="MetaEvent" and event.subType.." ["..event.data.."]"
+                        (n=='NoteStart' or n=='NoteEnd') and event.note or
+                        n=='ControlChange' and event.control or
+                        (n=='ProgramChange' or n=='PitchBend') and event.value or
+                        "?"
                     )
                 end
                 table.insert(track,event)
@@ -189,7 +191,7 @@ function MIDI:update(dt)
         while true do
             local event=self.tracks[i][head]
             if event and tick>=event.tick then
-                if event.name=="MetaEvent" and event.subType==0x51 then
+                if event.name=='MetaEvent' and event.subType==0x51 then
                     self.beatPerMinute=60000000/STRING.binNum(event.data)
                 else
                     self.handler(event)
