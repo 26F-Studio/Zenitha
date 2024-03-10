@@ -28,15 +28,16 @@ MIDI.__index=MIDI
 
 -- local r={0}
 -- for i=1,12 do r[i+1]=r[i]+2^(7*i) end -- Offset value of N-byte VLQ
+local byte=string.byte
 local function VLQ(str)
     local e=1
-    while str:byte(e)>127 do e=e+1 end
+    while byte(str,e)>127 do e=e+1 end
     if e==1 then
-        return str:byte(),str:sub(2)
+        return byte(str),str:sub(2)
     else
         local sum=0
         for i=1,e do
-            sum=sum*2^7+str:byte(i)%128
+            sum=sum*2^7+byte(str,i)%128
         end
         return sum,str:sub(e+1)
         -- return sum+r[e],str:sub(e+1) -- why mid doesn't use real VLQ with offset
@@ -198,7 +199,7 @@ function MIDI.newSong(sData,handler)
     else
         Song.beatPerMinute="120"
     end
-    if debug then print(Song.beatPerMinute) end
+    if debug then printf("BPM: %.2f",Song.beatPerMinute) end
 
     return setmetatable(Song,MIDI)
 end

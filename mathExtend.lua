@@ -8,7 +8,7 @@ MATH.nan=0/0
 
 local floor,ceil=math.floor,math.ceil
 local sin,cos=math.sin,math.cos
-local max,min=math.max,math.min
+local max=math.max
 local rnd=math.random
 local exp,log=math.exp,math.log
 local abs=math.abs

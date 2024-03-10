@@ -1,11 +1,11 @@
 local data=love.data
 local assert,tostring,tonumber=assert,tostring,tonumber
 local floor,lg=math.floor,math.log10
-local min,max=math.min,math.max
+local min=math.min
 local find,format=string.find,string.format
 local sub,gsub=string.sub,string.gsub
 local match,gmatch=string.match,string.gmatch
-local rep,reverse=string.rep,string.reverse
+local rep=string.rep
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
 
@@ -318,14 +318,13 @@ end
 ---@return string
 function STRING.UTF8(num)
     assertf(type(num)=='number',"Wrong type (%s)",type(num))
-    if num<=0 then errorf("STRING.UTF8(num): Out of range (%d)",num)
-    elseif num<2^7  then return char(num)
+    assertf(num>=0 and num<2^31,"Out of range (%d)",num)
+    if     num<2^7  then return char(num)
     elseif num<2^11 then return char(192+floor(num/2^06),128+num%2^6)
     elseif num<2^16 then return char(224+floor(num/2^12),128+floor(num/2^06)%2^6,128+num%2^6)
     elseif num<2^21 then return char(240+floor(num/2^18),128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     elseif num<2^26 then return char(248+floor(num/2^24),128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
-    elseif num<2^31 then return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
-    else errorf("STRING.UTF8(num): Out of range (%d)",num)
+    else                 return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     end
 end
 
