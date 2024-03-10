@@ -218,7 +218,7 @@ function SFX.play(name,vol,pos,pitch)
         end
     end
     S:setVolume(vol^1.626)
-    S:setPitch(pitch and 1.0594630943592953^pitch or 1)
+    S:setPitch(pitch and (2^(1/12))^pitch or 1)
     S:play()
 end
 
