@@ -3,14 +3,15 @@ local debug=false
 ---@class Zenitha.MIDI.Event
 ---@field tick number tick
 ---@field type number midi-type number
----@field name 'NoteStart' | 'NoteEnd' | 'ControlChange' | 'ProgramChange' | 'PitchBend' | 'MetaEvent' readable event type name
+---@field name 'NoteEnd' | 'NoteStart' | 'KeyPressure' | 'ControlChange' | 'ProgramChange' | 'ChannelPressure' | 'PitchBend' | 'MetaEvent' | 'SysMes' | 'Unknown' readable event type name
 ---@field channel number? For all event except MetaEvent
----@field note number? NoteStart & NoteEnd
----@field velocity number? NoteStart & NoteEnd
+---@field note number? NoteEnd & NoteStart
+---@field velocity number? NoteEnd & NoteStart & KeyPressure & ChannelPressure
 ---@field control number? ControlChange
 ---@field value number? ControlChange & ProgramChange & PitchBend
 ---@field subType number? MetaEvent
----@field data string MetaEvent
+---@field subName string? MetaEvent
+---@field data string MetaEvent & SysMes
 
 ---@class Zenitha.MIDI
 ---@field midFormat number
@@ -84,8 +85,8 @@ function MIDI.newSong(sData,handler)
     Song.tickPerQuarterNote=STRING.binNum(sec)
 
     Song.tracks={}
-    for _=1,Song.trackCount do
-        if debug then print("TRACK ".._..":") end
+    for t=1,Song.trackCount do
+        if debug then print("TRACK "..t..":") end
         local track={}
         sec,sData=read(sData,4)
         assert(sec=='MTrk',"Track head missing")
@@ -107,52 +108,111 @@ function MIDI.newSong(sData,handler)
 
             sec,tData=read(tData,1)
             event.type=sec:byte()
-            if event.type>=0x90 and event.type<=0x9F then
-                event.name='NoteStart'
-                event.channel=event.type-0x90
+            if event.type>=0x80 and event.type<=0x8F then
+                event.name='NoteEnd'
+                event.channel=event.type%0x10
                 sec,tData=read(tData,2)
                 event.note=sec:byte(1)
                 event.velocity=sec:byte(2)
-            elseif event.type>=0x80 and event.type<=0x8F then
-                event.name='NoteEnd'
-                event.channel=event.type-0x80
+            elseif event.type>=0x90 and event.type<=0x9F then
+                event.name='NoteStart'
+                event.channel=event.type%0x10
+                sec,tData=read(tData,2)
+                event.note=sec:byte(1)
+                event.velocity=sec:byte(2)
+            elseif event.type>=0xA0 and event.type<=0xAF then
+                event.name='KeyPressure'
+                event.channel=event.type%0x10
                 sec,tData=read(tData,2)
                 event.note=sec:byte(1)
                 event.velocity=sec:byte(2)
             elseif event.type>=0xB0 and event.type<=0xBF then
                 event.name='ControlChange'
-                event.channel=event.type-0xB0
+                event.channel=event.type%0x10
                 sec,tData=read(tData,2)
                 event.control=sec:byte(1)
                 event.value=sec:byte(2)
             elseif event.type>=0xC0 and event.type<=0xCF then
                 event.name='ProgramChange'
-                event.channel=event.type-0xC0
+                event.channel=event.type%0x10
                 sec,tData=read(tData,1)
                 event.value=sec:byte()
+            elseif event.type>=0xD0 and event.type<=0xDF then
+                event.name='ChannelPressure'
+                event.channel=event.type%0x10
+                sec,tData=read(tData,1)
+                event.velocity=sec:byte()
             elseif event.type>=0xE0 and event.type<=0xEF then
                 event.name='PitchBend'
-                event.channel=event.type-0xE0
+                event.channel=event.type%0x10
                 sec,tData=read(tData,2)
                 event.value=STRING.binNum(sec)
-            elseif event.type==0xFF then
+            elseif event.type==0xFF then -- MetaEvent
                 event.name='MetaEvent'
                 event.subType,tData=VLQ(tData)
                 local len
                 len,tData=VLQ(tData)
                 event.data,tData=read(tData,len)
-                if event.subType==0x51 then -- SetTempo
-                    -- For calculating all events' real time
-                    local bpm=60000000/STRING.binNum(event.data)
+                if event.subType<=0x07 then -- Texts
+                    event.subName=
+                        event.subType==0x01 and '' or
+                        event.subType==0x02 and 'CopyRight' or
+                        event.subType==0x03 and 'TrackName' or
+                        event.subType==0x04 and 'InstrumentName' or
+                        event.subType==0x05 and 'Lyric' or
+                        event.subType==0x06 and 'Marker' or
+                        event.subType==0x07 and 'CuePoint' or ''
+                    if debug then printf("MetaEvent-%sText, %s",event.subName,event.data) end
+                elseif event.subType==0x20 then -- MIDIChannelPrefix
+                    event.subName='MIDIChannelPrefix'
+                    if debug then print("MetaEvent-MIDIChannelPrefix",event.data:byte()) end
+                elseif event.subType==0x2F then -- EndOfTrack
+                    event.subName='EndOfTrack'
+                    if debug then print("MetaEvent-EndOfTrack") end
+                elseif event.subType==0x51 then -- SetTempo, Save value for calculating all events' real time
+                    event.subName='SetTempo'
+                    local bpm=MATH.roundUnit(60000000/STRING.binNum(event.data),0.001)
                     table.insert(bpmEvents,{tick=tick,bpm=bpm})
-                    if debug then print("MetaEvent: SetTempo",bpm) end
+                    if debug then printf("MetaEvent-SetTempo: %d",bpm) end
+                elseif event.subType==0x54 then -- SMPTEOffset
+                    event.subName='SMPTEOffset'
+                    if debug then print("MetaEvent-SMPTEOffset: ",event.data:byte(1,-1)) end
                 elseif event.subType==0x58 then -- TimeSignature
-                    if debug then print("MetaEvent: TimeSignature",event.data:byte(1,-1)) end
+                    event.subName='TimeSignature'
+                    if debug then print("MetaEvent-TimeSignature: ",event.data:byte(1,-1)) end
                 elseif event.subType==0x59 then -- KeySignature
-                    if debug then print("MetaEvent: KeySignature",event.data:byte(1,-1)) end
+                    event.subName='KeySignature'
+                    if debug then print("MetaEvent-KeySignature: ",event.data:byte(1,-1)) end
+                elseif event.subType==0x7F then -- SequencerSpecific
+                    event.subName='SequencerSpecific'
+                    if debug then print("MetaEvent-SequencerSpecific: ",event.data:byte(1,-1)) end
+                else
+                    event.name=nil -- Undefined
+                    if debug then print("MetaEvent-Undefined",event.subType,event.data) end
                 end
-            elseif debug then
-                print("UNK",event.type)
+            elseif event.type>=0xF0 then -- System events, shouldn't appear in .mid file...?
+                event.name='SysMes'
+                if event.type==0xF0 then -- SysEx
+                    event.subName='SysEx'
+                    event.data,tData=read(tData,(assert((tData:find('\xF7')))))
+                    event.data=event.data:sub(1,-2)
+                elseif event.type==0xF2 then -- Song Position Pointer
+                    event.subName='SongPositionPointer'
+                    event.data,tData=read(tData,2)
+                elseif event.type==0xF3 then -- Song Select
+                    event.subName='SongSelect'
+                    event.data,tData=read(tData,1)
+                elseif event.type==0xF6 then event.subName='TuneRequest'
+                elseif event.type==0xF8 then event.subName='TimingClock'
+                elseif event.type==0xFA then event.subName='Start'
+                elseif event.type==0xFB then event.subName='Continue'
+                elseif event.type==0xFC then event.subName='Stop'
+                elseif event.type==0xFE then event.subName='ActiveSensing'
+                elseif event.type==0xFF then event.subName='Reset'
+                else event.name=nil -- Undefined codepoints
+                end
+            else-- 0x00~0x79, should never appear I think
+                event.data,tData=read(tData,1)
             end
             if event.name then
                 if debug and event.name~='MetaEvent' then
