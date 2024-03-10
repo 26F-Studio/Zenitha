@@ -1,4 +1,7 @@
-local debug=false
+local printEvent=false
+local printDT=false
+local printMeta=false
+local printUnk=false
 
 ---@class Zenitha.MIDI.Event
 ---@field tick number tick
@@ -76,17 +79,20 @@ function MIDI.newSong(sData,handler)
 
     sec,sData=read(sData,2)
     Song.midFormat=STRING.binNum(sec)
+    if printMeta then printf("Format: %d",Song.midFormat) end
 
     sec,sData=read(sData,2)
     Song.trackCount=STRING.binNum(sec)
     Song.trackHeads=TABLE.new(1,Song.trackCount)
+    if printMeta then printf("Track count: %d",Song.trackCount) end
 
     sec,sData=read(sData,2)
     Song.tickPerQuarterNote=STRING.binNum(sec)
+    if printMeta then printf("TPQN: %d",Song.tickPerQuarterNote) end
 
     Song.tracks={}
     for t=1,Song.trackCount do
-        if debug then print("TRACK "..t..":") end
+        if printMeta then print("TRACK "..t..":") end
         local track={}
         sec,sData=read(sData,4)
         assert(sec=='MTrk',"Track head missing")
@@ -100,7 +106,7 @@ function MIDI.newSong(sData,handler)
         repeat
             local dTick
             dTick,tData=VLQ(tData)
-            if debug and dTick>0 then print("D "..dTick) end
+            if printDT and dTick>0 then print("D "..dTick) end
             tick=tick+dTick
 
             ---@type Zenitha.MIDI.Event
@@ -162,33 +168,35 @@ function MIDI.newSong(sData,handler)
                         event.subType==0x05 and 'Lyric' or
                         event.subType==0x06 and 'Marker' or
                         event.subType==0x07 and 'CuePoint' or ''
-                    if debug then printf("MetaEvent-%sText, %s",event.subName,event.data) end
+                    if printMeta then printf("MetaEvent-%sText: %s",event.subName,event.data) end
                 elseif event.subType==0x20 then -- MIDIChannelPrefix
                     event.subName='MIDIChannelPrefix'
-                    if debug then print("MetaEvent-MIDIChannelPrefix",event.data:byte()) end
+                    if printMeta then print("MetaEvent-MIDIChannelPrefix",event.data:byte()) end
                 elseif event.subType==0x2F then -- EndOfTrack
                     event.subName='EndOfTrack'
-                    if debug then print("MetaEvent-EndOfTrack") end
+                    if printMeta then print("MetaEvent-EndOfTrack") end
                 elseif event.subType==0x51 then -- SetTempo, Save value for calculating all events' real time
                     event.subName='SetTempo'
                     local bpm=MATH.roundUnit(60000000/STRING.binNum(event.data),0.001)
-                    table.insert(bpmEvents,{tick=tick,bpm=bpm})
-                    if debug then printf("MetaEvent-SetTempo: %d",bpm) end
+                    if #bpmEvents==0 or bpm~=bpmEvents[#bpmEvents].bpm then
+                        table.insert(bpmEvents,{tick=tick,bpm=bpm})
+                        if printMeta then printf("MetaEvent-SetTempo: %d",bpm) end
+                    end
                 elseif event.subType==0x54 then -- SMPTEOffset
                     event.subName='SMPTEOffset'
-                    if debug then print("MetaEvent-SMPTEOffset: ",event.data:byte(1,-1)) end
+                    if printMeta then print("MetaEvent-SMPTEOffset: ",event.data:byte(1,-1)) end
                 elseif event.subType==0x58 then -- TimeSignature
                     event.subName='TimeSignature'
-                    if debug then print("MetaEvent-TimeSignature: ",event.data:byte(1,-1)) end
+                    if printMeta then print("MetaEvent-TimeSignature: ",event.data:byte(1,-1)) end
                 elseif event.subType==0x59 then -- KeySignature
                     event.subName='KeySignature'
-                    if debug then print("MetaEvent-KeySignature: ",event.data:byte(1,-1)) end
+                    if printMeta then print("MetaEvent-KeySignature: ",event.data:byte(1,-1)) end
                 elseif event.subType==0x7F then -- SequencerSpecific
                     event.subName='SequencerSpecific'
-                    if debug then print("MetaEvent-SequencerSpecific: ",event.data:byte(1,-1)) end
+                    if printMeta then print("MetaEvent-SequencerSpecific: ",event.data:byte(1,-1)) end
                 else
                     event.name=nil -- Undefined
-                    if debug then print("MetaEvent-Undefined",event.subType,event.data) end
+                    if printMeta then print("MetaEvent-Undefined",event.subType,event.data) end
                 end
             elseif event.type>=0xF0 then -- System events, shouldn't appear in .mid file...?
                 event.name='SysMes'
@@ -212,10 +220,12 @@ function MIDI.newSong(sData,handler)
                 else event.name=nil -- Undefined codepoints
                 end
             else-- 0x00~0x79, should never appear I think
+                event.name='Unknown'
                 event.data,tData=read(tData,1)
+                if printUnk then printf("Unknown event: %02X",event.type) end
             end
             if event.name then
-                if debug and event.name~='MetaEvent' then
+                if printEvent and event.type>=0x80 and event.type<=0xEF then
                     local n=event.name
                     print(n,
                         (n=='NoteStart' or n=='NoteEnd') and event.note or
@@ -259,7 +269,7 @@ function MIDI.newSong(sData,handler)
     else
         Song.beatPerMinute="120"
     end
-    if debug then printf("BPM: %.2f",Song.beatPerMinute) end
+    if printMeta then print("BPM: "..Song.beatPerMinute) end
 
     return setmetatable(Song,MIDI)
 end
