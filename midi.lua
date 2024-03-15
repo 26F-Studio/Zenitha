@@ -103,6 +103,7 @@ function MIDI.newSong(sData,handler)
         tData,sData=read(sData,trackDataLen)
 
         local tick=0
+        local prevType
         repeat
             local dTick
             dTick,tData=VLQ(tData)
@@ -112,8 +113,21 @@ function MIDI.newSong(sData,handler)
             ---@type Zenitha.MIDI.Event
             local event={tick=tick}
 
-            sec,tData=read(tData,1)
-            event.type=sec:byte()
+            event.type=tData:byte()
+            if event.type<0x80 then
+                if prevType then
+                    event.type=prevType
+                else
+                    event.name='Unknown'
+                    event.data,tData=read(tData,1)
+                    if printUnk then printf("Unknown event: %02X",event.type) end
+                    tData=tData:sub(2)
+                end
+            else
+                prevType=event.type
+                tData=tData:sub(2)
+            end
+
             if event.type>=0x80 and event.type<=0x8F then
                 event.name='NoteEnd'
                 event.channel=event.type%0x10
@@ -154,6 +168,7 @@ function MIDI.newSong(sData,handler)
                 sec,tData=read(tData,2)
                 event.value=STRING.binNum(sec)
             elseif event.type==0xFF then -- MetaEvent
+                prevType=nil
                 event.name='MetaEvent'
                 event.subType,tData=VLQ(tData)
                 local len
@@ -199,6 +214,7 @@ function MIDI.newSong(sData,handler)
                     if printMeta then print("MetaEvent-Undefined",event.subType,event.data) end
                 end
             elseif event.type>=0xF0 then -- System events, shouldn't appear in .mid file...?
+                prevType=nil
                 event.name='SysMes'
                 if event.type==0xF0 then -- SysEx
                     event.subName='SysEx'
@@ -219,10 +235,6 @@ function MIDI.newSong(sData,handler)
                 elseif event.type==0xFF then event.subName='Reset'
                 else event.name=nil -- Undefined codepoints
                 end
-            else-- 0x00~0x79, should never appear I think
-                event.name='Unknown'
-                event.data,tData=read(tData,1)
-                if printUnk then printf("Unknown event: %02X",event.type) end
             end
             if event.name then
                 if printEvent and event.type>=0x80 and event.type<=0xEF then
