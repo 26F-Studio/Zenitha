@@ -1,5 +1,5 @@
 local printEvent=false
-local printDT=false
+local printBigDT=1e99
 local printMeta=false
 local printUnk=false
 
@@ -107,7 +107,7 @@ function MIDI.newSong(sData,handler)
         repeat
             local dTick
             dTick,tData=VLQ(tData)
-            if printDT and dTick>0 then print("D "..dTick) end
+            if dTick>printBigDT then print("D "..dTick) end
             tick=tick+dTick
 
             ---@type Zenitha.MIDI.Event
