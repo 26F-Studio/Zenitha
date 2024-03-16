@@ -5,6 +5,7 @@ local printUnk=false
 
 ---@class Zenitha.MIDI.Event
 ---@field tick number tick
+---@field time number time (second)
 ---@field type number midi-type number
 ---@field name 'NoteEnd' | 'NoteStart' | 'KeyPressure' | 'ControlChange' | 'ProgramChange' | 'ChannelPressure' | 'PitchBend' | 'MetaEvent' | 'SysMes' | 'Unknown' readable event type name
 ---@field channel number? For all event except MetaEvent
@@ -56,7 +57,7 @@ local read=STRING.readChars
 ---```lua
 ---MIDI.newSong(FILE.load("music.mid"),function(event)
 ---    if event.name=='NoteStart' then
----        SFX.playSample('lead',event.note)
+---        SFX.playSample('lead',event.velocity/127,event.note)
 ---    end
 ---end):play()
 ---```
@@ -258,13 +259,15 @@ function MIDI.newSong(sData,handler)
     for i=1,Song.trackCount do
         local bpmPointer=1
         local tickPerSecond=Song.tickPerQuarterNote*120/60
+        -- print("Track "..i.." init tickPerSecond is "..tickPerSecond)
         local tickAnchor,timeAnchor=0,0
         local track=Song.tracks[i]
         for j=1,#track do
             local event=track[j]
             if bpmPointer>0 and event.tick>=bpmEvents[bpmPointer].tick then
-                timeAnchor,tickAnchor=timeAnchor+(event.tick-tickAnchor)/tickPerSecond,bpmEvents[bpmPointer].tick
+                timeAnchor,tickAnchor=timeAnchor+(bpmEvents[bpmPointer].tick-tickAnchor)/tickPerSecond,bpmEvents[bpmPointer].tick
                 tickPerSecond=Song.tickPerQuarterNote*bpmEvents[bpmPointer].bpm/60
+                -- print("tickPerSecond change to "..tickPerSecond..", timeAnchor="..timeAnchor)
                 bpmPointer=bpmPointer+1
                 if not bpmEvents[bpmPointer] then bpmPointer=-1 end -- No more bpm change
             end
@@ -304,9 +307,23 @@ function MIDI:reset()
     end
 end
 
+function MIDI:step(minDT)
+    if not self.playing then return end
+    local heads=self.trackHeads
+    local nearestTime=1e99
+    for i=1,self.trackCount do
+        local event=self.tracks[i][heads[i]]
+        if event then
+            nearestTime=math.min(nearestTime,event.time)
+        end
+    end
+    nearestTime=math.max(nearestTime,minDT)
+    self:update()
+end
+
 function MIDI:update(dt)
     if not self.playing then return end
-    self.time=self.time+dt
+    if dt then self.time=self.time+dt end
     local heads=self.trackHeads
     local dead=true
     for i=1,self.trackCount do
