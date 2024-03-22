@@ -5,8 +5,8 @@
 ---@field headers? table|nil
 ---@field url? string default to the url set with HTTP.setHost
 ---@field path? string|nil append to url
----@field _poolPtr string internal use only
----@field _destroy true internal use only
+---@field _poolPtr? string internal use only
+---@field _destroy? true internal use only
 
 local sendCHN=love.thread.getChannel('inputChannel')
 local recvCHN=love.thread.getChannel('outputChannel')
@@ -102,7 +102,9 @@ function HTTP.request(arg)
 
     if arg.body~=nil then
         assertf(type(arg.body)=='table',"HTTP.request(arg): arg.body need table, got %s",arg.body)
-        arg.body=JSON.encode(arg.body)
+        local res
+        res,arg.body=pcall(JSON.encode,arg.body)
+        assert(res,"HTTP.request(arg): arg.body json-encoding error")
         if not arg.headers then arg.headers={} end
         TABLE.cover({
             ['Content-Type']="application/json",
@@ -169,7 +171,7 @@ end
 ---@param pool string|nil pool name
 ---@return table|nil
 function HTTP.pollMsg(pool)
-    if not (pool or type(pool)=='string') then error("HTTP.pollMsg(pool): Need string|nil") end
+    if pool~=nil and type(pool)~='string' then error("HTTP.pollMsg(pool): Need string|nil") end
     HTTP._update()
     local p=msgPool[pool or '_default']
     if #p>0 then

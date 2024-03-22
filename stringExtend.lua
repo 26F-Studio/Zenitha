@@ -1,11 +1,11 @@
 local data=love.data
 local assert,tostring,tonumber=assert,tostring,tonumber
 local floor,lg=math.floor,math.log10
-local min,max=math.min,math.max
+local min=math.min
 local find,format=string.find,string.format
 local sub,gsub=string.sub,string.gsub
 local match,gmatch=string.match,string.gmatch
-local rep,reverse=string.rep,string.reverse
+local rep=string.rep
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
 
@@ -14,13 +14,64 @@ local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
 ---@class stringlib
 local STRING={}
 
----Install stringExtend into the lua basic "string library", so that you can use these extended functions with `str:xxx(...)` format
+---Install stringExtend into the lua basic "string library",
+---so that you can use these extended functions with `str:xxx(...)` format
 function STRING.install()
-    function STRING.install()
-        error("STRING.install(): Attempt to install stringExtend library multiple times")
-    end
+    function STRING.install() error("STRING.install: Attempt to install stringExtend library twice") end
     for k,v in next,STRING do
         string[k]=v
+    end
+end
+
+---Install str[n] and str[n]='c' syntax.
+---The editted string will be stored into STRING._
+---
+---Notice that str[n]='ccc' will removed the n-th character then put 'ccc' into it, changing string length
+---
+---And will potentially make `:` (like `str:find(...)`) slightly slower than before
+function STRING.installIndex()
+    function STRING.installIndex() error("STRING.installIndex: Attempt to install stringIndex syntax twice") end
+    local meta=getmetatable('')
+    function meta.__index(str,n)
+        if type(n)~='number' then
+            return string[n]
+        else
+            return sub(str,n,n)
+        end
+    end
+    STRING._='' -- Editted string stored here
+    function meta.__newindex(str,n,c)
+        STRING._=sub(str,1,n-1)..c..sub(str,n+1)
+    end
+end
+
+---Install stringPath syntax. Warning: conflict with normal auto-tonumber operation
+---\- "script/main.lua" Get the file name from path
+---
+---"script" / "main.lua" Combine folder and file name
+---
+---"script/main.lua" - n Get the level n directory name
+---
+---"script/main.lua" % "lua,js" Check if the file has the postfix
+function STRING.installPath()
+    function STRING.installPath() error("STRING.installPath: Attempt to install stringPath syntax twice") end
+    local meta=getmetatable('')
+    function meta.__unm(path) return match(path,".+/(.+)$") or path end
+    function meta.__div(folder,file) return folder.."/"..file end
+    function meta.__sub(path,layer)
+        while layer>0 do
+            path=match(path,"(.+)/") or path
+            layer=layer-1
+        end
+        return path
+    end
+    function meta.__mod(file,postfixs)
+        local postfix=match(file,"%.(.-)$")
+        postfixs=STRING.split(postfixs,',')
+        for i=1,#postfixs do
+            if postfix==postfixs[i] then return true end
+        end
+        return false
     end
 end
 
@@ -267,16 +318,13 @@ end
 ---@return string
 function STRING.UTF8(num)
     assertf(type(num)=='number',"Wrong type (%s)",type(num))
-    if num<=0 then
-        errorf("STRING.UTF8(num): Out of range (%d)",num)
-    elseif num<2^7  then return char(num)
+    assertf(num>=0 and num<2^31,"Out of range (%d)",num)
+    if     num<2^7  then return char(num)
     elseif num<2^11 then return char(192+floor(num/2^06),128+num%2^6)
     elseif num<2^16 then return char(224+floor(num/2^12),128+floor(num/2^06)%2^6,128+num%2^6)
     elseif num<2^21 then return char(240+floor(num/2^18),128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     elseif num<2^26 then return char(248+floor(num/2^24),128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
-    elseif num<2^31 then return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
-    else
-        errorf("STRING.UTF8(num): Out of range (%d)",num)
+    else                 return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
     end
 end
 
@@ -299,7 +347,6 @@ function STRING.binNum(str)
     -- end
     return num
 end
-print(STRING.binNum("\255\255\255\255\255\255"))
 
 local units={'','K','M','B','T','Qa','Qt','Sx','Sp','Oc','No'}
 local preUnits={'','U','D','T','Qa','Qt','Sx','Sp','O','N'}

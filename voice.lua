@@ -64,11 +64,11 @@ function VOC.play(name,channelID) end
 ---For each channel, play next voice if current ended
 function VOC._update() end
 
----Initialize the voice module, must be called before use
+---Initialize VOC lib (only once), must be called before use
 ---@param list table
 function VOC.init(list)
     if initialized then
-        MSG.new('info',"VOC.init(): Attempt to initialize VLC lib twice")
+        MSG.new('info',"VOC.init: Attempt to initialize VLC lib twice")
         return
     end
     initialized,VOC.init=true,nil
@@ -156,14 +156,14 @@ function VOC.init(list)
             elseif Q.s==1 then -- Waiting load source
                 Q[1]=_getVoice(Q[1])
                 Q[1]:setVolume(volume)
-                Q[1]:setPitch(1.0594630943592953^(diversion*(math.random()*2-1)))
+                Q[1]:setPitch((2^(1/12))^(diversion*(math.random()*2-1)))
                 Q[1]:play()
                 Q.s=Q[2] and 2 or 4
             elseif Q.s==2 then -- Playing 1,ready 2
                 if Q[1]:getDuration()-Q[1]:tell()<crossTime then
                     Q[2]=_getVoice(Q[2])
                     Q[2]:setVolume(volume)
-                    Q[1]:setPitch(1.0594630943592953^(diversion*(math.random()*2-1)))
+                    Q[1]:setPitch((2^(1/12))^(diversion*(math.random()*2-1)))
                     Q[2]:play()
                     Q.s=3
                 end
