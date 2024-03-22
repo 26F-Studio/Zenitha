@@ -45,7 +45,7 @@ local function alignDraw(self,drawable,x,y,ang,image_k)
     local h=drawable:getHeight()
     local k=image_k or min(self.widthLimit/w,1)
     local ox=self.alignX=='left' and 0 or self.alignX=='right' and w or w*.5
-    local oy=self.alignY=='up' and 0 or self.alignY=='down' and h or h*.5
+    local oy=self.alignY=='top' and 0 or self.alignY=='bottom' and h or h*.5
     gc_draw(drawable,x,y,ang,k,1,ox,oy)
 end
 
@@ -121,6 +121,7 @@ Widgets.base={
     lineWidth=4,cornerR=3,
     fontSize=30,fontType=false,
     widthLimit=1e99,
+    labelPos='left',
     alignX='center',alignY='center',
     sound_press=false,sound_hover=false,
 
@@ -167,6 +168,10 @@ function Widgets.base:reset()
 
     assert(type(self.lineWidth)=='number',"[widget].lineWidth need number")
     assert(type(self.cornerR)=='number',"[widget].cornerR need number")
+
+    assert(self.alignX=='left' or self.alignX=='right' or self.alignX=='center',"[widget].alignX need 'left', 'right' or 'center'")
+    assert(self.alignY=='top' or self.alignY=='bottom' or self.alignY=='center',"[widget].alignY need 'top', 'bottom' or 'center'")
+    assert(self.labelPos=='left' or self.labelPos=='right' or self.labelPos=='top' or self.labelPos=='bottom',"[widget].labelPos need 'left', 'right', 'top', or 'bottom'")
 
     if self.pos then
         assert(
@@ -491,7 +496,6 @@ Widgets.checkBox=setmetatable({
 
     text=false,
     image=false,
-    labelPos='left',
     labelDistance=20,
     sound_on=false,sound_off=false,
 
@@ -524,17 +528,8 @@ function Widgets.checkBox:reset()
     assert(not self.sound_on or type(self.sound_on)=='string',"[checkBox].sound_on need string")
     assert(not self.sound_off or type(self.sound_off)=='string',"[checkBox].sound_off need string")
 
-    if self.labelPos=='left' then
-        self.alignX='right'
-    elseif self.labelPos=='right' then
-        self.alignX='left'
-    elseif self.labelPos=='up' then
-        self.alignY='down'
-    elseif self.labelPos=='down' then
-        self.alignY='up'
-    else
-        error("[checkBox].labelPos need 'left', 'right', 'up', or 'down'")
-    end
+    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
+    self.alignY=self.labelPos=='top' and 'bottom' or self.labelPos=='bottom' and 'top' or 'center'
 end
 function Widgets.checkBox:isAbove(x,y)
     return
@@ -582,9 +577,9 @@ function Widgets.checkBox:draw()
         x2=-w*.5-self.labelDistance
     elseif self.labelPos=='right' then
         x2=w*.5+self.labelDistance
-    elseif self.labelPos=='up' then
+    elseif self.labelPos=='top' then
         y2=-w*.5-self.labelDistance
-    elseif self.labelPos=='down' then
+    elseif self.labelPos=='bottom' then
         y2=w*.5+self.labelDistance
     end
     if self._image then
@@ -608,7 +603,6 @@ Widgets.switch=setmetatable({
     fillColor='lS',
     text=false,
     image=false,
-    labelPos='left',
     labelDistance=20,
 
     disp=false, -- function return a boolean
@@ -640,17 +634,8 @@ function Widgets.switch:reset()
     assert(type(self.disp)=='function',"[switch].disp need function")
 
     self._slideTime=0
-    if self.labelPos=='left' then
-        self.alignX='right'
-    elseif self.labelPos=='right' then
-        self.alignX='left'
-    elseif self.labelPos=='up' then
-        self.alignY='down'
-    elseif self.labelPos=='down' then
-        self.alignY='up'
-    else
-        error("[switch].labelPos need 'left', 'right', 'up', or 'down'")
-    end
+    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
+    self.alignY=self.labelPos=='top' and 'bottom' or self.labelPos=='bottom' and 'top' or 'center'
 end
 function Widgets.switch:isAbove(x,y)
     return
@@ -693,9 +678,9 @@ function Widgets.switch:draw()
         x2=-h-self.labelDistance
     elseif self.labelPos=='right' then
         x2=h+self.labelDistance
-    elseif self.labelPos=='up' then
+    elseif self.labelPos=='top' then
         y2=-h*.5-self.labelDistance
-    elseif self.labelPos=='down' then
+    elseif self.labelPos=='bottom' then
         y2=h*.5+self.labelDistance
     end
     if self._image then
@@ -736,7 +721,6 @@ Widgets.slider=setmetatable({
 
     text=false,
     image=false,
-    labelPos='left',
     labelDistance=20,
     numFontSize=25,numFontType=false,
     valueShow=nil,
@@ -848,15 +832,11 @@ function Widgets.slider:reset()
         end
     end
 
-    if self.labelPos=='left' then
-        self.alignX='right'
-    elseif self.labelPos=='right' then
-        self.alignX='left'
-    elseif self.labelPos=='down' then
-        self.alignY='up'
+    assert(self.labelPos~='top',"[slider].labelPos cannot be 'top'")
+    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
+    if self.labelPos=='bottom' then
+        self.alignY='top'
         self.labelDistance=max(self.labelDistance,20)
-    else
-        error("[slider].labelPos need 'left', 'right', or 'down'")
     end
 end
 function Widgets.slider:isAbove(x,y)
@@ -932,7 +912,7 @@ function Widgets.slider:draw()
             alignDraw(self,self._text,x-self.labelDistance,y)
         elseif self.labelPos=='right' then
             alignDraw(self,self._text,x+self.w+self.labelDistance,y)
-        elseif self.labelPos=='down' then
+        elseif self.labelPos=='bottom' then
             alignDraw(self,self._text,x+self.w*.5,y+self.labelDistance)
         end
     end
@@ -986,7 +966,6 @@ Widgets.slider_fill=setmetatable({
 
     text=false,
     image=false,
-    labelPos='left',
     labelDistance=20,
     lineDist=3,
     sound_drag=false,
@@ -1035,15 +1014,11 @@ function Widgets.slider_fill:reset()
     self._pos=self._rangeL
     self._textShowTime=3
 
-    if self.labelPos=='left' then
-        self.alignX='right'
-    elseif self.labelPos=='right' then
-        self.alignX='left'
-    elseif self.labelPos=='down' then
-        self.alignY='up'
+    assert(self.labelPos~='top',"[slider_fill].cannot be 'top'")
+    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
+    if self.labelPos=='bottom' then
+        self.alignY='top'
         self.labelDistance=max(self.labelDistance,20)
-    else
-        error("[slider_fill].labelPos need 'left','right' or 'down'")
     end
 end
 function Widgets.slider_fill:isAbove(x,y)
@@ -1094,7 +1069,7 @@ function Widgets.slider_fill:draw()
             x2,y2=x-self.labelDistance,y
         elseif self.labelPos=='right' then
             x2,y2=x+w+self.labelDistance,y
-        elseif self.labelPos=='down' then
+        elseif self.labelPos=='bottom' then
             x2,y2=x+w*.5,y-self.labelDistance
         end
         alignDraw(self,self._text,x2,y2)
@@ -1111,7 +1086,6 @@ Widgets.slider_progress=setmetatable({
 
     text=false,
     image=false,
-    labelPos='left',
     labelDistance=20,
     lineDist=3,
     sound_drag=false,
@@ -1159,15 +1133,11 @@ function Widgets.slider_progress:reset()
     self._pos=self._rangeL
     self._textShowTime=3
 
-    if self.labelPos=='left' then
-        self.alignX='right'
-    elseif self.labelPos=='right' then
-        self.alignX='left'
-    elseif self.labelPos=='down' then
-        self.alignY='up'
+    assert(self.labelPos~='top',"[slider_progress].labelPos cannot be 'top'")
+    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
+    if self.labelPos=='bottom' then
+        self.alignY='top'
         self.labelDistance=max(self.labelDistance,20)
-    else
-        error("[slider_progress].labelPos need 'left','right' or 'down'")
     end
 end
 function Widgets.slider_progress:isAbove(x,y)
@@ -1197,7 +1167,7 @@ function Widgets.slider_progress:draw()
             x2,y2=x-self.labelDistance,y
         elseif self.labelPos=='right' then
             x2,y2=x+w+self.labelDistance,y
-        elseif self.labelPos=='down' then
+        elseif self.labelPos=='bottom' then
             x2,y2=x+w*.5,y-self.labelDistance
         end
         alignDraw(self,self._text,x2,y2)
@@ -1213,7 +1183,6 @@ Widgets.selector=setmetatable({
     type='selector',
     w=100,
 
-    labelPos='left',
     labelDistance=20,
 
     list=false, -- table of items
@@ -1258,12 +1227,10 @@ function Widgets.selector:reset()
         self.alignX='right'
     elseif self.labelPos=='right' then
         self.alignX='left'
-    elseif self.labelPos=='down' then
-        self.alignY='up'
-    elseif self.labelPos=='up' then
-        self.alignY='down'
-    else
-        error("[selector].labelPos need 'left','right','down' or 'up'")
+    elseif self.labelPos=='bottom' then
+        self.alignY='top'
+    elseif self.labelPos=='top' then
+        self.alignY='bottom'
     end
 
     local V=self.disp()
@@ -1314,9 +1281,9 @@ function Widgets.selector:draw()
         x2,y2=x-w*.5-self.labelDistance,y
     elseif self.labelPos=='right' then
         x2,y2=x+w*.5+self.labelDistance,y
-    elseif self.labelPos=='up' then
+    elseif self.labelPos=='top' then
         x2,y2=x,y-self.labelDistance
-    elseif self.labelPos=='down' then
+    elseif self.labelPos=='bottom' then
         x2,y2=x,y+self.labelDistance
     end
     if self._image then
@@ -1393,7 +1360,6 @@ Widgets.inputBox=setmetatable({
     fillColor={0,0,0,.3},
     secret=false,
     regex=false,
-    labelPos='left',
     labelDistance=20,
 
     maxInputLength=1e99,
@@ -1434,12 +1400,10 @@ function Widgets.inputBox:reset()
         self.alignX,self.alignY='right','center'
     elseif self.labelPos=='right' then
         self.alignX,self.alignY='left','center'
-    elseif self.labelPos=='up' then
-        self.alignX,self.alignY='center','down'
-    elseif self.labelPos=='down' then
-        self.alignX,self.alignY='center','up'
-    else
-        error("[inputBox].labelPos need 'left', 'right', 'up', or 'down'")
+    elseif self.labelPos=='top' then
+        self.alignX,self.alignY='center','bottom'
+    elseif self.labelPos=='bottom' then
+        self.alignX,self.alignY='center','top'
     end
 end
 function Widgets.inputBox:_cutTooLong()
@@ -1504,9 +1468,9 @@ function Widgets.inputBox:draw()
             x2,y2=x-8,y+self.h*.5
         elseif self.labelPos=='right' then
             x2,y2=x+self.w+8,y+self.h*.5
-        elseif self.labelPos=='up' then
+        elseif self.labelPos=='top' then
             x2,y2=x+self.w*.5,y
-        elseif self.labelPos=='down' then
+        elseif self.labelPos=='bottom' then
             x2,y2=x+self.w*.5,y+self.h
         end
         alignDraw(self,self._text,x2,y2)
@@ -2252,9 +2216,9 @@ end
 ---@field fontSize? number
 ---@field fontType? string
 ---@field image? string|love.Drawable Can use slash-path to read from IMG lib
----@field alignX? 'left'|'center'|'right'
----@field alignY? 'up'|'center'|'down'
----@field labelPos? 'left'|'right'|'up'|'down'
+---@field alignX? 'left'|'right'|'center'
+---@field alignY? 'top'|'bottom'|'center'
+---@field labelPos? 'left'|'right'|'top'|'bottom' Some widget (like Slider) didn't use 'top'
 ---@field labelDistance? number
 ---@field disp? function
 ---@field code? function
