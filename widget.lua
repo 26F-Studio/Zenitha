@@ -296,7 +296,7 @@ function Widgets.text:draw()
     end
 end
 
-
+-- SweetSea: Better implementation with ``fitMode`` parameter: https://gist.github.com/SweetSea-ButImNotSweet/acbae7f9a7d9fa463f829847c43202d4
 ---@field w number|false
 ---@field h number|false
 ---@class Zenitha.widget.image: Zenitha.widget.base
