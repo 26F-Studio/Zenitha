@@ -40,13 +40,14 @@ local function updateWheel(self,d)
         return n
     end
 end
-local function alignDraw(self,drawable,x,y,ang,image_k)
+local function alignDraw(self,drawable,x,y,ang,kx,ky)
     local w=drawable:getWidth()
     local h=drawable:getHeight()
-    local k=image_k or min(self.widthLimit/w,1)
+    if not kx then kx=min(self.widthLimit/w,1) end
+    if not ky then ky=kx or 1 end
     local ox=self.alignX=='left' and 0 or self.alignX=='right' and w or w*.5
     local oy=self.alignY=='top' and 0 or self.alignY=='bottom' and h or h*.5
-    gc_draw(drawable,x,y,ang,k,1,ox,oy)
+    gc_draw(drawable,x,y,ang,kx,ky,ox,oy)
 end
 
 local leftAngle=GC.load{20,20,
@@ -294,18 +295,23 @@ end
 
 
 ---@class Zenitha.widget.image: Zenitha.widget.base
+---@field _kx number|false
+---@field _ky number|false
 Widgets.image=setmetatable({
     type='image',
-    ang=0,k=1,
+    w=false,h=false,k=false,
+    ang=0,
 
     image=false,
+    _kx=false,_ky=false,
 
     buildArgs={
         'name',
         'pos',
         'x','y',
+        'k','w','h', -- Not compatible
 
-        'ang','k',
+        'ang',
         'image',
         'alignX','alignY',
 
@@ -313,10 +319,30 @@ Widgets.image=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
+function Widgets.image:reset()
+    Widgets.base.reset(self)
+    assert(not self.k or not (self.w or self.h),"[image].w/h and .k cannot appear simultaneously")
+    if not self._image then return end
+
+    if self.k then
+        self._kx,self._ky=self.k,self.k
+    elseif self.w or self.h then
+        if self.w then self._kx=self.w/self._image:getWidth() end
+        if self.h then self._ky=self.h/self._image:getHeight() end
+        if not self.w then self._kx=self._ky end
+        if not self.h then self._ky=self._kx end
+    else
+        self._kx,self._ky=1,1
+    end
+end
+function Widgets.image:setImage(_img)
+    self.image=_img
+    self:reset()
+end
 function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,self._x,self._y,self.ang,self.k)
+        alignDraw(self,self._image,self._x,self._y,self.ang,self._kx,self._ky)
     end
 end
 
