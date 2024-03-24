@@ -298,22 +298,18 @@ end
 
 
 ---@field w number|false
----@field h? number|false
----@field keepAspectRatio? boolean|true
+---@field h number|false
 ---@class Zenitha.widget.image: Zenitha.widget.base
 Widgets.image=setmetatable({
     type='image',
     ang=0,k=1,
-    keepAspectRatio=true,
 
     image=false,
-    _scaleW=1,_scaleH=1,
 
     buildArgs={
         'name',
         'pos',
         'x','y','w','h',
-        'keepAspectRatio',
 
         'ang','k',
         'image',
@@ -331,25 +327,11 @@ function Widgets.image:reset()
         self.h=self._image:getHeight()
     end
 
-    if self.keepAspectRatio then
-        assert(self.w~=nil or self.h~=nil, '[image].keepAspectRatio==true, need a integer passed to [image].w or [image.h], got both nil')
-    else
-        assertf(self.w and self.h,'[image].keepAspectRatio==false, [image].w & [image].h need number, got [image].w=%s and [image].h=%s',self.w,self.h)
-    end
+    if self.w then self._scaleW=self.w/self._image:getWidth()  end
+    if self.h then self._scaleH=self.h/self._image:getHeight() end
 
-    if self.keepAspectRatio then
-        if self.w then
-            self._scaleW=self.w/self._image:getWidth()
-            self._scaleH=self._scaleW
-        else
-            self._scaleH=self.h/self._image:getHeight()
-            self._scaleW=self._scaleH
-        end
-    else
-        self._scaleW=self.w/self._image:getWidth()
-        self._scaleH=self.h/self._image:getHeight()
-    end
-
+    if self._scaleW and not self._scaleH then self._scaleH=self._scaleW end
+    if self._scaleH and not self._scaleW then self._scaleW=self._scaleH end
 end
 function Widgets.image:draw()
     if self._image then
