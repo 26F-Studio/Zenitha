@@ -73,18 +73,23 @@ end
 function TCP.S_send(data,id)
     ---@type Zenitha.TCP.SendMsgPack
     local pack={
-        data=STRING.packTable(data),
+        data=JSON.encode(data),
         receiver=id,
     }
     S_sendCHN:push(pack)
 end
 
 ---Receive data from client(s)
----@return Zenitha.TCP.RecvMsgPack
+---@return Zenitha.TCP.RecvMsgPack|nil
 function TCP.S_receive()
     local pack=S_recvCHN:pop()
-    pack.data=TABLE.unpackTable(pack.data)
-    return pack
+    if pack then
+        local suc,res=pcall(JSON.decode,pack.data)
+        if suc then
+            pack.data=res
+            return pack
+        end
+    end
 end
 
 
@@ -139,18 +144,23 @@ end
 function TCP.C_send(data,id)
     ---@type Zenitha.TCP.SendMsgPack
     local pack={
-        data=STRING.packTable(data),
+        data=JSON.encode(data),
         receiver=id,
     }
     C_sendCHN:push(pack)
 end
 
 ---Receive data from server
----@return Zenitha.TCP.RecvMsgPack
+---@return Zenitha.TCP.RecvMsgPack|nil
 function TCP.C_receive()
     local pack=C_recvCHN:pop()
-    pack.data=TABLE.unpackTable(pack.data)
-    return pack
+    if pack then
+        local suc,res=pcall(JSON.decode,pack.data)
+        if suc then
+            pack.data=res
+            return pack
+        end
+    end
 end
 
 return TCP
