@@ -2,7 +2,7 @@
 ---@alias Zenitha.TCP.recvID Zenitha.TCP.sendID|string[] 0 = server/broadcast, 1+ = client id
 
 ---@class Zenitha.TCP.Client
----@field conn LuaSocket.master
+---@field conn LuaSocket.client
 ---@field id string '1'|'2'|...
 ---@field sockname string
 ---@field timestamp number

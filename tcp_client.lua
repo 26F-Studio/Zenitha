@@ -4,7 +4,7 @@ local C_confCHN=love.thread.getChannel("tcp_c_config")
 local C_sendCHN=love.thread.getChannel("tcp_c_send")
 local C_recvCHN=love.thread.getChannel("tcp_c_receive")
 
----@type LuaSocket.master
+---@type LuaSocket.client
 local client
 
 ---@return Zenitha.TCP.MsgPack
@@ -16,6 +16,7 @@ local function parseMessage(message)
     } or {data=message}
 end
 
+local partialDataBuffer=''
 local function clientLoop()
     while true do
         local config=C_confCHN:pop()
@@ -27,9 +28,15 @@ local function clientLoop()
             end
         end
 
-        local message,status,partial=client:receive()
-        if message then C_recvCHN:push(parseMessage(message)) end
-        if status=='closed' then
+        local message,err,partial=client:receive('*l')
+        if message then
+            C_recvCHN:push(parseMessage(partialDataBuffer..message))
+            partialDataBuffer=''
+        elseif err=='timeout' then
+            if partial then
+                partialDataBuffer=partialDataBuffer..partial
+            end
+        elseif err=='closed' then
             print("[TCP_C] Server disconnected")
             return
         end
@@ -39,8 +46,8 @@ local function clientLoop()
         if data then
             if type(data.receiver)=='table' then data.receiver=table.concat(data.receiver,',') end
             local mes=data.receiver..'|'..data.data
-            client:send(mes)
-            print("[TCP_C] Message sent: "..mes)
+            client:send(mes..'\n')
+            -- print("[TCP_C] Message sent: "..mes)
         end
     end
 end

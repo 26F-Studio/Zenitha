@@ -1,10 +1,11 @@
+local STRING=require("Zenitha.stringExtend")
 local socket=require("socket")
 
 local S_confCHN=love.thread.getChannel("tcp_s_config")
 local S_sendCHN=love.thread.getChannel("tcp_s_send")
 local S_recvCHN=love.thread.getChannel("tcp_s_receive")
 
----@type LuaSocket.master
+---@type LuaSocket.server
 local server
 ---@type table<string, Zenitha.TCP.Client>
 local clients
@@ -35,7 +36,7 @@ local function sendMessage(data,receiver,sender)
     if receiver==nil then
         for _,client in next,clients do
             if client.id~=sender then
-                client.conn:send(sender..'|'..data)
+                client.conn:send(sender..'|'..data..'\n')
             end
         end
     elseif type(receiver)=='string' then
@@ -45,7 +46,7 @@ local function sendMessage(data,receiver,sender)
                 sender=sender,
             }
         elseif clients[receiver] then
-            clients[receiver].conn:send(sender..'|'..data)
+            clients[receiver].conn:send(sender..'|'..data..'\n')
         else
             print("[TCP_S] Client '"..receiver.."' does not exist")
         end
@@ -56,6 +57,7 @@ local function sendMessage(data,receiver,sender)
     end
 end
 
+local partialDataBuffer={}
 local function serverLoop()
     local nextClientId=1
     clients={}
@@ -89,6 +91,7 @@ local function serverLoop()
                 print("[TCP_S] "..c.sockname.." connected")
                 c.conn:settimeout(0.01)
                 clients[c.id]=c
+                partialDataBuffer[c.id]=''
 
                 nextClientId=nextClientId+1
             end
@@ -101,16 +104,22 @@ local function serverLoop()
         end
 
         for id,client in next,clients do
-            local message,err,partial=client.conn:receive()
+            local message,err,partial=client.conn:receive('*l')
             if message then
-                print("[TCP] "..id..": "..message)
+                -- print("[TCP_S] "..id..": "..message)
+                message=partialDataBuffer[id]..message
+                partialDataBuffer[id]=''
                 local pack=parseMessage(message,id)
                 sendMessage(pack.data,pack.receiver,id)
-            elseif err~='timeout' then
-                if err=='closed' then
-                    clients[id]=nil
-                    print("[TCP_S] "..client.sockname.." disconnected")
+            elseif err=='timeout' then
+                if partial then
+                    -- print("[TCP_S] (part) "..id..": "..partial)
+                    partialDataBuffer[id]=partialDataBuffer[id]..partial
                 end
+            elseif err=='closed' then
+                partialDataBuffer[id]=nil
+                clients[id]=nil
+                print("[TCP_S] "..client.sockname.." disconnected")
             end
         end
     end
