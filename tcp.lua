@@ -7,10 +7,13 @@
 ---@field sockname string
 ---@field timestamp number
 
----@class Zenitha.TCP.MsgPack
+---@class Zenitha.TCP.RecvMsgPack
+---@field data string
+---@field sender Zenitha.TCP.sendID
+
+---@class Zenitha.TCP.SendMsgPack
 ---@field data string
 ---@field receiver Zenitha.TCP.recvID
----@field sender? Zenitha.TCP.sendID
 
 local TCP={}
 
@@ -68,7 +71,7 @@ end
 ---@param data table
 ---@param id Zenitha.TCP.recvID
 function TCP.S_send(data,id)
-    ---@type Zenitha.TCP.MsgPack
+    ---@type Zenitha.TCP.SendMsgPack
     local pack={
         data=STRING.packTable(data),
         receiver=id,
@@ -77,9 +80,11 @@ function TCP.S_send(data,id)
 end
 
 ---Receive data from client(s)
----@return Zenitha.TCP.MsgPack
+---@return Zenitha.TCP.RecvMsgPack
 function TCP.S_receive()
-    return S_recvCHN:pop()
+    local pack=S_recvCHN:pop()
+    pack.data=TABLE.unpackTable(pack.data)
+    return pack
 end
 
 
@@ -132,7 +137,7 @@ end
 ---@param data table
 ---@param id Zenitha.TCP.recvID
 function TCP.C_send(data,id)
-    ---@type Zenitha.TCP.MsgPack
+    ---@type Zenitha.TCP.SendMsgPack
     local pack={
         data=STRING.packTable(data),
         receiver=id,
@@ -141,9 +146,11 @@ function TCP.C_send(data,id)
 end
 
 ---Receive data from server
----@return Zenitha.TCP.MsgPack
+---@return Zenitha.TCP.RecvMsgPack
 function TCP.C_receive()
-    return C_recvCHN:pop()
+    local pack=C_recvCHN:pop()
+    pack.data=TABLE.unpackTable(pack.data)
+    return pack
 end
 
 return TCP

@@ -51,7 +51,7 @@ end
 
 local read=STRING.readChars
 ---@param sData string
----@param handler fun(event:Zenitha.MIDI.Event)
+---@param handler fun(event: Zenitha.MIDI.Event)
 ---@return Zenitha.MIDI
 ---## Example
 ---```lua

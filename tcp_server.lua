@@ -10,7 +10,7 @@ local server
 ---@type table<string, Zenitha.TCP.Client>
 local clients
 
----@return Zenitha.TCP.MsgPack
+---@return Zenitha.TCP.RecvMsgPack
 local function parseMessage(message,id)
     local sep=message:find('|')
     if sep then -- Receiver(s) specified
@@ -97,7 +97,7 @@ local function serverLoop()
             end
         end
 
-        ---@type Zenitha.TCP.MsgPack
+        ---@type Zenitha.TCP.SendMsgPack
         local data=S_sendCHN:pop()
         if data then
             sendMessage(data.data,'0','0')
