@@ -414,20 +414,24 @@ function BGM.isPlaying()
     return #nowPlay>0 and nowPlay[1].source:isPlaying()
 end
 
----Get time of BGM playing now
----@return number
+---Get time of BGM playing now, 0 if not exists
+---@return number|0
 function BGM.tell()
-    if nowPlay[1] then
-        local src=nowPlay[1].source
+    local src=nowPlay[1] and nowPlay[1].source
+    if src then
         return src:tell()%src:getDuration() -- bug of love2d, tell() may return value greater than duration
+    else
+        return 0
     end
 end
 
----Get duration of BGM playing now
----@return number
+---Get duration of BGM playing now, 0 if not exists
+---@return number|0
 function BGM.getDuration()
     if nowPlay[1] then
         return nowPlay[1].source:getDuration()
+    else
+        return 0
     end
 end
 

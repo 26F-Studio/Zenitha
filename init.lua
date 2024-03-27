@@ -63,14 +63,19 @@ EDITING=""
 
 ---print with formatted string
 ---@param str string
+---@diagnostic disable-next-line
 function printf(str,...) print(str:format(...)) end
+
 ---error with formatted string
 ---@param str string
+---@diagnostic disable-next-line
 function errorf(str,...) error(str:format(...)) end
+
 ---assert with formatted string
 ---@param v any
 ---@param str string
 ---@return any
+---@diagnostic disable-next-line
 function assertf(v,str,...) return v or error(str:format(...)) end
 
 -- Inside values
@@ -91,7 +96,7 @@ local bigCanvases=setmetatable({},{
 -- User-changeable values
 local appName='Zenitha'
 local versionText='V0.1'
-local firstScene=false ---@type string|false
+local firstScene='_zenitha'
 local clickFX=function(x,y) SYSFX.new('tap',3,x,y) end
 local discardCanvas=false
 local showFPS=true
@@ -726,10 +731,7 @@ function love.run()
         SCN.go(firstScene,'none')
         SCN.scenes._zenitha=nil
     else
-        if firstScene then
-            MSG.new('error',"No scene named '"..firstScene.."'")
-        end
-        SCN.go('_zenitha')
+        SCN.go(firstScene)
     end
 
     -- Main loop
