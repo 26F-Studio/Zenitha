@@ -529,11 +529,7 @@ end
 ---@param str string
 ---@return string|any
 function STRING.unpackBin(str)
-    local success,res
-    success,res=pcall(data.decode,'string','base64',str)
-    if not success then return end
-    success,res=pcall(data.decompress,'string','zlib',str)
-    if success then return res end
+    return data.decompress('string','zlib',data.decode('string','base64',str))
 end
 
 ---Pack text data into string (Gzip+Base64)
@@ -548,24 +544,19 @@ end
 ---@param str string
 ---@return string|any
 function STRING.unpackText(str)
-    local success,res
-    success,res=pcall(data.decode,'string','base64',str)
-    if not success then return end
-    success,res=pcall(data.decompress,'string','gzip',str)
-    if success then return res end
+    return data.decompress('string','gzip',data.decode('string','base64',str))
 end
 
 ---Pack table into string (JSON+Gzip+Base64)
 ---@param t table
 ---@return string
 function STRING.packTable(t)
-    ---@type string
     return STRING.packText(JSON.encode(t))
 end
 
 ---Unpack table from string (JSON+Gzip+Base64)
 ---@param str string
----@return table|any
+---@return table
 function STRING.unpackTable(str)
     return JSON.decode(STRING.unpackText(str))
 end
