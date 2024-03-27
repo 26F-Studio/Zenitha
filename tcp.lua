@@ -80,14 +80,13 @@ function TCP.S_send(data,id)
 end
 
 ---Receive data from client(s)
----@return Zenitha.TCP.RecvMsgPack|nil
+---@return Zenitha.TCP.RecvMsgPack|nil, Zenitha.TCP.sendID|nil
 function TCP.S_receive()
     local pack=S_recvCHN:pop()
     if pack then
         local suc,res=pcall(JSON.decode,pack.data)
         if suc then
-            pack.data=res
-            return pack
+            return res,pack.sender
         end
     end
 end
@@ -151,14 +150,13 @@ function TCP.C_send(data,id)
 end
 
 ---Receive data from server
----@return Zenitha.TCP.RecvMsgPack|nil
+---@return Zenitha.TCP.RecvMsgPack|nil, Zenitha.TCP.sendID|nil
 function TCP.C_receive()
     local pack=C_recvCHN:pop()
     if pack then
         local suc,res=pcall(JSON.decode,pack.data)
         if suc then
-            pack.data=res
-            return pack
+            return res,pack.sender
         end
     end
 end
