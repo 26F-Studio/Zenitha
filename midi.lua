@@ -7,7 +7,7 @@ local printUnk=false
 ---@field tick number tick
 ---@field time number time (second)
 ---@field type number midi-type number
----@field name 'NoteEnd' | 'NoteStart' | 'KeyPressure' | 'ControlChange' | 'ProgramChange' | 'ChannelPressure' | 'PitchBend' | 'MetaEvent' | 'SysMes' | 'Unknown' readable event type name
+---@field name 'NoteEnd'|'NoteStart'|'KeyPressure'|'ControlChange'|'ProgramChange'|'ChannelPressure'|'PitchBend'|'MetaEvent'|'SysMes'|'Unknown' readable event type name
 ---@field channel number? For all event except MetaEvent
 ---@field note number? NoteEnd & NoteStart
 ---@field velocity number? NoteEnd & NoteStart & KeyPressure & ChannelPressure
