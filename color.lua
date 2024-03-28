@@ -32,7 +32,7 @@ local function hsv(h,s,v,a)
     h=h*6
     local c=v*s
     local x=abs((h-1)%2-1)*c
-    if h<1     then return v,x+v-c,v-c,a
+    if     h<1 then return v,x+v-c,v-c,a
     elseif h<2 then return x+v-c,v,v-c,a
     elseif h<3 then return v-c,v,x+v-c,a
     elseif h<4 then return v-c,x+v-c,v,a

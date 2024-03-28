@@ -31,6 +31,8 @@
 ---@field xOy_dl love.Transform Screen transformation objects (down-left)
 ---@field xOy_d love.Transform  Screen transformation objects (down)
 ---@field xOy_dr love.Transform Screen transformation objects (down-right)
+---
+---@field info fun():string[] Return all numbers of SCR module with a list of string
 
 
 ---@type Zenitha.ScreenInfo
@@ -104,7 +106,6 @@ function SCR.resize(w,h)
 end
 
 ---Get screen info
----@return string[]
 function SCR.info()
     return {
         ("w0,h0 : %d, %d"):format(SCR.w0,SCR.h0),
