@@ -664,7 +664,7 @@ function love.errorhandler(msg)
             GC.scale(k)
             setFont(100,'_norm') gc_print(":(",100,0,0,1.2)
             setFont(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
-            setFont(20,'_norm') gc.printf(err[1],100,380,SCR.w/k-200)
+            setFont(20,'_norm') gc.printf(err[1],100,330,SCR.w/k-200)
             GC.print(love.system.getOS().."-"..versionText.."\nScene stack:"..sceneStack,100,640)
             GC.print("TRACEBACK",100,430)
             for i=4,#err-2 do
