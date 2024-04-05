@@ -40,7 +40,7 @@ local backColors={
 }
 
 ---Create a new message popup at up-left corner
----@param icon string|love.Canvas
+---@param icon 'info'|'check'|'warn'|'error'|love.Canvas
 ---@param str string
 ---@param time? number
 function MSG.new(icon,str,time)
