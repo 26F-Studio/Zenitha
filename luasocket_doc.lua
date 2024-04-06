@@ -16,7 +16,7 @@ local socket={}
 ---@param address string
 ---@param port string
 ---@param backlog? number
-function socket.bind(address, port, backlog) end
+function socket.bind(address,port,backlog) end
 
 ---@param address string
 ---@param port number
@@ -24,17 +24,17 @@ function socket.bind(address, port, backlog) end
 ---@param locport? number
 ---@param family? 'inet'|'inet6'
 ---@return LuaSocket.client
-function socket.connect(address, port, locaddr, locport, family) end
+function socket.connect(address,port,locaddr,locport,family) end
 socket.connect4=socket.connect
 socket.connect6=socket.connect
 
 ---@param recvt LuaSocket.master[]
 ---@param sendt LuaSocket.master[]
 ---@param timeout? number?
-function socket.select(recvt, sendt, timeout) end
+function socket.select(recvt,sendt,timeout) end
 
 ---Throw an exception, like assert
-function socket.try(ret1, ret2, ...) end
+function socket.try(ret1,ret2,...) end
 
 ---Patch a function to be the finalizer of a SAFE function, if the SAFE function crashed, the finalizer function will be called
 ---@param finalizer function
@@ -49,19 +49,19 @@ function socket.protect(func) end
 ---@param ret1 any
 ---@param ret2 any
 ---@param ... any
-function socket.skip(D, ret1, ret2, ...) end
+function socket.skip(D,ret1,ret2,...) end
 
 ---LTN12
 ---@param mode string
 ---@param sock LuaSocket.master
 ---@return LTN12.Sink
-function socket.sink(mode, sock) end
+function socket.sink(mode,sock) end
 
 ---@param mode string
 ---@param sock LuaSocket.master
 ---@param length? number
 ---@return LTN12.Source
-function socket.source(mode, sock, length) end
+function socket.source(mode,sock,length) end
 
 ---Just sleep
 ---@param time number
@@ -79,12 +79,12 @@ local master={}
 ---@param address string
 ---@param port string
 ---@return number? success, string errInfo
-function master:bind(address, port) end
+function master:bind(address,port) end
 
 ---@param address string
 ---@param port string
 ---@return number? success, string errInfo
-function master:connect(address, port) end
+function master:connect(address,port) end
 
 function master:close() end
 
@@ -108,11 +108,11 @@ function master:listen(backlog) end
 ---@param received number bytes
 ---@param sent number bytes
 ---@param age number seconds
-function master:setstats(received, sent, age) end
+function master:setstats(received,sent,age) end
 
 ---@param value? number nil or negative means block
 ---@param mode? 'b'|'t'
-function master:settimeout(value, mode) end
+function master:settimeout(value,mode) end
 
 ---@return string
 function master:getfd() end
@@ -133,7 +133,7 @@ function server:getoption(option) end
 
 ---@param option string
 ---@param value? any
-function server:setoption(option, value) end
+function server:setoption(option,value) end
 
 
 
@@ -145,20 +145,20 @@ function client:getoption(option) end
 
 ---@param option string
 ---@param value? any
-function client:setoption(option, value) end
+function client:setoption(option,value) end
 
 ---@return string
 function client:getpeername() end
 
 ---@param pattern? '*l'|'*a'|number
 ---@param prefix? string
-function client:receive(pattern, prefix) end
+function client:receive(pattern,prefix) end
 
 ---Send data string between i and j (byte) if given
 ---@param data string
 ---@param i? number
 ---@param j? number
-function client:send(data, i, j) end
+function client:send(data,i,j) end
 
 ---Close one side of a full-duplex connection
 ---@param mode? 'both'|'send'|'receive'
