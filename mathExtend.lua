@@ -161,8 +161,8 @@ end
 ---@return number
 function MATH.cLerp(v1,v2,ratio)
     return
-        ratio<=v1 and 0 or
-        ratio>=v2 and 1 or
+        ratio<=0 and v1 or
+        ratio>=1 and v2 or
         v1+(v2-v1)*ratio
 end
 
@@ -172,7 +172,10 @@ end
 ---@param value number
 ---@return number
 function MATH.icLerp(v1,v2,value)
-    return (value-v1)/(v2-v1)
+    return
+        value<=v1 and 0 or
+        value>=v2 and 1 or
+        (value-v1)/(v2-v1)
 end
 
 local clamp,lerp=MATH.clamp,MATH.lerp
