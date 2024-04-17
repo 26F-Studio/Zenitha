@@ -13,33 +13,6 @@ local packSetting={}
 local volume=1
 local stereo=1
 
-local noteVal={
-    C=0,c=0,
-    D=2,d=2,
-    E=4,e=4,
-    F=5,f=5,
-    G=7,g=7,
-    A=9,a=9,
-    B=11,b=11,
-}
-local noteName={'C','C#','D','D#','E','F','F#','G','G#','A','A#','B'}
-local function _getTuneHeight(tune)
-    local octave=tonumber(tune:sub(-1,-1))
-    if octave then
-        local tuneHeight=noteVal[tune:sub(1,1)]
-        if tuneHeight then
-            tuneHeight=tuneHeight+(octave-1)*12
-            local s=tune:sub(2,2)
-            if s=='s' or s=='#' then
-                tuneHeight=tuneHeight+1
-            elseif s=='f' or s=='b' then
-                tuneHeight=tuneHeight-1
-            end
-            return tuneHeight
-        end
-    end
-end
-
 local SFX={}
 
 ---@param name string
@@ -93,6 +66,48 @@ function SFX.load(name,path,lazyLoad)
     table.sort(nameList)
 end
 
+local noteVal={
+    C=0,c=0,
+    D=2,d=2,
+    E=4,e=4,
+    F=5,f=5,
+    G=7,g=7,
+    A=9,a=9,
+    B=11,b=11,
+}
+local noteName={'C','C#','D','D#','E','F','F#','G','G#','A','A#','B'}
+function SFX.getTuneHeight(tune)
+    local octave=tonumber(tune:sub(-1,-1))
+    if octave then
+        local tuneHeight=noteVal[tune:sub(1,1)]
+        if tuneHeight then
+            tuneHeight=tuneHeight+(octave-1)*12
+            local s=tune:sub(2,2)
+            if s=='s' or s=='#' then
+                tuneHeight=tuneHeight+1
+            elseif s=='f' or s=='b' then
+                tuneHeight=tuneHeight-1
+            end
+            return tuneHeight
+        end
+    end
+end
+
+---Get note name with note number (start from 0, like midi)
+---
+---0 --> ' C1'
+---12 --> 'C2'
+---@param note number Note number, start from 0
+---@return string Note name, e.g. 'C4'
+function SFX.getNoteName(note)
+    if note<1 then
+        return '---'
+    else
+        local octave=floor(note/12)+1
+        return noteName[note%12+1]..octave
+    end
+end
+
 ---Load SFX samples from specified directory
 ---@param pack {name:string, path:string, base:string}
 ---## Example
@@ -108,7 +123,7 @@ function SFX.loadSample(pack)
         srcMap[pack.name..num]={love.audio.newSource(pack.path..'/'..num..'.ogg','static')}
         num=num+1
     end
-    local base=(_getTuneHeight(pack.base) or 37)-1
+    local base=(SFX.getTuneHeight(pack.base) or 37)-1
     local top=base+num-1
     packSetting[pack.name]={base=base,top=top}
     LOG((num-1).." "..pack.name.." samples loaded")
@@ -134,21 +149,6 @@ function SFX.setStereo(s)
     stereo=s
 end
 
----Get note name with note number (start from 0, like midi)
----
----0 --> ' C1'
----12 --> 'C2'
----@param note number Note number, start from 0
----@return string Note name, e.g. 'C4'
-function SFX.getNoteName(note)
-    if note<1 then
-        return '---'
-    else
-        local octave=floor(note/12)+1
-        return noteName[note%12+1]..octave
-    end
-end
-
 ---Play a sample
 ---@param pack string
 ---@param ... string|number 0~1 number for volume, big integer and string for tune
@@ -167,7 +167,7 @@ function SFX.playSample(pack,...)
             else
                 local base=packSetting[pack].base
                 local top=packSetting[pack].top
-                local tune=type(a)=='string' and _getTuneHeight(a) or a -- Absolute tune in number
+                local tune=type(a)=='string' and SFX.getTuneHeight(a) or a -- Absolute tune in number
                 local playTune=tune+rnd(-2,2)
                 if playTune<=base then -- Too low notes
                     playTune=base+1
