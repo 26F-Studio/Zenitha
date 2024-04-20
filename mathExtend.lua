@@ -36,6 +36,14 @@ function MATH.roundUnit(n,u)
     return floor(n/u+.5)*u
 end
 
+---Round a number with specified unit
+---@param x number
+---@param base number
+---@return number
+function MATH.roundLog(x,base)
+    return floor(log(x,base)+.5)
+end
+
 ---Get a random boolean with specified chance, 50% if not given
 ---@param chance? number 0~1
 ---@return boolean
