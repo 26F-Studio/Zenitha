@@ -97,7 +97,7 @@ function MATH.randFreq(fList)
         r=r-fList[i]
         if r<0 then return i end
     end
-    error("MATH.randFreq(fList): Frequency list should be a simple positive number list")
+    error("MATH.randFreq(fList): Need simple positive number list")
 end
 
 ---Get a random key with specified frequency table
@@ -110,7 +110,7 @@ function MATH.randFreqAll(fList)
         r=r-v
         if r<0 then return k end
     end
-    error("MATH.randFreqAll(fList): Frequency list should be a simple positive number list")
+    error("MATH.randFreqAll(fList): Need simple positive number list")
 end
 
 ---Get a random numbers in gaussian distribution (Box-Muller algorithm + stream buffer)

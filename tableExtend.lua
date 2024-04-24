@@ -58,7 +58,7 @@ end
 ---Connect [1~#] elements of new to the end of org
 ---@param org any[] original list
 ---@param new any[] new list
----@return any[] org with new data
+---@return any[] #org with new data
 function TABLE.connect(org,new)
     local l0=#org
     for i=1,#new do

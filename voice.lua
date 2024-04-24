@@ -41,7 +41,7 @@ function VOC.getCount() return 0 end
 function VOC.getQueueCount() return 0 end
 
 ---Get the number of voice files in the bank
----@return number Free channel id
+---@return number #Free channel id
 function VOC.getFreeChannel() return 0 end
 
 ---Load voice files from specified path
