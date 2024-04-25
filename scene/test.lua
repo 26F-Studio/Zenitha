@@ -1,5 +1,6 @@
 local ins,rem=table.insert,table.remove
 
+---@type Zenitha.Scene
 local scene={}
 
 local backCounter

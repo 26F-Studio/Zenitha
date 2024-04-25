@@ -10,6 +10,8 @@ local function _sceneDraw()
     FONT.set(20,'_norm')
     GC.mStr("Powered by LÖVE",400,280)
 end
+
+---@type Zenitha.Scene
 local scene={
     draw=function()
         GC.setColor(.97,.97,.97,.626)

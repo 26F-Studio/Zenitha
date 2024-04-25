@@ -2226,7 +2226,6 @@ end
 
 ---@class Zenitha.widgetArg: table
 ---
----General
 ---@field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
 ---@field name? string
 ---@field pos? table
@@ -2246,13 +2245,13 @@ end
 ---@field alignY? 'top'|'bottom'|'center'
 ---@field labelPos? 'left'|'right'|'top'|'bottom' Some widget (like Slider) didn't use 'top'
 ---@field labelDistance? number
----@field disp? function
----@field code? function
+---@field disp? function Must return the value that widget should show
+---@field code? function Called 'When triggered'
 ---@field visibleFunc? function Used to determine if widget is visible when scene changed
 ---@field visibleTick? function Used to change widget's visibility every frame
 ---
 ---@field lineWidth? number
----@field cornerR? number
+---@field cornerR? number Round corner ratio
 ---
 ---@field textColor? Zenitha.ColorStr|Zenitha.Color
 ---@field fillColor? Zenitha.ColorStr|Zenitha.Color
@@ -2263,53 +2262,44 @@ end
 ---@field sound_press? string
 ---@field sound_hover? string
 ---
----Image
----@field ang? number
----@field k? number
+---@field ang? number [image]
+---@field k? number [image]
 ---
----Check box
----@field sound_on? string
----@field sound_off? string
+---@field sound_on? string [checkBox]
+---@field sound_off? string [checkBox]
 ---
----Slider
----@field axis? {x:number, y:number, unit?:number}
----@field smooth? boolean
----@field valueShow? false|'int'|'float'|'percent'|function
+---@field axis? {minVal:number, maxVal:number, step?:number} [slider]
+---@field smooth? boolean Unit point visibility [slider]
+---@field valueShow? false|'int'|'float'|'percent'|function Value showing mode or function [called with widgetObj) [slider]
+---@field lineDist? number Outline dist from the bat [slider_fill]
 ---
----@field lineDist? number
+---@field selFontSize? number [selector]
+---@field selFontType? string [selector]
+---@field list? table [selector]
+---@field show? function [selector]
 ---
----Selector
----@field selFontSize? number
----@field selFontType? string
----@field list? table
----@field show? function
+---@field secret? boolean [inputBox]
+---@field regex? string [inputBox]
+---@field maxInputLength? number [inputBox]
+---@field sound_input? string [inputBox]
+---@field sound_bksp? string [inputBox]
+---@field sound_clear? string [inputBox]
+---@field sound_fail? string [inputBox]
 ---
----Input box
----@field secret? boolean
----@field regex? string
----@field maxInputLength? number
----@field sound_input? string
----@field sound_bksp? string
----@field sound_clear? string
----@field sound_fail? string
+---@field scrollBarPos? number [textBox & listBox]
+---@field scrollBarWidth? number [textBox & listBox]
+---@field scrollBarDist? number [textBox & listBox]
+---@field scrollBarColor? Zenitha.ColorStr|Zenitha.Color [textBox & listBox]
+---@field lineHeight? number [textBox & listBox]
 ---
----Scrolling boxes
----@field scrollBarPos? number
----@field scrollBarWidth? number
----@field scrollBarDist? number
----@field scrollBarColor? Zenitha.ColorStr|Zenitha.Color
----@field lineHeight? number
+---@field yOffset? number [textBox]
+---@field fixContent? boolean [textBox]
 ---
----Text box
----@field yOffset? number
----@field fixContent? boolean
----
----List box
----@field drawFunc? function
----@field releaseDist? number
----@field stencilMode? 'total'|'single'|false
----@field sound_click? string
----@field sound_select? string
+---@field drawFunc? function [listBox]
+---@field releaseDist? number [listBox]
+---@field stencilMode? 'total'|'single'|false [listBox]
+---@field sound_click? string [listBox]
+---@field sound_select? string [listBox]
 
 ---Create new widget
 ---@param args Zenitha.widgetArg Arguments to create widget, check declare widget class for more info
