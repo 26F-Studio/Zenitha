@@ -4,7 +4,7 @@ local ins,rem=table.insert,table.remove
 local outputBox=WIDGET.new{type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25,fixContent=true}
 local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
 
-local function log(str)outputBox:push(str) end
+local function log(str) outputBox:push(str) end
 
 log{COLOR.lP,"Zenitha Console"}
 log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
@@ -507,7 +507,7 @@ local commands={} do
                 commands.cls.code()
                 outputBox:clear()
                 outputBox.h=SCR.h0-140
-                local button=WIDGET.new{type='button',name='bye',text=Zenitha.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,code=function()
+                local button=WIDGET.new{type='button',name='bye',text=ZENITHA.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,code=function()
                     WIDGET.active.bye:setVisible(false)
                     outputBox.h=SCR.h0-20
                     TASK.new(function()
@@ -618,7 +618,7 @@ function userG.print(...)
 end
 userG._G=userG
 TABLE.complete(math,userG.math)
-TABLE.complete(string,userG.string)userG.string.dump=nil
+TABLE.complete(string,userG.string) userG.string.dump=nil
 TABLE.complete(table,userG.table)
 TABLE.complete(bit,userG.bit)
 TABLE.complete(coroutine,userG.coroutine)

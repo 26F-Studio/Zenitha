@@ -1,4 +1,5 @@
 local MATH={}
+
 for k,v in next,math do MATH[k]=v end
 
 MATH.tau=2*math.pi

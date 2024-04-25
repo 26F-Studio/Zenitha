@@ -10,8 +10,7 @@ local _ncalls={}   -- number of calls
 local _internal={} -- list of internal profiler functions
 
 local getInfo=debug.getinfo
-local _hooker
-_hooker=function(event,line,info)
+local function _hooker(event,line,info)
     info=info or getInfo(2,'fnS')
     local f=info.func
     if _internal[f] then return end -- ignore the profiler itself
@@ -144,7 +143,7 @@ local switch=false
 ---Turn profile mode on/off
 ---
 ---Automatically copy the report to clipboard when turned off
----@return boolean current state
+---@return boolean #current state
 function profile.switch()
     switch=not switch
     if not switch then

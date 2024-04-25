@@ -14,6 +14,8 @@ local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
 ---@class stringlib
 local STRING={}
 
+for k,v in next,string do STRING[k]=v end
+
 ---Install stringExtend into the lua basic "string library",
 ---so that you can use these extended functions with `str:xxx(...)` format
 function STRING.install()

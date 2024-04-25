@@ -278,7 +278,7 @@ function SCN.back(style,...)
         SCN.swapTo(SCN.stack[#SCN.stack-1],style,...)
         SCN._pop()
     else
-        Zenitha._quit(style)
+        ZENITHA._quit(style)
     end
 end
 

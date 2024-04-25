@@ -18,7 +18,7 @@ local LOG=setmetatable({},{
 })
 
 ---Get raw logs data
----@return string[] @READ ONLY, DO NOT MODIFY
+---@return string[] #READ ONLY, DO NOT MODIFY
 function LOG.getLogs()
     return logs
 end
@@ -28,8 +28,8 @@ end
 function LOG.getString()
     return
         STRING.repD("$1 $2  logs  $3\n",
-            Zenitha.getAppName(),
-            Zenitha.getVersionText(),
+            ZENITHA.getAppName(),
+            ZENITHA.getVersionText(),
             startDate
         )..table.concat(logs,"\n")
 end

@@ -71,9 +71,7 @@ end
 ---@param args? string|'-d'|'-luaon'|'-expand'
 function FILE.save(data,path,args)
     if not args then args='' end
-    if STRING.sArg(args,'-d') and fs.getInfo(path) then
-        error("FILE.save: File already exist")
-    end
+    assert(not (STRING.sArg(args,'-d') and fs.getInfo(path)),"FILE.save: File already exist")
 
     if type(data)=='table' then
         if STRING.sArg(args,'-luaon') then

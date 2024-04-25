@@ -4,6 +4,8 @@ local rem=table.remove
 local next,type,select=next,type,select
 local TABLE={}
 
+for k,v in next,table do TABLE[k]=v end
+
 ---Get a new filled table
 ---@param val any value to fill
 ---@param count number how many elements

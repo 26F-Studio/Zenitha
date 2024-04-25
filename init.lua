@@ -1,10 +1,68 @@
--- #  _____           _ _   _            #
--- # / _  / ___ _ __ (_) |_| |__   __ _  #
--- # \// / / _ \ '_ \| | __| '_ \ / _` | #
--- #  / //\  __/ | | | | |_| | | | (_| | #
--- # /____/\___|_| |_|_|\__|_| |_|\__,_| #
--- #                                     #
--- An awesome pure-lua framework using Love2D
+--  #   _____           _ _   _             #
+--  #  / _  / ___ _ __ (_) |_| |__   __ _   #
+--  #  \// / / _ \ '_ \| | __| '_ \ / _` |  #
+--  #   / //\  __/ | | | | |_| | | | (_| |  #
+--  #  /____/\___|_| |_|_|\__|_| |_|\__,_|  #
+--  #                                       #
+--  An awesome, deluxe Pure-Lua game/app framework using Love2D
+--
+--  Main Modules:
+--
+--  SCN (Scene), allow you custom all callback functions for each scene.
+--      With customizable scene swapping animation and a scene-stack which allow back to prev scene with `SCN.back()`.
+--  
+--  BGM/SFX/VOC (Effect/Music/Voice), allow you play sound effects with simple function call.
+--      Play music with `BGM.play("bgm1")`, with smooth fade-in/out.
+--      Play effect with `SFX.play("click")`, or `("click",0.8,-1,12)` to play a 80%Vol, +1Octave, left side effect.
+--      Module will automatically create/unload idle resources.
+--  
+--  BG (Background), a customizable layer under the scene.
+--      Added with `BG.add(...)`, set with `BG.set("bg1")`.
+--  
+--  WIDGET, interective widgets layer above the scene, has the highest priority.
+--  
+--  MSG (Message), an on-screen print, can be used to show notifications or warnings.
+--  
+--  GC, extended lib of love.graphics.
+--  
+--  FONT, make font style & size can be set easily with `FONT.set(60,'consolas')`, just like `GC.setColor`.
+--  
+--  IMG (Image), allow images to be lazy-loaded after first used.
+--  
+--  COLOR, a set of common color tables which can be used with `COLOR.R` (red), `COLOR.dG` (dark green).
+--  
+--  PROFILE, a simple debug tool allow you start/stop profiling anytime, the result will be placed into the clipboard.
+--
+--
+--  FILE, save/load a table with one function call like `FILE.save(config,'conf.json')`.
+--      Support "Luaon" format similar to Json.
+--
+--  LANG (Language), an i18n module allow you manage all strings which displayed to players/users.
+--      Just call `LANG.set('zh')` to change the text pool to another!.
+--
+--  MATH/STRING/TABLE, extended libs of standard Lua libs.
+--      `chebyshevDist=MATH.mDist2(0,x1,y1,x2,y2)`
+--      `list=STRING.split("hello;love2d;world",";")`
+--      `t2=TABLE.copy(t1)`
+--
+--  TASK, a seudo-async module allow you run a function asynchronously (as coroutine, it must yield itself periodically, continue once per main loop cycle).
+--      With an extra "Lock" tool works like mutex lock: use `TASK.lock("L1",60)` to create a lock (forever if no time value), use `TASK.unlock` to unlock, or use `TASK.getLock` to check if lock is active.
+--
+--  TCP, allow you exchange data much more easier then using LuaSocket.
+--      Notice: this module is made for data exchanging with TCP module itself (now using pure json only).
+--
+--  And some useful utility functions like `ZENITHA.setMaxFPS` `ZENITHA.setDebugInfo` `ZENITHA.setVersionText`.
+--
+--  Experimental modules:
+--  WAIT, DEBUG, LOG, SYSFX, TEXT, VIB, WHEELMOV, REQUIRE, HTTP, MIDI
+--
+--  Exterior modules:
+--  JSON, json.lua by rxi;
+--  HASH, sha2.lua by Egor Skriptunoff;
+--
+--  All Zenitha module variables are named in all uppercase.
+---@class Zenitha.main
+ZENITHA={}
 
 --------------------------------------------------------------
 
@@ -24,7 +82,7 @@ kb.setKeyRepeat(true)
 
 --------------------------------------------------------------
 
--- typedef
+-- typedef (you need extension Emmylua to make these things work)
 ---@class Zenitha.Click
 ---@field x number
 ---@field y number
@@ -558,13 +616,13 @@ function love.lowmemory()
     collectgarbage()
     if autoGCcount<3 then
         autoGCcount=autoGCcount+1
-        MSG.new('check',"[auto GC] low MEM 设备内存过低"..string.rep('.',4-autoGCcount))
+        MSG.new('check',"[auto GC] low MEM 设备内存过低"..('.'):rep(4-autoGCcount))
     end
 end
 
 function love.resize(w,h)
     if SCR.w==w and SCR.h==h then return end
-    SCR.resize(w,h)
+    SCR._resize(w,h)
     for k in next,bigCanvases do
         bigCanvases[k]:release()
         bigCanvases[k]=gc.newCanvas()
@@ -612,7 +670,7 @@ function love.errorhandler(msg)
     love.audio.stop()
     BGM.stop()
     gc.reset()
-    SCR.resize(gc.getWidth(),gc.getHeight())
+    SCR._resize(gc.getWidth(),gc.getHeight())
 
     local sceneStack=SCN and table.concat(SCN.stack,"/") or "NULL"
     if mainLoopStarted and #errData<3 and SCN.scenes['error'] then
@@ -654,7 +712,7 @@ function love.errorhandler(msg)
                 if E=='quit' or a=='escape' then
                     return true
                 elseif E=='resize' then
-                    SCR.resize(a,b)
+                    SCR._resize(a,b)
                 end
             end
             GC.clear(.3,.5,.9)
@@ -840,7 +898,7 @@ function love.run()
                             gc.rectangle('fill',150+2*i,-20,2,-frameTimeList[i]*4000)
                         end
 
-                        -- Cursor pos disp
+                        -- Cursor position info
                         gc_replaceTransform(SCR.origin)
                             local x,y=xOy:transformPoint(mx,my)
                             gc.setLineWidth(1)
@@ -852,7 +910,7 @@ function love.run()
                     WAIT_draw()
                 gc_present()
 
-                -- SPEED UPUP! (probably not that obvious)
+                -- Speed up a bit on mobile device, maybe
                 if discardCanvas then GC.discard() end
             end
         end
@@ -879,46 +937,44 @@ function love.run()
 end
 
 --------------------------------------------------------------
-
--- Zenitha framework & methods
-Zenitha={}
+-- Utility functions
 
 ---Go to quit scene then terminate the application
 ---@param style? string Choose a scene swapping style
-function Zenitha._quit(style)
+function ZENITHA._quit(style)
     onQuit()
     SCN.swapTo('_quit',style or 'slowFade')
 end
 
 ---Set the application name string
 ---@param name string
-function Zenitha.setAppName(name)
+function ZENITHA.setAppName(name)
     assert(type(name)=='string',"Zenitha.setAppName(name): Need string")
     appName=name
 end
 
 ---Get the application name
 ---@return string
-function Zenitha.getAppName() return appName end
+function ZENITHA.getAppName() return appName end
 
 ---Set the application version text
 ---@param text string
-function Zenitha.setVersionText(text)
+function ZENITHA.setVersionText(text)
     assert(type(text)=='string',"Zenitha.setVersionText(text): Need string")
     versionText=text
 end
 
 ---Get the application version text
 ---@return string
-function Zenitha.getVersionText() return versionText end
+function ZENITHA.getVersionText() return versionText end
 
 ---Get the joysticks' state table
-function Zenitha.getJsState() return jsState end
+function ZENITHA.getJsState() return jsState end
 
 ---Get the error info
 ---@param i number|'#' Index of error info, '#' for the last one
 ---@return Zenitha.Exception|table<number, Zenitha.Exception>
-function Zenitha.getErr(i)
+function ZENITHA.getErr(i)
     if i=='#' then
         return errData[#errData]
     elseif i then
@@ -930,7 +986,7 @@ end
 
 ---Set the debug info list
 ---@param list table<number,  table<string|function>>[]
-function Zenitha.setDebugInfo(list)
+function ZENITHA.setDebugInfo(list)
     assert(type(list)=='table',"Zenitha.setDebugInfo(list): Need table")
     for i=1,#list do
         assert(type(list[i][1])=='string',"Zenitha.setDebugInfo(list): list[i][1] must be string")
@@ -939,50 +995,50 @@ function Zenitha.setDebugInfo(list)
     debugInfos=list
 end
 
----Set the first scene to load
+---Set the first scene to load, normally this must be used, or you wlil enter the demo scene
 ---@param name string|any
-function Zenitha.setFirstScene(name)
+function ZENITHA.setFirstScene(name)
     assert(type(name)=='string',"Zenitha.setFirstScene(name): Need string")
     firstScene=name
 end
 
 ---Set whether to discard canvas buffer after drawing each frame
 ---@param b boolean
-function Zenitha.setCleanCanvas(b)
+function ZENITHA.setCleanCanvas(b)
     assert(type(b)=='boolean',"Zenitha.setCleanCanvas(b): Need boolean")
     discardCanvas=b
 end
 
 ---Set the updating rate of the application
 ---
----Default value is 100(%), all *.update(dt) will be called every main loop
+---Default value is 100(%), all updating will be called every main loop cycle
 ---
----If set to 50(%), all *.update(dt) will be called every 2 main loop
+---If set to 50(%), all *.update(dt) will be called every 2 main loop cycle
 ---@param rate number Updating rate percentage, range from 0 to 100
-function Zenitha.setUpdateFreq(rate)
+function ZENITHA.setUpdateFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setUpdateFreq(rate): Need in (0,100]")
     updateFreq=rate
 end
 
 ---Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
 ---@param rate number Drawing rate percentage, range from 0 to 100
-function Zenitha.setDrawFreq(rate)
+function ZENITHA.setDrawFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"Zenitha.setDrawFreq(rate): Need in (0,100]")
     drawFreq=rate
 end
 
 ---Set whether to show FPS at left-down corner
 ---@param b boolean
-function Zenitha.setShowFPS(b)
+function ZENITHA.setShowFPS(b)
     assert(type(b)=='boolean',"Zenitha.setShowFPS(b): Need boolean")
     showFPS=b
 end
 
----Set the max update rate of main loop
+---Set the max update rate of main loop cycle
 ---
 ---Default value is 60
 ---@param fps number
-function Zenitha.setMaxFPS(fps)
+function ZENITHA.setMaxFPS(fps)
     assert(type(fps)=='number' and fps>0,"Zenitha.setMaxFPS(fps): Need >0")
     sleepInterval=1/fps
 end
@@ -993,7 +1049,7 @@ end
 ---
 ---Function: trigger custom function after every clicks (pass x,y as arguments)
 ---@param fx false|true|function
-function Zenitha.setClickFX(fx)
+function ZENITHA.setClickFX(fx)
     assert(type(fx)=='boolean' or type(fx)=='function',"Zenitha.setClickFX(fx): Need boolean|function")
     if fx==false then fx=NULL end
     if fx==true then fx=function(x,y) SYSFX.new('tap',3,x,y) end end
@@ -1004,7 +1060,7 @@ end
 ---
 ---Default value is 62
 ---@param dist number Distance threshold
-function Zenitha.setClickDist(dist)
+function ZENITHA.setClickDist(dist)
     assert(type(dist)=='number' and dist>0,"Zenitha.setClickDist(dist): Need >0")
     clickDist2=dist^2
 end
@@ -1012,7 +1068,7 @@ end
 ---Set highest priority global key-pressing event listener
 ---@param key string Key name
 ---@param func function|false Function to be called when key is pressed, false to remove
-function Zenitha.setOnGlobalKey(key,func)
+function ZENITHA.setOnGlobalKey(key,func)
     assert(type(key)=='string',"Zenitha.setOnFnKeys(key,func): Need string")
     if func==false then
         globalKey[key]=nil
@@ -1024,7 +1080,7 @@ end
 
 ---Set Fn keys' event listener (for debugging)
 ---@param list function[] @Function list, [1~7]=function
-function Zenitha.setOnFnKeys(list)
+function ZENITHA.setOnFnKeys(list)
     assert(type(list)=='table',"Zenitha.setOnFnKeys(list): Need table, [1~7]=function")
     for i=1,7 do
         if type(list[i])=='function' then
@@ -1035,21 +1091,21 @@ end
 
 ---Set global onFocus event listener
 ---@param func function Function to be called when window focus changed
-function Zenitha.setOnFocus(func)
+function ZENITHA.setOnFocus(func)
     assert(type(func)=='function',"Zenitha.setOnFocus(func): Need function")
     onFocus=func
 end
 
 ---Set global onResize event listener
 ---@param func function Function to be called when window resized
-function Zenitha.setOnResize(func)
+function ZENITHA.setOnResize(func)
     assert(type(func)=='function',"Zenitha.setOnResize(func): Need function")
     onResize=func
 end
 
 ---Set global onQuit event listener
 ---@param func function Function to be called when application is about to quit
-function Zenitha.setOnQuit(func)
+function ZENITHA.setOnQuit(func)
     assert(type(func)=='function',"Zenitha.setOnQuit(func): Need function")
     onQuit=func
 end
@@ -1058,14 +1114,14 @@ end
 ---
 ---Color and line width is uncertain, set it yourself in the function.
 ---@param func function Function to be called when drawing cursor
-function Zenitha.setDrawCursor(func)
+function ZENITHA.setDrawCursor(func)
     assert(type(func)=='function',"Zenitha.setDrawCursor(func): Need function")
     drawCursor=func
 end
 
----Set system info drawing function (default transform is SCR.xOy_ul)
+---Set system info (like time and battery power) drawing function (default transform is SCR.xOy_ul)
 ---@param func function Function to be called when drawing system info
-function Zenitha.setDrawSysInfo(func)
+function ZENITHA.setDrawSysInfo(func)
     assert(type(func)=='function',"Zenitha.setDrawSysInfo(func): Need function")
     drawSysInfo=func
 end
@@ -1073,7 +1129,7 @@ end
 ---Get a big canvas which is as big as the screen
 ---@param id string Canvas ID
 ---@return love.Canvas
-function Zenitha.getBigCanvas(id)
+function ZENITHA.getBigCanvas(id)
     return bigCanvases[id]
 end
 
