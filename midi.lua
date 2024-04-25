@@ -93,7 +93,7 @@ function MIDI.newSong(sData,handler)
 
     Song.tracks={}
     for t=1,Song.trackCount do
-        if printMeta then print("TRACK "..t..":") end
+        if printMeta then print("TRACK "..t) end
         local track={}
         sec,sData=read(sData,4)
         assert(sec=='MTrk',"Track head missing")
@@ -259,7 +259,9 @@ function MIDI.newSong(sData,handler)
     for i=1,Song.trackCount do
         local bpmPointer=1
         local tickPerSecond=Song.tickPerQuarterNote*120/60
-        -- print("Track "..i.." init tickPerSecond is "..tickPerSecond)
+        if printMeta then
+            printf("Track %d init tickPerSecond is %f",i,tickPerSecond)
+        end
         local tickAnchor,timeAnchor=0,0
         local track=Song.tracks[i]
         for j=1,#track do
@@ -267,7 +269,9 @@ function MIDI.newSong(sData,handler)
             if bpmPointer>0 and event.tick>=bpmEvents[bpmPointer].tick then
                 timeAnchor,tickAnchor=timeAnchor+(bpmEvents[bpmPointer].tick-tickAnchor)/tickPerSecond,bpmEvents[bpmPointer].tick
                 tickPerSecond=Song.tickPerQuarterNote*bpmEvents[bpmPointer].bpm/60
-                -- print("tickPerSecond change to "..tickPerSecond..", timeAnchor="..timeAnchor)
+                if printMeta then
+                    printf("tickPerSecond change to %f, timeAnchor=%f",tickPerSecond,timeAnchor)
+                end
                 bpmPointer=bpmPointer+1
                 if not bpmEvents[bpmPointer] then bpmPointer=-1 end -- No more bpm change
             end
@@ -284,7 +288,7 @@ function MIDI.newSong(sData,handler)
     else
         Song.beatPerMinute="120"
     end
-    if printMeta then print("BPM: "..Song.beatPerMinute) end
+    if printMeta then printf("BPM: %d",Song.beatPerMinute) end
 
     return setmetatable(Song,MIDI)
 end

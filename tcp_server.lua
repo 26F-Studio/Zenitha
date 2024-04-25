@@ -1,3 +1,7 @@
+local printEvent=true
+local printMsg=false
+local printException=false
+
 require"love.timer"
 local socket=require("socket")
 local TABLE=require("Zenitha.tableExtend")
@@ -64,7 +68,9 @@ local function sendMessage(pack,sender)
             elseif clients[recvID] then
                 clients[recvID].conn:send(dataStr..'\n')
             else
-                -- printf("[TCP_S] Client '%s' does not exist",receiver)
+                if printException then
+                    printf("[TCP_S] Client '%s' does not exist",receiver)
+                end
             end
         end
     elseif allowBroadcast then
@@ -90,18 +96,24 @@ local function serverLoop()
         if cfg then
             if cfg.action=='close' then
                 server:close()
-                printf("[TCP_S] Server closed")
+                if printEvent then
+                    printf("[TCP_S] Server closed")
+                end
                 return
             elseif cfg.action=='kick' then
                 for i=1,#cfg.id do
                     local client=clients[cfg.id[i]]
                     if client then
                         client.conn:close()
-                        printf("[TCP_S] Kicked %s",client.sockname)
+                        if printEvent then
+                            printf("[TCP_S] Kicked %s",client.sockname)
+                        end
                         clients[cfg.id[i]]=nil
                         partialDataBuffer[cfg.id[i]]=nil
                     else
-                        printf("[TCP_S] Client '%s' does not exist",cfg.id)
+                        if printException then
+                            printf("[TCP_S] Client '%s' does not exist",cfg.id)
+                        end
                     end
                 end
             elseif cfg.action=='setAllowBroadcast' then
@@ -126,10 +138,14 @@ local function serverLoop()
             elseif cfg.action=='bus.create' then
                 if #busList>=maxBusCount then
                     S_recvCHN:push{success=false}
-                    printf("[TCP_S] Bus count reached max count (%d)",maxBusCount)
+                    if printException then
+                        printf("[TCP_S] Bus count reached max count (%d)",maxBusCount)
+                    end
                 elseif busList[cfg.bus] then
                     S_recvCHN:push{success=false}
-                    printf("[TCP_S] Bus '%s' already exists",cfg.bus)
+                    if printException then
+                        printf("[TCP_S] Bus '%s' already exists",cfg.bus)
+                    end
                 else
                     ---@type Zenitha.TCP.Bus
                     local bus={
@@ -142,7 +158,9 @@ local function serverLoop()
                     ins(busList,bus)
                     busList[cfg.bus]=bus
                     S_recvCHN:push{success=true}
-                    printf("[TCP_S] Bus '%s' created",cfg.bus)
+                    if printEvent then
+                        printf("[TCP_S] Bus '%s' created",cfg.bus)
+                    end
                 end
             elseif cfg.action=='bus.close' then
                 local oldCount=#busList
@@ -157,7 +175,7 @@ local function serverLoop()
                         break
                     end
                 end
-                if #busList==oldCount then
+                if #busList==oldCount and printException then
                     printf("[TCP_S] no Bus called '%s'",cfg.bus)
                 end
             end
@@ -174,7 +192,9 @@ local function serverLoop()
                     sockname=conn:getsockname(),
                     timestamp=os.time(),
                 }
-                printf("[TCP_S] %s connected",c.sockname)
+                if printEvent then
+                    printf("[TCP_S] %s connected",c.sockname)
+                end
                 c.conn:settimeout(0.01)
                 clients[c.id]=c
                 partialDataBuffer[c.id]=''
@@ -192,7 +212,9 @@ local function serverLoop()
         for id,client in next,clients do
             local message,err,partial=client.conn:receive('*l')
             if message then
-                -- printf("[TCP_S] %s: %s",id,message)
+                if printMsg then
+                    printf("[TCP_S] (%s) %s",id,message)
+                end
                 message=partialDataBuffer[id]..message
                 partialDataBuffer[id]=''
 
@@ -230,7 +252,7 @@ local function serverLoop()
                                 bus=recvPack.bus,
                                 data=id,
                             },id)
-                        else
+                        elseif printException then
                             printf("[TCP_S] unknown config key '%s'",recvPack.config)
                         end
                     else
@@ -239,13 +261,17 @@ local function serverLoop()
                 end
             elseif err=='timeout' then
                 if partial and #partial>0 then
-                    -- printf("[TCP_S] (part) %s: %s",id,partial)
                     partialDataBuffer[id]=partialDataBuffer[id]..partial
+                    if printMsg then
+                        printf("[TCP_S] (p%s) %s",id,partial)
+                    end
                 end
             elseif err=='closed' then
                 partialDataBuffer[id]=nil
                 clients[id]=nil
-                printf("[TCP_S] %s disconnected",client.sockname)
+                if printEvent then
+                    printf("[TCP_S] %s disconnected",client.sockname)
+                end
             end
         end
 
@@ -282,7 +308,9 @@ while true do
             message=("Cannot bind to port %s, reason: %s"):format(port,err),
         }
     else
-        printf("[TCP_S] Server started on port %d",port)
+        if printEvent then
+            printf("[TCP_S] Server started on port %d",port)
+        end
         server:settimeout(0.01)
         S_recvCHN:push{success=true}
         serverLoop()
