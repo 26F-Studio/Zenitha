@@ -1,125 +1,272 @@
-local STRING=require("Zenitha.stringExtend")
+require"love.timer"
 local socket=require("socket")
+local TABLE=require("Zenitha.tableExtend")
+local JSON=require("Zenitha.json")
+
+local ins,rem=table.insert,table.remove
+local function printf(str,...) print(str:format(...)) end
 
 local S_confCHN=love.thread.getChannel("tcp_s_config")
 local S_sendCHN=love.thread.getChannel("tcp_s_send")
 local S_recvCHN=love.thread.getChannel("tcp_s_receive")
+local S_recvBusCHN=love.thread.getChannel("tcp_s_receiveBus")
 
----@type LuaSocket.server
-local server
----@type table<string, Zenitha.TCP.Client>
-local clients
+local server ---@type LuaSocket.server
+local clients ---@type table<string, Zenitha.TCP.Client>
+local partialDataBuffer ---@type table<Zenitha.TCP.sendID, string>
+local busList={} ---@type table<number|string, Zenitha.TCP.Bus>
+local maxBusCount=26 ---@type number
+local allowBroadcast=true ---@type boolean
 
----@return Zenitha.TCP.RecvMsgPack
-local function parseMessage(message,id)
-    local sep=message:find('|')
-    if sep then -- Receiver(s) specified
-        local recvIDs=STRING.split(message:sub(1,sep-1),',')
-        local data=message:sub(sep+1)
-        return {
-            data=data,
-            receiver=recvIDs,
-            sender=id,
-        }
-    else -- Broadcast
-        return {
-            data=message,
-            sender=id,
-        }
-    end
-end
+local busTemplate={
+    maxMember=26,
+    maxAliveTime=26,
+    members={},
+}
 
----@param data string
----@param receiver Zenitha.TCP.recvID
+---Send datapack with sender's ID
+---@param pack Zenitha.TCP.MsgPack
 ---@param sender Zenitha.TCP.sendID
-local function sendMessage(data,receiver,sender)
-    if receiver==nil then
-        for _,client in next,clients do
-            if client.id~=sender then
-                client.conn:send(sender..'|'..data..'\n')
-            end
-        end
-    elseif type(receiver)=='string' then
-        if receiver=='0' then
-            S_recvCHN:push{
-                data=data,
-                sender=sender,
-            }
-        elseif clients[receiver] then
-            clients[receiver].conn:send(sender..'|'..data..'\n')
-        else
-            print("[TCP_S] Client '"..receiver.."' does not exist")
-        end
-    elseif type(receiver)=='table' then
-        for _,id in next,receiver do
-            sendMessage(data,id,sender)
-        end
-    end
-end
+local function sendMessage(pack,sender)
+    ---@type Zenitha.TCP.MsgPack
+    local sendPack={
+        config=pack.config,
+        data=pack.data,
+        bus=pack.bus,
+        sender=sender,
+    }
+    local suc,dataStr=pcall(JSON.encode,sendPack)
+    if not suc then return end
 
-local partialDataBuffer={}
-local function serverLoop()
-    local nextClientId=1
-    clients={}
-
-    while true do
-        local config=S_confCHN:pop()
-        if config then
-            if config.action=='close' then
-                server:close()
-                print("[TCP_S] Server closed")
-                return
-            elseif config.action=='kick' then
-                local c=clients[config.id]
-                if c then
-                    c.conn:close()
-                    print("[TCP_S] Kicked "..c.sockname)
-                    clients[config.id]=nil
+    if pack.bus then
+        -- Send to specified bus subscribers
+        local busName=pack.bus
+        local bus=busList[busName]
+        if bus then
+            for i=1,#bus.members do
+                if bus.members[i]=='0' then
+                    S_recvBusCHN:push(sendPack)
+                else
+                    local client=clients[bus.members[i]]
+                    if client then
+                        client.conn:send(dataStr..'\n')
+                    end
                 end
             end
         end
+    elseif pack.receiver then
+        -- Send to specified ID(s)
+        local receiver=type(pack.receiver)=='table' and pack.receiver or {pack.receiver}
+        for i=1,#receiver do
+            local recvID=receiver[i]
+            if recvID=='0' then
+                S_recvCHN:push(sendPack)
+            elseif clients[recvID] then
+                clients[recvID].conn:send(dataStr..'\n')
+            else
+                -- printf("[TCP_S] Client '%s' does not exist",receiver)
+            end
+        end
+    elseif allowBroadcast then
+        -- Send to everyone when receiver not specified
+        S_recvCHN:push(sendPack)
+        for _,client in next,clients do
+            if client.id~=sender then
+                client.conn:send(dataStr..'\n')
+            end
+        end
+    end
+end
+
+local function serverLoop()
+    local newClientId=1
+    clients={}
+    partialDataBuffer={}
+
+    while true do
+        -- Process config action
+        ---@type Zenitha.TCP.ConfigMsg
+        local cfg=S_confCHN:pop()
+        if cfg then
+            if cfg.action=='close' then
+                server:close()
+                printf("[TCP_S] Server closed")
+                return
+            elseif cfg.action=='kick' then
+                for i=1,#cfg.id do
+                    local client=clients[cfg.id[i]]
+                    if client then
+                        client.conn:close()
+                        printf("[TCP_S] Kicked %s",client.sockname)
+                        clients[cfg.id[i]]=nil
+                        partialDataBuffer[cfg.id[i]]=nil
+                    else
+                        printf("[TCP_S] Client '%s' does not exist",cfg.id)
+                    end
+                end
+            elseif cfg.action=='setAllowBroadcast' then
+                allowBroadcast=cfg.flag
+            elseif cfg.action=='setMaxBus' then
+                maxBusCount=cfg.count
+            elseif cfg.action=='setBusMaxAliveTime' then
+                busTemplate.maxAliveTime=cfg.time
+            elseif cfg.action=='setBusMaxMember' then
+                busTemplate.maxMember=cfg.count
+            elseif cfg.action=='bus.get' then
+                S_recvCHN:push(TABLE.shift(busList))
+            elseif cfg.action=='bus.join' then
+                local bus=busList[cfg.bus]
+                if bus then ins(bus.members,'0') end
+            elseif cfg.action=='bus.quit' then
+                local bus=busList[cfg.bus]
+                if bus then
+                    local p=TABLE.find(bus.members,'0')
+                    if p then rem(bus.members,p) end
+                end
+            elseif cfg.action=='bus.create' then
+                if #busList>=maxBusCount then
+                    S_recvCHN:push{success=false}
+                    printf("[TCP_S] Bus count reached max count (%d)",maxBusCount)
+                elseif busList[cfg.bus] then
+                    S_recvCHN:push{success=false}
+                    printf("[TCP_S] Bus '%s' already exists",cfg.bus)
+                else
+                    ---@type Zenitha.TCP.Bus
+                    local bus={
+                        name=cfg.bus,
+                        createTime=love.timer.getTime(),
+                        maxAliveTime=busTemplate.maxAliveTime,
+                        maxMember=busTemplate.maxMember,
+                        members={},
+                    }
+                    ins(busList,bus)
+                    busList[cfg.bus]=bus
+                    S_recvCHN:push{success=true}
+                    printf("[TCP_S] Bus '%s' created",cfg.bus)
+                end
+            elseif cfg.action=='bus.close' then
+                local oldCount=#busList
+                for i=1,#busList do
+                    if busList[i].name==cfg.bus then
+                        sendMessage({
+                            config='bus.close',
+                            bus=cfg.bus,
+                        },'0')
+                        busList[busList[i].name]=nil
+                        rem(busList,i)
+                        break
+                    end
+                end
+                if #busList==oldCount then
+                    printf("[TCP_S] no Bus called '%s'",cfg.bus)
+                end
+            end
+        end
+
+        -- Accept new connection
         do
             local conn,err=server:accept();
             if not err then
                 ---@type Zenitha.TCP.Client
                 local c={
-                    id=tostring(nextClientId),
+                    id=tostring(newClientId),
                     conn=conn,
                     sockname=conn:getsockname(),
                     timestamp=os.time(),
                 }
-                print("[TCP_S] "..c.sockname.." connected")
+                printf("[TCP_S] %s connected",c.sockname)
                 c.conn:settimeout(0.01)
                 clients[c.id]=c
                 partialDataBuffer[c.id]=''
 
-                nextClientId=nextClientId+1
+                newClientId=newClientId+1
             end
         end
 
-        ---@type Zenitha.TCP.SendMsgPack
-        local data=S_sendCHN:pop()
-        if data then
-            sendMessage(data.data,'0','0')
-        end
+        -- Send Data
+        ---@type Zenitha.TCP.MsgPack?
+        local pack=S_sendCHN:pop()
+        if pack then sendMessage(pack,'0') end
 
+        -- Receive data
         for id,client in next,clients do
             local message,err,partial=client.conn:receive('*l')
             if message then
-                -- print("[TCP_S] "..id..": "..message)
+                -- printf("[TCP_S] %s: %s",id,message)
                 message=partialDataBuffer[id]..message
                 partialDataBuffer[id]=''
-                local pack=parseMessage(message,id)
-                sendMessage(pack.data,pack.receiver,id)
+
+                local suc,recvPack=pcall(JSON.decode,message) ---@type boolean, Zenitha.TCP.MsgPack
+                if suc then
+                    if recvPack.config then
+                        if recvPack.config=='bus.get' then
+                            local list={}
+                            for i=1,#busList do
+                                ins(list,busList[i].name)
+                            end
+                            sendMessage({
+                                config='bus.get',
+                                receiver=id,
+                                data=list,
+                            },'0')
+                        elseif recvPack.config=='bus.join' then
+                            local bus=busList[recvPack.bus]
+                            if bus and not TABLE.find(bus.members,id) then
+                                ins(bus.members,id)
+                                sendMessage({
+                                    config='bus.join',
+                                    bus=recvPack.bus,
+                                    data=id,
+                                },'0')
+                            end
+                        elseif recvPack.config=='bus.quit' then
+                            local bus=busList[recvPack.bus]
+                            if bus then
+                                local p=TABLE.find(bus.members,id)
+                                if p then rem(bus.members,p) end
+                            end
+                            sendMessage({
+                                config='bus.quit',
+                                bus=recvPack.bus,
+                                data=id,
+                            },id)
+                        else
+                            printf("[TCP_S] unknown config key '%s'",recvPack.config)
+                        end
+                    else
+                        sendMessage(recvPack,id)
+                    end
+                end
             elseif err=='timeout' then
-                if partial then
-                    -- print("[TCP_S] (part) "..id..": "..partial)
+                if partial and #partial>0 then
+                    printf("[TCP_S] (part) %s: %s",id,partial)
                     partialDataBuffer[id]=partialDataBuffer[id]..partial
                 end
             elseif err=='closed' then
                 partialDataBuffer[id]=nil
                 clients[id]=nil
-                print("[TCP_S] "..client.sockname.." disconnected")
+                printf("[TCP_S] %s disconnected",client.sockname)
+            end
+        end
+
+        -- Update buses
+        for i=#busList,1,-1 do
+            local bus=busList[i]
+            if #bus.members==0 then
+                if not bus.startIdleTime then
+                    bus.startIdleTime=love.timer.getTime()
+                else
+                    if love.timer.getTime()-bus.startIdleTime>bus.maxAliveTime then
+                        sendMessage({
+                            config='bus.close',
+                            bus=bus.name,
+                        },'0')
+                        busList[bus.name]=nil
+                        rem(busList,i)
+                    end
+                end
+            elseif bus.startIdleTime then
+                bus.startIdleTime=nil
             end
         end
     end
@@ -132,10 +279,10 @@ while true do
     if err then
         S_recvCHN:push{
             success=false,
-            message="Cannot bind to port "..port..", reason: "..err,
+            message=("Cannot bind to port %s, reason: %s"):format(port,err),
         }
     else
-        print("[TCP_S] Server started on port "..port)
+        printf("[TCP_S] Server started on port %d",port)
         server:settimeout(0.01)
         S_recvCHN:push{success=true}
         serverLoop()
