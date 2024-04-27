@@ -63,7 +63,7 @@
 --  HASH, sha2.lua by Egor Skriptunoff;
 --
 --  All Zenitha module variables are named in all uppercase.
----@class Zenitha.main
+---@class Zenitha.Main
 ZENITHA={}
 
 --------------------------------------------------------------
@@ -80,7 +80,7 @@ ZENITHA={}
 ---@field scene string
 ---@field shot? love.ImageData
 
----@class Zenitha.joyStickState
+---@class Zenitha.JoystickState
 ---@field _id number
 ---@field _jsObj love.Joystick
 ---@field leftx number
@@ -146,7 +146,7 @@ local autoGCcount=0
 local devMode=false ---@type false|1|2|3|4
 local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastClicks={} ---@type Zenitha.Click[]
-local jsState={} ---@type Zenitha.joyStickState[]
+local jsState={} ---@type Zenitha.JoystickState[]
 local errData={} ---@type Zenitha.Exception[]
 local bigCanvases=setmetatable({},{
     __index=function(self,k)

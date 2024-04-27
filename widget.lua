@@ -1,4 +1,4 @@
----@class Zenitha.widgetArg: table
+---@class Zenitha.Widgetarg: table
 ---
 ---@field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
 ---@field name? string
@@ -140,7 +140,7 @@ local Widgets={}
 
 --------------------------------------------------------------
 
----@class Zenitha.widget.base not used by user
+---@class Zenitha.Widget.base not used by user
 ---@field _widget true
 ---@field type string
 ---@field name string|false
@@ -339,7 +339,7 @@ function Widgets.base.drag()    end
 function Widgets.base.scroll()  end
 
 
----@class Zenitha.widget.text: Zenitha.widget.base
+---@class Zenitha.Widget.text: Zenitha.Widget.base
 Widgets.text=setmetatable({
     type='text',
 
@@ -371,7 +371,7 @@ function Widgets.text:draw()
 end
 
 
----@class Zenitha.widget.image: Zenitha.widget.base
+---@class Zenitha.Widget.image: Zenitha.Widget.base
 ---@field _kx number|false
 ---@field _ky number|false
 Widgets.image=setmetatable({
@@ -424,7 +424,7 @@ function Widgets.image:draw()
 end
 
 
----@class Zenitha.widget.button: Zenitha.widget.base
+---@class Zenitha.Widget.button: Zenitha.Widget.base
 ---@field w number
 ---@field h number
 ---@field sound_trigger string|false
@@ -522,7 +522,7 @@ function Widgets.button:draw()
     gc_pop()
 end
 
----@class Zenitha.widget.button_fill: Zenitha.widget.button
+---@class Zenitha.Widget.button_fill: Zenitha.Widget.button
 Widgets.button_fill=setmetatable({
     type='button_fill',
     textColor='D',
@@ -558,7 +558,7 @@ function Widgets.button_fill:draw()
     gc_pop()
 end
 
----@class Zenitha.widget.button_invis: Zenitha.widget.button
+---@class Zenitha.Widget.button_invis: Zenitha.Widget.button
 Widgets.button_invis=setmetatable({
     type='button_invis',
     sound_trigger=false,
@@ -589,7 +589,7 @@ function Widgets.button_invis:draw()
 end
 
 
----@class Zenitha.widget.checkBox: Zenitha.widget.base
+---@class Zenitha.Widget.checkBox: Zenitha.Widget.base
 ---@field w number
 ---@field sound_on string|false
 ---@field sound_off string|false
@@ -697,7 +697,7 @@ function Widgets.checkBox:draw()
 end
 
 
----@class Zenitha.widget.switch: Zenitha.widget.checkBox
+---@class Zenitha.Widget.switch: Zenitha.Widget.checkBox
 ---@field _slideTime number
 Widgets.switch=setmetatable({
     type='switch',
@@ -798,7 +798,7 @@ function Widgets.switch:draw()
 end
 
 
----@class Zenitha.widget.slider: Zenitha.widget.base
+---@class Zenitha.Widget.slider: Zenitha.Widget.base
 ---@field w number
 ---@field valueShow false|'int'|'float'|'percent'|function
 ---@field numFontSize number
@@ -1059,7 +1059,7 @@ function Widgets.slider:arrowKey(k)
 end
 
 
----@class Zenitha.widget.slider_fill: Zenitha.widget.slider
+---@class Zenitha.Widget.slider_fill: Zenitha.Widget.slider
 ---@field w number
 ---@field h number
 Widgets.slider_fill=setmetatable({
@@ -1180,7 +1180,7 @@ function Widgets.slider_fill:draw()
 end
 
 
----@class Zenitha.widget.slider_progress: Zenitha.widget.slider
+---@class Zenitha.Widget.slider_progress: Zenitha.Widget.slider
 ---@field w number
 ---@field h number
 Widgets.slider_progress=setmetatable({
@@ -1278,7 +1278,7 @@ function Widgets.slider_progress:draw()
 end
 
 
----@class Zenitha.widget.selector: Zenitha.widget.base
+---@class Zenitha.Widget.selector: Zenitha.Widget.base
 ---@field w number
 ---@field _select number|false
 ---@field _selText love.Text
@@ -1447,7 +1447,7 @@ function Widgets.selector:arrowKey(k)
 end
 
 
----@class Zenitha.widget.inputBox: Zenitha.widget.base
+---@class Zenitha.Widget.inputBox: Zenitha.Widget.base
 ---@field w number
 ---@field h number
 ---@field sound_input string|false
@@ -1623,7 +1623,7 @@ function Widgets.inputBox:keypress(k)
 end
 
 
----@class Zenitha.widget.textBox: Zenitha.widget.base
+---@class Zenitha.Widget.textBox: Zenitha.Widget.base
 ---@field w number
 ---@field h number
 ---@field scrollBarColor Zenitha.ColorStr|Zenitha.Color
@@ -1820,7 +1820,7 @@ function Widgets.textBox:draw()
 end
 
 
----@class Zenitha.widget.listBox: Zenitha.widget.base
+---@class Zenitha.Widget.listBox: Zenitha.Widget.base
 ---@field w number
 ---@field h number
 ---@field sound_click string|false
@@ -2082,10 +2082,10 @@ end
 -- Widget module
 local WIDGET={_prototype=Widgets}
 
----@type Zenitha.widget.base[]
+---@type Zenitha.Widget.base[]
 WIDGET.active={} -- Table contains all active widgets
 
----@type Zenitha.widget.base|false
+---@type Zenitha.Widget.base|false
 WIDGET.sel=false -- Selected widget
 
 ---Reset all widgets (called by Zenitha when scene changed and window resized or something)
@@ -2096,7 +2096,7 @@ function WIDGET._reset()
 end
 
 ---Set WIDGET.active to widget list (called by Zenitha when scene changed)
----@param list Zenitha.widget.base[]
+---@param list Zenitha.Widget.base[]
 function WIDGET._setWidgetList(list)
     WIDGET.unFocus(true)
     WIDGET.active=list or NONE
@@ -2115,13 +2115,13 @@ function WIDGET._setWidgetList(list)
 end
 
 ---Get selected widget
----@return Zenitha.widget.base|false
+---@return Zenitha.Widget.base|false
 function WIDGET.getSelected()
     return WIDGET.sel
 end
 
 ---Check if widget W is focused, or check if any widget is focused if given false|nil
----@param W? Zenitha.widget.base|false
+---@param W? Zenitha.Widget.base|false
 ---@return boolean
 function WIDGET.isFocus(W)
     if W then
@@ -2132,7 +2132,7 @@ function WIDGET.isFocus(W)
 end
 
 ---Focus widget W
----@param W Zenitha.widget.base
+---@param W Zenitha.Widget.base
 ---@param reason? 'init'|'press'|'move'|'release'
 function WIDGET.focus(W,reason)
     if WIDGET.sel==W then return end
@@ -2248,7 +2248,7 @@ end
 ---Update widget states with drag event (called by Zenitha)
 ---@param texts string
 function WIDGET._textinput(texts)
-    ---@type Zenitha.widget.inputBox
+    ---@type Zenitha.Widget.inputBox
     local W=WIDGET.sel
     if W and W.type=='inputBox' then
         if not W.regex or texts:match(W.regex) then
@@ -2292,7 +2292,7 @@ function WIDGET._draw()
 end
 
 ---Draw widgets
----@param widgetList Zenitha.widget.base[]
+---@param widgetList Zenitha.Widget.base[]
 ---@param scroll? number
 function WIDGET.draw(widgetList,scroll)
     if scroll then gc_translate(0,-scroll) end
@@ -2302,8 +2302,8 @@ function WIDGET.draw(widgetList,scroll)
 end
 
 ---Create new widget
----@param args Zenitha.widgetArg Arguments to create widget, check declare widget class for more info
----@return Zenitha.widget.base
+---@param args Zenitha.WidgetArg Arguments to create widget, check declare widget class for more info
+---@return Zenitha.Widget.base
 function WIDGET.new(args)
     local t=args.type
     args.type=nil
@@ -2392,7 +2392,7 @@ end
 ---Get custom new widget (not guaranteed to work)
 ---@param name string
 ---@param parent string
----@return Zenitha.widget.base
+---@return Zenitha.Widget.base
 function WIDGET.newClass(name,parent)
     if not parent then parent='base' end
     assertf(type(name)=='string',"Widget name need string")

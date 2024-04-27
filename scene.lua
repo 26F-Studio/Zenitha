@@ -1,5 +1,5 @@
 ---@class Zenitha.Scene
----@field widgetList? Zenitha.widgetArg[]|Zenitha.widget.base[]
+---@field widgetList? Zenitha.WidgetArg[]|Zenitha.Widget.base[]
 ---@field scrollHeight? number|nil
 ---
 ---@field enter? function

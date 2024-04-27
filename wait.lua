@@ -1,4 +1,4 @@
----@class Zenitha.waitObj
+---@class Zenitha.WaitEvent
 ---@field init?            function
 ---@field update?          function
 ---@field quit?            function
@@ -41,7 +41,7 @@ local defaultDraw=function(a,t)
 end
 
 ---Start a new Wait Modal
----@param args Zenitha.waitObj
+---@param args Zenitha.WaitEvent
 function WAIT.new(args)
     if WAIT.state then return end
 

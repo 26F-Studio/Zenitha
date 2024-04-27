@@ -1,4 +1,4 @@
----@class Zenitha.textAnimArg
+---@class Zenitha.TextAnimArg
 ---@field text? string
 ---@field x? number
 ---@field y? number
@@ -115,7 +115,7 @@ function TEXT:clear()
 end
 
 ---Add text to container
----@param data Zenitha.textAnimArg
+---@param data Zenitha.TextAnimArg
 ---```lua
 ---default={
 ---    text="Example Text",

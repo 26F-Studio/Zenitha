@@ -1,4 +1,4 @@
----@class Zenitha.httpRequest
+---@class Zenitha.HttpRequest
 ---@field body? table|nil|string must be table if given, will be encoded to json
 ---@field pool? string default to `'_default'` if not given
 ---@field method? string|nil default to `'POST'` if body is given, `'GET'` otherwise
@@ -94,7 +94,7 @@ local function addThread(num)
 end
 
 ---Send a HTTP request
----@param arg Zenitha.httpRequest
+---@param arg Zenitha.HttpRequest
 function HTTP.request(arg)
     arg.method=arg.method or arg.body and 'POST' or 'GET'
     if arg.url then

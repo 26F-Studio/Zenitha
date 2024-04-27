@@ -1,4 +1,4 @@
----@class Zenitha.bgmObj
+---@class Zenitha.BgmObj
 ---@field name string
 ---@field path string
 ---@field source love.Source|false
@@ -24,10 +24,10 @@ local lastLoadNames={}
 ---@type string[]
 local lastPlay=NONE
 
----@type table<string, Zenitha.bgmObj>
+---@type table<string, Zenitha.BgmObj>
 local srcLib={}
 
----@type Zenitha.bgmObj[]
+---@type Zenitha.BgmObj[]
 local nowPlay={}
 
 ---@type false|string|string[]

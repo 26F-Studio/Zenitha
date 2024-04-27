@@ -1,4 +1,4 @@
----@class Zenitha.background
+---@class Zenitha.Background
 ---@field init function
 ---@field resize function
 ---@field update function
@@ -8,7 +8,7 @@
 
 local gc_clear=love.graphics.clear
 
----@type Zenitha.background[]
+---@type Zenitha.Background[]
 local BGs={} -- Stored backgrounds
 
 local BG={
