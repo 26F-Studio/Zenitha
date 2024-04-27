@@ -1,4 +1,4 @@
----@alias Zenitha.Tween.easeCurve
+---@alias Zenitha.Tween.basicCurve
 ---| 'linear'
 ---| 'inSin'
 ---| 'outSin'
@@ -19,7 +19,7 @@
 ---| 'inElastic'
 ---| 'outElastic'
 
----@alias Zenitha.Tween.easeSugar
+---@alias Zenitha.Tween.easeTemplate
 ---| 'Linear'
 ---| 'InSin' | 'OutSin' | 'InOutSin' | 'OutInSin'
 ---| 'InQuad' | 'OutQuad' | 'InOutQuad' | 'OutInQuad'
@@ -31,21 +31,17 @@
 ---| 'Inback' | 'Outback' | 'InOutback' | 'OutInback'
 ---| 'InElastic' | 'OutElastic' | 'InOutElastic' | 'OutInElastic'
 
+---@alias Zenitha.Tween.Tag string
 
 local preAnimSet={} ---@type Set<Zenitha.Tween> new Animation created during _update will be added here first, then moved to updAnimSet
 local updAnimSet={} ---@type Set<Zenitha.Tween>
 local tagAnimSet={} ---@type Set<Zenitha.Tween>
 
----@alias Zenitha.Tween.Tag string
-
-local max,min=math.max,math.min
+local min,floor=math.min,math.floor
 local sin,cos=math.sin,math.cos
-local floor=math.floor
-
 local clamp=MATH.clamp
 
-
----@type table<Zenitha.Tween.easeCurve, function>
+---@type table<Zenitha.Tween.basicCurve, function>
 local curves={
     linear=function(t) return t end,
     inSin=function(t) return 1-cos(t*1.5707963267948966) end,
@@ -68,8 +64,8 @@ local curves={
 curves.outBack=function(t) return 1-curves.inBack(1-t) end
 curves.outElastic=function(t) return 1-curves.inElastic(1-t) end
 
----@type table<Zenitha.Tween.easeSugar, Zenitha.Tween.easeCurve[]>
-local easeSugarData={
+---@type table<Zenitha.Tween.easeTemplate, Zenitha.Tween.basicCurve[]>
+local easeTemplates={
     Linear={'linear'},
     InSin={'inSin'},
     OutSin={'outSin'},
@@ -109,6 +105,9 @@ local easeSugarData={
     OutInElastic={'outElastic','inElastic'},
 }
 
+--------------------------------------------------------------
+-- Tween Class
+
 ---@class Zenitha.Tween
 ---@field private running boolean
 ---@field private duration number default to 1
@@ -116,39 +115,23 @@ local easeSugarData={
 ---@field private loop false|'repeat'|'yoyo'
 ---@field private loopCount number how many times to loop
 ---@field private flipMode boolean true when loop is `'yoyo'`, making time flow back and forth
----@field private ease Zenitha.Tween.easeCurve[]
+---@field private ease Zenitha.Tween.basicCurve[]
 ---@field private doFunc fun(t:number)
 ---@field private timeFunc? fun():number custom how time goes
 ---@field private tags Set<Zenitha.Tween.Tag>
 ---@field private onRepeat function
 ---@field private onFinish function
-local TWEEN={}
+---@field private onKill function
+local Tween={}
 
-TWEEN.__index=TWEEN
+Tween.__index=Tween
 
 local duringUpdate=false -- During update, new [tween]:run() will be added to preAnimSet first to prevent undefined behavior of table iterating
-
----Create a new tween animation
----@param doFunc fun(t:number)
----@return Zenitha.Tween
-function TWEEN.new(doFunc)
-    assert(type(doFunc)=='function',"TWEEN.new(doFunc): Need function")
-    local anim=setmetatable({
-        running=false,
-        duration=1,
-        doFunc=doFunc,
-        ease=easeSugarData.InOutSin,
-        tagSet={},
-        onRepeat=NULL,
-        onFinish=NULL,
-    },TWEEN)
-    return anim
-end
 
 ---Set doFunc (generally unnecessary, already set when creating)
 ---@param doFunc fun(t:number)
 ---@return Zenitha.Tween
-function TWEEN:setDo(doFunc)
+function Tween:setDo(doFunc)
     assert(type(doFunc)=='function',"[tween]:setDo(doFunc): Need function")
     self.doFunc=doFunc
     return self
@@ -157,7 +140,7 @@ end
 ---Set onRepeat callback function
 ---@param func function
 ---@return Zenitha.Tween
-function TWEEN:setOnRepeat(func)
+function Tween:setOnRepeat(func)
     assert(type(func)=='function',"[tween]:setOnRepeat(onRepeat): Need function")
     -- assert(not self.running,"[tween]:setOnRepeat(func): Can't set ease when running")
     self.onRepeat=func
@@ -167,21 +150,31 @@ end
 ---Set onFinish callback function
 ---@param func function
 ---@return Zenitha.Tween
-function TWEEN:setOnFinish(func)
+function Tween:setOnFinish(func)
     assert(type(func)=='function',"[tween]:setOnFinish(onFinish): Need function")
     -- assert(not self.running,"[tween]:setOnFinish(func): Can't set ease when running")
     self.onFinish=func
     return self
 end
 
----Set easing mode
----@param ease? Zenitha.Tween.easeSugar|Zenitha.Tween.easeCurve[] default to 'InOutSin'
+---Set onFinish callback function
+---@param func function
 ---@return Zenitha.Tween
-function TWEEN:setEase(ease)
+function Tween:setOnKill(func)
+    assert(type(func)=='function',"[tween]:setOnKill(onKill): Need function")
+    -- assert(not self.running,"[tween]:setOnKill(func): Can't set ease when running")
+    self.onKill=func
+    return self
+end
+
+---Set easing mode
+---@param ease? Zenitha.Tween.easeTemplate|Zenitha.Tween.basicCurve[] default to 'InOutSin'
+---@return Zenitha.Tween
+function Tween:setEase(ease)
     -- assert(not self.running,"[tween]:setEase(ease): Can't set ease when running")
     if type(ease)=='string' then
-        assertf(easeSugarData[ease],"[tween]:setEase(ease): Invalid ease name '%s'",ease)
-        self.ease=easeSugarData[ease]
+        assertf(easeTemplates[ease],"[tween]:setEase(ease): Invalid ease name '%s'",ease)
+        self.ease=easeTemplates[ease]
     elseif type(ease)=='table' then
         for i=1,#ease do
             assertf(curves[ease[i]],"[tween]:setEase(ease): Invalid ease curve name '%s'",ease[i])
@@ -196,7 +189,7 @@ end
 ---Set duration
 ---@param duration? number
 ---@return Zenitha.Tween
-function TWEEN:setDuration(duration)
+function Tween:setDuration(duration)
     assert(type(duration)=='number' and duration>=0,"[tween]:setDuration(duration): Need >=0")
     -- assert(not self.running,"[tween]:setDuration(duration): Can't set duration when running")
     self.duration=duration
@@ -207,7 +200,7 @@ end
 ---@param loopMode false|'repeat'|'yoyo'
 ---@param loopCount? number default to Infinity
 ---@return Zenitha.Tween
-function TWEEN:setLoop(loopMode,loopCount)
+function Tween:setLoop(loopMode,loopCount)
     assert(not self.timeFunc,"[tween]:setLoop(loopMode): Looping and timeFunc can't exist together")
     assert(not loopMode or loopMode=='repeat' or loopMode=='yoyo',"[tween]:setLoop(loopMode): Need false|'repeat'|'yoyo'")
     assert(not loopCount or type(loopCount)=='number' and loopCount>=0,"[tween]:setLoop(loopMode,loopCount): loopCount need >=0")
@@ -221,7 +214,7 @@ end
 ---Set tag for batch actions
 ---@param tag Zenitha.Tween.Tag
 ---@return Zenitha.Tween
-function TWEEN:setTag(tag)
+function Tween:setTag(tag)
     assert(type(tag)=='string',"[tween]:setTag(tag): Need string")
     tagAnimSet[self]=true
     self.tags[tag]=true
@@ -230,7 +223,7 @@ end
 
 ---Start the animation animate with time, or custom timeFunc
 ---@param timeFunc? fun():number Custom the timeFunc (return a number in duration)
-function TWEEN:run(timeFunc)
+function Tween:run(timeFunc)
     assert(timeFunc==nil or type(timeFunc)=='function',"[tween]:run(timeFunc): Need function if exist")
     assert(not (self.loop and timeFunc),"[tween]:run(timeFunc): Looping and timeFunc can't exist together")
     assert(not self.running,"[tween]:run(): Can't run a running animation")
@@ -246,7 +239,7 @@ end
 ---Finish instantly (cannot apply to animation with timeFunc)
 ---@param simBound? boolean simulate all bound case for animation with loop
 ---@return Zenitha.Tween
-function TWEEN:skip(simBound)
+function Tween:skip(simBound)
     assert(not self.timeFunc,"[tween]:skip(): Can't skip an animation with timeFunc")
     if not self.loop then
         self.time=self.duration
@@ -256,21 +249,22 @@ function TWEEN:skip(simBound)
         else
             if self.loop=='repeat' then
                 self.time=self.duration
+                self.loopCount=1
                 self:update(0)
             elseif self.loop=='yoyo' then
                 self.time=self.duration
-                self.flipMode=self.loopCount%2==0==self.flipMode
+                self.flipMode=self.loopCount%2==1==self.flipMode
+                self.loopCount=1
                 self:update(0)
             end
         end
     end
-    self:kill()
     return self
 end
 
 ---Release animation from auto updating list and tag list
-function TWEEN:kill()
-    self.onFinish()
+function Tween:kill()
+    self.onKill()
     preAnimSet[self]=nil
     updAnimSet[self]=nil
     tagAnimSet[self]=nil
@@ -288,13 +282,14 @@ local function curveValue(t,ease)
 end
 
 ---Update the animation
-function TWEEN:update(dt)
+function Tween:update(dt)
     self.running=true
     if self.timeFunc then
         local t=self.timeFunc()
         if t then
             self.doFunc(curveValue(clamp(self.flipMode and 1-t or t,0,1),self.ease))
         else
+            self.onFinish()
             self:kill()
         end
     else
@@ -307,13 +302,37 @@ function TWEEN:update(dt)
                 self.loopCount=self.loopCount-1
                 if self.loop=='yoyo' then
                     self.flipMode=not self.flipMode
-                    self.onRepeat()
                 end
+                self.onRepeat()
             else
+                self.onFinish()
                 self:kill()
             end
         end
     end
+end
+
+--------------------------------------------------------------
+-- Module
+
+local TWEEN={}
+
+---Create a new tween animation
+---@param doFunc fun(t:number)
+---@return Zenitha.Tween
+function TWEEN.new(doFunc)
+    assert(type(doFunc)=='function',"TWEEN.new(doFunc): Need function")
+    local anim=setmetatable({
+        running=false,
+        duration=1,
+        doFunc=doFunc,
+        ease=easeTemplates.InOutQuad,
+        tags={},
+        onRepeat=NULL,
+        onFinish=NULL,
+        onKill=NULL,
+    },Tween)
+    return anim
 end
 
 ---Update all autoAnims (called by Zenitha)
@@ -330,9 +349,6 @@ function TWEEN._update(dt)
     duringUpdate=false
 end
 
---------------------------------------------------------------
--- Batch actions with tag
-
 ---@param tag Zenitha.Tween.Tag
 ---@param method 'setEase'|'setTime'|'pause'|'continue'|'skip'|'kill'|'update'
 ---@vararg any
@@ -340,7 +356,7 @@ local function tagAction(tag,method,...)
     assert(type(tag)=='string',"TWEEN.tag_"..method..": tag need string")
     for anim in next,tagAnimSet do
         if anim.tags[tag] then
-            TWEEN[method](anim,...)
+            Tween[method](anim,...)
         end
     end
 end
