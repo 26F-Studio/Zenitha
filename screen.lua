@@ -49,7 +49,7 @@ if love.graphics then SCR.w0,SCR.h0=love.graphics.getDimensions() end
 ---If you want to make self-adaption ui, you can use `gc.replaceTranformation(SCR.xOy_ul)` things to
 ---makes some elements stick to the upper-left corner, etc.
 ---
----In Zenitha, all operations related to screen size use `Designing Rect` of the "planning area",
+---In Zenitha, all operations related to screen size use `Designing Rect`
 ---rather than the engine's original coordinate system.
 ---If necessary, you must manually transform the coordinate values back to the origin in all callback events,
 ---and `gc.replaceTransform(SCR.origin)` at the beginning of each draw function.

@@ -1,15 +1,5 @@
 ---@alias Zenitha.TCP.sendID string 0 = server/broadcast, 1+ = client id, NUMBER ONLY
 ---@alias Zenitha.TCP.recvID Zenitha.TCP.sendID|Zenitha.TCP.sendID[] 0 = server/broadcast, 1+ = client id, NUMBER ONLY
----@alias Zenitha.TCP.busID string [0-9A-Za-z_]+
----@alias Zenitha.TCP.MsgCfg
---- | 'bus.get' recv: data=Bus name list
---- | 'bus.join' recv: data=joined client id
---- | 'bus.quit' recv: data=quited client id
---- | 'bus.close' recv: data=quited client id
----@alias Zenitha.TCP.ConfigMsgAction
---- | 'bus.get' send
---- | 'bus.join' send: bus=Bus name
---- | 'bus.quit' send
 
 ---@class Zenitha.TCP.Client
 ---@field conn LuaSocket.client
@@ -70,7 +60,7 @@ end
 ---@param port number 0~65535
 function TCP.S_start(port)
     if S_running then return end
-    assert(type(port)=='number' and port>=1 and port<=65535 and port%1==0,"TCP.S_start(port): need 0~65535")
+    assert(type(port)=='number' and port>=1 and port<=65535 and port%1==0,"TCP.S_start(port): Need 0~65535")
     TASK.removeTask_code(S_daemonFunc)
     TASK.new(S_daemonFunc)
     S_confCHN:push(port)
@@ -193,6 +183,17 @@ end
 
 --------------------------------------------------------------
 -- Use the following pub/sub features when you need more scalable communication.
+
+---@alias Zenitha.TCP.busID string [0-9A-Za-z_]+
+---@alias Zenitha.TCP.MsgCfg
+---| 'bus.get' recv: data=Bus name list
+---| 'bus.join' recv: data=joined client id
+---| 'bus.quit' recv: data=quited client id
+---| 'bus.close' recv: data=quited client id
+---@alias Zenitha.TCP.ConfigMsgAction
+---| 'bus.get' send
+---| 'bus.join' send: bus=Bus name
+---| 'bus.quit' send
 
 ---@class Zenitha.TCP.Bus
 ---@field name string

@@ -112,7 +112,8 @@ function MIDI.newSong(sData,handler)
             tick=tick+dTick
 
             ---@type Zenitha.MIDI.Event
-            local event={tick=tick}
+            ---@diagnostic disable-next-line
+            local event={}
 
             event.type=tData:byte()
             if event.type<0x80 then

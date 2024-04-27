@@ -588,7 +588,7 @@ do -- function GC.load(L), GC.execute(t)
                 elseif type(cmd)=='function' then
                     cmd(unpack(code,2))
                 else
-                    error("GC.load: cmd must be string|function")
+                    error("GC.load: cmd need string|function")
                 end
             end
             gc.setShader()

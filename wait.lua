@@ -1,3 +1,16 @@
+---@class Zenitha.waitObj
+---@field init?            function
+---@field update?          function
+---@field quit?            function
+---@field draw?            function
+---@field timeout?         number
+---@field escapable?       boolean
+---@field coverAlpha?      number
+---@field noDefaultInit?   boolean
+---@field noDefaultUpdate? boolean
+---@field noDefaultDraw?   boolean
+---@field noDefaultQuit?   boolean
+
 local WAIT={
     state=false,
     timer=false,
@@ -26,19 +39,6 @@ local defaultDraw=function(a,t)
         GC.arc('line','open',SCR.w/2,SCR.h/2,SCR.h/5,t+MATH.tau*(i/4),t+MATH.tau*((i+1)/4))
     end
 end
-
----@class Zenitha.waitObj
----@field init?            function
----@field update?          function
----@field quit?            function
----@field draw?            function
----@field timeout?         number
----@field escapable?       boolean
----@field coverAlpha?      number
----@field noDefaultInit?   boolean
----@field noDefaultUpdate? boolean
----@field noDefaultDraw?   boolean
----@field noDefaultQuit?   boolean
 
 ---Start a new Wait Modal
 ---@param args Zenitha.waitObj

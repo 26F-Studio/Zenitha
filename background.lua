@@ -19,22 +19,22 @@ local BG={
 
 local fields={'init','resize','update','draw','event','discard'}
 
----Lock the background, forbid changing with BG.set() until call BG.unlock()
+---Lock the background, forbid changing with `BG.set()` until call `BG.unlock()`
 function BG.lock() BG.locked=true end
 
----Unlock the background, allow changing with BG.set()
+---Unlock the background, allow changing with `BG.set()`
 function BG.unlock() BG.locked=false end
 
 ---Add a background
 ---@param name string
 ---@param bg {init:function, resize:function, update:function, draw:function, event:function, discard:function}
 function BG.add(name,bg)
-    assertf(type(name)=='string',"BG.add(name,bg): name must be string")
+    assertf(type(name)=='string',"BG.add(name,bg): name need string")
     assertf(not BGs[name],"BG.add(name,bg): name '%s' already exists",name)
-    assertf(type(bg)=='table',"BG.add(name,bg): bg must be table")
+    assertf(type(bg)=='table',"BG.add(name,bg): bg need table")
     for i=1,#fields do
         if bg[fields[i]]==nil then bg[fields[i]]=NULL end
-        assertf(type(bg[fields[i]])=='function',"BG.add(name,bg): BG.%s must be function",fields[i])
+        assertf(type(bg[fields[i]])=='function',"BG.add(name,bg): BG.%s need function",fields[i])
     end
     BGs[name]=bg
 end
@@ -50,7 +50,7 @@ function BG.send(name,...)
     end
 end
 
----Set the default background, used when BG.set() is called without argument
+---Set the default background, used when `BG.set()` is called without argument
 ---@param name string
 function BG.setDefault(name)
     BG.default=name

@@ -19,8 +19,8 @@ local SFX={}
 ---@param path string
 ---@param lazyLoad? boolean
 local function loadOne(name,path,lazyLoad)
-    assert(type(name)=='string',"SFX.load: name must be string")
-    assert(type(path)=='string',"SFX.load: path must be string")
+    assert(type(name)=='string',"SFX.load: name need string")
+    assert(type(path)=='string',"SFX.load: path need string")
     if love.filesystem.getInfo(path) and FILE.isSafe(path) then
         if srcMap[name] then
             rem(nameList,TABLE.find(nameList,name))
@@ -98,7 +98,7 @@ end
 ---0 --> ' C1'
 ---12 --> 'C2'
 ---@param note number Note number, start from 0
----@return string Note name, e.g. 'C4'
+---@return string Note name, e.g. `'C4'`
 function SFX.getNoteName(note)
     if note<1 then
         return '---'

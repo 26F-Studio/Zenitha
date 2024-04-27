@@ -25,12 +25,12 @@ function STRING.install()
     end
 end
 
----Install str[n] and str[n]='c' syntax.
+---Install `str[n]` and `str[n]="c"` syntax.
 ---The editted string will be stored into STRING._
 ---
----Notice that str[n]='ccc' will removed the n-th character then put 'ccc' into it, changing string length
+---Notice that `str[n]="ccc"` will removed the n-th character then put "ccc" into it, changing string length
 ---
----And will potentially make `:` (like `str:find(...)`) slightly slower than before
+---And will potentially make all `:` call (like `str:find(...)`) slightly slower than before
 function STRING.installIndex()
     function STRING.installIndex() error("STRING.installIndex: Attempt to install stringIndex syntax twice") end
     local meta=getmetatable('')
@@ -89,7 +89,7 @@ function STRING.repD(str,...)
     return str
 end
 
----"Scan arg", scan if str has the arg (format of str is like '-json -q', arg is like '-q')
+---"Scan arg", scan if str has the arg (format of str is like `'-json -q'`, switch is like `'-q'`)
 ---@param str string
 ---@param switch string
 ---@return boolean
@@ -334,7 +334,7 @@ end
 ---@param str string
 ---@return number
 function STRING.binNum(str)
-    assert(type(str)=='string',"STRING.binNum: need string")
+    assert(type(str)=='string',"STRING.binNum: Need string")
     local size=#str
     assert(size<=8,"Too long data")
     local num=byte(str,1)

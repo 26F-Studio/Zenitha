@@ -1,7 +1,3 @@
-local audio=love.audio
-local effectsSupported=audio.isEffectsSupported()
-local ins=table.insert
-
 ---@class Zenitha.bgmObj
 ---@field name string
 ---@field path string
@@ -14,6 +10,10 @@ local ins=table.insert
 ---@field lowgainChanging boolean
 ---@field highgain number
 ---@field highgainChanging boolean
+
+local audio=love.audio
+local effectsSupported=audio.isEffectsSupported()
+local ins=table.insert
 
 ---@type string[]
 local nameList={}
@@ -166,7 +166,7 @@ function BGM.getList() return nameList end
 ---@return number
 function BGM.getCount() return #nameList end
 
----Set the default BGM(s) to play when BGM.play() is called without arguments
+---Set the default BGM(s) to play when `BGM.play()` is called without arguments
 ---@param bgms string|string[]
 function BGM.setDefault(bgms)
     if type(bgms)=='string' then
@@ -230,7 +230,7 @@ function BGM.play(bgms,args)
     bgms=type(bgms)=='string' and {bgms} or type(bgms)=='table' and bgms or {false}
     for i=1,#bgms do
         if type(bgms[i])~='string' then
-            error("BGM.play(bgms,args): bgms must be string|list<string>")
+            error("BGM.play(bgms,args): bgms need string|list<string>")
         end
     end
 
@@ -332,12 +332,12 @@ function BGM.set(bgms,mode,...)
         bgms=TABLE.shift(bgms)
         for i=1,#bgms do
             if type(bgms[i])~='string' then
-                error("BGM.set(bgms,mode,...): bgms must be string|list<string>")
+                error("BGM.set(bgms,mode,...): bgms need string|list<string>")
             end
             bgms[i]=srcLib[bgms[i]]
         end
     else
-        error("BGM.set(bgms,mode,...): bgms must be string|list<string>")
+        error("BGM.set(bgms,mode,...): bgms need string|list<string>")
     end
     for i=1,#bgms do
         local obj=bgms[i]

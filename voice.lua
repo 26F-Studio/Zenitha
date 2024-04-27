@@ -46,14 +46,14 @@ function VOC.getFreeChannel() return 0 end
 
 ---Load voice files from specified path
 ---
----Only available after VOC.init()
+---Only available after `VOC.init()`
 ---@param path string Path to the folder contains voice files, including the last '/'
 ---@diagnostic disable-next-line: unused-local
 function VOC.load(path) error("VOC.load(path): Call VOC.init() first") end
 
 ---Add a voice to specified (or a free) queue
 ---
----Only available after VOC.load()
+---Only available after `VOC.load()`
 ---@param name string
 ---@param channelID? number
 ---@diagnostic disable-next-line: unused-local
