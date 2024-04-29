@@ -1,4 +1,4 @@
----@class Zenitha.Widgetarg: table
+---@class Zenitha.WidgetArg: table
 ---
 ---@field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
 ---@field name? string

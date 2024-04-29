@@ -109,16 +109,16 @@ local easeTemplates={
 -- Tween Class
 
 ---@class Zenitha.Tween
----@field private running boolean
----@field private duration number default to 1
----@field private time number used when no timeFunc
----@field private loop false|'repeat'|'yoyo'
----@field private loopCount number how many times to loop
----@field private flipMode boolean true when loop is `'yoyo'`, making time flow back and forth
----@field private ease Zenitha.Tween.basicCurve[]
+---@field running boolean
+---@field duration number default to 1
+---@field time number used when no timeFunc
+---@field loop false|'repeat'|'yoyo'
+---@field loopCount number how many times to loop
+---@field flipMode boolean true when loop is `'yoyo'`, making time flow back and forth
+---@field ease Zenitha.Tween.basicCurve[]
+---@field tags Set<Zenitha.Tween.Tag>
 ---@field private doFunc fun(t:number)
 ---@field private timeFunc? fun():number custom how time goes
----@field private tags Set<Zenitha.Tween.Tag>
 ---@field private onRepeat function
 ---@field private onFinish function
 ---@field private onKill function

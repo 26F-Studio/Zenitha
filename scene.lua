@@ -137,7 +137,7 @@ function SCN.add(name,scene)
     if scene.widgetList==nil then scene.widgetList={} end
 
     -- Check each field in scene object
-    for k,v in next,scene do
+    for k in next,scene do
         if k=='widgetList' then
             assertf(type(scene.widgetList)=='table',"SCN.add: scene[%s].widgetList need table",name)
             for kw,w in next,scene.widgetList do
