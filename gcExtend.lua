@@ -6,6 +6,7 @@ local rectangle,circle=gc.rectangle,gc.circle
 local applyTransform=gc.applyTransform
 local sin,cos=math.sin,math.cos
 local pcall=pcall
+local lerp,lLerp=MATH.lerp,MATH.lLerp
 local NULL=NULL
 
 local GC=setmetatable({},{
@@ -14,6 +15,8 @@ local GC=setmetatable({},{
 })
 
 --------------------------------------------------------------
+-- Aligning Draw
+
 ---Printf a string with 'center'
 ---@param obj string|number
 ---@param x number
@@ -102,6 +105,7 @@ function GC.mDrawLY(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,0,obj:getHeight()*.5)
 function GC.mDrawL(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
 
 --------------------------------------------------------------
+-- Utility
 
 ---Set current pen's alpha
 ---@param a number
@@ -294,6 +298,115 @@ do -- function GC.getScreenShot(table,key) -- Save screenshot as image object to
 end
 
 --------------------------------------------------------------
+-- Beziers
+
+---@class Zenitha.Curve.Bezier
+---@field points Zenitha.Curve.Point[]
+---@field curve number[]
+---@field ctrlPos number[]
+local Bezier={}
+Bezier.__index=Bezier
+
+---Render the curve to a points list with specific mode
+---@param seg number Segments between each data point
+---@param dist? number Distance between each data point, nil to skip this step
+function Bezier:render(seg,dist)
+    assert(type(seg)=='number' and seg>0 and seg%1==0,"Bezier:render(seg,dist): seg need positive int")
+    local list=self.points
+    print(TABLE.dump(list))
+    assert(list and #list>1,"Bezier:render: points need at least 2")
+
+    local p=1 -- r goes first, Find first data point
+    while list[p] and list[p][3] do p=p+1 end
+    assert(list[p],"[Bezier]:render: Data point not found")
+
+    local curve={}
+    local secList={list[p]}
+    while true do
+        -- Find next data point
+        local _p=p
+        for i=p+1,#list do
+            if list[i][3] then
+                secList[#secList+1]=list[i]
+            else
+                p=i
+                break
+            end
+        end
+        if p==_p then break end -- No more data point
+        secList[#secList+1]=list[p]
+
+        -- Generate curve t in [0,1) for each section
+        for t=1,seg do
+            -- Normalize t
+            t=(t-1)/seg
+
+            -- Create list for each dimension
+            local xList,yList={},{}
+            for i=1,#secList do
+                xList[i]=secList[i][1]
+                yList[i]=secList[i][2]
+            end
+
+            -- Calculate curve with lerping
+            while #xList>1 do
+                for i=1,#xList-1 do
+                    xList[i]=lerp(xList[i],xList[i+1],t)
+                    yList[i]=lerp(yList[i],yList[i+1],t)
+                end
+                xList[#xList],yList[#yList]=nil,nil
+            end
+            curve[#curve+1]=xList[1]
+            curve[#curve+1]=yList[1]
+        end
+
+        -- Clear section list cache
+        TABLE.cut(secList)
+        secList[1]=list[p]
+    end
+
+    curve[#curve+1]=list[p][1]
+    curve[#curve+1]=list[p][2]
+
+    if dist~=nil then
+        assert(type(dist)=='number' and dist>0,"Bezier:render(seg,dist): dist need positive number")
+        -- TODO
+    end
+    self.curve=curve
+    return curve
+end
+
+---@class Zenitha.Curve.Point
+---@field [1] number
+---@field [2] number
+---@field [3] boolean
+---@field x? number
+---@field y? number
+---@field ctrl? boolean
+
+---@param points Zenitha.Curve.Point[]
+---@return Zenitha.Curve.Bezier
+function GC.newBezier(points)
+    assert(type(points)=='table',"GC.newBezier(points): Need points[]")
+    local _pList={}
+    for i=1,#points do
+        local p=points[i]
+        local P={
+            p[1] or p.x,
+            p[2] or p.y,
+            not not (p[3] or p.ctrl),
+        }
+        assert(P[1] and P[2],"GC.newBezier(points): points[n] need [1]&[2]/x&y")
+        _pList[i]=P
+    end
+    return setmetatable({
+        points=_pList,
+        curve={},
+    },Bezier)
+end
+
+--------------------------------------------------------------
+-- Easier Stencil
 
 local gc_stencil,gc_setStencilTest=gc.stencil,gc.setStencilTest
 
@@ -358,6 +471,8 @@ function GC.stc_circ(x,y,r,seg)
 end
 
 --------------------------------------------------------------
+-- Camera
+
 ---@class Zenitha.Camera
 ---@field x0 number
 ---@field y0 number
@@ -440,6 +555,7 @@ function GC.newCamera()
 end
 
 --------------------------------------------------------------
+-- WIP text warping
 
 local function measureWidth(font,str)
     return newText(font,str):getWidth()
