@@ -148,10 +148,10 @@ end
 ---Get mix value (linear) of two numbers with a ratio (not clamped)
 ---@param v1 number
 ---@param v2 number
----@param ratio number 0~1 at most time
+---@param t number 0~1 at most time
 ---@return number
-function MATH.lerp(v1,v2,ratio)
-    return v1+(v2-v1)*ratio
+function MATH.lerp(v1,v2,t)
+    return v1+(v2-v1)*t
 end
 
 ---Inverse function of MATH.lerp (not clamped)
@@ -166,13 +166,13 @@ end
 ---Similar to MATH.lerp (clamped)
 ---@param v1 number
 ---@param v2 number
----@param ratio number 0~1 at most time
+---@param t number 0~1 at most time
 ---@return number
-function MATH.cLerp(v1,v2,ratio)
+function MATH.cLerp(v1,v2,t)
     return
-        ratio<=0 and v1 or
-        ratio>=1 and v2 or
-        v1+(v2-v1)*ratio
+        t<=0 and v1 or
+        t>=1 and v2 or
+        v1+(v2-v1)*t
 end
 
 ---Inverse function of MATH.cLerp (clamped)
@@ -191,11 +191,30 @@ local clamp,lerp=MATH.clamp,MATH.lerp
 
 ---Get mix value (linear) of a list of numbers with a ratio (clampped in [0,1])
 ---@param list number[]
----@param ratio number
+---@param t number
 ---@return number
-function MATH.listLerp(list,ratio)
-    local index=(#list-1)*clamp(ratio,0,1)+1
+function MATH.lLerp(list,t)
+    local index=(#list-1)*clamp(t,0,1)+1
     return lerp(list[floor(index)],list[ceil(index)],index%1)
+end
+
+---Inverse function of MATH.lLerp
+---@param list number[] need #list>2 and ascending, or result is undefined
+---@param value number
+---@return number
+function MATH.ilLerp(list,value)
+    local i,j=1,#list
+    if value<=list[1] then return 0 end
+    if value>=list[j] then return 1 end
+    while j-i>1 do
+        local mid=floor((i+j)/2)
+        if value<list[mid] then
+            j=mid
+        else
+            i=mid
+        end
+    end
+    return MATH.iLerp(list[i],list[j],value)
 end
 
 ---Specify a line pass (x1,y1) and (x2,y2), got the y value when x=t
@@ -205,10 +224,10 @@ end
 ---@param y1 number
 ---@param x2 number
 ---@param y2 number
----@param ratio number
+---@param t number
 ---@return number
-function MATH.interpolate(x1,y1,x2,y2,ratio)
-    return y1+(ratio-x1)*(y2-y1)/(x2-x1)
+function MATH.interpolate(x1,y1,x2,y2,t)
+    return y1+(t-x1)*(y2-y1)/(x2-x1)
 end
 
 ---Get a closer value from a to b with "exponential speed" k
