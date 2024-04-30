@@ -555,7 +555,7 @@ function GC.newCamera()
 end
 
 --------------------------------------------------------------
--- WIP text warping
+-- TODO: text warping
 
 local function measureWidth(font,str)
     return newText(font,str):getWidth()

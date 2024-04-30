@@ -1,4 +1,9 @@
-package.cpath=package.cpath..';'..love.filesystem.getSaveDirectory()..'/lib/lib?.so;./?.so;?.dylib'
+package.cpath=
+    package.cpath.. -- Windows, .\?.dll; .\loadall.dll
+    ';'..love.filesystem.getSaveDirectory()..'/lib/lib?.so'.. -- Android, %save%/lib/lib?.so
+    ';./?.so'.. -- Linux
+    ';?.dylib' -- OS X
+package.cpath=package.cpath:gsub('\\','/')
 
 local _androidPlatform='armeabi-v7a'
 if love.system.getOS()=='Android' then

@@ -4,65 +4,81 @@
 --  #   / //\  __/ | | | | |_| | | | (_| |  #
 --  #  /____/\___|_| |_|_|\__|_| |_|\__,_|  #
 --  #                                       #
---  An awesome, deluxe Pure-Lua game/app framework using Love2D
+
+--  > An awesome, deluxe Pure-Lua game/app framework using Love2D, with modules listed below:
 --
---  Main Modules:
+--  `SCN` (Scene), allow you custom all callback functions for each scene.
 --
---  SCN (Scene), allow you custom all callback functions for each scene.
---      With customizable scene swapping animation and a scene-stack which allow back to prev scene with `SCN.back()`.
---  
---  BGM/SFX/VOC (Effect/Music/Voice), allow you play sound effects with simple function call.
---      Play music with `BGM.play("bgm1")`, with smooth fade-in/out.
---      Play effect with `SFX.play("click")`, or `("click",0.8,-1,12)` to play a 80%Vol, +1Octave, left side effect.
---      Module will automatically create/unload idle resources.
---  
---  BG (Background), a customizable layer under the scene.
---      Added with `BG.add(...)`, set with `BG.set("bg1")`.
---  
---  WIDGET, interective widgets layer above the scene, has the highest priority.
---  
---  MSG (Message), an on-screen print, can be used to show notifications or warnings.
---  
---  GC, extended lib of love.graphics.
---  
---  FONT, make font style & size can be set easily with `FONT.set(60,'consolas')`, just like `GC.setColor`.
---  
---  IMG (Image), allow images to be lazy-loaded after first used.
---  
---  COLOR, a set of common color tables which can be used with `COLOR.R` (red), `COLOR.dG` (dark green).
---  
---  PROFILE, a simple debug tool allow you start/stop profiling anytime, the result will be placed into the clipboard.
+--   > With customizable scene swapping animation and a scene-stack which allow you travelling through scenes with `SCN.go` and `SCN.back()`.
 --
---  FILE, save/load a table with one function call like `FILE.save(config,'conf.json')`.
---      Support "Luaon" format similar to Json.
+--  `BGM`/`SFX`/`VOC` (Effect/Music/Voice), allow you play sound effects with simple function call.
 --
---  LANG (Language), an i18n module allow you manage all strings which displayed to players/users.
---      Just call `LANG.set('zh')` to change the text pool to another!.
+--   > Play music with `BGM.play("bgm1")`, with smooth fade-in/out.
 --
---  MATH/STRING/TABLE, extended libs of standard Lua libs.
---      `chebyshevDist=MATH.mDist2(0,x1,y1,x2,y2)`
---      `list=STRING.split("hello;love2d;world",";")`
---      `t2=TABLE.copy(t1)`
+--   > Play effect with `SFX.play("click")`, or `("click",0.8,-1,24)` to play a 80% Vol, left-sided, +2 Oct effect.
 --
---  TASK, a seudo-async module allow you run a function asynchronously (as coroutine, it must yield itself periodically, continue once per main loop cycle).
---      With an extra "Lock" tool works like mutex lock: use `TASK.lock("L1",60)` to create a lock (forever if no time value), use `TASK.unlock` to unlock, or use `TASK.getLock` to check if lock is active.
+--   > Module will automatically create/unload idle resources.
 --
---  TCP, allow you exchange data much more easier then using LuaSocket.
---      Notice: this module is made for data exchanging with TCP module itself (now using pure json only).
+--  `BG` (Background), a customizable layer under the scene.
 --
---  TWEEN, a simple tweening module allow you animate functions by time with several lines of codes
---      Example: `TWEEN.new(function(v) position=200+100*v end):setEase('InOutSin'):setDuration(2.6):setOnFinish(function() print("FIN") end):run()`
+--   > Added with `BG.add(...)`, set with `BG.set("bg1")`.
+--
+--  `WIDGET`, interective widgets layer above the scene, has the highest priority.
+--
+--  `MSG` (Message), an on-screen print, can be used to show notifications or warnings.
+--
+--  `GC`, extended lib of love.graphics.
+--
+--   > Giving more convinient functions like aligning draws, easier stencil,
+--
+--   > simple Camera, completed Bezier, tablized graphics action, etc.
+--
+--  `FONT`, set font style & size easily with `FONT.set(60,'consolas')`, just like `GC.setColor`.
+--
+--  `IMG` (Image), allow images to be lazy-loaded after first used.
+--
+--  `COLOR`, a set of common color tables which can be used with `COLOR.R` (red), `COLOR.dG` (dark green).
+--
+--  `PROFILE`, a simple debug tool allow you start/stop profiling anytime, the result will be placed into the clipboard.
+--
+--  `FILE`, save/load a lua table with one function call like `FILE.save(config,'conf.json')`.
+--
+--   > Support "Luaon" format similar to Json.
+--
+--  `LANG` (Language), an i18n module allow you manage all strings which displayed to players/users.
+--
+--   > Just call `LANG.set('zh')` to change the text pool to another!.
+--
+--  `MATH`/`STRING`/`TABLE`, extended libs of standard Lua libs.
+--
+--   > `chebyshevDist=MATH.mDist2(0,x1,y1,x2,y2)`
+--
+--   > `list=STRING.split("hello;love2d;world",";")`
+--
+--   > `t2=TABLE.copy(t1)`
+--
+--  `TASK`, a seudo-async module allow you run a function asynchronously (as coroutine, it must yield itself periodically, continue once per main loop cycle).
+--
+--   > With an extra "Lock" tool works like mutex lock: use `TASK.lock("L1",60)` to create a lock (forever if no time value), use `TASK.unlock` to unlock, or use `TASK.getLock` to check if lock is active.
+--
+--  `TCP`, allow you exchange data much more easier then using LuaSocket.
+--
+--   > Notice: this module is made for data exchanging with TCP module itself (now using pure json only).
+--
+--  `TWEEN`, a simple tweening module allow you animate functions by time with several lines of codes
+--
+--   > Example: `TWEEN.new(function(v) position=200+100*v end):setEase('InOutSin'):setDuration(2.6):setOnFinish(function() print("FIN") end):run()`
 --
 --  And some useful utility functions like `ZENITHA.setMaxFPS` `ZENITHA.setDebugInfo` `ZENITHA.setVersionText`.
 --
 --  Experimental modules:
---  WAIT, DEBUG, LOG, SYSFX, TEXT, VIB, WHEELMOV, REQUIRE, HTTP, MIDI
+--  `WAIT`, `DEBUG`, `LOG`, `SYSFX`, `TEXT`, `VIB`, `WHEELMOV`, `REQUIRE`, `HTTP`, `MIDI`
 --
 --  Exterior modules:
---  JSON, json.lua by rxi;
---  HASH, sha2.lua by Egor Skriptunoff;
+--  `JSON`, json.lua by rxi;
+--  `HASH`, sha2.lua by Egor Skriptunoff;
 --
---  All Zenitha module variables are named in all uppercase.
+--  All ZENITHA module VARs are named in all UPPERCASE.
 ---@class Zenitha.Main
 ZENITHA={}
 
