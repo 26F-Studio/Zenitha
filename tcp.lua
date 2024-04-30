@@ -1,5 +1,5 @@
 ---@alias Zenitha.TCP.sendID string 0 = server/broadcast, 1+ = client id, NUMBER ONLY
----@alias Zenitha.TCP.recvID Zenitha.TCP.sendID|Zenitha.TCP.sendID[] 0 = server/broadcast, 1+ = client id, NUMBER ONLY
+---@alias Zenitha.TCP.recvID Zenitha.TCP.sendID|Zenitha.TCP.sendID[]|nil 0 = server/broadcast, 1+ = client id, NUMBER ONLY, nil = broadcast
 
 ---@class Zenitha.TCP.Client
 ---@field conn LuaSocket.client

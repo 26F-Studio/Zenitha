@@ -7,67 +7,116 @@
 
 --  > An awesome, deluxe Pure-Lua game/app framework using Love2D, with modules listed below:
 --
---  `SCN` (Scene), allow you custom all callback functions for each scene.
---
---   > With customizable scene swapping animation and a scene-stack which allow you travelling through scenes with `SCN.go` and `SCN.back()`.
---
---  `BGM`/`SFX`/`VOC` (Effect/Music/Voice), allow you play sound effects with simple function call.
---
---   > Play music with `BGM.play("bgm1")`, with smooth fade-in/out.
---
---   > Play effect with `SFX.play("click")`, or `("click",0.8,-1,24)` to play a 80% Vol, left-sided, +2 Oct effect.
---
---   > Module will automatically create/unload idle resources.
---
+--  `SCN` (Scene), allow you custom all callback functions for each scene and easily travel between them.
+--   ```
+--      SCN.add("menu",scene)
+--      SCN.go("menu")
+--      SCN.go("setting","fastFade")
+--      SCN.back()
+--   ```
+--  `BGM`/`SFX`/`VOC` (Effect/Music/Voice), allow you play audio events simpler.
+--   ```
+--      BGM.play("bgm1") -- with smooth fade-in/out
+--      SFX.play("click")
+--      SFX.play("click",0.8,-1,24) -- 80% Vol, left-sided, +2 Oct effect
+--      -- Module will automatically create/unload idle resources.
+--   ```
 --  `BG` (Background), a customizable layer under the scene.
---
---   > Added with `BG.add(...)`, set with `BG.set("bg1")`.
---
+--   ```
+--      BG.add("space",bg)
+--      BG.setDefault("space")
+--      BG.set("galaxy")
+--   ```
 --  `WIDGET`, interective widgets layer above the scene, has the highest priority.
 --
 --  `MSG` (Message), an on-screen print, can be used to show notifications or warnings.
---
+--   ```
+--      MSG.new('info',"Techmino is fun!")
+--   ```
 --  `GC`, extended lib of love.graphics.
---
---   > Giving more convinient functions like aligning draws, easier stencil,
---
---   > simple Camera, completed Bezier, tablized graphics action, etc.
---
---  `FONT`, set font style & size easily with `FONT.set(60,'consolas')`, just like `GC.setColor`.
---
+--   ```
+--      GC.mDraw(); GC.regPolygon();
+--      GC.newCamera(); GC.newBezier(); 
+--      GC.stc_setComp('equal',1); GC.stc_rect(0,0,800,600); ...; GC.stc_stop()
+--      GC.DO{{'setCL',COLOR.R},{'fRect',0,0,800,600},...}
+--   ```
+--  `FONT`, set font style & size easily as `GC.setColor`.
+--   ```
+--      FONT.load{
+--          consolas="consola.ttf",
+--          pixel="codePixel-Regular.ttf"
+--      }
+--      FONT.set(20,'consolas')
+--      FONT.setDefaultFont('pixel') -- My monospaced coding font: github.com/MrZ626/codePixel
+--      FONT.set(26)
+--      FONT.setFallback('pixel','consolas')
+--   ```
 --  `IMG` (Image), allow images to be lazy-loaded after first used.
+--   ```
+--      IMG.init{
+--          bg={"back/1.png","back/2.png","back/3.png"},
+--          ...
+--      }
+--      GC.draw(IMG.bg[1])
+--   ```
+--  `FILE`, save/load a lua table with one function call like `FILE.save(config,'conf.json')`.
+--   ```
+--      FILE.save(config,'conf.json') -- Default to json
+--      config=FILE.load('conf.json')
+--      FILE.save(data,'data.lua','-luaon') -- Support "Luaon" format similar to Json
+--      data=FILE.load('data.lua')
+--      texts=FILE.load('log.txt','-string')
+--   ```
+--  `LANG` (Language), an i18n module allow you manage all strings which displayed to players/users.
+--   ```
+--      LANG.add{en='lang/en.lua',zh='lang/zh.lua'}
+--      LANG.setDefault('en')
+--      Text=LANG.set('zh')
+--      print(Text.hello=="你好")
+--   ```
+--  `MATH`/`STRING`/`TABLE`, extended libs of standard Lua libs.
+--   ```
+--      chebyshevDist=MATH.mDist2(0,x1,y1,x2,y2)
+--      list=STRING.split("Welcome;to;Zenitha",";") -- {"Welcome","to","Zenitha"}
+--      t2=TABLE.copy(t1)
+--   ```
+--  `TASK`, a seudo-async module allow you run a function asynchronously (as coroutine which must yield itself periodically, be continued once per main loop cycle).
+--   ```
+--      TASK.lock("signal",2.56)
+--      TASK.new(function()
+--          repeat yield() until not TASK.getLock("signal")
+--          print("Echo from Moon")
+--      end)
 --
---  `COLOR`, a set of common color tables which can be used with `COLOR.R` (red), `COLOR.dG` (dark green).
---
+--      function scene.keyDown(k)
+--          if k~='escape' then return end
+--          if TASK.lock('sureQuit',1) then MSG.new('info',Text.pressAgainToQuit) return end
+--          love.event.quit()
+--      end
+--   ```
+--  `TCP`, allow you exchange data much more easier then using LuaSocket. (Yet designed for data exchanging with TCP module itself, and using pure json only)
+--   ```
+--      TASK.new(function() -- Simulate Server
+--          TCP.S_start(10026)
+--          DEBUG.yieldT(0.26) -- Wait a bit, or getting a nil from TCP:S_receive()
+--          print(TCP.S_receive()) -- "Hello server!"
+--      end)
+--      TASK.new(function() -- Simulate Client
+--          TCP.C_connect("127.0.0.1", 10026)
+--          TCP.C_send("Hello server!")
+--      end)
+--   ```
+--  `TWEEN`, a simple tweening module allow you making smooth animation with several lines of codes
+--   ```
+--      TWEEN.new(function(v) Pos=200+100*v end) -- update Pos with v which goes from 0 to 1
+--      :setEase('InOutSin') -- with a sine curve
+--      :setDuration(2.6) -- in 2.6 seconds
+--      :setOnFinish(function() print("FIN") end) -- and print "FIN" when finished
+--      :run() -- confirm start
+--   ```
 --  `PROFILE`, a simple debug tool allow you start/stop profiling anytime, the result will be placed into the clipboard.
 --
---  `FILE`, save/load a lua table with one function call like `FILE.save(config,'conf.json')`.
---
---   > Support "Luaon" format similar to Json.
---
---  `LANG` (Language), an i18n module allow you manage all strings which displayed to players/users.
---
---   > Just call `LANG.set('zh')` to change the text pool to another!.
---
---  `MATH`/`STRING`/`TABLE`, extended libs of standard Lua libs.
---
---   > `chebyshevDist=MATH.mDist2(0,x1,y1,x2,y2)`
---
---   > `list=STRING.split("hello;love2d;world",";")`
---
---   > `t2=TABLE.copy(t1)`
---
---  `TASK`, a seudo-async module allow you run a function asynchronously (as coroutine, it must yield itself periodically, continue once per main loop cycle).
---
---   > With an extra "Lock" tool works like mutex lock: use `TASK.lock("L1",60)` to create a lock (forever if no time value), use `TASK.unlock` to unlock, or use `TASK.getLock` to check if lock is active.
---
---  `TCP`, allow you exchange data much more easier then using LuaSocket.
---
---   > Notice: this module is made for data exchanging with TCP module itself (now using pure json only).
---
---  `TWEEN`, a simple tweening module allow you animate functions by time with several lines of codes
---
---   > Example: `TWEEN.new(function(v) position=200+100*v end):setEase('InOutSin'):setDuration(2.6):setOnFinish(function() print("FIN") end):run()`
+--  `COLOR`, a set of common color tables which can be used with `COLOR.R` (red), `COLOR.dG` (dark green).
 --
 --  And some useful utility functions like `ZENITHA.setMaxFPS` `ZENITHA.setDebugInfo` `ZENITHA.setVersionText`.
 --
