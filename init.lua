@@ -207,6 +207,15 @@ function errorf(str,...) error(str:format(...)) end
 ---@diagnostic disable-next-line
 function assertf(v,str,...) return v or error(str:format(...)) end
 
+---Use `local require=requirePath(...)` to require modules in simpler way
+---@overload fun(loader:function):unknown
+---@param path string
+function simpRequire(path)
+    return type(path)=='function' and
+        function(module) return path(module) end or
+        function(module) return require(path..module) end
+end
+
 -- Inside values
 local mainLoopStarted=false
 local autoGCcount=0
