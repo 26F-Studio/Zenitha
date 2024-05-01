@@ -134,7 +134,9 @@ ZENITHA={}
 --------------------------------------------------------------
 
 -- typedef (you need Emmylua to make these things work) (Recommend extension: "Lua" by sumneko)
+
 ---@class Set<T>: { [T]: any }
+---@class Map<T>: { [any]:T  }
 
 ---@class Zenitha.Click
 ---@field x number
@@ -1033,7 +1035,7 @@ function ZENITHA.getJsState() return jsState end
 
 ---Get the error info
 ---@param i number|'#' Index of error info, `'#'` for the last one
----@return Zenitha.Exception|table<number, Zenitha.Exception>
+---@return Zenitha.Exception|Zenitha.Exception[]
 function ZENITHA.getErr(i)
     if i=='#' then
         return errData[#errData]
@@ -1045,7 +1047,7 @@ function ZENITHA.getErr(i)
 end
 
 ---Set the debug info list
----@param list table<number,  table<string|function>>[]
+---@param list {[1]:string, [2]:function}[]
 function ZENITHA.setDebugInfo(list)
     assert(type(list)=='table',"ZENITHA.setDebugInfo(list): Need table")
     for i=1,#list do

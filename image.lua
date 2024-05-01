@@ -33,7 +33,7 @@ local function link(A,B)
 end
 
 ---Initialize IMG lib (only once)
----@param imgTable table<any, string|table>
+---@param imgTable Map<string|table>
 ---## Example
 ---```lua
 ---IMG.init{

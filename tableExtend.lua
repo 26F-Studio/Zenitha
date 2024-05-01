@@ -101,19 +101,12 @@ end
 ---For all things in new, push to old
 ---@param new table
 ---@param old table
-function TABLE.cover(new,old)
+---@param depth? number how many sub-table will be covered, default to inf
+function TABLE.cover(new,old,depth)
+    if not depth then depth=1e99 end
     for k,v in next,new do
-        old[k]=v
-    end
-end
-
----For all things in new, push to old, recursive
----@param new table
----@param old table
-function TABLE.coverR(new,old)
-    for k,v in next,new do
-        if type(v)=='table' and type(old[k])=='table' then
-            TABLE.coverR(v,old[k])
+        if type(v)=='table' and type(old[k])=='table' and depth>0 then
+            TABLE.cover(v,old[k],depth-1)
         else
             old[k]=v
         end
@@ -405,7 +398,7 @@ function TABLE.sum(t)
 end
 
 ---Sum table
----@param t table<any, number>
+---@param t Map<number>
 ---@return number
 function TABLE.sumAll(t)
     local s=0

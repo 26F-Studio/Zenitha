@@ -36,6 +36,7 @@
 local preAnimSet={} ---@type Set<Zenitha.Tween> new Animation created during _update will be added here first, then moved to updAnimSet
 local updAnimSet={} ---@type Set<Zenitha.Tween>
 local tagAnimSet={} ---@type Set<Zenitha.Tween>
+local unqAnimMap={} ---@type Map<Zenitha.Tween>
 
 local min,floor=math.min,math.floor
 local sin,cos=math.sin,math.cos
@@ -117,6 +118,7 @@ local easeTemplates={
 ---@field flipMode boolean true when loop is `'yoyo'`, making time flow back and forth
 ---@field ease Zenitha.Tween.basicCurve[]
 ---@field tags Set<Zenitha.Tween.Tag>
+---@field unqTag Zenitha.Tween.Tag
 ---@field private doFunc fun(t:number)
 ---@field private timeFunc? fun():number custom how time goes
 ---@field private onRepeat function
@@ -221,12 +223,38 @@ function Tween:setTag(tag)
     return self
 end
 
----Start the animation animate with time, or custom timeFunc
+---Set uniqueID (kill the others which has same uniqueID)
+---@param uniqueTag Zenitha.Tween.Tag
+---@return Zenitha.Tween
+function Tween:setUnique(uniqueTag)
+    assert(type(uniqueTag)=='string',"[tween]:setUnique(uniqueTag): Need string")
+    self.unqTag=uniqueTag
+    return self
+end
+
+---Copy an animation ojbect (idk what this is for)
+---@return Zenitha.Tween
+function Tween:copy()
+    local anim=TWEEN.new(NULL)
+    TABLE.cover(self,anim,2)
+    return anim
+end
+
+---Start the animation animate with time (again), or custom timeFunc
+---
+---Warning: you still have full access to animation after [tween]:run(), but don't touch it unless you know what you're doing
 ---@param timeFunc? fun():number Custom the timeFunc (return a number in duration)
 function Tween:run(timeFunc)
+    if self.running then return end
     assert(timeFunc==nil or type(timeFunc)=='function',"[tween]:run(timeFunc): Need function if exist")
     assert(not (self.loop and timeFunc),"[tween]:run(timeFunc): Looping and timeFunc can't exist together")
-    assert(not self.running,"[tween]:run(): Can't run a running animation")
+    if self.unqTag then
+        if unqAnimMap[self.unqTag] then
+            local a=unqAnimMap[self.unqTag]
+            a:kill()
+        end
+        unqAnimMap[self.unqTag]=self
+    end
     if timeFunc then
         self.timeFunc=timeFunc
     else
@@ -264,10 +292,11 @@ end
 
 ---Release animation from auto updating list and tag list
 function Tween:kill()
-    self.onKill()
     preAnimSet[self]=nil
     updAnimSet[self]=nil
     tagAnimSet[self]=nil
+    unqAnimMap[self.unqTag]=nil
+    self.onKill()
 end
 
 ---@param t number
@@ -328,6 +357,7 @@ function TWEEN.new(doFunc)
         doFunc=doFunc,
         ease=easeTemplates.InOutQuad,
         tags={},
+        unqTag=nil,
         onRepeat=NULL,
         onFinish=NULL,
         onKill=NULL,
