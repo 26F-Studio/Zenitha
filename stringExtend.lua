@@ -5,7 +5,7 @@ local min=math.min
 local find,format=string.find,string.format
 local sub,gsub=string.sub,string.gsub
 local match,gmatch=string.match,string.gmatch
-local rep=string.rep
+local rep,rev=string.rep,string.reverse
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
 
@@ -188,9 +188,9 @@ end
 function STRING.trim(str)
     -- local p=find(str,'%S')
     -- if not p then return '' end
-    -- str=reverse(sub(str,p))
-    -- return reverse(sub(str,assert(find(str,'%S'))))
-    return match(str,"%s*(.+)%s*") or ""
+    -- str=rev(sub(str,p))
+    -- return rev(sub(str,(find(str,'%S'))))
+    return match(str,"^%s*(.-)%s*$") or ""
 end
 
 ---Split a string by sep
