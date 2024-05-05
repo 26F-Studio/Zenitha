@@ -183,7 +183,7 @@ local function serverLoop()
 
         -- Accept new connection
         do
-            local conn,err=server:accept();
+            local conn,err=server:accept()
             if not err then
                 ---@type Zenitha.TCP.Client
                 local c={
