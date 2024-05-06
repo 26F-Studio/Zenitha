@@ -27,7 +27,7 @@ local baseFX={
 FX.beam=setmetatable({
     type='beam',
     t=0,
-},{__index=baseFX})
+},{__index=baseFX,__metatable=true})
 function FX.beam:draw()
     gc_setColor(self.r*2,self.g*2,self.b*2,self.a*min(4-self.t*4,1))
 

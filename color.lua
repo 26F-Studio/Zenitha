@@ -7,6 +7,7 @@
 ---@field [4]? number Alpha
 
 local rnd,sin,abs=math.random,math.sin,math.abs
+local max,min=math.max,math.min
 
 ---Convert hex string to color
 ---@param str string
@@ -65,7 +66,40 @@ local COLOR={
     Light=   {{hex'B8B8B8'},{hex'DBDBDB'},{hex'FDFDFD'},{hex'FEFEFE'},{hex'FFFFFF'}},
     Xback=   {{hex'060606CC'},{hex'3C3C3CCC'},{hex'7A7A7ACC'},{hex'DBDBDBCC'},{hex'FEFEFECC'}},
 }
-do
+
+---@param r number [0,1]
+---@param g number [0,1]
+---@param b number [0,1]
+---@return number, number, number #All [0,1]
+function COLOR.rgb2hsv(r,g,b)
+    local M,m=max(r,g,b),min(r,g,b)
+    return
+        M==m and 0 or (
+            M==r and (g-b) or
+            M==g and 2+(b-r) or
+            M==b and 4+(r-g)
+        )/(M-m)/6%1,
+        M==0 and 0 or 1-m/M,
+        M
+end
+
+---@param r number [0,1]
+---@param g number [0,1]
+---@param b number [0,1]
+---@return number, number, number #All [0,1]
+function COLOR.rgb2hsl(r,g,b)
+    local M,m=max(r,g,b),min(r,g,b)
+    return
+        M==m and 0 or (
+            M==r and (g-b) or
+            M==g and 2+(b-r) or
+            M==b and 4+(r-g)
+        )/(M-m)/6%1,
+        (M+m)<1 and (M-m)/(M+m) or (M-m)/(2-M-m),
+        (M+m)/2
+end
+
+do -- Generate color shortcuts
     -- Get all color names
     local colorNames={}
     for k,v in next,COLOR do
