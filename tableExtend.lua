@@ -228,6 +228,16 @@ function TABLE.reverse(org)
     end
 end
 
+---Shuffle [1~#]
+---@param org any[]
+function TABLE.shuffle(org)
+    local l=#org
+    for i=l,2,-1 do
+        local r=rnd(i)
+        org[i],org[r]=org[r],org[i]
+    end
+end
+
 ---Get a rotated copy of a matrix
 ---@param matrix any[][]
 ---@return any[][]
