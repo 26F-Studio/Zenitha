@@ -235,7 +235,7 @@ function BGM.play(bgms,args)
     end
 
     if
-        TABLE.compare(lastPlay,bgms) and
+        TABLE.equal(lastPlay,bgms) and
         srcLib[lastPlay[1]] and srcLib[lastPlay[1]].source and
         srcLib[lastPlay[1]].source:isPlaying()
     then
@@ -312,7 +312,7 @@ function BGM.stop(time)
                 obj.volChanging=true
             end
         end
-        TABLE.cut(nowPlay)
+        TABLE.clear(nowPlay)
         lastPlay=NONE
     end
 end
@@ -329,7 +329,7 @@ function BGM.set(bgms,mode,...)
             bgms={srcLib[bgms]}
         end
     elseif type(bgms)=='table' then
-        bgms=TABLE.shift(bgms)
+        bgms=TABLE.copy(bgms)
         for i=1,#bgms do
             if type(bgms[i])~='string' then
                 error("BGM.set(bgms,mode,...): bgms need string|list<string>")
@@ -405,7 +405,7 @@ end
 ---Get (current playing) BGM(s) name list
 ---@return string[]
 function BGM.getPlaying()
-    return TABLE.shift(lastPlay)
+    return TABLE.copy(lastPlay)
 end
 
 ---Get if BGM playing now

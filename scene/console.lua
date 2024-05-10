@@ -617,11 +617,11 @@ function userG.print(...)
     end
 end
 userG._G=userG
-TABLE.complete(math,userG.math)
-TABLE.complete(string,userG.string) userG.string.dump=nil
-TABLE.complete(table,userG.table)
-TABLE.complete(bit,userG.bit)
-TABLE.complete(coroutine,userG.coroutine)
+TABLE.updateMissing(math,userG.math)
+TABLE.updateMissing(string,userG.string) userG.string.dump=nil
+TABLE.updateMissing(table,userG.table)
+TABLE.updateMissing(bit,userG.bit)
+TABLE.updateMissing(coroutine,userG.coroutine)
 local dangerousLibMeta={__index=function() error("No way.") end,__metatable=true}
 setmetatable(userG.debug,dangerousLibMeta)
 setmetatable(userG.package,dangerousLibMeta)

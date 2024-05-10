@@ -361,7 +361,7 @@ function Bezier:render(seg,dist)
         end
 
         -- Clear section list cache
-        TABLE.cut(secList)
+        TABLE.clear(secList)
         secList[1]=list[p]
     end
 

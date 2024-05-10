@@ -46,7 +46,7 @@ local backColors={
 function MSG.new(icon,str,time)
     local color=backColors.other
     if type(icon)=='string' then
-        color=TABLE.shift(backColors[icon] or color)
+        color=TABLE.copy(backColors[icon] or color)
         icon=mesIcon[icon]
     end
     local text=GC.newText(FONT.get(30),str)
@@ -88,7 +88,7 @@ end
 
 ---Clear all messages
 function MSG.clear()
-    TABLE.cut(mesList)
+    TABLE.clear(mesList)
 end
 
 ---Update all messages (called by Zenitha)

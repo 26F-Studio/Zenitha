@@ -1696,7 +1696,7 @@ function Widgets.textBox:replaceTexts(newList)
 end
 function Widgets.textBox:setTexts(t)
     assert(type(t)=='table',"Arg need table")
-    TABLE.clear(self._texts)
+    TABLE.clearAll(self._texts)
     TABLE.connect(self._texts,t)
     self._scrollPos=0
 end

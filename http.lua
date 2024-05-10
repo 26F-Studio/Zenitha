@@ -115,7 +115,7 @@ function HTTP.request(arg)
         res,arg.body=pcall(JSON.encode,arg.body)
         assert(res,"HTTP.request(arg): arg.body json-encoding error")
         if not arg.headers then arg.headers={} end
-        TABLE.cover({
+        TABLE.update({
             ['Content-Type']="application/json",
             ['Content-Length']=#arg.body,
         },arg.headers)
@@ -133,7 +133,7 @@ function HTTP.reset()
         threads[i]:release()
         threads[i]=false
     end
-    TABLE.clear(msgPool)
+    TABLE.clearAll(msgPool)
     sendCHN:clear()
     recvCHN:clear()
     addThread(threadCount)

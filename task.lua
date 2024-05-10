@@ -107,7 +107,7 @@ end
 
 ---Remove all tasks
 function TASK.clear()
-    TABLE.cut(tasks)
+    TABLE.clear(tasks)
 end
 
 return TASK

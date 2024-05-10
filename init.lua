@@ -78,7 +78,7 @@
 --   ```
 --      chebyshevDist=MATH.mDist2(0,x1,y1,x2,y2)
 --      list=STRING.split("Welcome;to;Zenitha",";") -- {"Welcome","to","Zenitha"}
---      t2=TABLE.copy(t1)
+--      t2=TABLE.copyAll(t1)
 --   ```
 --  `TASK`, a seudo-async module allow you run a function asynchronously (as coroutine which must yield itself periodically, be continued once per main loop cycle).
 --   ```
@@ -135,8 +135,8 @@ ZENITHA={}
 
 -- typedef (you need Emmylua to make these things work) (Recommend extension: "Lua" by sumneko)
 
----@class Set<T>: { [T]: any }
----@class Map<T>: { [any]:T  }
+---@class Set<T>: { [T]:any }
+---@class Map<T>: { [any]:T }
 
 ---@class Zenitha.Click
 ---@field x number

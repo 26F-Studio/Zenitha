@@ -116,6 +116,7 @@ end
 
 ---Add text to container
 ---@param data Zenitha.TextAnimArg
+---## Example
 ---```lua
 ---default={
 ---    text="Example Text",

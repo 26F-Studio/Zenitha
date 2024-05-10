@@ -125,7 +125,7 @@ local function serverLoop()
             elseif cfg.action=='setBusMaxMember' then
                 busTemplate.maxMember=cfg.count
             elseif cfg.action=='bus.get' then
-                S_recvCHN:push(TABLE.shift(busList))
+                S_recvCHN:push(TABLE.copy(busList))
             elseif cfg.action=='bus.join' then
                 local bus=busList[cfg.bus]
                 if bus then ins(bus.members,'0') end
