@@ -143,7 +143,7 @@ ZENITHA={}
 ---@field y number
 
 ---@class Zenitha.Exception
----@field msg string
+---@field msg table
 ---@field scene string
 ---@field shot? love.ImageData
 
@@ -489,7 +489,7 @@ local function noDevkeyPressed(key)
     elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3")
     elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4")
     elseif devMode==2 then
-        local W=WIDGET.sel
+        local W=WIDGET.sel ---@type table
         if W then
             if key=='left' then W.x=W.x-10
             elseif key=='right' then W.x=W.x+10
@@ -1044,7 +1044,8 @@ function ZENITHA.getJsState() return jsState end
 
 ---Get the error info
 ---@param i number|'#' Index of error info, `'#'` for the last one
----@return Zenitha.Exception|Zenitha.Exception[]
+---@return Zenitha.Exception
+---@overload fun():Zenitha.Exception[]
 function ZENITHA.getErr(i)
     if i=='#' then
         return errData[#errData]
