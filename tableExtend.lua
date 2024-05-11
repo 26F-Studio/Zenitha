@@ -661,7 +661,7 @@ do -- function TABLE.newResourceTable(src,loadFunc)
     local function wakeLazyTable(src,lazyT)
         for k,v in next,src do
             if type(v)=='table' then
-                TABLE.wakeLazyTable(v,lazyT[k])
+                wakeLazyTable(v,lazyT[k])
             else
                 local _=lazyT[k]
             end
