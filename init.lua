@@ -255,34 +255,37 @@ local globalEvent={
     touchClick=NULL, -- Able to interrupt scene event
 
     -- Able to interrupt scene event and widget interaction
+    --
+    -- Default to a debugging tool, switch on/off with F8, then use it with F1~F12
     keyDown=function(key,isRep)
         if isRep then return end
         if devMode then
-            if     key=='f1'  then
-                MSG.new('info',("System:%s[%s]\nLuaVer:%s\nJitVer:%s\nJitVerNum:%s"):format(SYSTEM,jit.arch,_VERSION,jit.version,jit.version_num))
+            if     key=='f1'  then -- Show system info
+                local info=("System:%s[%s]\nLuaVer:%s\nJitVer:%s\nJitVerNum:%s"):format(SYSTEM,jit.arch,_VERSION,jit.version,jit.version_num)
+                print(info); MSG.new('info',info)
             elseif key=='f2'  then
-                MSG.new('check',PROFILE.switch() and "Profile start!" or "Profile report copied!")
+                local info=PROFILE.switch() and "Profile start!" or "Profile report copied!"
+                print(info); MSG.new('info',info)
             elseif key=='f3'  then
                 local info=table.concat(SCR.info(),"\n")
-                MSG.new('info',info)
-                print(info)
+                print(info); MSG.new('info',info)
             elseif key=='f4'  then
                 for k,v in next,_G do print(k,v) end
                 MSG.new('info',"_G listed in console")
             elseif key=='f5'  then
-                print(WIDGET.sel and WIDGET.sel:getInfo() or "No widget selected")
-                MSG.new('info',"Widget info listed in console")
+                local info=WIDGET.sel and WIDGET.sel:getInfo() or "No widget selected"
+                print(info); MSG.new('info',info)
             elseif key=='f6'  then
-                local stack=table.concat(SCN.stack,"->")
-                print(stack)
-                MSG.new('info',"Scene stack:"..stack)
+                local info="Scene stack:"..table.concat(SCN.stack,"->")
+                print(info); MSG.new('info',info)
             elseif key=='f7'  then
                 if love['_openConsole'] then love['_openConsole']() end
+                MSG.new('info',"Console opened")
             elseif key=='f8'  then devMode=false MSG.new('info',"DEBUG OFF",.2)
-            elseif key=='f9'  then devMode=1     MSG.new('info',"DEBUG 1")
-            elseif key=='f10' then devMode=2     MSG.new('info',"DEBUG 2")
-            elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3")
-            elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4")
+            elseif key=='f9'  then devMode=1     MSG.new('info',"DEBUG 1 (Click)")
+            elseif key=='f10' then devMode=2     MSG.new('info',"DEBUG 2 (Widget)")
+            elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3 (Slower)")
+            elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4 (Slowest)")
             elseif devMode==2 then
                 local W=WIDGET.sel ---@type table
                 if not W then return true end
@@ -293,7 +296,7 @@ local globalEvent={
                 elseif key==',' then W.w=W.w-10
                 elseif key=='.' then W.w=W.w+10
                 elseif key=='/' then W.h=W.h-10
-                elseif key=='\'' then W.h=W.h+10
+                elseif key=="'" then W.h=W.h+10
                 elseif key=='[' then W.fontSize=W.fontSize-5
                 elseif key==']' then W.fontSize=W.fontSize+5
                 else return true
