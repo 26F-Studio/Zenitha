@@ -161,7 +161,7 @@ ZENITHA={}
 
 -- #define
 local ms,kb=love.mouse,love.keyboard
-local KBisDown=kb.isDown
+local MSisDown,KBisDown=ms.isDown,kb.isDown
 
 local gc=love.graphics
 local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
@@ -218,7 +218,6 @@ end
 
 -- Inside values
 local mainLoopStarted=false
-local autoGCcount=0
 local devMode=false ---@type false|1|2|3|4
 local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastClicks={} ---@type Zenitha.Click[]
@@ -242,22 +241,109 @@ local updateFreq=100
 local drawFreq=100
 local sleepInterval=1/60
 local clickDist2=62
-local function drawCursor(_,x,y)
-    gc_setColor(1,1,1)
-    gc.setLineWidth(2)
-    gc_circle(ms.isDown(1) and 'fill' or 'line',x,y,6)
-end
-local globalKey={
-    f8=function()
-        devMode=1
-        MSG.new('info',"DEBUG ON",.2)
+local maxErrorCount=3
+local globalEvent={
+    mouseDown=NULL, -- Able to interrupt scene event
+    mouseMove=NULL, -- Able to interrupt scene event and widget interaction
+    mouseUp=NULL, -- Able to interrupt scene event
+    mouseClick=NULL, -- Able to interrupt scene event
+    wheelMoved=NULL, -- Able to interrupt scene event and widget interaction
+
+    touchDown=NULL, -- Able to interrupt scene event
+    touchUp=NULL, -- Able to interrupt scene event
+    touchMove=NULL, -- Able to interrupt scene event
+    touchClick=NULL, -- Able to interrupt scene event
+
+    -- Able to interrupt scene event and widget interaction
+    keyDown=function(key,isRep)
+        if isRep then return end
+        if devMode then
+            if     key=='f1'  then
+                MSG.new('info',("System:%s[%s]\nLuaVer:%s\nJitVer:%s\nJitVerNum:%s"):format(SYSTEM,jit.arch,_VERSION,jit.version,jit.version_num))
+            elseif key=='f2'  then
+                MSG.new('check',PROFILE.switch() and "Profile start!" or "Profile report copied!")
+            elseif key=='f3'  then
+                local info=table.concat(SCR.info(),"\n")
+                MSG.new('info',info)
+                print(info)
+            elseif key=='f4'  then
+                for k,v in next,_G do print(k,v) end
+                MSG.new('info',"_G listed in console")
+            elseif key=='f5'  then
+                print(WIDGET.sel and WIDGET.sel:getInfo() or "No widget selected")
+                MSG.new('info',"Widget info listed in console")
+            elseif key=='f6'  then
+                local stack=table.concat(SCN.stack,"->")
+                print(stack)
+                MSG.new('info',"Scene stack:"..stack)
+            elseif key=='f7'  then
+                if love['_openConsole'] then love['_openConsole']() end
+            elseif key=='f8'  then devMode=false MSG.new('info',"DEBUG OFF",.2)
+            elseif key=='f9'  then devMode=1     MSG.new('info',"DEBUG 1")
+            elseif key=='f10' then devMode=2     MSG.new('info',"DEBUG 2")
+            elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3")
+            elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4")
+            elseif devMode==2 then
+                local W=WIDGET.sel ---@type table
+                if not W then return true end
+                if key=='left' then W.x=W.x-10
+                elseif key=='right' then W.x=W.x+10
+                elseif key=='up' then W.y=W.y-10
+                elseif key=='down' then W.y=W.y+10
+                elseif key==',' then W.w=W.w-10
+                elseif key=='.' then W.w=W.w+10
+                elseif key=='/' then W.h=W.h-10
+                elseif key=='\'' then W.h=W.h+10
+                elseif key=='[' then W.fontSize=W.fontSize-5
+                elseif key==']' then W.fontSize=W.fontSize+5
+                else return true
+                end
+                W:reset()
+            else
+                return true
+            end
+        else
+            if key=='f8' then
+                devMode=1
+                MSG.new('info',"DEBUG ON",.2)
+            end
+        end
     end,
+    keyUp=NULL, -- Able to interrupt scene event
+    textInput=NULL, -- Able to interrupt scene event and widget interaction
+    imeChange=NULL, -- Able to interrupt scene event and var `EDIT` updating
+
+    gamepadAdd=NULL, -- Able to interrupt gamepad managing
+    gamepadRemove=NULL, -- Able to interrupt gamepad managing
+    gamepadAxis=NULL, -- Able to interrupt gamepad managing
+    gamepadDown=NULL, -- Able to interrupt scene event and widget interaction
+    gamepadUp=NULL, -- Able to interrupt scene event
+
+    fileDrop=NULL, -- Able to interrupt scene event
+    folderDrop=NULL, -- Able to interrupt scene event
+    lowMemory=NULL, -- Able to interrupt scene event
+    resize=NULL, -- Able to interrupt scene event
+    focus=NULL, -- Able to interrupt scene event
+
+    -- System info function (like time and battery power) drawing function (default transform is SCR.xOy_ul)
+    drawSysInfo=NULL,
+
+    -- Cursor drawing function (pass time,x,y as arguments) (Color and line width is uncertain)
+    drawCursor=function(_,x,y)
+        gc_setColor(1,1,1)
+        gc.setLineWidth(2)
+        gc_circle(MSisDown(1) and 'fill' or 'line',x,y,6)
+    end,
+
+    -- Called when request quiting with ZENITHA._quit()
+    requestQuit=NULL,
+
+    -- Called when exactly before quiting
+    quit=NULL,
+
+    -- When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'.
+    error=false,
 }
-local devFnKey={NULL,NULL,NULL,NULL,NULL,NULL,NULL}
-local onResize=NULL
-local onFocus=NULL
-local onQuit=NULL
-local drawSysInfo=NULL
 
 --------------------------------------------------------------
 
@@ -322,16 +408,21 @@ FONT.setDefaultFallback('_norm')
 --------------------------------------------------------------
 
 local function _updateMousePos(x,y,dx,dy)
+    -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
-    dx,dy=dx/SCR.k,dy/SCR.k
+
+    -- Interrupt by global event
+    if globalEvent.mouseMove(mx,my,dx,dy)==true then return end
+
     if SCN.mouseMove then SCN.mouseMove(x,y,dx,dy) end
-    if ms.isDown(1) then
+    if MSisDown(1) then
         WIDGET._drag(x,y,dx,dy)
     else
         WIDGET._cursorMove(x,y,'move')
     end
 end
 local function _triggerMouseDown(x,y,k)
+    -- Debug info
     if devMode==1 then
         if not lastClicks[k] then lastClicks[k]={x=0,y=0} end
         print(("(%d,%d)<-%d,%d ~~(%d,%d)<-%d,%d"):format(
@@ -341,12 +432,18 @@ local function _triggerMouseDown(x,y,k)
             floor((x-lastClicks[k].x)/10)*10,floor((y-lastClicks[k].y)/10)*10
         ))
     end
+
+    -- Interrupt by scene swapping
     if SCN.swapping then return end
+
     WIDGET._cursorMove(x,y,'press')
     if WIDGET.sel then
         WIDGET._press(x,y,k)
     else
-        if SCN.mouseDown then SCN.mouseDown(x,y,k) end
+        -- Skip scene event by global event
+        if globalEvent.mouseDown(mx,my,k)~=true then
+            if SCN.mouseDown then SCN.mouseDown(x,y,k) end
+        end
         lastClicks[k]={x=x,y=y}
     end
     clickFX(x,y)
@@ -354,13 +451,15 @@ end
 local function mouse_update(dt)
     if not KBisDown('lctrl','rctrl') and KBisDown('up','down','left','right') then
         local dx,dy=0,0
-        if KBisDown('up') then    dy=dy-cursorSpd end
-        if KBisDown('down') then  dy=dy+cursorSpd end
-        if KBisDown('left') then  dx=dx-cursorSpd end
+        if KBisDown('up')    then dy=dy-cursorSpd end
+        if KBisDown('down')  then dy=dy+cursorSpd end
+        if KBisDown('left')  then dx=dx-cursorSpd end
         if KBisDown('right') then dx=dx+cursorSpd end
+        if dx==0 and dy==0 then return end
+
         mx=max(min(mx+dx,SCR.w0),0)
         my=max(min(my+dy,SCR.h0),0)
-        if my==0 or my==SCR.h0 then
+        if my==0 or my==SCR.h0 and dy~=0 then
             WIDGET.sel=false
             WIDGET._drag(0,0,0,-dy)
         end
@@ -376,6 +475,8 @@ local function gp_update(js,dt)
         local dx,dy=0,0
         if abs(sy)>.1 then dy=dy+2*sy*cursorSpd end
         if abs(sx)>.1 then dx=dx+2*sx*cursorSpd end
+        if dx==0 and dy==0 then return end
+
         mx=max(min(mx+dx,SCR.w0),0)
         my=max(min(my+dy,SCR.h0),0)
         if my==0 or my==SCR.h0 then
@@ -388,54 +489,89 @@ local function gp_update(js,dt)
         cursorSpd=6
     end
 end
+---@type love.mousepressed
 function love.mousepressed(x,y,k,touch)
     if touch or WAIT.state then return end
     mouseShow=true
     mx,my=ITP(xOy,x,y)
+
     _triggerMouseDown(mx,my,k)
 end
+---@type love.mousemoved
 function love.mousemoved(x,y,dx,dy,touch)
     if touch then return end
     mouseShow=true
+
     mx,my=ITP(xOy,x,y)
+    dx,dy=dx/SCR.k,dy/SCR.k
+
     for k,last in next,lastClicks do
         if type(k)=='number' and (x-last.x)^2+(y-last.y)^2>clickDist2 then
             lastClicks[k]=nil
         end
     end
+
     _updateMousePos(mx,my,dx,dy)
 end
+---@type love.mousereleased
 function love.mousereleased(x,y,k,touch)
     if touch or WAIT.state or SCN.swapping then return end
     mx,my=ITP(xOy,x,y)
+
     local widgetSel=not not WIDGET.sel
     if widgetSel then
         WIDGET._release(mx,my,k)
     end
-    if SCN.mouseUp then SCN.mouseUp(mx,my,k) end
-    if not widgetSel then
-        if lastClicks[k] and SCN.mouseClick then
-            SCN.mouseClick(mx,my,k,((x-lastClicks[k].x)^2+(y-lastClicks[k].y)^2)^.5)
+
+    -- Skip scene event by global event
+    if globalEvent.mouseUp(mx,my,k)~=true then
+        if SCN.mouseUp then SCN.mouseUp(mx,my,k) end
+    end
+
+    if not widgetSel and lastClicks[k] then
+        local dist=((x-lastClicks[k].x)^2+(y-lastClicks[k].y)^2)^.5
+        -- Skip scene event by global event
+        if globalEvent.mouseClick(mx,my,k,dist)~=true then
+            if SCN.mouseClick then
+                SCN.mouseClick(mx,my,k,dist)
+            end
         end
     end
+
     WIDGET._cursorMove(mx,my,'release')
 end
+---@type love.wheelmoved
 function love.wheelmoved(dx,dy)
-    if WAIT.state or SCN.swapping then return end
-    if not SCN.wheelMoved or SCN.wheelMoved(dx,dy) then
-        WIDGET._scroll(dx,dy)
-    end
+    -- Interrupt by scene swapping & WAIT module
+    if SCN.swapping or WAIT.state then return end
+
+    -- Interrupt by global event
+    if globalEvent.wheelMoved(dx,dy)==true then return end
+
+    -- Interrupt by scene event
+    if SCN.wheelMoved and SCN.wheelMoved(dx,dy)==true then return end
+
+    WIDGET._scroll(dx,dy)
 end
 
-function love.touchpressed(id,x,y)
+---@type love.touchpressed
+function love.touchpressed(id,x,y,_,_,pressure)
+    -- Hide cursor when key pressed
     mouseShow=false
-    if WAIT.state or SCN.swapping then return end
+
+    -- Interrupt by scene swapping & WAIT module
+    if SCN.swapping or WAIT.state then return end
+
+    -- Update mainTouchID
     if not SCN.mainTouchID then
         SCN.mainTouchID=id
         WIDGET.unFocus(true)
-        love.touchmoved(id,x,y,0,0)
+        love.touchmoved(id,x,y,0,0,pressure)
     end
+
+    -- Transform to designing coord
     x,y=ITP(xOy,x,y)
+
     lastClicks[id]={x=x,y=y}
     if WIDGET.sel and WIDGET.sel.type=='inputBox' and not WIDGET.sel:isAbove(x,y) then
         WIDGET.unFocus(true)
@@ -443,19 +579,37 @@ function love.touchpressed(id,x,y)
     end
     WIDGET._cursorMove(x,y,'press')
     WIDGET._press(x,y,1)
-    if not WIDGET.sel and SCN.touchDown then SCN.touchDown(x,y,id) end
+
+    -- Skip scene event by global event
+    if globalEvent.touchDown(x,y,id,pressure)~=true then
+        if not WIDGET.sel and SCN.touchDown then SCN.touchDown(x,y,id,pressure) end
+    end
 end
-function love.touchmoved(id,x,y,dx,dy)
-    if WAIT.state or SCN.swapping then return end
+---@type love.touchmoved
+function love.touchmoved(id,x,y,dx,dy,pressure)
+    -- Interrupt by scene swapping & WAIT module
+    if SCN.swapping or WAIT.state then return end
+
+    -- Transform to designing coord
     x,y=ITP(xOy,x,y)
+    dx,dy=dx/SCR.k,dy/SCR.k
+
     if lastClicks[id] and (x-lastClicks[id].x)^2+(y-lastClicks[id].y)^2>clickDist2 then
         lastClicks[id]=nil
     end
-    WIDGET._drag(x,y,dx/SCR.k,dy/SCR.k)
-    if not WIDGET.sel and SCN.touchMove then SCN.touchMove(x,y,dx/SCR.k,dy/SCR.k,id) end
+    WIDGET._drag(x,y,dx,dy)
+
+    -- Skip scene event by global event
+    if globalEvent.touchMove(x,y,id,pressure)~=true then
+        if not WIDGET.sel and SCN.touchMove then SCN.touchMove(x,y,dx,dy,id,pressure) end
+    end
 end
-function love.touchreleased(id,x,y)
-    if WAIT.state or SCN.swapping then return end
+---@type love.touchreleased
+function love.touchreleased(id,x,y,_,_,pressure)
+    -- Interrupt by scene swapping & WAIT module
+    if SCN.swapping or WAIT.state then return end
+
+    -- Transform to designing coord
     x,y=ITP(xOy,x,y)
     if id==SCN.mainTouchID then
         WIDGET._release(x,y,id)
@@ -463,9 +617,18 @@ function love.touchreleased(id,x,y)
         WIDGET.unFocus()
         SCN.mainTouchID=false
     end
-    if SCN.touchUp then SCN.touchUp(x,y,id) end
-    if lastClicks[id] and SCN.touchClick then
-        SCN.touchClick(x,y,id,((x-lastClicks[id].x)^2+(y-lastClicks[id].y)^2)^.5)
+
+    -- Skip scene event by global event
+    if globalEvent.touchUp(x,y,id,pressure)~=true then
+        if SCN.touchUp then SCN.touchUp(x,y,id,pressure) end
+    end
+
+    if lastClicks[id] then
+        local dist=((x-lastClicks[id].x)^2+(y-lastClicks[id].y)^2)^.5
+        -- Skip scene event by global event
+        if globalEvent.touchClick(x,y,id,dist)~=true then
+            if SCN.touchClick then SCN.touchClick(x,y,id,dist) end
+        end
         clickFX(x,y)
     end
 end
@@ -473,88 +636,82 @@ end
 -- Touch control test
 -- function love.mousepressed(x,y,k) if k==1 then love.touchpressed(1,x,y) end end
 -- function love.mousereleased(x,y,k) if k==1 then love.touchreleased(1,x,y) end end
--- function love.mousemoved(x,y,dx,dy) if ms.isDown(1) then love.touchmoved(1,x,y,dx,dy) end end
+-- function love.mousemoved(x,y,dx,dy) if isMsDown(1) then love.touchmoved(1,x,y,dx,dy) end end
 
-local function noDevkeyPressed(key)
-    if key=='f1' then      devFnKey[1]()
-    elseif key=='f2' then  devFnKey[2]()
-    elseif key=='f3' then  devFnKey[3]()
-    elseif key=='f4' then  devFnKey[4]()
-    elseif key=='f5' then  devFnKey[5]()
-    elseif key=='f6' then  devFnKey[6]()
-    elseif key=='f7' then  devFnKey[7]()
-    elseif key=='f8' then  devMode=false MSG.new('info',"DEBUG OFF",.2)
-    elseif key=='f9' then  devMode=1     MSG.new('info',"DEBUG 1")
-    elseif key=='f10' then devMode=2     MSG.new('info',"DEBUG 2")
-    elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3")
-    elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4")
-    elseif devMode==2 then
-        local W=WIDGET.sel ---@type table
-        if W then
-            if key=='left' then W.x=W.x-10
-            elseif key=='right' then W.x=W.x+10
-            elseif key=='up' then W.y=W.y-10
-            elseif key=='down' then W.y=W.y+10
-            elseif key==',' then W.w=W.w-10
-            elseif key=='.' then W.w=W.w+10
-            elseif key=='/' then W.h=W.h-10
-            elseif key=='\'' then W.h=W.h+10
-            elseif key=='[' then W.fontSize=W.fontSize-5
-            elseif key==']' then W.fontSize=W.fontSize+5
-            else return true
-            end
-            W:reset()
-        else
-            return true
-        end
-    else
-        return true
+---@type love.keypressed
+function love.keypressed(key,scancode,isRep)
+    -- Hide cursor when key pressed
+    if not isRep then mouseShow=false end
+
+    -- Interrupt by scene swapping
+    if SCN.swapping then return end
+
+    -- Interrupt by WAIT module
+    if WAIT.state then
+        if key=='escape' and WAIT.arg.escapable then WAIT.interrupt() end
+        return
     end
-end
-function love.keypressed(key,_,isRep)
-    mouseShow=false
-    if devMode and not noDevkeyPressed(key) then
-        -- Do nothing
-    elseif globalKey[key] then
-        globalKey[key]()
-    else
-        if SCN.swapping then return end
-        if WAIT.state then
-            if key=='escape' and WAIT.arg.escapable then WAIT.interrupt() end
-            return
+
+    -- Interrupt when typing text
+    if EDITING~="" then return end
+
+    -- Interrupt by global event
+    if globalEvent.keyDown(key,isRep,scancode)==true then return end
+
+    -- Interrupt by scene event
+    if SCN.keyDown and SCN.keyDown(key,isRep,scancode)==true then return end
+
+    -- Widget interaction
+    local W=WIDGET.sel
+    if key=='escape' and not isRep then
+        SCN.back()
+    elseif key=='up' or key=='down' or key=='left' or key=='right' then
+        mouseShow=true
+        if KBisDown('lctrl','rctrl') then
+            if W and W.arrowKey then W:arrowKey(key) end
         end
-        if EDITING=="" and (not SCN.keyDown or SCN.keyDown(key,isRep)) then
-            local W=WIDGET.sel
-            if key=='escape' and not isRep then
-                SCN.back()
-            elseif key=='up' or key=='down' or key=='left' or key=='right' then
-                mouseShow=true
-                if KBisDown('lctrl','rctrl') then
-                    if W and W.arrowKey then W:arrowKey(key) end
-                end
-            elseif W and W.keypress then
-                W:keypress(key)
-            elseif key=='space' or key=='return' then
-                mouseShow=true
-                if not isRep then
-                    clickFX(mx,my)
-                    _triggerMouseDown(mx,my,1)
-                    WIDGET._release(mx,my,1)
-                end
-            end
+    elseif W and W.keypress then
+        W:keypress(key)
+    elseif key=='space' or key=='return' then
+        mouseShow=true
+        if not isRep then
+            clickFX(mx,my)
+            _triggerMouseDown(mx,my,1)
+            WIDGET._release(mx,my,1)
         end
     end
 end
-function love.keyreleased(i)
-    if WAIT.state or SCN.swapping then return end
-    if SCN.keyUp then SCN.keyUp(i) end
+---@type love.keyreleased
+function love.keyreleased(key)
+    -- Interrupt by scene swapping & WAIT module
+    if SCN.swapping or WAIT.state then return end
+
+    -- Skip scene event by global event
+    if globalEvent.keyUp(key)~=true then
+        if SCN.keyUp then SCN.keyUp(key) end
+    end
 end
 
-function love.textedited(texts)
-    EDITING=texts
-end
+---@type love.textinput
 function love.textinput(texts)
+    -- Interrupt by global event
+    if globalEvent.textInput(texts)==true then return end
+
+    -- Interrupt by scene event
+    if SCN.textInput and SCN.textInput(texts)==true then return end
+
     WIDGET._textinput(texts)
+end
+
+---@type love.textedited
+function love.textedited(texts)
+    -- Interrupt by global event
+    if globalEvent.imeChange(texts)==true then return end
+
+    -- Interrupt by scene event
+    if SCN.imeChange and SCN.imeChange(texts)==true then return end
+
+    EDITING=texts
 end
 
 -- analog sticks: -1, 0, 1 for neg, neutral, pos
@@ -576,7 +733,11 @@ local dPadToKey={
     start='return',
     back='escape',
 }
+---@type love.joystickadded
 function love.joystickadded(JS)
+    -- Interrupt by global event
+    if globalEvent.gamepadAdd(JS)==true then return end
+
     table.insert(jsState,{
         _id=JS:getID(),
         _jsObj=JS,
@@ -589,7 +750,11 @@ function love.joystickadded(JS)
     })
     MSG.new('info',"Joystick added")
 end
+---@type love.joystickremoved
 function love.joystickremoved(JS)
+    -- Interrupt by global event
+    if globalEvent.gamepadRemove(JS)==true then return end
+
     for i=1,#jsState do
         if jsState[i]._jsObj==JS then
             for j=1,#gamePadKeys do
@@ -609,52 +774,67 @@ function love.joystickremoved(JS)
         end
     end
 end
+---@type love.gamepadaxis
 function love.gamepadaxis(JS,axis,val)
-    if jsState[1] and JS==jsState[1]._jsObj then
-        local js=jsState[1]
-        if axis=='leftx' or axis=='lefty' or axis=='rightx' or axis=='righty' then
-            local newVal= -- range: [0,1]
-                val>.4 and 1 or
-                val<-.4 and -1 or
-                0
-            if newVal~=js[axis] then
-                if js[axis]==-1 then
-                    love.gamepadreleased(JS,jsAxisEventName[axis][1])
-                elseif js[axis]~=0 then
-                    love.gamepadreleased(JS,jsAxisEventName[axis][2])
-                end
-                if newVal==-1 then
-                    love.gamepadpressed(JS,jsAxisEventName[axis][1])
-                elseif newVal==1 then
-                    love.gamepadpressed(JS,jsAxisEventName[axis][2])
-                end
-                js[axis]=newVal
+    -- Interrupt by global event
+    if globalEvent.gamepadAxis(JS,axis,val)==true then return end
+
+    local js
+    for i=1,#jsState do
+        if jsState[i]._jsObj==JS then
+            js=jsState[i]
+            break
+        end
+    end
+    assert(js,"WTF why js not found")
+    if axis=='leftx' or axis=='lefty' or axis=='rightx' or axis=='righty' then
+        local newVal= -- range: [0,1]
+            val>.4 and 1 or
+            val<-.4 and -1 or
+            0
+        if newVal~=js[axis] then
+            if js[axis]==-1 then
+                love.gamepadreleased(JS,jsAxisEventName[axis][1])
+            elseif js[axis]~=0 then
+                love.gamepadreleased(JS,jsAxisEventName[axis][2])
             end
-        elseif axis=='triggerleft' or axis=='triggerright' then
-            local newVal=val>.3 and 1 or 0 -- range: [0,1]
-            if newVal~=js[axis] then
-                if newVal==1 then
-                    love.gamepadpressed(JS,jsAxisEventName[axis])
-                else
-                    love.gamepadreleased(JS,jsAxisEventName[axis])
-                end
-                js[axis]=newVal
+            if newVal==-1 then
+                love.gamepadpressed(JS,jsAxisEventName[axis][1])
+            elseif newVal==1 then
+                love.gamepadpressed(JS,jsAxisEventName[axis][2])
             end
+            js[axis]=newVal
+        end
+    elseif axis=='triggerleft' or axis=='triggerright' then
+        local newVal=val>.3 and 1 or 0 -- range: [0,1]
+        if newVal~=js[axis] then
+            if newVal==1 then
+                love.gamepadpressed(JS,jsAxisEventName[axis])
+            else
+                love.gamepadreleased(JS,jsAxisEventName[axis])
+            end
+            js[axis]=newVal
         end
     end
 end
-function love.gamepadpressed(_,key)
+---@type love.gamepadpressed
+function love.gamepadpressed(JS,key)
+    -- Hide cursor when gamepad pressed
     mouseShow=false
+
+    -- Interrupt by scene swapping
     if SCN.swapping then return end
-    local cursorCtrl
+
+    -- Interrupt by global event
+    if globalEvent.gamepadDown(JS,key)==true then return end
+
+    local interruptCursor
     if SCN.gamepadDown then
-        cursorCtrl=SCN.gamepadDown(key)
+        interruptCursor=SCN.gamepadDown(key)
     elseif SCN.keyDown then
-        cursorCtrl=SCN.keyDown(dPadToKey[key] or key)
-    else
-        cursorCtrl=true
+        interruptCursor=SCN.keyDown(dPadToKey[key] or key)
     end
-    if cursorCtrl then
+    if not interruptCursor then
         key=dPadToKey[key] or key
         mouseShow=true
         local W=WIDGET.sel
@@ -675,32 +855,53 @@ function love.gamepadpressed(_,key)
         end
     end
 end
-function love.gamepadreleased(_,key)
-    if WAIT.state or SCN.swapping then return end
-    if SCN.gamepadUp then
-        SCN.gamepadUp(key)
-    elseif SCN.keyUp then
-        SCN.keyUp(dPadToKey[key] or key)
+---@type love.gamepadreleased
+function love.gamepadreleased(JS,key)
+    -- Interrupt by scene swapping & WAIT module
+    if SCN.swapping or WAIT.state then return end
+
+    -- Skip scene event by global event
+    if globalEvent.gamepadUp(JS,key)~=true then
+        if SCN.gamepadUp then
+            SCN.gamepadUp(key)
+        elseif SCN.keyUp then
+            SCN.keyUp(dPadToKey[key] or key)
+        end
     end
 end
 
+---@type love.filedropped
 function love.filedropped(file)
-    if WAIT.state or SCN.swapping then return end
-    if SCN.fileDropped then SCN.fileDropped(file) end
+    -- Interrupt by scene swapping & WAIT module
+    if SCN.swapping or WAIT.state then return end
+
+    -- Skip scene event by global event
+    if globalEvent.fileDrop(file)~=true then
+        if SCN.fileDrop then SCN.fileDrop(file) end
+    end
 end
+---@type love.directorydropped
 function love.directorydropped(dir)
-    if WAIT.state or SCN.swapping then return end
-    if SCN.directoryDropped then SCN.directoryDropped(dir) end
+    -- Interrupt by scene swapping & WAIT module
+    if SCN.swapping or WAIT.state then return end
+
+    -- Skip scene event by global event
+    if globalEvent.folderDrop(dir)~=true then
+        if SCN.folderDrop then SCN.folderDrop(dir) end
+    end
 end
 
+---@type love.lowmemory
 function love.lowmemory()
     collectgarbage()
-    if autoGCcount<3 then
-        autoGCcount=autoGCcount+1
-        MSG.new('check',"[auto GC] low MEM 设备内存过低"..('.'):rep(4-autoGCcount))
+
+    -- Skip scene event by global event
+    if globalEvent.lowMemory()~=true then
+        if SCN.lowMemory then SCN.lowMemory() end
     end
 end
 
+---@type love.resize
 function love.resize(w,h)
     if SCR.w==w and SCR.h==h then return end
     SCR._resize(w,h)
@@ -709,14 +910,20 @@ function love.resize(w,h)
         bigCanvases[k]=gc.newCanvas()
     end
     BG._resize(w,h)
-    if SCN.resize then SCN.resize(w,h) end
+
+    -- Skip scene event by global event
+    if globalEvent.resize(w,h)~=true then
+        if SCN.resize then SCN.resize(w,h) end
+    end
+
     WIDGET._reset()
-    onResize(w,h)
 end
 
+---@type love.focus
 function love.focus(f)
-    if onFocus then
-        onFocus(f)
+    -- Skip scene event by global event
+    if globalEvent.focus(f)~=true then
+        if SCN.focus then SCN.focus(f) end
     end
 end
 
@@ -724,7 +931,11 @@ local function secondLoopThread()
     local mainLoop=love.run()
     repeat coroutine.yield() until mainLoop()
 end
+---@type love.errorhandler
 function love.errorhandler(msg)
+    -- Call global event if exist
+    if globalEvent.error then return globalEvent.error(msg) end
+
     if type(msg)~='string' then
         msg="Unknown error"
     elseif msg:find("Invalid UTF-8") then
@@ -754,7 +965,7 @@ function love.errorhandler(msg)
     SCR._resize(gc.getWidth(),gc.getHeight())
 
     local sceneStack=SCN and table.concat(SCN.stack,"/") or "NULL"
-    if mainLoopStarted and #errData<3 and SCN.scenes['error'] then
+    if mainLoopStarted and #errData<maxErrorCount and SCN.scenes['error'] then
         BG.set('none')
         table.insert(errData,{msg=err,scene=sceneStack})
 
@@ -831,6 +1042,7 @@ local devColor={
 local debugInfos={
     {"Cache",gcinfo},
 }
+---@type love.run
 function love.run()
     mainLoopStarted=true
 
@@ -876,6 +1088,7 @@ function love.run()
             if love[N] then
                 love[N](A,B,C,D,E)
             elseif N=='quit' then
+                globalEvent.quit()
                 return A or true
             end
         end
@@ -926,9 +1139,9 @@ function love.run()
                 gc_replaceTransform(xOy)
                     SYSFX._draw()
                     TEXT.draw(TEXT)
-                    if mouseShow then drawCursor(time,mx,my) end
+                    if mouseShow then globalEvent.drawCursor(time,mx,my) end
                 gc_replaceTransform(SCR.xOy_ul)
-                    drawSysInfo()
+                    globalEvent.drawSysInfo()
                 gc_replaceTransform(SCR.origin)
                     if SCN.swapping then
                         SCN.state.draw(SCN.state.timeRem)
@@ -1013,8 +1226,10 @@ end
 ---Go to quit scene then terminate the application
 ---@param style? string Choose a scene swapping style
 function ZENITHA._quit(style)
-    onQuit()
-    SCN.swapTo('_quit',style or 'slowFade')
+    -- Skip quitting by global event
+    if globalEvent.requestQuit()~=true then
+        SCN.swapTo('_quit',style or 'slowFade')
+    end
 end
 
 ---Set the application name string
@@ -1086,14 +1301,14 @@ end
 ---Default value is 100(%), all updating will be called every main loop cycle
 ---
 ---If set to 50(%), all *.update(dt) will be called every 2 main loop cycle
----@param rate number Updating rate percentage, range from 0 to 100
+---@param rate number in [0,100]
 function ZENITHA.setUpdateFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setUpdateFreq(rate): Need in (0,100]")
     updateFreq=rate
 end
 
 ---Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
----@param rate number Drawing rate percentage, range from 0 to 100
+---@param rate number in [0,100]
 function ZENITHA.setDrawFreq(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setDrawFreq(rate): Need in (0,100]")
     drawFreq=rate
@@ -1107,9 +1322,7 @@ function ZENITHA.setShowFPS(b)
 end
 
 ---Set the max update rate of main loop cycle
----
----Default value is 60
----@param fps number
+---@param fps number Default to 60
 function ZENITHA.setMaxFPS(fps)
     assert(type(fps)=='number' and fps>0,"ZENITHA.setMaxFPS(fps): Need >0")
     sleepInterval=1/fps
@@ -1129,73 +1342,17 @@ function ZENITHA.setClickFX(fx)
 end
 
 ---Set click distance threshold
----
----Default value is 62
----@param dist number Distance threshold
+---@param dist number Default to 7.87
 function ZENITHA.setClickDist(dist)
     assert(type(dist)=='number' and dist>0,"ZENITHA.setClickDist(dist): Need >0")
     clickDist2=dist^2
 end
 
----Set highest priority global key-pressing event listener
----@param key string Key name
----@param func function|false Function to be called when key is pressed, false to remove
-function ZENITHA.setOnGlobalKey(key,func)
-    assert(type(key)=='string',"ZENITHA.setOnFnKeys(key,func): Need string")
-    if func==false then
-        globalKey[key]=nil
-    else
-        assert(type(func)=='function',"ZENITHA.setOnFnKeys(key,func): Need function|false")
-        globalKey[key]=func
-    end
-end
-
----Set Fn keys' event listener (for debugging)
----@param list function[] @Function list, [1~7]=function
-function ZENITHA.setOnFnKeys(list)
-    assert(type(list)=='table',"ZENITHA.setOnFnKeys(list): Need table, [1~7]=function")
-    for i=1,7 do
-        if type(list[i])=='function' then
-            devFnKey[i]=list[i]
-        end
-    end
-end
-
----Set global onFocus event listener
----@param func function Function to be called when window focus changed
-function ZENITHA.setOnFocus(func)
-    assert(type(func)=='function',"ZENITHA.setOnFocus(func): Need function")
-    onFocus=func
-end
-
----Set global onResize event listener
----@param func function Function to be called when window resized
-function ZENITHA.setOnResize(func)
-    assert(type(func)=='function',"ZENITHA.setOnResize(func): Need function")
-    onResize=func
-end
-
----Set global onQuit event listener
----@param func function Function to be called when application is about to quit
-function ZENITHA.setOnQuit(func)
-    assert(type(func)=='function',"ZENITHA.setOnQuit(func): Need function")
-    onQuit=func
-end
-
----Set cursor drawing function (pass time,x,y as arguments)
----
----Color and line width is uncertain, set it yourself in the function.
----@param func function Function to be called when drawing cursor
-function ZENITHA.setDrawCursor(func)
-    assert(type(func)=='function',"ZENITHA.setDrawCursor(func): Need function")
-    drawCursor=func
-end
-
----Set system info (like time and battery power) drawing function (default transform is SCR.xOy_ul)
----@param func function Function to be called when drawing system info
-function ZENITHA.setDrawSysInfo(func)
-    assert(type(func)=='function',"ZENITHA.setDrawSysInfo(func): Need function")
-    drawSysInfo=func
+---Set the max error count, before hitting this number, errors will cause scene swapping to 'error'
+---@param n number Default to 3
+function ZENITHA.setMaxErrorCount(n)
+    assert(type(n)=='number' and n>0,"ZENITHA.setMaxErrorCount(n): Need >0")
+    maxErrorCount=n
 end
 
 ---Get a big canvas which is as big as the screen
@@ -1205,9 +1362,19 @@ function ZENITHA.getBigCanvas(id)
     return bigCanvases[id]
 end
 
+---Global event callback function table, they will be called earlier than scene event (if exist)
+---
+---**Return `true` as "INTERRUPT" signal**, to prevent calling scene event and other process (see each function for details)
+ZENITHA.globalEvent=setmetatable(globalEvent,{
+    __newindex=function()
+        error("ZENITHA.globalEvent: You shall not add field to this table")
+    end,
+    __metatable=true,
+})
+
 --------------------------------------------------------------
 
-SCN.add('_quit',{enter=function() onQuit() love.event.quit() end})
+SCN.add('_quit',{enter=love.event.quit})
 SCN.add('_console',require'Zenitha/scene/console')
 SCN.add('_zenitha',require'Zenitha/scene/demo')
 SCN.add('_test',require'Zenitha/scene/test')

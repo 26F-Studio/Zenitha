@@ -71,11 +71,11 @@ end
 function scene.wheelMoved(dx,dy)
     _push(("[wheelMoved] <%d, %d>"):format(dx,dy))
 end
-function scene.fileDropped(file)
-    _push(("[fileDropped] <%s>"):format(file:getFilename()))
+function scene.fileDrop(file)
+    _push(("[fileDrop] <%s>"):format(file:getFilename()))
 end
-function scene.directoryDropped(path)
-    _push(("[directoryDropped] <%s>"):format(path))
+function scene.folderDrop(path)
+    _push(("[folderDrop] <%s>"):format(path))
 end
 
 function scene.update(dt)

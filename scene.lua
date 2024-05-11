@@ -8,18 +8,22 @@
 ---@field mouseMove? function
 ---@field mouseUp? function
 ---@field mouseClick? function
----@field wheelMoved? function
+---@field wheelMoved? function Able to interrupt WIDGET._scroll
 ---@field touchDown? function
 ---@field touchUp? function
 ---@field touchMove? function
 ---@field touchClick? function
----@field keyDown? function
+---@field keyDown? function Able to interrupt cursor & widget control
 ---@field keyUp? function
+---@field textInput? function Able to interrupt widget control
+---@field imeChange? function Able to interrupt widget control
 ---@field gamepadDown? function
 ---@field gamepadUp? function
----@field fileDropped? function
----@field directoryDropped? function
+---@field fileDrop? function
+---@field folderDrop? function
+---@field lowMemory? function
 ---@field resize? function
+---@field focus? function
 ---@field update? function
 ---@field draw? function
 
@@ -32,16 +36,19 @@
 local scenes={}
 
 local eventNames={
-    "enter",
-    "leave",
+    'enter','leave',
 
-    "mouseDown","mouseMove","mouseUp","mouseClick","wheelMoved",
-    "touchDown","touchUp","touchMove","touchClick",
-    "keyDown","keyUp",
-    "gamepadDown","gamepadUp",
-    "fileDropped","directoryDropped",
-    "resize",
-    "update","draw",
+    'mouseDown','mouseMove','mouseUp','mouseClick','wheelMoved',
+    'touchDown','touchMove','touchUp','touchClick',
+    'keyDown','keyUp',
+    'textInput','imeChange',
+    'gamepadDown','gamepadUp',
+
+    'fileDrop','folderDrop',
+    'lowMemory',
+    'resize','focus',
+
+    'update','draw',
 }
 
 local SCN={
