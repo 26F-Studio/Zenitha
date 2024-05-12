@@ -1282,7 +1282,8 @@ function ZENITHA.setDebugInfo(list)
         assert(type(list[i][1])=='string',"ZENITHA.setDebugInfo(list): list[i][1] need string")
         assert(type(list[i][2])=='function',"ZENITHA.setDebugInfo(list): list[i][2] need function")
     end
-    debugInfos=list
+    debugInfos=TABLE.copy(list)
+    TABLE.reverse(debugInfos)
 end
 
 ---Set the first scene to load, normally this must be used, or you wlil enter the demo scene
