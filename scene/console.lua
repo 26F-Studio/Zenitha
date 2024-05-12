@@ -640,7 +640,7 @@ function scene.enter()
     BG.set('none')
 end
 
-function scene.wheelMoved(_,y)
+function scene.wheelMove(_,y)
     WHEELMOV(y,'scrollup','scrolldown')
 end
 

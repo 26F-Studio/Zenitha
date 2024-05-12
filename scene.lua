@@ -8,7 +8,7 @@
 ---@field mouseMove? function
 ---@field mouseUp? function
 ---@field mouseClick? function
----@field wheelMoved? function Able to interrupt WIDGET._scroll
+---@field wheelMove? function Able to interrupt WIDGET._scroll
 ---@field touchDown? function
 ---@field touchUp? function
 ---@field touchMove? function
@@ -38,7 +38,7 @@ local scenes={}
 local eventNames={
     'enter','leave',
 
-    'mouseDown','mouseMove','mouseUp','mouseClick','wheelMoved',
+    'mouseDown','mouseMove','mouseUp','mouseClick','wheelMove',
     'touchDown','touchMove','touchUp','touchClick',
     'keyDown','keyUp',
     'textInput','imeChange',

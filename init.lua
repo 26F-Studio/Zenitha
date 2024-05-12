@@ -247,7 +247,7 @@ local globalEvent={
     mouseMove=NULL, -- Able to interrupt scene event and widget interaction
     mouseUp=NULL, -- Able to interrupt scene event
     mouseClick=NULL, -- Able to interrupt scene event
-    wheelMoved=NULL, -- Able to interrupt scene event and widget interaction
+    wheelMove=NULL, -- Able to interrupt scene event and widget interaction
 
     touchDown=NULL, -- Able to interrupt scene event
     touchUp=NULL, -- Able to interrupt scene event
@@ -549,10 +549,10 @@ function love.wheelmoved(dx,dy)
     if SCN.swapping or WAIT.state then return end
 
     -- Interrupt by global event
-    if globalEvent.wheelMoved(dx,dy)==true then return end
+    if globalEvent.wheelMove(dx,dy)==true then return end
 
     -- Interrupt by scene event
-    if SCN.wheelMoved and SCN.wheelMoved(dx,dy)==true then return end
+    if SCN.wheelMove and SCN.wheelMove(dx,dy)==true then return end
 
     WIDGET._scroll(dx,dy)
 end

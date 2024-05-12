@@ -68,8 +68,8 @@ function scene.touchUp(x,y)
     SYSFX.new('rectRipple',1,x-10,y-10,20,20)
     _push{COLOR.LD,"[touchUp]"}
 end
-function scene.wheelMoved(dx,dy)
-    _push(("[wheelMoved] <%d, %d>"):format(dx,dy))
+function scene.wheelMove(dx,dy)
+    _push(("[wheelMove] <%d, %d>"):format(dx,dy))
 end
 function scene.fileDrop(file)
     _push(("[fileDrop] <%s>"):format(file:getFilename()))
