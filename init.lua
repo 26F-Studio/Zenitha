@@ -262,54 +262,54 @@ local globalEvent={
         if devMode then
             if     key=='f1'  then -- Show system info
                 local info=("System:%s[%s]\nLuaVer:%s\nJitVer:%s\nJitVerNum:%s"):format(SYSTEM,jit.arch,_VERSION,jit.version,jit.version_num)
-                print(info); MSG.new('info',info)
+                print(info); MSG.new('info',info); return true
             elseif key=='f2'  then -- Quick profiling
                 local info=PROFILE.switch() and "Profile start!" or "Profile report copied!"
-                print(info); MSG.new('info',info)
+                print(info); MSG.new('info',info); return true
             elseif key=='f3'  then -- Show screen info
                 local info=table.concat(SCR.info(),"\n")
-                print(info); MSG.new('info',info)
+                print(info); MSG.new('info',info); return true
             elseif key=='f4'  then -- Show everything in _G
                 for k,v in next,_G do print(k,v) end
                 MSG.new('info',"_G listed in console")
             elseif key=='f5'  then -- Show selected widget info
                 local info=WIDGET.sel and WIDGET.sel:getInfo() or "No widget selected"
-                print(info); MSG.new('info',info)
+                print(info); MSG.new('info',info); return true
             elseif key=='f6'  then -- Show scene stack
                 local info="Scene stack:"..table.concat(SCN.stack,"->")
-                print(info); MSG.new('info',info)
+                print(info); MSG.new('info',info); return true
             elseif key=='f7'  then -- Open console
                 if love['_openConsole'] then love['_openConsole']() end
                 MSG.new('info',"Console opened")
-            elseif key=='f8'  then devMode=false MSG.new('info',"DEBUG OFF",.2)
-            elseif key=='f9'  then devMode=1     MSG.new('info',"DEBUG 1 (Basic)")
-            elseif key=='f10' then devMode=2     MSG.new('info',"DEBUG 2 (Widget)")
-            elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3 (Slow)")
-            elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4 (Sloooow)")
+            elseif key=='f8'  then devMode=false MSG.new('info',"DEBUG OFF",.2);      return true
+            elseif key=='f9'  then devMode=1     MSG.new('info',"DEBUG 1 (Basic)");   return true
+            elseif key=='f10' then devMode=2     MSG.new('info',"DEBUG 2 (Widget)");  return true
+            elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3 (Slow)");    return true
+            elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4 (Sloooow)"); return true
             elseif devMode==2 then -- Adjust Widget
                 local W=WIDGET.sel ---@type table
-                if not W then return true end
-                if key=='left' then W.x=W.x-10
-                elseif key=='right' then W.x=W.x+10
-                elseif key=='up' then W.y=W.y-10
-                elseif key=='down' then W.y=W.y+10
-                elseif key==',' then W.w=W.w-10
-                elseif key=='.' then W.w=W.w+10
-                elseif key=='/' then W.h=W.h-10
-                elseif key=="'" then W.h=W.h+10
-                elseif key=='[' then W.fontSize=W.fontSize-5
-                elseif key==']' then W.fontSize=W.fontSize+5
-                else return true
+                if not W then return end
+                local editted
+                if     key=='left'  then W.x=W.x-10; editted=true
+                elseif key=='right' then W.x=W.x+10; editted=true
+                elseif key=='up'    then W.y=W.y-10; editted=true
+                elseif key=='down'  then W.y=W.y+10; editted=true
+                elseif key==',' then W.w=W.w-10; editted=true
+                elseif key=='.' then W.w=W.w+10; editted=true
+                elseif key=='/' then W.h=W.h-10; editted=true
+                elseif key=="'" then W.h=W.h+10; editted=true
+                elseif key=='[' then W.fontSize=W.fontSize-5; editted=true
+                elseif key==']' then W.fontSize=W.fontSize+5; editted=true
                 end
-                W:reset()
-            else
-                return true
+                if editted then
+                    W:reset()
+                    return true
+                end
             end
-        else
-            if key=='f8' then
-                devMode=1
-                MSG.new('info',"DEBUG ON",.2)
-            end
+        elseif key=='f8' then
+            devMode=1
+            MSG.new('info',"DEBUG 1 (Basic)",.2)
+            return true
         end
     end,
     keyUp=NULL, -- Able to interrupt scene event
