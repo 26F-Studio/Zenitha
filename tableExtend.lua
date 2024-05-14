@@ -196,7 +196,7 @@ function TABLE.update(old,new,depth)
     if not depth then depth=1e99 end
     for k,v in next,new do
         if type(v)=='table' and type(old[k])=='table' and depth>0 then
-            TABLE.update(v,old[k],depth-1)
+            TABLE.update(old[k],v,depth-1)
         else
             old[k]=v
         end
@@ -210,7 +210,7 @@ function TABLE.updateType(old,new)
     for k,v in next,new do
         if type(v)==type(old[k]) then
             if type(v)=='table' then
-                TABLE.updateType(v,old[k])
+                TABLE.updateType(old[k],v)
             else
                 old[k]=v
             end
@@ -225,7 +225,7 @@ function TABLE.updateMissing(old,new)
     for k,v in next,new do
         if type(v)=='table' then
             if old[k]==nil then old[k]={} end
-            TABLE.updateMissing(v,old[k])
+            TABLE.updateMissing(old[k],v)
         elseif old[k]==nil then
             old[k]=v
         end
