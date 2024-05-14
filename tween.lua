@@ -236,7 +236,7 @@ end
 ---@return Zenitha.Tween
 function Tween:copy()
     local anim=TWEEN.new(NULL)
-    TABLE.update(self,anim,2)
+    TABLE.update(anim,self,2)
     return anim
 end
 

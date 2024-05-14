@@ -158,10 +158,24 @@ function TABLE.connect(org,new)
     return org
 end
 
----For all things in org, delete them if it's in sub
----@param org table original table
+---Delete items in [1~#] of org which also in [1~#] of sub
+---@param org table
 ---@param sub table
 function TABLE.subtract(org,sub)
+    for i=#org,1,-1 do
+        for j=#sub,1,-1 do
+            if org[i]==sub[j] then
+                rem(org,i)
+                break
+            end
+        end
+    end
+end
+
+---Delete all items in org which also in sub
+---@param org table
+---@param sub table
+function TABLE.subtractAll(org,sub)
     for _,v in next,sub do
         while true do
             local p=TABLE.findAll(org,v)
@@ -174,11 +188,11 @@ function TABLE.subtract(org,sub)
     end
 end
 
----For all things in new, push to old (recursive when match table type and below specifiled depth)
+---Update old table with new table (recursive when both table type and below specifiled depth)
 ---@param new table
 ---@param old table
 ---@param depth? number how many layer will be entered, default to inf
-function TABLE.update(new,old,depth)
+function TABLE.update(old,new,depth)
     if not depth then depth=1e99 end
     for k,v in next,new do
         if type(v)=='table' and type(old[k])=='table' and depth>0 then
@@ -189,10 +203,10 @@ function TABLE.update(new,old,depth)
     end
 end
 
----For all things in new if same type in old, push to old (recursive)
----@param new table
+---Update old table with new table when same type (recursive)
 ---@param old table
-function TABLE.updateType(new,old)
+---@param new table
+function TABLE.updateType(old,new)
     for k,v in next,new do
         if type(v)==type(old[k]) then
             if type(v)=='table' then
@@ -204,10 +218,10 @@ function TABLE.updateType(new,old)
     end
 end
 
----For all things in new if no val in old, push to old (recursive)
----@param new table
+---Update old table with new table when no value (recursive)
 ---@param old table
-function TABLE.updateMissing(new,old)
+---@param new table
+function TABLE.updateMissing(old,new)
     for k,v in next,new do
         if type(v)=='table' then
             if old[k]==nil then old[k]={} end

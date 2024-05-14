@@ -115,10 +115,10 @@ function HTTP.request(arg)
         res,arg.body=pcall(JSON.encode,arg.body)
         assert(res,"HTTP.request(arg): arg.body json-encoding error")
         if not arg.headers then arg.headers={} end
-        TABLE.update({
+        TABLE.update(arg.headers,{
             ['Content-Type']="application/json",
             ['Content-Length']=#arg.body,
-        },arg.headers)
+        })
     end
 
     if arg.pool==nil then arg.pool='_default' end
