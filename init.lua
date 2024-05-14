@@ -424,7 +424,7 @@ local function _updateMousePos(x,y,dx,dy)
         WIDGET._cursorMove(x,y,'move')
     end
 end
-local function _triggerMouseDown(x,y,k)
+local function _triggerMouseDown(x,y,k,presses)
     -- Debug info
     if devMode==1 then
         if not lastClicks[k] then lastClicks[k]={x=0,y=0} end
@@ -444,8 +444,8 @@ local function _triggerMouseDown(x,y,k)
         WIDGET._press(x,y,k)
     else
         -- Skip scene event by global event
-        if globalEvent.mouseDown(mx,my,k)~=true then
-            if SCN.mouseDown then SCN.mouseDown(x,y,k) end
+        if globalEvent.mouseDown(mx,my,k,presses)~=true then
+            if SCN.mouseDown then SCN.mouseDown(x,y,k,presses) end
         end
         lastClicks[k]={x=x,y=y}
     end
@@ -493,14 +493,24 @@ local function gp_update(js,dt)
     end
 end
 ---@type love.mousepressed
-function love.mousepressed(x,y,k,touch)
+---@param x number
+---@param y number
+---@param k? number
+---@param touch? boolean
+---@param presses? number
+function love.mousepressed(x,y,k,touch,presses)
     if touch or WAIT.state then return end
     mouseShow=true
     mx,my=ITP(xOy,x,y)
 
-    _triggerMouseDown(mx,my,k)
+    _triggerMouseDown(mx,my,k,presses)
 end
 ---@type love.mousemoved
+---@param x number
+---@param y number
+---@param dx number
+---@param dy number
+---@param touch? boolean
 function love.mousemoved(x,y,dx,dy,touch)
     if touch then return end
     mouseShow=true
@@ -517,7 +527,12 @@ function love.mousemoved(x,y,dx,dy,touch)
     _updateMousePos(mx,my,dx,dy)
 end
 ---@type love.mousereleased
-function love.mousereleased(x,y,k,touch)
+---@param x number
+---@param y number
+---@param k? number
+---@param touch? boolean
+---@param presses? number
+function love.mousereleased(x,y,k,touch,presses)
     if touch or WAIT.state or SCN.swapping then return end
     mx,my=ITP(xOy,x,y)
 
@@ -527,16 +542,16 @@ function love.mousereleased(x,y,k,touch)
     end
 
     -- Skip scene event by global event
-    if globalEvent.mouseUp(mx,my,k)~=true then
-        if SCN.mouseUp then SCN.mouseUp(mx,my,k) end
+    if globalEvent.mouseUp(mx,my,k,presses)~=true then
+        if SCN.mouseUp then SCN.mouseUp(mx,my,k,presses) end
     end
 
     if not widgetSel and lastClicks[k] then
         local dist=((x-lastClicks[k].x)^2+(y-lastClicks[k].y)^2)^.5
         -- Skip scene event by global event
-        if globalEvent.mouseClick(mx,my,k,dist)~=true then
+        if globalEvent.mouseClick(mx,my,k,dist,presses)~=true then
             if SCN.mouseClick then
-                SCN.mouseClick(mx,my,k,dist)
+                SCN.mouseClick(mx,my,k,dist,presses)
             end
         end
     end
@@ -544,6 +559,8 @@ function love.mousereleased(x,y,k,touch)
     WIDGET._cursorMove(mx,my,'release')
 end
 ---@type love.wheelmoved
+---@param dx number ±1 for each wheel movement
+---@param dy number ±1 for each wheel movement
 function love.wheelmoved(dx,dy)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -558,6 +575,11 @@ function love.wheelmoved(dx,dy)
 end
 
 ---@type love.touchpressed
+---@param id lightuserdata
+---@param x number
+---@param y number
+---@param _? number dx and dy, ignored because always 0
+---@param pressure? number
 function love.touchpressed(id,x,y,_,_,pressure)
     -- Hide cursor when key pressed
     mouseShow=false
@@ -589,6 +611,12 @@ function love.touchpressed(id,x,y,_,_,pressure)
     end
 end
 ---@type love.touchmoved
+---@param id lightuserdata
+---@param x number
+---@param y number
+---@param dx number
+---@param dy number
+---@param pressure? number
 function love.touchmoved(id,x,y,dx,dy,pressure)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -608,6 +636,11 @@ function love.touchmoved(id,x,y,dx,dy,pressure)
     end
 end
 ---@type love.touchreleased
+---@param id lightuserdata
+---@param x number
+---@param y number
+---@param _? number dx and dy, ignored because always 0
+---@param pressure? number
 function love.touchreleased(id,x,y,_,_,pressure)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -642,6 +675,9 @@ end
 -- function love.mousemoved(x,y,dx,dy) if isMsDown(1) then love.touchmoved(1,x,y,dx,dy) end end
 
 ---@type love.keypressed
+---@param key string
+---@param scancode? string
+---@param isRep? boolean
 function love.keypressed(key,scancode,isRep)
     -- Hide cursor when key pressed
     if not isRep then mouseShow=false end
@@ -669,9 +705,10 @@ function love.keypressed(key,scancode,isRep)
     if key=='escape' and not isRep then
         SCN.back()
     elseif key=='up' or key=='down' or key=='left' or key=='right' then
-        mouseShow=true
         if KBisDown('lctrl','rctrl') then
             if W and W.arrowKey then W:arrowKey(key) end
+        else
+            mouseShow=true
         end
     elseif W and W.keypress then
         W:keypress(key)
@@ -685,6 +722,7 @@ function love.keypressed(key,scancode,isRep)
     end
 end
 ---@type love.keyreleased
+---@param key string
 function love.keyreleased(key)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -696,6 +734,7 @@ function love.keyreleased(key)
 end
 
 ---@type love.textinput
+---@param texts string
 function love.textinput(texts)
     -- Interrupt by global event
     if globalEvent.textInput(texts)==true then return end
@@ -707,6 +746,7 @@ function love.textinput(texts)
 end
 
 ---@type love.textedited
+---@param texts string
 function love.textedited(texts)
     -- Interrupt by global event
     if globalEvent.imeChange(texts)==true then return end
@@ -737,6 +777,7 @@ local dPadToKey={
     back='escape',
 }
 ---@type love.joystickadded
+---@param JS love.Joystick
 function love.joystickadded(JS)
     -- Interrupt by global event
     if globalEvent.gamepadAdd(JS)==true then return end
@@ -754,6 +795,7 @@ function love.joystickadded(JS)
     MSG.new('info',"Joystick added")
 end
 ---@type love.joystickremoved
+---@param JS love.Joystick
 function love.joystickremoved(JS)
     -- Interrupt by global event
     if globalEvent.gamepadRemove(JS)==true then return end
@@ -778,6 +820,9 @@ function love.joystickremoved(JS)
     end
 end
 ---@type love.gamepadaxis
+---@param JS love.Joystick
+---@param axis string
+---@param val number
 function love.gamepadaxis(JS,axis,val)
     -- Interrupt by global event
     if globalEvent.gamepadAxis(JS,axis,val)==true then return end
@@ -821,6 +866,8 @@ function love.gamepadaxis(JS,axis,val)
     end
 end
 ---@type love.gamepadpressed
+---@param JS love.Joystick
+---@param key string
 function love.gamepadpressed(JS,key)
     -- Hide cursor when gamepad pressed
     mouseShow=false
@@ -859,6 +906,8 @@ function love.gamepadpressed(JS,key)
     end
 end
 ---@type love.gamepadreleased
+---@param JS love.Joystick
+---@param key string
 function love.gamepadreleased(JS,key)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -874,6 +923,7 @@ function love.gamepadreleased(JS,key)
 end
 
 ---@type love.filedropped
+---@param file love.DroppedFile
 function love.filedropped(file)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -884,13 +934,14 @@ function love.filedropped(file)
     end
 end
 ---@type love.directorydropped
-function love.directorydropped(dir)
+---@param path string
+function love.directorydropped(path)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
 
     -- Skip scene event by global event
-    if globalEvent.folderDrop(dir)~=true then
-        if SCN.folderDrop then SCN.folderDrop(dir) end
+    if globalEvent.folderDrop(path)~=true then
+        if SCN.folderDrop then SCN.folderDrop(path) end
     end
 end
 
@@ -905,6 +956,8 @@ function love.lowmemory()
 end
 
 ---@type love.resize
+---@param w number
+---@param h number
 function love.resize(w,h)
     if SCR.w==w and SCR.h==h then return end
     SCR._resize(w,h)
@@ -923,6 +976,7 @@ function love.resize(w,h)
 end
 
 ---@type love.focus
+---@param f boolean
 function love.focus(f)
     -- Skip scene event by global event
     if globalEvent.focus(f)~=true then
@@ -930,11 +984,9 @@ function love.focus(f)
     end
 end
 
-local function secondLoopThread()
-    local mainLoop=love.run()
-    repeat coroutine.yield() until mainLoop()
-end
 ---@type love.errorhandler
+---@param msg string
+---@return function #The main loop function
 function love.errorhandler(msg)
     -- Call global event if exist
     if globalEvent.error then return globalEvent.error(msg) end
@@ -983,17 +1035,7 @@ function love.errorhandler(msg)
         GC.getScreenShot(errData[#errData],'shot')
         gc.present()
 
-        -- Create a new mainLoop thread to keep game alive
-        local status,resume=coroutine.status,coroutine.resume
-        local loopThread=coroutine.create(secondLoopThread)
-        local res,threadErr
-        repeat
-            res,threadErr=resume(loopThread)
-        until status(loopThread)=='dead'
-        if not res then
-            love.errorhandler(threadErr)
-            return
-        end
+        return love.run()
     else
         ms.setVisible(true)
 
@@ -1001,7 +1043,7 @@ function love.errorhandler(msg)
         errorMsg=mainLoopStarted and
             "Too many errors or fatal error occured.\nPlease restart the game." or
             "An error has occurred during loading.\nError info has been created, and you can send it to the author."
-        while true do
+        return function()
             love.event.pump()
             for E,a,b in love.event.poll() do
                 if E=='quit' or a=='escape' then
@@ -1010,21 +1052,21 @@ function love.errorhandler(msg)
                     SCR._resize(a,b)
                 end
             end
-            GC.clear(.3,.5,.9)
-            GC.push('transform')
-            GC.replaceTransform(SCR.origin)
+            gc.clear(.3,.5,.9)
+            gc.push('transform')
+            gc.replaceTransform(SCR.origin)
             local k=min(SCR.h/720,1)
-            GC.scale(k)
+            gc.scale(k)
             setFont(100,'_norm') gc_print(":(",100,0,0,1.2)
             setFont(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
             setFont(20,'_norm') gc.printf(err[1],100,330,SCR.w/k-200)
-            GC.print(love.system.getOS().."-"..versionText.."\nScene stack:"..sceneStack,100,640)
-            GC.print("TRACEBACK",100,430)
+            gc.print(love.system.getOS().."-"..versionText.."\nScene stack:"..sceneStack,100,640)
+            gc.print("TRACEBACK",100,430)
             for i=4,#err-2 do
                 gc_print(err[i],100,380+20*i)
             end
-            GC.pop()
-            GC.present()
+            gc.pop()
+            gc.present()
             love.timer.sleep(.26)
         end
     end
@@ -1046,6 +1088,7 @@ local debugInfos={
     {"Cache",gcinfo},
 }
 ---@type love.run
+---@return function #The main loop function
 function love.run()
     mainLoopStarted=true
 
@@ -1198,7 +1241,7 @@ function love.run()
                 gc_present()
 
                 -- Speed up a bit on mobile device, maybe
-                if discardCanvas then GC.discard() end
+                if discardCanvas then gc.discard() end
             end
         end
 

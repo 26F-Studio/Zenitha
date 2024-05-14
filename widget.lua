@@ -2192,7 +2192,7 @@ end
 ---Update widget states with press event (called by Zenitha)
 ---@param x number
 ---@param y number
----@param k number|lightuserdata
+---@param k number|lightuserdata|any
 function WIDGET._press(x,y,k)
     WIDGET._cursorMove(x,y,'press')
     local W=WIDGET.sel
@@ -2212,7 +2212,7 @@ end
 ---Update widget states with release event (called by Zenitha)
 ---@param x number
 ---@param y number
----@param k number|lightuserdata
+---@param k number|lightuserdata|any
 function WIDGET._release(x,y,k)
     if WIDGET.sel then
         WIDGET.sel:release(x,y+SCN.curScroll,k)

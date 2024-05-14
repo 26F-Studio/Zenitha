@@ -647,7 +647,7 @@ end
 function scene.keyDown(key,isRep)
     if key=='return' or key=='kpenter' then
         local input=STRING.trim(inputBox:getText())
-        if input=='' then return end
+        if input=='' then return true end
 
         -- Write History
         ins(history,input)
@@ -753,10 +753,8 @@ function scene.keyDown(key,isRep)
         if not isRep then
             SCN.back()
         end
-    else
-        if not WIDGET.isFocus(inputBox) then
-            WIDGET.focus(inputBox)
-        end
+    elseif not WIDGET.isFocus(inputBox) then
+        WIDGET.focus(inputBox)
         return true
     end
 end
