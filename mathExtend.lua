@@ -9,7 +9,7 @@ MATH.nan=0/0
 
 local floor,ceil=math.floor,math.ceil
 local sin,cos=math.sin,math.cos
-local max=math.max
+local max,min=math.max,math.min
 local rnd=math.random
 local exp,log=math.exp,math.log
 local abs=math.abs
@@ -228,6 +228,17 @@ end
 ---@return number
 function MATH.interpolate(x1,y1,x2,y2,t)
     return y1+(t-x1)*(y2-y1)/(x2-x1)
+end
+
+---Get a closer value from a to b with difference d
+---
+---Automatically choose +d or -d, then clamped at b
+---@param a number
+---@param b number
+---@param d number
+---@return number
+function MATH.linearApproach(a,b,d)
+    return b>a and min(a+d,b) or max(a-d,b)
 end
 
 ---Get a closer value from a to b with "exponential speed" k
