@@ -173,16 +173,23 @@ function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
     end
     if not d then d=1 end
     setColor(c1 or COLOR.D)
-    printf(str,x-d,y-d,w,mode)
-    printf(str,x-d,y+d,w,mode)
-    printf(str,x+d,y-d,w,mode)
-    printf(str,x+d,y+d,w,mode)
-    if shadeCount==8 then
+    if shadeCount==4 then
+        d=d/1.4
+        printf(str,x-d,y-d,w,mode)
+        printf(str,x-d,y+d,w,mode)
+        printf(str,x+d,y-d,w,mode)
+        printf(str,x+d,y+d,w,mode)
+    elseif shadeCount==8 then
         printf(str,x-d,y,w,mode)
         printf(str,x+d,y,w,mode)
         printf(str,x,y-d,w,mode)
         printf(str,x,y+d,w,mode)
-    elseif shadeCount~=4 then
+        d=d/1.4
+        printf(str,x-d,y-d,w,mode)
+        printf(str,x-d,y+d,w,mode)
+        printf(str,x+d,y-d,w,mode)
+        printf(str,x+d,y+d,w,mode)
+    else
         errorf("GC.shadedPrint(...,shadeCount,...): Need 4 or 8, got %s",shadeCount)
     end
     setColor(c2 or COLOR.L)
