@@ -268,7 +268,7 @@ end
 ---@return string
 function STRING.time(t)
     return
-        t<=0 and "-0.00″" or
+        t<0 and "-0.000″" or
         t<60 and format('%.3f″',t) or
         t<3600 and format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100) or
         t<86400 and format('%d:%.2d′%05.1f″',floor(t/3600),floor(t/60%60),floor(t%60*10)/10) or
