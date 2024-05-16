@@ -234,7 +234,7 @@ local bigCanvases=setmetatable({},{
 local appName='Zenitha'
 local versionText='V0.1'
 local firstScene='_zenitha'
-local clickFX=function(x,y) SYSFX.new('tap',3,x,y) end
+local clickFX=function(x,y) SYSFX.tap(.3,x,y) end
 local discardCanvas=false
 local showFPS=true
 local updateFreq=100
@@ -1384,7 +1384,7 @@ end
 function ZENITHA.setClickFX(fx)
     assert(type(fx)=='boolean' or type(fx)=='function',"ZENITHA.setClickFX(fx): Need boolean|function")
     if fx==false then fx=NULL end
-    if fx==true then fx=function(x,y) SYSFX.new('tap',3,x,y) end end
+    if fx==true then fx=function(x,y) SYSFX.tap(.26,x,y) end end
     clickFX=fx
 end
 

@@ -38,34 +38,34 @@ function scene.keyUp(key)
     _push{COLOR.LD,"[keyUp] <"..key..">"}
 end
 function scene.mouseClick(x,y)
-    SYSFX.new('ripple',.5,x,y,50)
+    SYSFX.ripple(2,x,y,50)
     _push("[mouseClick]")
 end
 function scene.mouseDown(x,y,k)
-    SYSFX.new('rect',.5,x-10,y-10,20,20)
+    SYSFX.rect(2,x-10,y-10,20,20)
     _push(("[mouseDown] <%d: %d, %d>"):format(k,x,y))
 end
 function scene.mouseMove(x,y)
-    SYSFX.new('rect',.5,x-3,y-3,6,6)
+    SYSFX.rect(2,x-3,y-3,6,6)
 end
 function scene.mouseUp(x,y,k)
-    SYSFX.new('rectRipple',1,x-10,y-10,20,20)
+    SYSFX.rectRipple(1,x-10,y-10,20,20)
     _push{COLOR.LD,"[mouseUp] <"..k..">"}
 end
 function scene.touchClick(x,y)
-    SYSFX.new('ripple',.5,x,y,50)
+    SYSFX.ripple(2,x,y,50)
     _push("[touchClick]")
 end
 function scene.touchDown(x,y)
     if #love.touch.getTouches()>=6 then scene.keyDown('escape') end
-    SYSFX.new('rect',.5,x-10,y-10,20,20)
+    SYSFX.rect(2,x-10,y-10,20,20)
     _push(("[touchDown] <%d, %d>"):format(x,y))
 end
 function scene.touchMove(x,y)
-    SYSFX.new('rect',.5,x-3,y-3,6,6)
+    SYSFX.rect(2,x-3,y-3,6,6)
 end
 function scene.touchUp(x,y)
-    SYSFX.new('rectRipple',1,x-10,y-10,20,20)
+    SYSFX.rectRipple(1,x-10,y-10,20,20)
     _push{COLOR.LD,"[touchUp]"}
 end
 function scene.wheelMove(dx,dy)
