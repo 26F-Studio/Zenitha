@@ -316,7 +316,7 @@ Bezier.__index=Bezier
 
 ---Render the curve to a points list with specific mode
 ---@param seg number Segments between each data point
----@param dist? number Distance between each data point, nil to skip this step
+---@param dist? number [Second-Processing], Distance between each data point, nil to skip this step
 function Bezier:render(seg,dist)
     assert(type(seg)=='number' and seg>0 and seg%1==0,"Bezier:render(seg,dist): seg need positive int")
     local list=self.points

@@ -27,7 +27,7 @@
 --      BG.setDefault("space")
 --      BG.set("galaxy")
 --   ```
---  `WIDGET`, interective widgets layer above the scene, has the highest priority.
+--  `WIDGET`, interactive widgets layer above the scene, has the highest priority.
 --
 --  `MSG` (Message), an on-screen print, can be used to show notifications or warnings.
 --   ```
@@ -80,7 +80,7 @@
 --      list=STRING.split("Welcome;to;Zenitha",";") -- {"Welcome","to","Zenitha"}
 --      t2=TABLE.copyAll(t1)
 --   ```
---  `TASK`, a seudo-async module allow you run a function asynchronously (as coroutine which must yield itself periodically, be continued once per main loop cycle).
+--  `TASK`, a pseudo-async module allow you run a function asynchronously (as coroutine which must yield itself periodically, be continued once per main loop cycle).
 --   ```
 --      TASK.lock("signal",2.56)
 --      TASK.new(function()
@@ -94,7 +94,7 @@
 --          love.event.quit()
 --      end
 --   ```
---  `TCP`, allow you exchange data much more easier then using LuaSocket. (Yet designed for data exchanging with TCP module itself, and using pure json only)
+--  `TCP`, allow you exchange data much easier then using LuaSocket. (Yet designed for data exchanging with TCP module itself, and using pure json only)
 --   ```
 --      TASK.new(function() -- Simulate Server
 --          TCP.S_start(10026)
