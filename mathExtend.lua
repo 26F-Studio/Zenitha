@@ -145,6 +145,15 @@ function MATH.clamp(v,low,high)
     end
 end
 
+---Check if a number is in a range
+---@param v number
+---@param low number
+---@param high number
+---@return boolean
+function MATH.between(v,low,high)
+    return v>=low and v<=high
+end
+
 ---Get mix value (linear) of two numbers with a ratio (not clamped)
 ---@param v1 number
 ---@param v2 number
