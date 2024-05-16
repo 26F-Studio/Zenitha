@@ -274,7 +274,7 @@ function Widgets.base:reset()
     assert(not self.sound_press or type(self.sound_press)=='string',"[widget].sound_press need string")
     assert(not self.sound_hover or type(self.sound_hover)=='string',"[widget].sound_hover need string")
 
-    self._text=self.text or self.name and ("['..self.name..']")
+    self._text=self.text or self.name and ("["..self.name.."]")
     if self._text then
         if type(self._text)=='function' then
             self._text=self._text()
