@@ -515,7 +515,8 @@ function love.mousemoved(x,y,dx,dy,touch)
     if touch then return end
     mouseShow=true
 
-    mx,my=ITP(xOy,x,y)
+    x,y=ITP(xOy,x,y)
+    mx,my=x,y
     dx,dy=dx/SCR.k,dy/SCR.k
 
     for k,last in next,lastClicks do
