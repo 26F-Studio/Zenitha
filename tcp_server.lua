@@ -40,7 +40,10 @@ local function sendMessage(pack,sender)
         sender=sender,
     }
     local suc,dataStr=pcall(JSON.encode,sendPack)
-    if not suc then return end
+    if not suc then
+        printf("Error in encoding data to json: %s",dataStr)
+        return
+    end
 
     if pack.bus then
         -- Send to specified bus subscribers
@@ -258,6 +261,9 @@ local function serverLoop()
                     else
                         sendMessage(recvPack,id)
                     end
+                else
+                    printf("Error in encoding data to json: %s",recvPack)
+                    return
                 end
             elseif err=='timeout' then
                 if partial and #partial>0 then

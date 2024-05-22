@@ -15,7 +15,10 @@ local client
 ---@param pack Zenitha.TCP.MsgPack
 local function sendMessage(pack)
     local suc,dataStr=pcall(JSON.encode,pack)
-    if not suc then return end
+    if not suc then
+        printf("Error in encoding data to json: %s",dataStr)
+        return
+    end
     client:send(dataStr..'\n')
 end
 
@@ -52,6 +55,8 @@ local function clientLoop()
             local suc,recvPack=pcall(JSON.decode,message) ---@type boolean, Zenitha.TCP.MsgPack
             if suc then
                 (recvPack.bus and C_recvBusCHN or C_recvCHN):push(recvPack)
+            else
+                printf("[TCP_C] Error in decoding message: %s",recvPack)
             end
         elseif err=='timeout' then
             if partial then
