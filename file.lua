@@ -60,7 +60,7 @@ function FILE.load(path,args)
             error("FILE.load: Unknown mode")
         end
     elseif not STRING.sArg(args,'-canskip') then
-        error("FILE.load: No file")
+        errorf("FILE.load: file '%s' doesn't exist",path)
     end
 end
 
