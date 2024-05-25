@@ -251,6 +251,26 @@ function TABLE.clearAll(t)
     end
 end
 
+---Remove value of [1~#]
+---@param org any[]
+function TABLE.delete(org,value)
+    for i=#org,1,-1 do
+        if org[i]==value then
+            rem(org,i)
+        end
+    end
+end
+
+---Remove value in whole table
+---@param org table
+function TABLE.deleteAll(org,value)
+    for k,v in next,org do
+        if v==value then
+            org[k]=nil
+        end
+    end
+end
+
 ---Remove duplicated value of [1~#]
 ---@param org any[]
 function TABLE.removeDuplicate(org)
@@ -306,8 +326,7 @@ end
 ---Shuffle [1~#]
 ---@param org any[]
 function TABLE.shuffle(org)
-    local l=#org
-    for i=l,2,-1 do
+    for i=#org,2,-1 do
         local r=rnd(i)
         org[i],org[r]=org[r],org[i]
     end
