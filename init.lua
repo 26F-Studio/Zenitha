@@ -1410,6 +1410,9 @@ function ZENITHA.getBigCanvas(id)
     return bigCanvases[id]
 end
 
+---Set cursor invisible
+function ZENITHA.hideCursor() mouseShow=false end
+
 ---Global event callback function table, they will be called earlier than scene event (if exist)
 ---
 ---**Return `true` as "INTERRUPT" signal**, to prevent calling scene event and other process (see each function for details)
