@@ -14,6 +14,11 @@ local locks=setmetatable({},{
 ---Attempt to set a labeled lock
 ---
 ---Can only succeed if the same-name lock is not set or has expired
+---## Example
+---```lua
+----- Making 'name' sound cannot be played in next 0.26 seconds
+---if TASK.lock('sound_name',0.26) then playSound('name') end
+---```
 ---@param name any
 ---@param time? number
 ---@return boolean

@@ -24,9 +24,9 @@ end
 
 ---Create a copy of [1~#] elements
 ---@generic T
----@param org T[] original table
+---@param org T original table
 ---@param depth? number how many layers will be recreate, default to inf
----@return T[]
+---@return T
 function TABLE.copy(org,depth)
     if not depth then depth=1e99 end
     local L={}
@@ -41,9 +41,10 @@ function TABLE.copy(org,depth)
 end
 
 ---Create a full copy of org, depth = how many layers will be recreate, default to inf
----@param org table original table
+---@generic T
+---@param org T original table
 ---@param depth? number how many layers will be recreate, default to inf
----@return table
+---@return T
 function TABLE.copyAll(org,depth)
     if not depth then depth=1e99 end
     local L={}
