@@ -10,9 +10,10 @@ for k,v in next,table do TABLE[k]=v end
 -- Builder
 
 ---Create a new filled table
----@param val any value to fill
+---@generic T
+---@param val T value to fill
 ---@param count number how many elements
----@return any[]
+---@return T[]
 function TABLE.new(val,count)
     local L={}
     for i=1,count do
@@ -22,9 +23,10 @@ function TABLE.new(val,count)
 end
 
 ---Create a copy of [1~#] elements
----@param org any[] original table
+---@generic T
+---@param org T[] original table
 ---@param depth? number how many layers will be recreate, default to inf
----@return any[]
+---@return T[]
 function TABLE.copy(org,depth)
     if not depth then depth=1e99 end
     local L={}
@@ -56,9 +58,10 @@ function TABLE.copyAll(org,depth)
 end
 
 ---Create a table of two lists connected
----@param L1 any[] list 1
----@param L2 any[] list 2
----@return any[]
+---@generic T1,T2
+---@param L1 T1[] list 1
+---@param L2 T2[] list 2
+---@return (T1|T2)[]
 function TABLE.combine(L1,L2)
     local l={}
     local l0=#L1
@@ -68,9 +71,10 @@ function TABLE.combine(L1,L2)
 end
 
 ---Create a rotated copy of a matrix
----@param matrix any[][]
+---@generic T
+---@param matrix Mat<T>
 ---@param direction 'R'|'L'|'F'|'0' CW, CCW, 180 deg, 0 deg (copy)
----@return any[][]
+---@return Mat<T>
 function TABLE.rotate(matrix,direction)
     local icb={}
     if direction=='R' then -- Rotate CW
@@ -147,9 +151,10 @@ function TABLE.equalAll(a,b)
 end
 
 ---Connect [1~#] elements of new to the end of org
----@param org any[] original list
----@param new any[] new list
----@return any[] #org with new data
+---@generic T1,T2
+---@param org T1[] original list
+---@param new T2[] new list
+---@return (T1|T2)[] #org with new data
 function TABLE.connect(org,new)
     local l0=#org
     for i=1,#new do
@@ -311,8 +316,9 @@ function TABLE.reverse(org)
 end
 
 ---Pop & return random [1~#] of table
----@param t any[]
----@return any
+---@generic T
+---@param t T[]
+---@return T
 function TABLE.popRandom(t)
     local l=#t
     if l>0 then
@@ -320,6 +326,8 @@ function TABLE.popRandom(t)
         r,t[r]=t[r],t[l]
         t[l]=nil
         return r
+    else
+        error("TABLE.popRandom(t): Table is empty")
     end
 end
 
@@ -380,9 +388,10 @@ function TABLE.findOrdered(t,val)
 end
 
 ---Find value in whole table
----@param t table
----@param val any
----@return any
+---@generic K,V
+---@param t table<K,V>
+---@param val V
+---@return K|nil
 function TABLE.findAll(t,val)
     for k,v in next,t do if v==val then return k end end
 end
@@ -593,9 +602,10 @@ function TABLE.sumAll(t)
 end
 
 ---Return next value of [1~#] (by value) (like _G.next)
----@param t any[]
----@param val any
----@return any
+---@generic K,V
+---@param t table<K,V>
+---@param val V
+---@return K|nil
 function TABLE.next(t,val)
     if val==nil then return t[1] end
     for i=1,#t do if t[i]==val then return t[i+1] end end
@@ -605,8 +615,9 @@ end
 -- (Utility) Foreach
 
 ---Execute func(table[i],i) in [1~#]
----@param t any[]
----@param f fun(v:any, i:number)
+---@generic T
+---@param t T[]
+---@param f fun(v:T, i:number)
 ---@param rev? boolean Reverse the order, allow removing elements
 function TABLE.foreach(t,f,rev)
     if rev then

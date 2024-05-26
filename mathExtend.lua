@@ -53,9 +53,10 @@ function MATH.roll(chance)
 end
 
 ---Select random one between a and b (50% - 50%)
----@param a any
----@param b any
----@return any
+---@generic A,B
+---@param a A
+---@param b B
+---@return A|B
 function MATH.coin(a,b)
     if rnd()<.5 then
         return a

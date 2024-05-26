@@ -176,7 +176,7 @@ function HTTP.deletePool(pool)
     msgPool[pool]=nil
 end
 
----Poll a message from pool (specifiedif given)
+---Poll a message from pool (specified if given)
 ---@param pool string|nil pool name
 ---@return table|nil
 function HTTP.pollMsg(pool)

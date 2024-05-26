@@ -672,7 +672,7 @@ do -- function GC.load(L), GC.execute(t)
 
     local sizeLimit=gc.getSystemLimits().texturesize
     ---Similar to GC.execute, but draw on a canvas.
-    ---@param list number[]|number[][]|table[][]|string[][]
+    ---@param list number[]|Mat<number>|Mat<table>|Mat<string>
     ---## Example
     ---```lua
     ---GC.load{100,100 -- size of canvas

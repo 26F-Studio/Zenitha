@@ -1,6 +1,6 @@
 local set=love.graphics.setFont
 
----@type love.File[], love.Font[][]
+---@type love.File[], Mat<love.Font>
 local fontFiles,fontCache={},{}
 
 ---@type string, string

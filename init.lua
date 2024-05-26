@@ -137,6 +137,7 @@ ZENITHA={}
 
 ---@class Set<T>: { [T]:any }
 ---@class Map<T>: { [any]:T }
+---@class Mat<T>: { [integer]:{ [integer]:T } }
 
 ---@class Zenitha.Click
 ---@field x number
@@ -201,9 +202,10 @@ function printf(str,...) print(str:format(...)) end
 function errorf(str,...) error(str:format(...)) end
 
 ---assert with formatted string
----@param v any
+---@generic T
+---@param v T
 ---@param str string
----@return any
+---@return T
 ---@diagnostic disable-next-line
 function assertf(v,str,...) return v or error(str:format(...)) end
 

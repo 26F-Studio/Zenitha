@@ -1,36 +1,3 @@
----@alias Zenitha.Tween.basicCurve
----| 'linear'
----| 'inSin'
----| 'outSin'
----| 'inQuad'
----| 'outQuad'
----| 'inCubic'
----| 'outCubic'
----| 'inQuart'
----| 'outQuart'
----| 'inQuint'
----| 'outQuint'
----| 'inExp'
----| 'outExp'
----| 'inCirc'
----| 'outCirc'
----| 'inBack'
----| 'outBack'
----| 'inElastic'
----| 'outElastic'
-
----@alias Zenitha.Tween.easeTemplate
----| 'Linear'
----| 'InSin' | 'OutSin' | 'InOutSin' | 'OutInSin'
----| 'InQuad' | 'OutQuad' | 'InOutQuad' | 'OutInQuad'
----| 'InCubic' | 'OutCubic' | 'InOutCubic' | 'OutInCubic'
----| 'InQuart' | 'OutQuart' | 'InOutQuart' | 'OutInQuart'
----| 'InQuint' | 'OutQuint' | 'InOutQuint' | 'OutInQuint'
----| 'InExp' | 'OutExp' | 'InOutExp' | 'OutInExp'
----| 'InCirc' | 'OutCirc' | 'InOutCirc' | 'OutInCirc'
----| 'Inback' | 'Outback' | 'InOutback' | 'OutInback'
----| 'InElastic' | 'OutElastic' | 'InOutElastic' | 'OutInElastic'
-
 ---@alias Zenitha.Tween.Tag string
 
 local preAnimSet={} ---@type Set<Zenitha.Tween> new Animation created during _update will be added here first, then moved to updAnimSet
@@ -42,7 +9,7 @@ local min,floor=math.min,math.floor
 local sin,cos=math.sin,math.cos
 local clamp=MATH.clamp
 
----@type table<Zenitha.Tween.basicCurve, function>
+---@enum (key) Zenitha.Tween.basicCurve
 local curves={
     linear=function(t) return t end,
     inSin=function(t) return 1-cos(t*1.5707963267948966) end,
@@ -61,11 +28,13 @@ local curves={
     outCirc=function(t) return (1-(t-1)^2)^.5 end,
     inBack=function(t) return t^2*(2.70158*t-1.70158) end,
     inElastic=function(t) return -2^(10*(t-1))*sin((10*t-10.75)*2.0943951023931953) end,
+    outBack=nil,
+    outElastic=nil,
 }
 curves.outBack=function(t) return 1-curves.inBack(1-t) end
 curves.outElastic=function(t) return 1-curves.inElastic(1-t) end
 
----@type table<Zenitha.Tween.easeTemplate, Zenitha.Tween.basicCurve[]>
+---@enum (key) Zenitha.Tween.easeTemplate
 local easeTemplates={
     Linear={'linear'},
     InSin={'inSin'},
@@ -381,7 +350,6 @@ end
 
 ---@param tag Zenitha.Tween.Tag
 ---@param method 'setEase'|'setTime'|'pause'|'continue'|'skip'|'kill'|'update'
----@vararg any
 local function tagAction(tag,method,...)
     assert(type(tag)=='string',"TWEEN.tag_"..method..": tag need string")
     for anim in next,tagAnimSet do
