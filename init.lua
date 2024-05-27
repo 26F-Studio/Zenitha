@@ -133,7 +133,7 @@ ZENITHA={}
 
 --------------------------------------------------------------
 
--- typedef (you need Emmylua to make these things work) (Recommend extension: "Lua" by sumneko)
+-- typedef (you need Lua language server extension to make all these "---@xxx" things work) (Recommend extension: "Lua" by sumneko)
 
 ---@class Set<T>: { [T]:any }
 ---@class Map<T>: { [any]:T }
