@@ -236,7 +236,6 @@ local bigCanvases=setmetatable({},{
 local appName='Zenitha'
 local versionText='V0.1'
 local firstScene='_zenitha'
-local clickFX=function(x,y) SYSFX.tap(.3,x,y) end
 local discardCanvas=false
 local showFPS=true
 local updateFreq=100
@@ -339,6 +338,9 @@ local globalEvent={
         gc.setLineWidth(2)
         gc_circle(MSisDown(1) and 'fill' or 'line',x,y,6)
     end,
+
+    -- Called when "Click Event" triggered
+    clickFX=function(x,y) SYSFX.tap(.26,x,y) end,
 
     -- Called when request quiting with ZENITHA._quit()
     requestQuit=NULL,
@@ -451,7 +453,7 @@ local function _triggerMouseDown(x,y,k,presses)
         end
         lastClicks[k]={x=x,y=y}
     end
-    clickFX(x,y)
+    globalEvent.clickFX(x,y)
 end
 local function mouse_update(dt)
     if not KBisDown('lctrl','rctrl') and KBisDown('up','down','left','right') then
@@ -668,7 +670,7 @@ function love.touchreleased(id,x,y,_,_,pressure)
         if globalEvent.touchClick(x,y,id,dist)~=true then
             if SCN.touchClick then SCN.touchClick(x,y,id,dist) end
         end
-        clickFX(x,y)
+        globalEvent.clickFX(x,y)
     end
 end
 
@@ -718,7 +720,7 @@ function love.keypressed(key,scancode,isRep)
     elseif key=='space' or key=='return' then
         mouseShow=true
         if not isRep then
-            clickFX(mx,my)
+            globalEvent.clickFX(mx,my)
             _triggerMouseDown(mx,my,1)
             WIDGET._release(mx,my,1)
         end
@@ -898,7 +900,7 @@ function love.gamepadpressed(JS,key)
             if W and W.arrowKey then W:arrowKey(key) end
         elseif key=='return' then
             mouseShow=true
-            clickFX(mx,my)
+            globalEvent.clickFX(mx,my)
             _triggerMouseDown(mx,my,1)
             WIDGET._release(mx,my,1)
         else
@@ -1376,19 +1378,6 @@ end
 function ZENITHA.setMaxFPS(fps)
     assert(type(fps)=='number' and fps>0,"ZENITHA.setMaxFPS(fps): Need >0")
     sleepInterval=1/fps
-end
-
----Set click effect
----
----Boolean: switch on/off
----
----Function: trigger custom function after every clicks (pass x,y as arguments)
----@param fx false|true|function
-function ZENITHA.setClickFX(fx)
-    assert(type(fx)=='boolean' or type(fx)=='function',"ZENITHA.setClickFX(fx): Need boolean|function")
-    if fx==false then fx=NULL end
-    if fx==true then fx=function(x,y) SYSFX.tap(.26,x,y) end end
-    clickFX=fx
 end
 
 ---Set click distance threshold
