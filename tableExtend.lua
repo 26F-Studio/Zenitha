@@ -1,5 +1,5 @@
 local rnd,floor=math.random,math.floor
-local find,gsub=string.find,string.gsub
+local find,gsub,gmatch=string.find,string.gsub,string.gmatch
 local rem=table.remove
 local next,type,select=next,type,select
 local TABLE={}
@@ -730,6 +730,8 @@ end
 --------------------------------------------------------------
 -- (Utility) Get value
 
+---Get first non-nil value in all arguments
+---@param ... any
 function TABLE.getFirstValue(...)
     local t={...}
     for i=1,select('#',...) do
@@ -739,15 +741,29 @@ function TABLE.getFirstValue(...)
     end
 end
 
+---Get last non-nil value in all arguments
 function TABLE.getlastValue(...)
     local t={...}
-    local last
-    for i=1,select('#',...) do
+    for i=select('#',...),1,-1 do
         if t[i]~=nil then
-            last=t[i]
+            return t[i]
         end
     end
-    return last
+end
+
+--------------------------------------------------------------
+-- (Utility) PathIndex
+
+---Get value in a table by a path-like string
+---@param t table
+---@param str string
+---@param sep? string Single-byte separator string, default to '.'
+function TABLE.pathIndex(t,str,sep)
+    local pattern=sep and '[^%'..sep..']+' or '[^%.]+'
+    for k in gmatch(str,pattern) do
+        t=t[k]
+    end
+    return t
 end
 
 return TABLE
