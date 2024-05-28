@@ -193,6 +193,24 @@ function STRING.trim(str)
     return match(str,"^%s*(.-)%s*$") or ""
 end
 
+---Get string before pattern
+---@param str string
+---@param sep string
+---@param regex? boolean
+function STRING.before(str,sep,regex)
+    local p=find(str,sep,1,regex)
+    if p then return sub(str,1,p-1) end
+end
+
+---Get string after pattern
+---@param str string
+---@param sep string
+---@param regex? boolean
+function STRING.after(str,sep,regex)
+    local _,p=find(str,sep,1,regex)
+    if p then return sub(str,p+1) end
+end
+
 ---Split a string by sep
 ---@param str string
 ---@param sep string
