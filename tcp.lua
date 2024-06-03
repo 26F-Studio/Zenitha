@@ -288,7 +288,7 @@ end
 
 ---@param name Zenitha.TCP.busID
 ---@param data any must be lua or love object
-function TCP.S_Bus_Send(name,data)
+function TCP.S_Bus_send(name,data)
     checkBusName(name)
     ---@type Zenitha.TCP.MsgPack
     local pack={
@@ -300,7 +300,7 @@ end
 
 ---@param name Zenitha.TCP.busID
 ---@return Zenitha.TCP.MsgPack
-function TCP.S_Bus_Receive(name)
+function TCP.S_Bus_receive(name)
     checkBusName(name)
     while true do
         ---@type Zenitha.TCP.MsgPack
