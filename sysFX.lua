@@ -51,7 +51,6 @@ end
 ---@field y2 number
 ---@field wid number
 FX.line={}
-setmetatable(FX.line,{__index=baseFX,__metatable=true})
 function FX.line:draw()
     gc_setColor(1,1,1,self.a*(1-self.t))
     gc_line(self.x1,self.y1,self.x2,self.y2)
@@ -72,7 +71,6 @@ end
 ---@field w number
 ---@field h number
 FX.rect={}
-setmetatable(FX.rect,{__index=baseFX,__metatable=true})
 function FX.rect:draw()
     gc_setColor(self.r,self.g,self.b,self.a*(1-self.t))
     gc_rectangle('fill',self.x,self.y,self.w,self.h,2)
@@ -90,7 +88,6 @@ end
 ---@field y number
 ---@field radius number
 FX.ripple={}
-setmetatable(FX.ripple,{__index=baseFX,__metatable=true})
 function FX.ripple:draw()
     gc_setLineWidth(2)
     gc_setColor(self.r,self.g,self.b,self.a*(1-self.t))
@@ -110,7 +107,6 @@ end
 ---@field w number
 ---@field h number
 FX.rectRipple={}
-setmetatable(FX.rectRipple,{__index=baseFX,__metatable=true})
 function FX.rectRipple:draw()
     gc_setLineWidth(6)
     gc_setColor(self.r,self.g,self.b,self.a*(1-self.t))
@@ -131,7 +127,6 @@ end
 FX.tap={
     a=.4,
 }
-setmetatable(FX.tap,{__index=baseFX,__metatable=true})
 function FX.tap:draw()
     gc_setColor(self.r,self.g,self.b,self.a*(1-self.t))
     gc_circle('fill',self.x,self.y,30*(1-self.t)^.5)
@@ -149,7 +144,6 @@ end
 ---@field y number
 ---@field radius number
 FX.glow={}
-setmetatable(FX.glow,{__index=baseFX,__metatable=true})
 function FX.glow:draw()
     gc_setLineWidth(2)
     for i=1,self.radius,2 do
@@ -167,7 +161,6 @@ end
 
 ---@class Zenitha.SysFX.beam: Zenitha.SysFX.line
 FX.beam={}
-setmetatable(FX.beam,{__index=baseFX,__metatable=true})
 function FX.beam:draw()
     gc_setColor(self.r*2,self.g*2,self.b*2,self.a*min(4-self.t*4,1))
 
@@ -211,7 +204,6 @@ end
 ---@field private cx number
 ---@field private cy number
 FX.particle={}
-setmetatable(FX.particle,{__index=baseFX,__metatable=true})
 function FX.particle:update(dt)
     if self.vx then
         self.x=self.x+self.vx*self.rate
@@ -237,6 +229,12 @@ function SYSFX.particle(duration,image,size,x,y,vx,vy,ax,ay)
         vx=vx,vy=vy,
         ax=ax,ay=ay,
     },{__index=FX.particle,__metatable=true}))
+end
+
+-------------------------------------------------------------
+
+for _,fx in next,FX do
+    setmetatable(fx,{__index=baseFX,__metatable=true})
 end
 
 -------------------------------------------------------------

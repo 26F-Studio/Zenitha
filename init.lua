@@ -340,7 +340,7 @@ local globalEvent={
     end,
 
     -- Called when "Click Event" triggered
-    clickFX=function(x,y) SYSFX.tap(.26,x,y) end,
+    clickFX=function(x,y,_) SYSFX.tap(.26,x,y) end,
 
     -- Called when request quiting with ZENITHA._quit()
     requestQuit=NULL,
@@ -453,7 +453,7 @@ local function _triggerMouseDown(x,y,k,presses)
         end
         lastClicks[k]={x=x,y=y}
     end
-    globalEvent.clickFX(x,y)
+    globalEvent.clickFX(x,y,k)
 end
 local function mouse_update(dt)
     if not KBisDown('lctrl','rctrl') and KBisDown('up','down','left','right') then
@@ -670,7 +670,7 @@ function love.touchreleased(id,x,y,_,_,pressure)
         if globalEvent.touchClick(x,y,id,dist)~=true then
             if SCN.touchClick then SCN.touchClick(x,y,id,dist) end
         end
-        globalEvent.clickFX(x,y)
+        globalEvent.clickFX(x,y,1)
     end
 end
 
@@ -720,7 +720,7 @@ function love.keypressed(key,scancode,isRep)
     elseif key=='space' or key=='return' then
         mouseShow=true
         if not isRep then
-            globalEvent.clickFX(mx,my)
+            globalEvent.clickFX(mx,my,1)
             _triggerMouseDown(mx,my,1)
             WIDGET._release(mx,my,1)
         end
@@ -900,7 +900,7 @@ function love.gamepadpressed(JS,key)
             if W and W.arrowKey then W:arrowKey(key) end
         elseif key=='return' then
             mouseShow=true
-            globalEvent.clickFX(mx,my)
+            globalEvent.clickFX(mx,my,1)
             _triggerMouseDown(mx,my,1)
             WIDGET._release(mx,my,1)
         else
