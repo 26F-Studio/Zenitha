@@ -977,7 +977,7 @@ function Widgets.slider:draw()
     if not self._smooth and self._unit then
         gc_setLineWidth(self.lineWidth)
         for p=rangeL,rangeR,self._unit do
-            local X=x+(x2-x)*(p-rangeL)/self._rangeWidth
+            local X=x+self.w*(p-rangeL)/self._rangeWidth
             gc_line(X,y+7,X,y-7)
         end
     end
@@ -988,7 +988,7 @@ function Widgets.slider:draw()
 
     -- Block
     local pos=clamp(self._pos,rangeL,rangeR)
-    local cx=x+(x2-x)*(pos-rangeL)/self._rangeWidth
+    local cx=x+self.w*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
     gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or self.fillColor)
