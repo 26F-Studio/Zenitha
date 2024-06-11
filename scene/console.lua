@@ -4,7 +4,9 @@ local ins,rem=table.insert,table.remove
 local outputBox=WIDGET.new{type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25,fixContent=true}
 local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
 
+-- Console Log
 local function log(str) outputBox:push(str) end
+_CL=log
 
 log{COLOR.lP,"Zenitha Console"}
 log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
@@ -46,11 +48,12 @@ local commands={} do
                 for i=1,#cmdList do
                     local cmd=cmdList[i]
                     local body=commands[cmd]
+                    local color=body.builtin and COLOR.L or COLOR.lR
                     log(
                         body.description and
-                            {COLOR.L,cmd,COLOR.LD,STRING.repD(" $1 $2",("·"):rep(16-#cmd),body.description)}
+                            {color,cmd,COLOR.LD,STRING.repD(" $1 $2",("·"):rep(16-#cmd),body.description)}
                         or
-                            log{COLOR.L,cmd}
+                            {color,cmd}
                     )
                 end
             end
@@ -552,7 +555,6 @@ local commands={} do
                 log{COLOR.Y,"* Now you should use the _CL(message) function to print into this console *"}
                 log{COLOR.Y,"* 最高权限模式开启, 请不要执行任何自己不懂确切含义的代码 *"}
                 log{COLOR.Y,"* 从现在开始请使用_CL(信息)函数在控制台打印信息 *"}
-                _CL=log
             else
                 log{COLOR.Y,"Password incorrect"}
             end
@@ -561,7 +563,9 @@ local commands={} do
 
     for cmd,body in next,commands do
         if type(body)=='function' then
-            commands[cmd]={code=body}
+            commands[cmd]={code=body,builtin=true}
+        elseif type(body)=='table' then
+            body.builtin=true
         end
         if type(body)~='string' then
             ins(cmdList,cmd)
@@ -572,7 +576,7 @@ local commands={} do
 
     ---Add custom console command
     ---@param name string
-    ---@param cmd function|{code:fun(str:string), description:string, details:string[]}
+    ---@param cmd function|{code:fun(str:string), description:string, details:string[], builtin:nil}
     function ZENITHA.addConsoleCommand(name,cmd)
         assert(type(name)=='string',"CMD name need string")
         assert(not commands[name],"CMD already exists")
@@ -581,6 +585,7 @@ local commands={} do
         assert(type(cmd.code)=='function',"CMD.code need function")
         assert(cmd.description==nil or type(cmd.description)=='string',"CMD.description need string if exists")
         assert(cmd.details==nil or type(cmd.details)=='table',"CMD.details need table if exists")
+        assert(cmd.builtin==nil,"?")
         commands[name]=cmd
         ins(cmdList,name)
         table.sort(cmdList)
