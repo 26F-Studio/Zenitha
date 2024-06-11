@@ -282,7 +282,7 @@ local commands={} do
             "Usage: mv [oldfilename] [newfilename]",
         },
     }commands.ren="mv"
-    commands.print={
+    commands.read={
         code=function(name)
             if name~='' then
                 local info=love.filesystem.getInfo(name)
@@ -300,14 +300,60 @@ local commands={} do
                     log{COLOR.R,("No file named '%s'"):format(name)}
                 end
             else
-                log{COLOR.I,"Usage: print [filename]"}
+                log{COLOR.I,"Usage: read [filename]"}
             end
         end,
-        description="Print file content",
+        description="Read file content",
         details={
-            "Print a file to this window.",
+            "Print the file content to this window.",
             "",
-            "Usage: print [filename]",
+            "Usage: read [filename]",
+        },
+    }
+    commands.resetall={
+        code=function(arg)
+            if arg=="sure" then
+                log"FINAL WARNING!"
+                log"Please remember that resetting everything will delete all saved data. Delete them anyway?"
+                log"Once the data has been deleted, there is no way to recover it."
+                log"Type: resetall really"
+            elseif arg=="really" then
+                BGM.stop()
+                WIDGET.unFocus(true)
+                inputBox:setVisible(false)
+                table.remove(WIDGET.active,TABLE.find(WIDGET.active,inputBox))
+                commands.cls.code()
+                outputBox:clear()
+                outputBox.h=SCR.h0-140
+                local button=WIDGET.new{type='button',name='bye',text=ZENITHA.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,code=function()
+                    WIDGET.active.bye:setVisible(false)
+                    outputBox.h=SCR.h0-20
+                    TASK.new(function()
+                        DEBUG.yieldT(0.5)
+                        for i=10,0,-1 do
+                            log{COLOR.R,STRING.repD("Deleting all data in $1...",i)}
+                            DEBUG.yieldT(1)
+                        end
+                        outputBox:setVisible(false)
+                        DEBUG.yieldT(0.26)
+                        FILE.clear_s('')
+                        love.event.quit()
+                    end)
+                end}
+                ins(WIDGET.active,button)
+            else
+                log"Are you sure you want to reset everything?"
+                log"This will delete EVERYTHING in your saved app data, just like factory reset."
+                log"This cannot be undone."
+                log"Type: resetall sure"
+            end
+        end,
+        description="Reset everything and delete all saved data.",
+        details={
+            "Hard resets the app and delete everything in the save directory, like a fresh install.",
+            "There WILL be a confirmation for this.",
+            "",
+            "Usage: resetall",
         },
     }
 
@@ -418,10 +464,10 @@ local commands={} do
     commands.fn={
         code=function(n)
             n=tonumber(n)
-            if n and n%1==0 and n>=1 and n<=12 then
+            if n and n%1==0 and n>=1 and n<=24 then
                 love.keypressed("f"..n)
             else
-                log{COLOR.I,"Usage: fn [1~12]"}
+                log{COLOR.I,"Usage: fn [1~24]"}
             end
         end,
         description="Simulates a Function key press",
@@ -429,36 +475,28 @@ local commands={} do
             "Acts as if you have pressed a function key (i.e. F1-F12) on a keyboard.",
             "Useful if you are on a mobile device without access to these keys.",
             "",
-            "Usage: fn <1-12>",
+            "Usage: fn <1-24>",
         },
     }
-    commands.playbgm={
+    commands.bgm={
         code=function(bgm)
             if bgm~='' then
                 BGM.play(bgm)
             else
-                log{COLOR.I,"Usage: playbgm [bgmName]"}
+                BGM.stop()
+                log{COLOR.I,"Usage: bgm [bgmName]"}
             end
         end,
-        description="Play a BGM",
+        description="Play/Stop BGM",
         details={
-            "Play a BGM.",
+            "Play a BGM or stop BGM.",
             "",
-            "Usage: playbgm [bgmName]"
+            "Usage:",
+            "bgm",
+            "bgm [bgmName]",
         },
     }
-    commands.stopbgm={
-        code=function()
-            BGM.stop()
-        end,
-        description="Stop BGM",
-        details={
-            "Stop the currently playing BGM.",
-            "",
-            "Usage: stopbgm"
-        },
-    }
-    commands.setbg={
+    commands.bg={
         code=function(name)
             if name~='' then
                 if name~=BG.cur then
@@ -471,14 +509,25 @@ local commands={} do
                     log(("Background already set to '%s'"):format(name))
                 end
             else
-                log{COLOR.I,"Usage: setbg [bgName]"}
+                log{COLOR.I,"Usage: bg [bgName]"}
             end
         end,
         description="Set background",
         details={
             "Set a background.",
             "",
-            "Usage: setbg [bgName]",
+            "Usage: bg [bgName]",
+        },
+    }
+    commands.demo={
+        code=function()
+            SCN.go('_zenitha','none')
+        end,
+        description="Enter Zenitha demo scene",
+        details={
+            "Go to Zenitha's demo scene",
+            "",
+            "Usage: test",
         },
     }
     commands.test={
@@ -490,52 +539,6 @@ local commands={} do
             "Go to an empty test scene",
             "",
             "Usage: test",
-        },
-    }
-    commands.resetall={
-        code=function(arg)
-            if arg=="sure" then
-                log"FINAL WARNING!"
-                log"Please remember that resetting everything will delete all saved data. Delete them anyway?"
-                log"Once the data has been deleted, there is no way to recover it."
-                log"Type: resetall really"
-            elseif arg=="really" then
-                BGM.stop()
-                WIDGET.unFocus(true)
-                inputBox:setVisible(false)
-                table.remove(WIDGET.active,TABLE.find(WIDGET.active,inputBox))
-                commands.cls.code()
-                outputBox:clear()
-                outputBox.h=SCR.h0-140
-                local button=WIDGET.new{type='button',name='bye',text=ZENITHA.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,code=function()
-                    WIDGET.active.bye:setVisible(false)
-                    outputBox.h=SCR.h0-20
-                    TASK.new(function()
-                        DEBUG.yieldT(0.5)
-                        for i=10,0,-1 do
-                            log{COLOR.R,STRING.repD("Deleting all data in $1...",i)}
-                            DEBUG.yieldT(1)
-                        end
-                        outputBox:setVisible(false)
-                        DEBUG.yieldT(0.26)
-                        FILE.clear_s('')
-                        love.event.quit()
-                    end)
-                end}
-                ins(WIDGET.active,button)
-            else
-                log"Are you sure you want to reset everything?"
-                log"This will delete EVERYTHING in your saved app data, just like factory reset."
-                log"This cannot be undone."
-                log"Type: resetall sure"
-            end
-        end,
-        description="Reset everything and delete all saved data.",
-        details={
-            "Hard resets the app and delete everything in the save directory, like a fresh install.",
-            "There WILL be a confirmation for this.",
-            "",
-            "Usage: resetall",
         },
     }
     commands.su={

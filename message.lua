@@ -1,29 +1,45 @@
-local mesIcon={
-    info=GC.load{40,40,
-        {'setCL',1,1,1},
-        {'setLW',2},
-        {'dCirc',20,20,19},
-        {'fRect',17,7,6,6},
-        {'fRect',17,16,6,17},
+---@enum (key) Zenitha.MessageType
+local msgStyle={
+    info={
+        color={COLOR.hex"3575F0"},
+        canvas=GC.load{40,40,
+            {'setCL',1,1,1},
+            {'setLW',2},
+            {'dCirc',20,20,19},
+            {'fRect',17,7,6,6},
+            {'fRect',17,16,6,17},
+        },
     },
-    check=GC.load{40,40,
-        {'setLW',6},
-        {'setCL',1,1,1},
-        {'line',5,20,15,30,35,10},
+    check={
+        color={COLOR.hex"4FB666"},
+        canvas=GC.load{40,40,
+            {'setLW',6},
+            {'setCL',1,1,1},
+            {'line',5,20,15,30,35,10},
+        },
     },
-    warn=GC.load{40,40,
-        {'setCL',1,1,1},
-        {'setLW',3},
-        {'dPoly',20.5,1,0,38,40,38},
-        {'setCL',1,1,1},
-        {'fRect',18,11,5,16,2},
-        {'fRect',18,30,5,5,2},
+    warn={
+        color={COLOR.hex"D2A100"},
+        canvas=GC.load{40,40,
+            {'setCL',1,1,1},
+            {'setLW',3},
+            {'dPoly',20.5,1,0,38,40,38},
+            {'setCL',1,1,1},
+            {'fRect',18,11,5,16,2},
+            {'fRect',18,30,5,5,2},
+        },
     },
-    error=GC.load{40,40,
-        {'setLW',6},
-        {'setCL',1,1,1},
-        {'line',8,8,32,32},
-        {'line',8,32,31,8},
+    error={
+        color={COLOR.hex"CF4949"},
+        canvas=GC.load{40,40,
+            {'setLW',6},
+            {'setCL',1,1,1},
+            {'line',8,8,32,32},
+            {'line',8,32,31,8},
+        },
+    },
+    other={
+        color={COLOR.hex"787878"},
     },
 }
 
@@ -31,23 +47,26 @@ local mesList={}
 local startY=0
 
 local MSG={}
-local backColors={
-    info= {COLOR.hex"3575F0"},
-    check={COLOR.hex"4FB666"},
-    warn= {COLOR.hex"D2A100"},
-    error={COLOR.hex"CF4949"},
-    other={COLOR.hex"787878"},
-}
+
+---Add a new icon (and color) for message popup
+---@param name string
+---@param color Zenitha.Color
+---@param canvas? love.Canvas
+function MSG.addType(name,color,canvas)
+    assert(type(name)=='string',"MSG.addType: name need string")
+    assert(type(color)=='table' and #color>=3,"MSG.addType: color need {r,g,b}")
+    msgStyle[name]={color=color,canvas=canvas}
+end
 
 ---Create a new message popup at up-left corner
----@param icon 'info'|'check'|'warn'|'error'|love.Canvas
+---@param icon Zenitha.MessageType|love.Canvas
 ---@param str string
 ---@param time? number
 function MSG.new(icon,str,time)
-    local color=backColors.other
+    local color=msgStyle.other.color
     if type(icon)=='string' then
-        color=TABLE.copy(backColors[icon] or color)
-        icon=mesIcon[icon]
+        color=msgStyle[icon].color or color
+        icon=msgStyle[icon].canvas
     end
     local text=GC.newText(FONT.get(30),str)
     local w=math.max(text:getWidth()+(icon and 45 or 5),200)+15
