@@ -193,6 +193,35 @@ function STRING.trim(str)
     return match(str,"^%s*(.-)%s*$") or ""
 end
 
+---Trim spaces and tabs at the beginning of all lines, useful for inline multi-line strings
+---## Example
+---```lua
+---do
+---    local s=STRING.trimIndent[=[
+---        Hello
+---        World
+---    ]=] --> "Hello\nWorld\n", not "        Hello\n        World\n    "
+---end
+---```
+---@param str string
+---@param keep? boolean|number `true`: keep some indent based on 1st line; [number] trim specific number of spaces
+---@return string
+function STRING.trimIndent(str,keep)
+    if keep then
+        local list=STRING.split(str,'\n')
+        local s=type(keep)=='number' and keep+1 or #list[1]:match('^%s*')+1
+        if s==1 then return str end
+
+        for i=1,#list do
+            print(i,min(s,find(list[i],'%S') or #list[i]+1))
+            list[i]=sub(list[i],min(s,find(list[i],'%S') or #list[i]+1))
+        end
+        return table.concat(list,'\n')
+    else
+        return (gsub('\n'..str,'\n[ \t]+','\n'):sub(2))
+    end
+end
+
 ---Get string before pattern
 ---@param str string
 ---@param sep string
