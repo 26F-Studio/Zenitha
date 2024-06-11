@@ -215,7 +215,7 @@ end
 ---@param timeFunc? fun():number Custom the timeFunc (return a number in duration)
 function Tween:run(timeFunc)
     if self.running then return end
-    assert(timeFunc==nil or type(timeFunc)=='function',"[tween]:run(timeFunc): Need function if exist")
+    assert(timeFunc==nil or type(timeFunc)=='function',"[tween]:run(timeFunc): Need function if exists")
     assert(not (self.loop and timeFunc),"[tween]:run(timeFunc): Looping and timeFunc can't exist together")
     if self.unqTag then
         if unqAnimMap[self.unqTag] then

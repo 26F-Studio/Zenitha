@@ -569,6 +569,22 @@ local commands={} do
     end
     table.sort(cmdList)
     TABLE.reIndex(commands)
+
+    ---Add custom console command
+    ---@param name string
+    ---@param cmd function|{code:fun(str:string), description:string, details:string[]}
+    function ZENITHA.addConsoleCommand(name,cmd)
+        assert(type(name)=='string',"CMD name need string")
+        assert(not commands[name],"CMD already exists")
+        if type(cmd)=='function' then cmd={code=cmd} end
+        assert(type(cmd)=='table',"CMD need function or table")
+        assert(type(cmd.code)=='function',"CMD.code need function")
+        assert(cmd.description==nil or type(cmd.description)=='string',"CMD.description need string if exists")
+        assert(cmd.details==nil or type(cmd.details)=='table',"CMD.details need table if exists")
+        commands[name]=cmd
+        ins(cmdList,name)
+        table.sort(cmdList)
+    end
 end
 
 local combKey={
