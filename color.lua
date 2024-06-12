@@ -39,7 +39,7 @@ local c={
     Wines=    {{hex'460813'},{hex'871126'},{hex'F52249'},{hex'F56D87'},{hex'F5B4C0'}},
     Darks=    {{hex'000000'},{hex'060606'},{hex'101010'},{hex'3C3C3C'},{hex'7A7A7A'}},
     Lights=   {{hex'B8B8B8'},{hex'DBDBDB'},{hex'FDFDFD'},{hex'FEFEFE'},{hex'FFFFFF'}},
-    Transps=  {{hex'060606CC'},{hex'3C3C3CCC'},{hex'7A7A7ACC'},{hex'DBDBDBCC'},{hex'FEFEFECC'}},
+    Translucents={{hex'060606CC'},{hex'3C3C3CCC'},{hex'7A7A7ACC'},{hex'DBDBDBCC'},{hex'FEFEFECC'}},
 }
 local COLOR=setmetatable({
     hex=hex,
@@ -65,8 +65,12 @@ local COLOR=setmetatable({
     Black=      c.Darks[1],    --[[Dark=   c.Darks[3],]]
     DarkGray=   c.Darks[4],    darkGray=   c.Darks[5],    lightGray=c.Lights[1], LightGray=   c.Lights[2],
     DarkGrey=   c.Darks[4],    darkGrey=   c.Darks[5],    lightGrey=c.Lights[1], LightGrey=   c.Lights[2],
-    --[[Light=  c.Lights[3],]]   White=    c.Lights[5],
-    DarkTransp= c.Transps[1],  darkTransp= c.Transps[2],  Transp= c.Transps[3],  lightTransp= c.Transps[4],  LightTransp= c.Transps[5],
+    --[[Light=  c.Lights[3],]] White=      c.Lights[5],
+    DarkTranslucent=c.Translucents[1],
+    darkTranslucent=c.Translucents[2],
+    Translucent= c.Translucents[3],
+    lightTranslucent=c.Translucents[4],
+    LightTranslucent= c.Translucents[5],
 
     DR=c.Reds[1], -- DarkRed
     dR=c.Reds[2], -- darkRed
@@ -158,11 +162,11 @@ local COLOR=setmetatable({
     L=c.Lights[3], -- Light
     lL=c.Lights[4], -- lightLight
     LL=c.Lights[5], -- LightLight
-    DT=c.Transps[1], -- DarkTransp
-    dT=c.Transps[2], -- darkTransp
-    T=c.Transps[3], -- Transp
-    lT=c.Transps[4], -- lightTransp
-    LT=c.Transps[5], -- LightTransp
+    DT=c.Translucents[1], -- DarkTranslucent
+    dT=c.Translucents[2], -- darkTranslucent
+    T=c.Translucents[3], -- Translucent
+    lT=c.Translucents[4], -- lightTranslucent
+    LT=c.Translucents[5], -- LightTranslucent
 
     Reds=c.Reds,         Flames=c.Flames,   Oranges=c.Oranges,
     Yellows=c.Yellows,   Apples=c.Apples,   Kellys=c.Kellys,
@@ -170,7 +174,7 @@ local COLOR=setmetatable({
     Cyans=c.Cyans,       Ices=c.Ices,       Seas=c.Seas,
     Blues=c.Blues,       Purples=c.Purples, Violets=c.Violets,
     Magentas=c.Magentas, Wines=c.Wines,
-    Darks=c.Darks,       Lights=c.Lights,   Transps=c.Transps,
+    Darks=c.Darks,       Lights=c.Lights,   Translucents=c.Translucents,
 },{__index=function(_,k)
     assert(type(k)=='string', "COLOR[name]: Need string")
     errorf("COLOR[name]:  No color '%s'",k)
