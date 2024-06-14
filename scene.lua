@@ -2,30 +2,30 @@
 ---@field widgetList? Zenitha.WidgetArg[]|Zenitha.Widget.base[]
 ---@field scrollHeight? number|nil
 ---
----@field enter? function
----@field leave? function
----@field mouseDown? function
----@field mouseMove? function
----@field mouseUp? function
----@field mouseClick? function
----@field wheelMove? function Able to interrupt WIDGET._scroll
----@field touchDown? function
----@field touchUp? function
----@field touchMove? function
----@field touchClick? function
----@field keyDown? function Able to interrupt cursor & widget control
----@field keyUp? function
----@field textInput? function Able to interrupt widget control
----@field imeChange? function Able to interrupt widget control
----@field gamepadDown? function
----@field gamepadUp? function
----@field fileDrop? function
----@field folderDrop? function
----@field lowMemory? function
----@field resize? function
----@field focus? function
----@field update? function
----@field draw? function
+---@field enter? fun()
+---@field leave? fun()
+---@field mouseDown? fun(x:number, y:number, k:number, presses:number):boolean? Able to interrupt cursor & widget control
+---@field mouseMove? fun(x:number, y:number, dx:number, dy:number)
+---@field mouseUp? fun(x:number, y:number, k:number, presses:number)
+---@field mouseClick? fun(x:number, y:number, k:number, dist:number, presses:number)
+---@field wheelMove? fun(dx:number, dy:number):boolean? Able to interrupt WIDGET._scroll
+---@field touchDown? fun(x:number, y:number, id:userdata, pressure:number)
+---@field touchUp? fun(x:number, y:number, id:userdata, pressure:number)
+---@field touchMove? fun(x:number, y:number, dx:number, dy:number, id:userdata, pressure:number)
+---@field touchClick? fun(x:number, y:number, id:userdata, dist:number)
+---@field keyDown? fun(key:love.KeyConstant, isRep:boolean, scancode:love.Scancode):boolean? Able to interrupt cursor & widget control
+---@field keyUp? fun(key:love.KeyConstant, scancode:love.Scancode)
+---@field textInput? fun(texts:string):boolean? Able to interrupt widget control
+---@field imeChange? fun(texts:string):boolean? Able to interrupt widget control
+---@field gamepadDown? fun(key:love.GamepadButton)
+---@field gamepadUp? fun(key:love.GamepadButton)
+---@field fileDrop? fun(file:love.DroppedFile)
+---@field folderDrop? fun(path:string)
+---@field lowMemory? fun()
+---@field resize? fun(width:number, height:number)
+---@field focus? fun(focus:boolean)
+---@field update? fun(dt:number)
+---@field draw? fun()
 
 ---@class Zenitha.SceneSwap
 ---@field duration number
@@ -58,8 +58,8 @@ local SCN={
 
     swapping=false, -- If Swapping
     state={
-        tar=false,        -- Swapping target
-        style=false,      -- Swapping style
+        target=false,     -- Swapping target
+        swapStyle=false,  -- Swapping style
         draw=false,       -- Swap draw func
         timeRem=false,    -- Swap time remain
         timeChange=false, -- Loading point
@@ -73,8 +73,10 @@ local SCN={
 }
 
 local defaultSwap='fade'
--- Scene swapping animations
-local swap={
+
+---@alias Zenitha.SceneSwapStyle Zenitha._SceneSwapStyle|string
+---@enum (key) Zenitha._SceneSwapStyle
+local swapStyles={
     none={
         duration=0,timeChange=0,
         draw=function() end,
@@ -166,15 +168,15 @@ end
 
 ---Add a scene swapping animation
 ---@param name string
----@param swp Zenitha.SceneSwap
-function SCN.addSwap(name,swp)
+---@param swapStyle Zenitha.SceneSwap
+function SCN.addSwapStyle(name,swapStyle)
     assertf(type(name)=='string',"SCN.addSwap(name,swp): name need string")
-    assertf(not swap[name],"SCN.addSwap(name,swp): Swap '%s' already exist",name)
-    assertf(type(swp)=='table',"SCN.addSwap(name,swp): swp need table")
-    assertf(type(swp.duration)=='number' and swp.duration>=0,"SCN.addSwap(name,swp): swp.duration need >=0")
-    assertf(type(swp.timeChange)=='number' and swp.timeChange>=0,"SCN.addSwap(name,swp): swp.timeChange need >=0")
-    assertf(type(swp.draw)=='function',"SCN.addSwap(name,swp): swp.draw need function")
-    swap[name]=swp
+    assertf(not swapStyles[name],"SCN.addSwap(name,swp): Swap '%s' already exist",name)
+    assertf(type(swapStyle)=='table',"SCN.addSwap(name,swp): swp need table")
+    assertf(type(swapStyle.duration)=='number' and swapStyle.duration>=0,"SCN.addSwap(name,swp): swp.duration need >=0")
+    assertf(type(swapStyle.timeChange)=='number' and swapStyle.timeChange>=0,"SCN.addSwap(name,swp): swp.timeChange need >=0")
+    assertf(type(swapStyle.draw)=='function',"SCN.addSwap(name,swp): swp.draw need function")
+    swapStyles[name]=swapStyle
 end
 
 ---Set max scroll area of current scene, default to 0
@@ -191,9 +193,9 @@ function SCN._swapUpdate(dt)
     S.timeRem=S.timeRem-dt
     if S.timeRem<S.timeChange and S.timeRem+dt>=S.timeChange then
         -- Actually load scene at this moment
-        SCN.stack[#SCN.stack]=S.tar
-        SCN.cur=S.tar
-        SCN._load(S.tar)
+        SCN.stack[#SCN.stack]=S.target
+        SCN.cur=S.target
+        SCN._load(S.target)
         SCN.mainTouchID=nil
     end
     if S.timeRem<0 then
@@ -230,25 +232,25 @@ end
 
 ---Swap to a sceene without add current scene to stack (cannot go back)
 ---@param tar string
----@param style? string
+---@param swapStyle? Zenitha.SceneSwapStyle
 ---@param ... any Arguments passed to new scene
-function SCN.swapTo(tar,style,...)
+function SCN.swapTo(tar,swapStyle,...)
     if scenes[tar] then
         if not SCN.swapping then
             SCN.prev=SCN.stack[#SCN.stack]
 
-            style=style or defaultSwap
-            if not swap[style] then
-                MSG.new('error',"No swap style named '"..style.."'")
-                style=defaultSwap
+            swapStyle=swapStyle or defaultSwap
+            if not swapStyles[swapStyle] then
+                MSG.new('error',"No swap style named '"..swapStyle.."'")
+                swapStyle=defaultSwap
             end
             SCN.swapping=true
             SCN.args={...}
             local S=SCN.state
-            S.tar,S.style=tar,style
-            S.timeRem=swap[style].duration
-            S.timeChange=swap[style].timeChange
-            S.draw=swap[style].draw
+            S.target,S.style=tar,swapStyle
+            S.timeRem=swapStyles[swapStyle].duration
+            S.timeChange=swapStyles[swapStyle].timeChange
+            S.draw=swapStyles[swapStyle].draw
         end
     else
         MSG.new('warn',"No Scene: "..tar)
@@ -257,13 +259,13 @@ end
 
 ---Go to a scene
 ---@param tar string
----@param style? string
+---@param swapStyle? Zenitha.SceneSwapStyle
 ---@param ... any Arguments passed to new scene
-function SCN.go(tar,style,...)
+function SCN.go(tar,swapStyle,...)
     if scenes[tar] then
         if not SCN.swapping then
             SCN._push(SCN.stack[#SCN.stack] or '_')
-            SCN.swapTo(tar,style,...)
+            SCN.swapTo(tar,swapStyle,...)
         end
     else
         MSG.new('warn',"No Scene: "..tar)
@@ -271,9 +273,9 @@ function SCN.go(tar,style,...)
 end
 
 ---Back to previous scene
----@param style? string
+---@param swapStyle? Zenitha.SceneSwapStyle
 ---@param ... any Arguments passed to previous scene
-function SCN.back(style,...)
+function SCN.back(swapStyle,...)
     if SCN.swapping then return end
 
     local m=#SCN.stack
@@ -282,25 +284,25 @@ function SCN.back(style,...)
         if SCN.leave then SCN.leave() end
 
         -- Poll&Back to previous Scene
-        SCN.swapTo(SCN.stack[#SCN.stack-1],style,...)
+        SCN.swapTo(SCN.stack[#SCN.stack-1],swapStyle,...)
         SCN._pop()
     else
-        ZENITHA._quit(style)
+        ZENITHA._quit(swapStyle)
     end
 end
 
 ---Back to a specific scene
 ---@param tar string
----@param style? string
+---@param swapStyle? Zenitha.SceneSwapStyle
 ---@param ... any Arguments passed to target scene
-function SCN.backTo(tar,style,...)
+function SCN.backTo(tar,swapStyle,...)
     if SCN.swapping then return end
 
     -- Poll&Back to previous Scene
     while SCN.stack[#SCN.stack-1]~=tar and #SCN.stack>1 do
         SCN._pop()
     end
-    SCN.swapTo(SCN.stack[#SCN.stack],style,...)
+    SCN.swapTo(SCN.stack[#SCN.stack],swapStyle,...)
 end
 
 ---Print current scene stack to console
@@ -310,7 +312,7 @@ end
 
 function SCN.setDefaultSwap(anim)
     assertf(type(anim)=='string',"SCN.setDefaultSwap(anim): Need string, got %s",anim)
-    assertf(swap[anim],"SCN.setDefaultSwap(anim): No swap style '%s'",anim)
+    assertf(swapStyles[anim],"SCN.setDefaultSwap(anim): No swap style '%s'",anim)
     defaultSwap=anim
 end
 

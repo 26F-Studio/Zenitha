@@ -680,8 +680,8 @@ end
 -- function love.mousemoved(x,y,dx,dy) if isMsDown(1) then love.touchmoved(1,x,y,dx,dy) end end
 
 ---@type love.keypressed
----@param key string
----@param scancode? string
+---@param key love.KeyConstant
+---@param scancode? love.Scancode
 ---@param isRep? boolean
 function love.keypressed(key,scancode,isRep)
     -- Hide cursor when key pressed
@@ -727,14 +727,15 @@ function love.keypressed(key,scancode,isRep)
     end
 end
 ---@type love.keyreleased
----@param key string
-function love.keyreleased(key)
+---@param key love.KeyConstant
+---@param scancode? love.Scancode
+function love.keyreleased(key,scancode)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
 
     -- Skip scene event by global event
-    if globalEvent.keyUp(key)~=true then
-        if SCN.keyUp then SCN.keyUp(key) end
+    if globalEvent.keyUp(key,scancode)~=true then
+        if SCN.keyUp then SCN.keyUp(key,scancode) end
     end
 end
 
@@ -769,8 +770,8 @@ local jsAxisEventName={
     lefty={'leftstick_up','leftstick_down'},
     rightx={'rightstick_left','rightstick_right'},
     righty={'rightstick_up','rightstick_down'},
-    triggerleft='triggerleft',
-    triggerright='triggerright',
+    triggerleft={'triggerleft'},
+    triggerright={'triggerright'},
 }
 local gamePadKeys={'a','b','x','y','back','guide','start','leftstick','rightstick','leftshoulder','rightshoulder','dpup','dpdown','dpleft','dpright'}
 local dPadToKey={
@@ -826,7 +827,7 @@ function love.joystickremoved(JS)
 end
 ---@type love.gamepadaxis
 ---@param JS love.Joystick
----@param axis string
+---@param axis love.GamepadAxis
 ---@param val number
 function love.gamepadaxis(JS,axis,val)
     -- Interrupt by global event
@@ -862,9 +863,9 @@ function love.gamepadaxis(JS,axis,val)
         local newVal=val>.3 and 1 or 0 -- range: [0,1]
         if newVal~=js[axis] then
             if newVal==1 then
-                love.gamepadpressed(JS,jsAxisEventName[axis])
+                love.gamepadpressed(JS,jsAxisEventName[axis][1])
             else
-                love.gamepadreleased(JS,jsAxisEventName[axis])
+                love.gamepadreleased(JS,jsAxisEventName[axis][1])
             end
             js[axis]=newVal
         end
@@ -872,7 +873,7 @@ function love.gamepadaxis(JS,axis,val)
 end
 ---@type love.gamepadpressed
 ---@param JS love.Joystick
----@param key string
+---@param key love.GamepadButton|string
 function love.gamepadpressed(JS,key)
     -- Hide cursor when gamepad pressed
     mouseShow=false
@@ -890,29 +891,29 @@ function love.gamepadpressed(JS,key)
         interruptCursor=SCN.keyDown(dPadToKey[key] or key)
     end
     if not interruptCursor then
-        key=dPadToKey[key] or key
+        local keyboardKey=dPadToKey[key] or key
         mouseShow=true
         local W=WIDGET.sel
-        if key=='back' then
+        if keyboardKey=='back' then
             SCN.back()
-        elseif key=='up' or key=='down' or key=='left' or key=='right' then
+        elseif keyboardKey=='up' or keyboardKey=='down' or keyboardKey=='left' or keyboardKey=='right' then
             mouseShow=true
-            if W and W.arrowKey then W:arrowKey(key) end
-        elseif key=='return' then
+            if W and W.arrowKey then W:arrowKey(keyboardKey) end
+        elseif keyboardKey=='return' then
             mouseShow=true
             globalEvent.clickFX(mx,my,1)
             _triggerMouseDown(mx,my,1)
             WIDGET._release(mx,my,1)
         else
             if W and W.keypress then
-                W:keypress(key)
+                W:keypress(keyboardKey)
             end
         end
     end
 end
 ---@type love.gamepadreleased
 ---@param JS love.Joystick
----@param key string
+---@param key love.GamepadButton|string
 function love.gamepadreleased(JS,key)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -1275,11 +1276,11 @@ end
 -- Utility functions
 
 ---Go to quit scene then terminate the application
----@param style? string Choose a scene swapping style
-function ZENITHA._quit(style)
+---@param swapStyle? Zenitha.SceneSwapStyle Choose a scene swapping style
+function ZENITHA._quit(swapStyle)
     -- Skip quitting by global event
     if globalEvent.requestQuit()~=true then
-        SCN.swapTo('_quit',style or 'slowFade')
+        SCN.swapTo('_quit',swapStyle or 'slowFade')
     end
 end
 
@@ -1420,3 +1421,6 @@ SCN.add('_quit',{enter=love.event.quit})
 SCN.add('_console',require'Zenitha/scene/console')
 SCN.add('_zenitha',require'Zenitha/scene/demo')
 SCN.add('_test',require'Zenitha/scene/test')
+
+-- Every little bit helps in saving resources (maybe)
+collectgarbage()

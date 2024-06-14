@@ -1,4 +1,5 @@
----@enum (key) Zenitha.MessageType
+---@alias Zenitha.MessageType Zenitha._MessageType|string
+---@enum (key) Zenitha._MessageType
 local msgStyle={
     info={
         backColor={COLOR.HEX"3575F0"},
@@ -65,7 +66,7 @@ function MSG.addCategory(name,backColor,textColor,canvas)
 end
 
 ---Create a new message popup at up-left corner
----@param icon Zenitha.MessageType|string|love.Canvas
+---@param icon Zenitha.MessageType|love.Canvas
 ---@param str string
 ---@param time? number
 function MSG.new(icon,str,time)
