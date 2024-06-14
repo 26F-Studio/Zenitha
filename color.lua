@@ -1,3 +1,25 @@
+--[[ Color Shortcuts
+    R: Red
+    F: Flame
+    O: Orange
+    Y: Yellow
+    A: Apple
+    K: Kelly
+    G: Green
+    J: Jungle
+    C: Cyan
+    I: Ice
+    S: Sea
+    B: Blue
+    P: Purple
+    V: Violet
+    M: Magenta
+    W: Wine
+    D: Dark
+    L: Light
+    T: Translucent
+]]
+
 ---@class Zenitha.Color: table READ ONLY
 ---@field [1] number Red
 ---@field [2] number Green
@@ -41,9 +63,8 @@ local c={
     Lights=   {{HEX'B8B8B8'},{HEX'DBDBDB'},{HEX'FDFDFD'},{HEX'FEFEFE'},{HEX'FFFFFF'}},
     Translucents={{HEX'060606CC'},{HEX'3C3C3CCC'},{HEX'7A7A7ACC'},{HEX'DBDBDBCC'},{HEX'FEFEFECC'}},
 }
+---@enum (key) Zenitha.ColorStr
 local COLOR=setmetatable({
-    HEX=HEX,
-
     DarkRed=    c.Reds[1],     darkRed=    c.Reds[2],     Red=    c.Reds[3],     lightRed=    c.Reds[4],     LightRed=    c.Reds[5],
     DarkFlame=  c.Flames[1],   darkFlame=  c.Flames[2],   Flame=  c.Flames[3],   lightFlame=  c.Flames[4],   LightFlame=  c.Flames[5],
     DarkOrange= c.Oranges[1],  darkOrange= c.Oranges[2],  Orange= c.Oranges[3],  lightOrange= c.Oranges[4],  LightOrange= c.Oranges[5],
@@ -62,15 +83,15 @@ local COLOR=setmetatable({
     DarkWine=   c.Wines[1],    darkWine=   c.Wines[2],    Wine=   c.Wines[3],    lightWine=   c.Wines[4],    LightWine=   c.Wines[5],
     DarkDark=   c.Darks[1],    darkDark=   c.Darks[2],    Dark=   c.Darks[3],    lightDark=   c.Darks[4],    LightDark=   c.Darks[5],
     DarkLight=  c.Lights[1],   darkLight=  c.Lights[2],   Light=  c.Lights[3],   lightLight=  c.Lights[4],   LightLight=  c.Lights[5],
+
     Black=      c.Darks[1],    --[[Dark=   c.Darks[3],]]
     DarkGray=   c.Darks[4],    darkGray=   c.Darks[5],    lightGray=c.Lights[1], LightGray=   c.Lights[2],
     DarkGrey=   c.Darks[4],    darkGrey=   c.Darks[5],    lightGrey=c.Lights[1], LightGrey=   c.Lights[2],
     --[[Light=  c.Lights[3],]] White=      c.Lights[5],
-    DarkTranslucent=c.Translucents[1],
-    darkTranslucent=c.Translucents[2],
-    Translucent= c.Translucents[3],
-    lightTranslucent=c.Translucents[4],
-    LightTranslucent= c.Translucents[5],
+
+    DarkTranslucent=c.Translucents[1],darkTranslucent=c.Translucents[2],Translucent=c.Translucents[3],lightTranslucent=c.Translucents[4],LightTranslucent=c.Translucents[5],
+
+    -- Separating these (down below) into single lines helps making language server hinting the full color names
 
     DR=c.Reds[1], -- DarkRed
     dR=c.Reds[2], -- darkRed
@@ -167,18 +188,44 @@ local COLOR=setmetatable({
     T=c.Translucents[3], -- Translucent
     lT=c.Translucents[4], -- lightTranslucent
     LT=c.Translucents[5], -- LightTranslucent
-
-    Reds=c.Reds,         Flames=c.Flames,   Oranges=c.Oranges,
-    Yellows=c.Yellows,   Apples=c.Apples,   Kellys=c.Kellys,
-    Greens=c.Greens,     Jungles=c.Jungles,
-    Cyans=c.Cyans,       Ices=c.Ices,       Seas=c.Seas,
-    Blues=c.Blues,       Purples=c.Purples, Violets=c.Violets,
-    Magentas=c.Magentas, Wines=c.Wines,
-    Darks=c.Darks,       Lights=c.Lights,   Translucents=c.Translucents,
 },{__index=function(_,k)
     assert(type(k)=='string', "COLOR[name]: Need string")
     errorf("COLOR[name]:  No color '%s'",k)
 end,__metatable=true})
+
+COLOR.Reds=c.Reds
+COLOR.Flames=c.Flames
+COLOR.Oranges=c.Oranges
+COLOR.Yellows=c.Yellows
+COLOR.Apples=c.Apples
+COLOR.Kellys=c.Kellys
+COLOR.Greens=c.Greens
+COLOR.Jungles=c.Jungles
+COLOR.Cyans=c.Cyans
+COLOR.Ices=c.Ices
+COLOR.Seas=c.Seas
+COLOR.Blues=c.Blues
+COLOR.Purples=c.Purples
+COLOR.Violets=c.Violets
+COLOR.Magentas=c.Magentas
+COLOR.Wines=c.Wines
+COLOR.Darks=c.Darks
+COLOR.Lights=c.Lights
+COLOR.Translucents=c.Translucents
+
+for i=1,5 do
+    COLOR[i]={
+        Red=c.Reds[i],       Flame=c.Flames[i],   Orange=c.Oranges[i],
+        Yellow=c.Yellows[i], Apple=c.Apples[i],   Kelly=c.Kellys[i],
+        Green=c.Greens[i],   Jungle=c.Jungles[i], Cyan=c.Cyans[i],
+        Ice=c.Ices[i],       Sea=c.Seas[i],       Blue=c.Blues[i],
+        Purple=c.Purples[i], Violet=c.Violets[i], Magenta=c.Magentas[i],
+        Wine=c.Wines[i],     Dark=c.Darks[i],     Light=c.Lights[i],
+        Translucent=c.Translucents[i],
+    }
+end
+
+COLOR.HEX=HEX
 
 ---Convert HSV to RGB
 ---@param h number Color type
