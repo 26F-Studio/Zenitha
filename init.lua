@@ -1038,7 +1038,7 @@ function love.errorhandler(msg)
         -- Write messages to log file
         love.filesystem.append('error.log',
             os.date("%Y/%m/%d %A %H:%M:%S\n")..
-            #errData.." crash(es) "..love.system.getOS().."-"..versionText.."  scene: "..sceneStack.."\n"..
+            #errData.." crash(es) "..SYSTEM.."-"..versionText.."  scene: "..sceneStack.."\n"..
             table.concat(err,"\n",1,c-2).."\n\n"
         )
 
@@ -1071,7 +1071,7 @@ function love.errorhandler(msg)
             setFont(100,'_norm') gc_print(":(",100,0,0,1.2)
             setFont(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
             setFont(20,'_norm') gc.printf(err[1],100,330,SCR.w/k-200)
-            gc.print(love.system.getOS().."-"..versionText.."\nScene stack:"..sceneStack,100,640)
+            gc.print(SYSTEM.."-"..versionText.."\nScene stack:"..sceneStack,100,640)
             gc.print("TRACEBACK",100,430)
             for i=4,#err-2 do
                 gc_print(err[i],100,380+20*i)
