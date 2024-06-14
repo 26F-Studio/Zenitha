@@ -1,7 +1,8 @@
 ---@enum (key) Zenitha.MessageType
 local msgStyle={
     info={
-        color={COLOR.hex"3575F0"},
+        backColor={COLOR.HEX"3575F0"},
+        textColor={COLOR.HEX"FFFFFF"},
         canvas=GC.load{40,40,
             {'setCL',1,1,1},
             {'setLW',2},
@@ -11,7 +12,8 @@ local msgStyle={
         },
     },
     check={
-        color={COLOR.hex"4FB666"},
+        backColor={COLOR.HEX"4FB666"},
+        textColor={COLOR.HEX"FFFFFF"},
         canvas=GC.load{40,40,
             {'setLW',6},
             {'setCL',1,1,1},
@@ -19,7 +21,8 @@ local msgStyle={
         },
     },
     warn={
-        color={COLOR.hex"D2A100"},
+        backColor={COLOR.HEX"D2A100"},
+        textColor={COLOR.HEX"FFFFFF"},
         canvas=GC.load{40,40,
             {'setCL',1,1,1},
             {'setLW',3},
@@ -30,7 +33,8 @@ local msgStyle={
         },
     },
     error={
-        color={COLOR.hex"CF4949"},
+        backColor={COLOR.HEX"CF4949"},
+        textColor={COLOR.HEX"FFFFFF"},
         canvas=GC.load{40,40,
             {'setLW',6},
             {'setCL',1,1,1},
@@ -39,7 +43,8 @@ local msgStyle={
         },
     },
     other={
-        color={COLOR.hex"787878"},
+        backColor={COLOR.HEX"787878"},
+        textColor={COLOR.HEX"FFFFFF"},
     },
 }
 
@@ -50,22 +55,25 @@ local MSG={}
 
 ---Add a new icon (and color) for message popup
 ---@param name string
----@param color Zenitha.Color
+---@param backColor Zenitha.Color
 ---@param canvas? love.Canvas
-function MSG.addType(name,color,canvas)
+function MSG.addCategory(name,backColor,textColor,canvas)
     assert(type(name)=='string',"MSG.addType: name need string")
-    assert(type(color)=='table' and #color>=3,"MSG.addType: color need {r,g,b}")
-    msgStyle[name]={color=color,canvas=canvas}
+    assert(type(backColor)=='table' and #backColor>=3,"MSG.addType: color need {r,g,b}")
+    assert(type(textColor)=='table' and #textColor>=3,"MSG.addType: color need {r,g,b}")
+    msgStyle[name]={backColor=backColor,textColor=textColor,canvas=canvas}
 end
 
 ---Create a new message popup at up-left corner
----@param icon Zenitha.MessageType|love.Canvas
+---@param icon Zenitha.MessageType|string|love.Canvas
 ---@param str string
 ---@param time? number
 function MSG.new(icon,str,time)
-    local color=msgStyle.other.color
+    local backColor=msgStyle.other.backColor
+    local textColor=msgStyle.other.textColor
     if type(icon)=='string' then
-        color=msgStyle[icon].color or color
+        backColor=msgStyle[icon].backColor or backColor
+        textColor=msgStyle[icon].textColor or textColor
         icon=msgStyle[icon].canvas
     end
     local text=GC.newText(FONT.get(30),str)
@@ -78,7 +86,8 @@ function MSG.new(icon,str,time)
         endTime=.26,
         time=time or 3,
 
-        color=color,
+        backColor=backColor,
+        textColor=textColor,
         text=text,icon=icon,
         w=w,h=h,k=k,
         y=-h,
@@ -146,11 +155,12 @@ function MSG._draw()
             GC.translate(3+SCR.safeX,m.y)
             GC.scale(m.k)
 
-            GC.setColor(m.color[1]*1.26,m.color[2]*1.26,m.color[3]*1.26,a*.042)
+            local c=m.backColor
+            GC.setColor(c[1]*1.26,c[2]*1.26,c[3]*1.26,a*.042)
             GC.setLineWidth(15) GC.rectangle('line',0,0,m.w,m.h,8)
             GC.setLineWidth(10) GC.rectangle('line',0,0,m.w,m.h,8)
             GC.setLineWidth(6)  GC.rectangle('line',0,0,m.w,m.h,8)
-            GC.setColor(m.color[1],m.color[2],m.color[3],a)
+            GC.setColor(c[1],c[2],c[3],a)
             GC.rectangle('fill',0,0,m.w,m.h,8)
             GC.setColor(1,1,1,a)
             local x=10
@@ -158,6 +168,9 @@ function MSG._draw()
                 GC.mDraw(m.icon,24,24,nil,.8)
                 x=x+40
             end
+
+            local tc=m.textColor
+            GC.setColor(tc[1],tc[2],tc[3],a)
             GC.draw(m.text,x,6)
             GC.pop()
         end

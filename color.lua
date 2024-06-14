@@ -10,8 +10,8 @@ local max,min=math.max,math.min
 ---Convert hex string to color
 ---@param str string
 ---@return number, number, number, number?
-local function hex(str)
-    assert(type(str)=='string',"COLOR.hex(str): Need string")
+local function HEX(str)
+    assert(type(str)=='string',"COLOR.HEX(str): Need string")
     str=str:match('#?(%x%x?%x?%x?%x?%x?%x?%x?)') or '000000'
     local r=(tonumber(str:sub(1,2),16) or 0)/255
     local g=(tonumber(str:sub(3,4),16) or 0)/255
@@ -21,28 +21,28 @@ local function hex(str)
 end
 
 local c={
-    Reds=     {{hex'3D0401'},{hex'83140F'},{hex'FF3126'},{hex'FF7B74'},{hex'FFC0BC'}},
-    Flames=   {{hex'3B1100'},{hex'802806'},{hex'FA5311'},{hex'F98D64'},{hex'FAC5B0'}},
-    Oranges=  {{hex'341D00'},{hex'7B4501'},{hex'F58B00'},{hex'F4B561'},{hex'F5DAB8'}},
-    Yellows=  {{hex'2E2500'},{hex'755D00'},{hex'F5C400'},{hex'F5D763'},{hex'F5EABD'}},
-    Apples=   {{hex'202A02'},{hex'536D06'},{hex'AFE50B'},{hex'C5E460'},{hex'D9E5B2'}},
-    Kellys=   {{hex'0C2800'},{hex'236608'},{hex'4ED415'},{hex'8ADE67'},{hex'C2E5B4'}},
-    Greens=   {{hex'002A06'},{hex'096017'},{hex'1DC436'},{hex'69D37A'},{hex'B0E2B8'}},
-    Jungles=  {{hex'002E2C'},{hex'00635E'},{hex'00C1B7'},{hex'5BD2CA'},{hex'B0E1DE'}},
-    Cyans=    {{hex'032733'},{hex'135468'},{hex'30A3C6'},{hex'72C1D7'},{hex'B1DBE8'}},
-    Ices=     {{hex'0C2437'},{hex'194A73'},{hex'318FDB'},{hex'6FAEE0'},{hex'A9CAE4'}},
-    Seas=     {{hex'001F40'},{hex'014084'},{hex'007BFF'},{hex'519CEF'},{hex'B0CCEB'}},
-    Blues=    {{hex'0D144F'},{hex'212B8F'},{hex'4053FB'},{hex'7C87F7'},{hex'B2B8F4'}},
-    Purples=  {{hex'1D1744'},{hex'332876'},{hex'5947CC'},{hex'897CE1'},{hex'B7ADF7'}},
-    Violets=  {{hex'2A1435'},{hex'54296C'},{hex'9F4BC9'},{hex'B075CB'},{hex'C8A7D8'}},
-    Magentas= {{hex'37082B'},{hex'731A5D'},{hex'DE3AB5'},{hex'DF74C3'},{hex'DEA9D1'}},
-    Wines=    {{hex'460813'},{hex'871126'},{hex'F52249'},{hex'F56D87'},{hex'F5B4C0'}},
-    Darks=    {{hex'000000'},{hex'060606'},{hex'101010'},{hex'3C3C3C'},{hex'7A7A7A'}},
-    Lights=   {{hex'B8B8B8'},{hex'DBDBDB'},{hex'FDFDFD'},{hex'FEFEFE'},{hex'FFFFFF'}},
-    Translucents={{hex'060606CC'},{hex'3C3C3CCC'},{hex'7A7A7ACC'},{hex'DBDBDBCC'},{hex'FEFEFECC'}},
+    Reds=     {{HEX'3D0401'},{HEX'83140F'},{HEX'FF3126'},{HEX'FF7B74'},{HEX'FFC0BC'}},
+    Flames=   {{HEX'3B1100'},{HEX'802806'},{HEX'FA5311'},{HEX'F98D64'},{HEX'FAC5B0'}},
+    Oranges=  {{HEX'341D00'},{HEX'7B4501'},{HEX'F58B00'},{HEX'F4B561'},{HEX'F5DAB8'}},
+    Yellows=  {{HEX'2E2500'},{HEX'755D00'},{HEX'F5C400'},{HEX'F5D763'},{HEX'F5EABD'}},
+    Apples=   {{HEX'202A02'},{HEX'536D06'},{HEX'AFE50B'},{HEX'C5E460'},{HEX'D9E5B2'}},
+    Kellys=   {{HEX'0C2800'},{HEX'236608'},{HEX'4ED415'},{HEX'8ADE67'},{HEX'C2E5B4'}},
+    Greens=   {{HEX'002A06'},{HEX'096017'},{HEX'1DC436'},{HEX'69D37A'},{HEX'B0E2B8'}},
+    Jungles=  {{HEX'002E2C'},{HEX'00635E'},{HEX'00C1B7'},{HEX'5BD2CA'},{HEX'B0E1DE'}},
+    Cyans=    {{HEX'032733'},{HEX'135468'},{HEX'30A3C6'},{HEX'72C1D7'},{HEX'B1DBE8'}},
+    Ices=     {{HEX'0C2437'},{HEX'194A73'},{HEX'318FDB'},{HEX'6FAEE0'},{HEX'A9CAE4'}},
+    Seas=     {{HEX'001F40'},{HEX'014084'},{HEX'007BFF'},{HEX'519CEF'},{HEX'B0CCEB'}},
+    Blues=    {{HEX'0D144F'},{HEX'212B8F'},{HEX'4053FB'},{HEX'7C87F7'},{HEX'B2B8F4'}},
+    Purples=  {{HEX'1D1744'},{HEX'332876'},{HEX'5947CC'},{HEX'897CE1'},{HEX'B7ADF7'}},
+    Violets=  {{HEX'2A1435'},{HEX'54296C'},{HEX'9F4BC9'},{HEX'B075CB'},{HEX'C8A7D8'}},
+    Magentas= {{HEX'37082B'},{HEX'731A5D'},{HEX'DE3AB5'},{HEX'DF74C3'},{HEX'DEA9D1'}},
+    Wines=    {{HEX'460813'},{HEX'871126'},{HEX'F52249'},{HEX'F56D87'},{HEX'F5B4C0'}},
+    Darks=    {{HEX'000000'},{HEX'060606'},{HEX'101010'},{HEX'3C3C3C'},{HEX'7A7A7A'}},
+    Lights=   {{HEX'B8B8B8'},{HEX'DBDBDB'},{HEX'FDFDFD'},{HEX'FEFEFE'},{HEX'FFFFFF'}},
+    Translucents={{HEX'060606CC'},{HEX'3C3C3CCC'},{HEX'7A7A7ACC'},{HEX'DBDBDBCC'},{HEX'FEFEFECC'}},
 }
 local COLOR=setmetatable({
-    hex=hex,
+    HEX=HEX,
 
     DarkRed=    c.Reds[1],     darkRed=    c.Reds[2],     Red=    c.Reds[3],     lightRed=    c.Reds[4],     LightRed=    c.Reds[5],
     DarkFlame=  c.Flames[1],   darkFlame=  c.Flames[2],   Flame=  c.Flames[3],   lightFlame=  c.Flames[4],   LightFlame=  c.Flames[5],
