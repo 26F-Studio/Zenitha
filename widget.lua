@@ -485,7 +485,7 @@ function Widgets.button:release(_,_,k)
     end
 end
 function Widgets.button:drag(x,y)
-    if not self:isAbove(x,y) and self==WIDGET.sel then
+    if not self:isAbove(x,y) and WIDGET.sel==self then
         WIDGET.unFocus()
         self._pressed=false
     end
@@ -2387,9 +2387,10 @@ function WIDGET.c_pressKey(key)
     end
     return c_cache[hash]
 end
+
 --------------------------------------------------------------
 
----Get custom new widget (not guaranteed to work)
+---Create & Get custom new widget class (not guaranteed to work)
 ---@param name string
 ---@param parent string
 ---@return Zenitha.Widget.base
