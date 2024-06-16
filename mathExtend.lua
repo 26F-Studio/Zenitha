@@ -29,6 +29,58 @@ function MATH.sign(a)
     return a>0 and 1 or a<0 and -1 or 0
 end
 
+---Sum table in [1~#]
+---@param t number[]
+---@return number
+function MATH.sum(t)
+    local s=0
+    for i=1,#t do s=s+t[i] end
+    return s
+end
+
+---Sum table
+---@param t Map<number>
+---@return number
+function MATH.sumAll(t)
+    local s=0
+    for _,v in next,t do s=s+v end
+    return s
+end
+
+---STATISTIC
+---@param data number[]
+---@return number
+function MATH.average(data)
+    return MATH.sum(data)/#data
+end
+
+---STATISTIC
+---@param data number[]
+---@return number
+function MATH.median(data)
+    local t=TABLE.copy(data)
+    table.sort(t)
+    local n=#t/2
+    return n%1==0 and (t[n]+t[n+1])/2 or t[n+.5]
+end
+
+---STATISTIC
+---@param data number[]
+---@return number
+function MATH.totalSquareSum(data)
+    local avg=MATH.average(data)
+    local sum=0
+    for i=1,#data do
+        sum=sum+(data[i]-avg)^2
+    end
+    return sum
+end
+
+function MATH.variance(data)       return MATH.totalSquareSum(data)/#data     end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]
+function MATH.sampleVariance(data) return MATH.totalSquareSum(data)/(#data-1) end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]
+function MATH.stdDev(data)         return MATH.variance(data)^.5              end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]
+function MATH.sampleStdDev(data)   return MATH.sampleVariance(data)^.5        end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]
+
 ---Round a number with specified unit
 ---@param n number
 ---@param u number
@@ -93,7 +145,7 @@ end
 ---@param fList number[] positive numbers
 ---@return integer
 function MATH.randFreq(fList)
-    local sum=TABLE.sum(fList)
+    local sum=MATH.sum(fList)
     local r=rnd()*sum
     for i=1,#fList do
         r=r-fList[i]
@@ -106,7 +158,7 @@ end
 ---@param fList Map<number> positive numbers
 ---@return integer
 function MATH.randFreqAll(fList)
-    local sum=TABLE.sumAll(fList)
+    local sum=MATH.sumAll(fList)
     local r=rnd()*sum
     for k,v in next,fList do
         r=r-v

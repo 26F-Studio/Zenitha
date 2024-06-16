@@ -58,17 +58,41 @@ function TABLE.copyAll(org,depth)
     return L
 end
 
+---Get keys of a table as a list
+---@param org table
+function TABLE.getKeys(org)
+    local L={}
+    local n=0
+    for k in next,org do
+        n=n+1
+        L[n]=k
+    end
+    return L
+end
+
+---Get values of a table as a list
+---@param org table
+function TABLE.getValues(org)
+    local L={}
+    local n=0
+    for _,v in next,org do
+        n=n+1
+        L[n]=v
+    end
+    return L
+end
+
 ---Create a table of two lists connected
 ---@generic T1,T2
 ---@param L1 T1[] list 1
 ---@param L2 T2[] list 2
 ---@return (T1|T2)[]
 function TABLE.combine(L1,L2)
-    local l={}
+    local L={}
     local l0=#L1
-    for i=1,l0 do l[i]=L1[i] end
-    for i=1,#L2 do l[l0+i]=L2[i] end
-    return l
+    for i=1,l0 do L[i]=L1[i] end
+    for i=1,#L2 do L[l0+i]=L2[i] end
+    return L
 end
 
 ---Create a rotated copy of a matrix
@@ -580,26 +604,6 @@ function TABLE.countAll(t,val)
         end
     end
     return count
-end
-
----Sum table in [1~#]
----@param t number[]
----@return number
-function TABLE.sum(t)
-    local s=0
-    for i=1,#t do
-        s=s+t[i]
-    end
-    return s
-end
-
----Sum table
----@param t Map<number>
----@return number
-function TABLE.sumAll(t)
-    local s=0
-    for _,v in next,t do s=s+v end
-    return s
 end
 
 ---Return next value of [1~#] (by value) (like _G.next)
