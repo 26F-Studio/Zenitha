@@ -2,6 +2,7 @@
 ---@field text? string
 ---@field x? number
 ---@field y? number
+---@field align? Zenitha.TextAlignMode|{[1]:number, [2]:number}
 ---@field r? number
 ---@field g? number
 ---@field b? number
@@ -114,6 +115,18 @@ function TEXT:clear()
     self._texts={}
 end
 
+---@enum (key) Zenitha.TextAlignMode
+local alignModes={
+    left={0,.5},
+    right={1,.5},
+    top={.5,0},
+    bottom={.5,1},
+    center={.5,.5},
+    topleft={0,0},
+    topright={1,0},
+    bottomleft={0,1},
+    bottomright={1,1},
+}
 ---Add text to container
 ---@param data Zenitha.TextAnimArg
 ---## Example
@@ -121,6 +134,7 @@ end
 ---default={
 ---    text="Example Text",
 ---    x=0,y=0,
+---    align={.5,.5},
 ---    r=1,g=1,b=1,a=1,
 ---    fontSize=40,
 ---    fontType=nil,
@@ -136,6 +150,7 @@ function TEXT:add(data)
     local T={
         text=GC.newText(FONT.get(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),
         x=data.x or 0,y=data.y or 0,
+        align=alignModes[data.align] or data.align or alignModes.center,
         r=data.r,g=data.g,b=data.b,a=data.a,
         duration=data.duration or 1,
         inPoint=data.inPoint or 0.2,
@@ -144,8 +159,9 @@ function TEXT:add(data)
         draw=assertf(textFX[data.style or 'appear'],"No text type: %s",data.style),
         arg=data.styleArg,
     }
+    assert(type(T.align)=='table',"Text.add: field align need string or {u,v}")
     T._t=0 -- Timer
-    T._ox,T._oy=T.text:getWidth()*.5,T.text:getHeight()*.5
+    T._ox,T._oy=T.text:getWidth()*T.align[1],T.text:getHeight()*T.align[2]
     if type(data.color)=='string' then data.color=COLOR[data.color] end
     if data.color then T.r,T.g,T.b,T.a=data.color[1],data.color[2],data.color[3],data.color[4] end
     T.r=T.r or 1
