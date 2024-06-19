@@ -264,7 +264,7 @@ function Tween:kill()
     preAnimSet[self]=nil
     updAnimSet[self]=nil
     tagAnimSet[self]=nil
-    unqAnimMap[self.unqTag]=nil
+    if self.unqTag then unqAnimMap[self.unqTag]=nil end
     self.onKill()
 end
 
