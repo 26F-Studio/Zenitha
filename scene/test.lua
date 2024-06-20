@@ -10,7 +10,7 @@ local function _push(msg)
     timer=1
 end
 
-function scene.enter()
+function scene.load()
     backCounter=5
     list={}
     timer=0

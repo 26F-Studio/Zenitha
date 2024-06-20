@@ -2,16 +2,18 @@
 ---@field widgetList? Zenitha.WidgetArg[]|Zenitha.Widget.base[]
 ---@field scrollHeight? number|nil
 ---
----@field enter? fun()
----@field leave? fun()
+---@field load? fun(fromScene:string, ...)  Called when scene loaded
+---@field enter? fun(fromScene:string, ...) Called when scene swapping finished
+---@field leave? fun(toScene:string, ...)   Called when scene swapping started
+---@field unload? fun(toScene:string, ...)  Called when scene unloaded
 ---@field mouseDown? fun(x:number, y:number, k:number, presses:number):boolean? Able to interrupt cursor & widget control
 ---@field mouseMove? fun(x:number, y:number, dx:number, dy:number)
 ---@field mouseUp? fun(x:number, y:number, k:number, presses:number)
 ---@field mouseClick? fun(x:number, y:number, k:number, dist:number, presses:number)
 ---@field wheelMove? fun(dx:number, dy:number):boolean? Able to interrupt WIDGET._scroll
----@field touchDown? fun(x:number, y:number, id:userdata, pressure:number)
----@field touchUp? fun(x:number, y:number, id:userdata, pressure:number)
----@field touchMove? fun(x:number, y:number, dx:number, dy:number, id:userdata, pressure:number)
+---@field touchDown? fun(x:number, y:number, id:userdata, pressure?:number)
+---@field touchUp? fun(x:number, y:number, id:userdata, pressure?:number)
+---@field touchMove? fun(x:number, y:number, dx:number, dy:number, id:userdata, pressure?:number)
 ---@field touchClick? fun(x:number, y:number, id:userdata, dist:number)
 ---@field keyDown? fun(key:love.KeyConstant, isRep:boolean, scancode:love.Scancode):boolean? Able to interrupt cursor & widget control
 ---@field keyUp? fun(key:love.KeyConstant, scancode:love.Scancode)
@@ -30,13 +32,13 @@
 ---@class Zenitha.SceneSwap
 ---@field duration number
 ---@field timeChange number
----@field draw function called with timeRemain(duration~0)
+---@field draw function Called with timeRemain(duration~0)
 
 ---@type table<string, Zenitha.Scene>
 local scenes={}
 
 local eventNames={
-    'enter','leave',
+    'load','enter','leave','unload',
 
     'mouseDown','mouseMove','mouseUp','mouseClick','wheelMove',
     'touchDown','touchMove','touchUp','touchClick',
@@ -58,6 +60,7 @@ local SCN={
 
     swapping=false, -- If Swapping
     state={
+        goingNew=false,   -- If going to new scene (for separating .go and .swapTo when swapping)
         target=false,     -- Swapping target
         swapStyle=false,  -- Swapping style
         draw=false,       -- Swap draw func
@@ -192,37 +195,49 @@ function SCN._swapUpdate(dt)
     local S=SCN.state
     S.timeRem=S.timeRem-dt
     if S.timeRem<S.timeChange and S.timeRem+dt>=S.timeChange then
-        -- Actually load scene at this moment
-        SCN.stack[#SCN.stack]=S.target
-        SCN.cur=S.target
+        -- Actually change scene at this moment
+        if S.goingNew then
+            SCN.prev=SCN.cur
+            SCN._push()
+            S.goingNew=false
+        end
+
+        local scn=scenes[SCN.prev]
+        if scn and scn.unload then scn.unload(SCN.prev,unpack(SCN.args)) end
+
         SCN._load(S.target)
-        SCN.mainTouchID=nil
     end
     if S.timeRem<0 then
         SCN.swapping=false
+        local scn=scenes[SCN.cur]
+        if scn.enter then scn.enter(SCN.cur,unpack(SCN.args)) end
     end
 end
 
 ---Load a scene, replace all events and fresh scrolling, widgets
 ---@param name string
 function SCN._load(name)
-    love.keyboard.setTextInput(false)
+    SCN.stack[#SCN.stack]=name
+    SCN.cur=name
 
-    local S=scenes[name]
-    SCN.maxScroll=S.scrollHeight or 0
+    love.keyboard.setTextInput(false)
+    SCN.mainTouchID=nil
+
+    local scn=scenes[name]
+    SCN.maxScroll=scn.scrollHeight or 0
     SCN.curScroll=0
-    WIDGET._setWidgetList(S.widgetList)
+    WIDGET._setWidgetList(scn.widgetList)
     for i=1,#eventNames do
-        SCN[eventNames[i]]=S[eventNames[i]]
+        SCN[eventNames[i]]=scn[eventNames[i]]
     end
 
-    if S.enter then S.enter() end
+    if scn.load then scn.load(SCN.prev,unpack(SCN.args)) end
 end
 
 ---Push a scene to stack
 ---@param tar? string
 function SCN._push(tar)
-    table.insert(SCN.stack,tar or SCN.stack[#SCN.stack-1])
+    table.insert(SCN.stack,tar or '_')
 end
 
 ---Pop a scene from stack
@@ -237,8 +252,6 @@ end
 function SCN.swapTo(tar,swapStyle,...)
     if scenes[tar] then
         if not SCN.swapping then
-            SCN.prev=SCN.stack[#SCN.stack]
-
             swapStyle=swapStyle or defaultSwap
             if not swapStyles[swapStyle] then
                 MSG.new('error',"No swap style named '"..swapStyle.."'")
@@ -264,7 +277,7 @@ end
 function SCN.go(tar,swapStyle,...)
     if scenes[tar] then
         if not SCN.swapping then
-            SCN._push(SCN.stack[#SCN.stack] or '_')
+            SCN.state.goingNew=true
             SCN.swapTo(tar,swapStyle,...)
         end
     else
@@ -281,7 +294,7 @@ function SCN.back(swapStyle,...)
     local m=#SCN.stack
     if m>1 then
         -- Leave scene
-        if SCN.leave then SCN.leave() end
+        if SCN.leave then SCN.leave(SCN.stack[#SCN.stack-1],unpack(SCN.args)) end
 
         -- Poll&Back to previous Scene
         SCN.swapTo(SCN.stack[#SCN.stack-1],swapStyle,...)

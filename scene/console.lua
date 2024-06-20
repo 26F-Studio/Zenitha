@@ -658,7 +658,7 @@ setmetatable(userG.os,dangerousLibMeta)
 ---@type Zenitha.Scene
 local scene={}
 
-function scene.enter()
+function scene.load()
     outputBox.w,outputBox.h=SCR.w0-40,math.max(SCR.h0-120,20)
     inputBox.y,inputBox.w=math.max(SCR.h0-120,20)+20,SCR.w0-40
     outputBox:reset()
