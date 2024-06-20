@@ -24,7 +24,7 @@ local commands={} do
             details: an array of strings containing documents, shows when user types 'help [command]'.
     ]]
 
-    local cmdList={} -- List of all non-alias commands
+    local helpCmdList={} -- List of all non-alias commands, only for help command
 
     -- Basic
     commands.help={
@@ -45,8 +45,8 @@ local commands={} do
                 end
             else
                 -- help
-                for i=1,#cmdList do
-                    local cmd=cmdList[i]
+                for i=1,#helpCmdList do
+                    local cmd=helpCmdList[i]
                     local body=commands[cmd]
                     local color=body.builtin and COLOR.L or COLOR.lR
                     log(
@@ -568,16 +568,17 @@ local commands={} do
             body.builtin=true
         end
         if type(body)~='string' then
-            ins(cmdList,cmd)
+            ins(helpCmdList,cmd)
         end
     end
-    table.sort(cmdList)
+    table.sort(helpCmdList)
     TABLE.reIndex(commands)
 
     ---Add custom console command
     ---@param name string
     ---@param cmd function|{code:fun(str:string), description:string, details:string[], builtin:nil}
-    function ZENITHA.addConsoleCommand(name,cmd)
+    ---@param hidden? boolean
+    function ZENITHA.addConsoleCommand(name,cmd,hidden)
         assert(type(name)=='string',"CMD name need string")
         assert(not commands[name],"CMD already exists")
         if type(cmd)=='function' then cmd={code=cmd} end
@@ -587,8 +588,10 @@ local commands={} do
         assert(cmd.details==nil or type(cmd.details)=='table',"CMD.details need table if exists")
         assert(cmd.builtin==nil,"?")
         commands[name]=cmd
-        ins(cmdList,name)
-        table.sort(cmdList)
+        if not hidden then
+            ins(helpCmdList,name)
+            table.sort(helpCmdList)
+        end
     end
 end
 
