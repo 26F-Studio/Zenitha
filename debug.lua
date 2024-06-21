@@ -19,7 +19,7 @@ end
 ---Set metatable for _G, print messages when a new variable is created
 function DEBUG.runVarMonitor()
     setmetatable(_G,{__newindex=function(self,k,v)
-        print('>>'..k)
+        print(">>"..k)
         print(debug.traceback():match("\n.-\n\t(.-): "))
         rawset(self,k,v)
     end})

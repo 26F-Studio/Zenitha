@@ -1798,7 +1798,7 @@ function Widgets.textBox:draw()
                 gc_rectangle('fill',w-40+11,14,18,21)
             else
                 setFont(40,'_norm')
-                gc_mStr('?',w-40+21,-8)
+                gc_mStr("?",w-40+21,-8)
             end
         end
 
