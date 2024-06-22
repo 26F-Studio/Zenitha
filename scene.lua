@@ -196,8 +196,8 @@ function SCN._swapUpdate(dt)
     S.timeRem=S.timeRem-dt
     if S.timeRem<S.timeChange and S.timeRem+dt>=S.timeChange then
         -- Actually change scene at this moment
+        SCN.prev=SCN.cur
         if S.goingNew then
-            SCN.prev=SCN.cur
             SCN._push()
             S.goingNew=false
         end
