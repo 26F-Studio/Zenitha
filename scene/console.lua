@@ -522,17 +522,6 @@ local commands={} do
             "Usage: bg [bgName]",
         },
     }
-    commands.demo={
-        code=function()
-            SCN.go('_zenitha','none')
-        end,
-        description="Enter Zenitha demo scene",
-        details={
-            "Go to Zenitha's demo scene",
-            "",
-            "Usage: test",
-        },
-    }
     commands.test={
         code=function()
             SCN.go('_test','none')
