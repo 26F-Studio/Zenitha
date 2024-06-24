@@ -97,7 +97,7 @@ local sub,ins,rem=string.sub,table.insert,table.remove
 
 local SCN,SCR,xOy=SCN,SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
-local utf8=require('utf8')
+local utf8=require'utf8'
 
 local indexMeta={
     __index=function(L,k)

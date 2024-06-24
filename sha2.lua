@@ -35,7 +35,7 @@
 --    Input data should be provided as a binary string: either as a whole string or as a sequence of substrings (chunk-by-chunk loading, total length < 9*10^15 bytes).
 --    Result (SHA digest) is returned in hexadecimal representation as a string of lowercase hex digits.
 --    Simplest usage example:
---       local sha = require("sha2")
+--       local sha = require'sha2'
 --       local your_hash = sha.sha256("your string")
 --    See file "sha2_test.lua" for more examples.
 --
@@ -128,10 +128,10 @@ local library_name
 
 if is_LuaJIT then
    -- Assuming "bit" library is always available on LuaJIT
-   b = require"bit"
+   b = require'bit'
    library_name = "bit"
    -- "ffi" is intentionally disabled on some systems for safety reason
-   local LuaJIT_has_FFI, result = pcall(require, "ffi")
+   local LuaJIT_has_FFI, result = pcall(require, 'ffi')
    if LuaJIT_has_FFI then
       ffi = result
    end

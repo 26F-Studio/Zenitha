@@ -13,6 +13,10 @@ if love.system.getOS()=='Android' then
         p:close()
         if arch:find('v8') or arch:find('64') then
             _androidPlatform='arm64-v8a'
+        elseif arch:find('x86_64') then
+            _androidPlatform='x86_64'
+        elseif arch:find('x86') then
+            _androidPlatform='x86'
         end
     end
 end
@@ -34,7 +38,6 @@ return function(libName)
             loaded[libName]=true
         end
     end
-
     -- arg #2: if system is OS X, it's nil, otherwise it's 'libName'
     local success,res=pcall(_require,(not love.system.getOS()=='OS X' or nil) and libName)
     if success and res then

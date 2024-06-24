@@ -1,5 +1,5 @@
-local socket=require("socket")
-local JSON=require("Zenitha.json")
+local socket=require'socket'
+local JSON=require'Zenitha.json'
 
 local function printf(str,...) print(str:format(...)) end
 
