@@ -776,6 +776,10 @@ function scene.keyDown(key,isRep)
 end
 
 scene.widgetList={
+    WIDGET.new{type='button',pos={1,1},w=80,x=-60,y=-460,color='lR',fontSize=20,text="QUIT",  code=function() SCN.back() end},
+    WIDGET.new{type='button',pos={1,1},w=80,x=-60,y=-360,color='lG',fontSize=20,text="UP",    code=function() scene.keyDown('up') end},
+    WIDGET.new{type='button',pos={1,1},w=80,x=-60,y=-260,color='lY',fontSize=20,text="DOWN",  code=function() scene.keyDown('down') end},
+    WIDGET.new{type='button',pos={1,1},w=80,x=-60,y=-160,color='lC',fontSize=20,text="PASTE", code=function() inputBox:addText(love.system.getClipboardText() or "") end},
     outputBox,
     inputBox,
 }
