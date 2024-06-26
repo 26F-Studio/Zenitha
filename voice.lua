@@ -67,6 +67,7 @@ function VOC._update() end
 ---Initialize VOC lib (only once), must be called before use
 ---@param list table
 function VOC.init(list)
+    if not (love.audio and love.sound) then return end
     if initialized then
         MSG.new('info',"VOC.init: Attempt to initialize VLC lib twice")
         return

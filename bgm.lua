@@ -12,7 +12,7 @@
 ---@field highgainChanging boolean
 
 local audio=love.audio
-local effectsSupported=audio.isEffectsSupported()
+local effectsSupported=audio and audio.isEffectsSupported()
 local ins=table.insert
 
 ---@type string[]

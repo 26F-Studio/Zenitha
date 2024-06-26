@@ -1025,7 +1025,7 @@ function love.errorhandler(msg)
     print("\n"..table.concat(err,"\n",1,c-2))
 
     -- Reset something
-    love.audio.stop()
+    if love.audio and love.sound then love.audio.stop() end
     BGM.stop()
     gc.reset()
     SCR._resize(gc.getWidth(),gc.getHeight())
