@@ -1186,6 +1186,7 @@ end
 Widgets.slider_progress=setmetatable({
     type='slider_progress',
     w=100,h=10,
+    fillColor='L',
 
     text=false,
     image=false,
@@ -1199,6 +1200,7 @@ Widgets.slider_progress=setmetatable({
         'name',
         'pos',
         'x','y','w','h',
+        'fillColor',
 
         'labelPos',
         'labelDistance',
@@ -1258,7 +1260,7 @@ function Widgets.slider_progress:draw()
 
     gc_setColor(.5,.5,.5,.4+.1*HOV)
     gc_rectangle('fill',x,y-h*.5,w,h,h*.5)
-    gc_setColor(COLOR.L)
+    gc_setColor(self.fillColor)
     if w*self._pos>=1 then
         gc_rectangle('fill',x,y-h*.5,w*self._pos,h,h*.5)
     end
