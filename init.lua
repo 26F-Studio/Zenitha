@@ -1124,11 +1124,8 @@ function love.run()
     if #errData>0 then
         SCN.stack={'error'}
         SCN._load('error')
-    elseif SCN.scenes[firstScene] then
-        SCN.go(firstScene,'none')
-        SCN.scenes._zenitha=nil
     else
-        SCN.go(firstScene)
+        SCN.go(firstScene,'none')
     end
 
     -- Main loop
