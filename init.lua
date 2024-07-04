@@ -1419,7 +1419,7 @@ ZENITHA.globalEvent=setmetatable(globalEvent,{
 
 --------------------------------------------------------------
 
-SCN.add('_quit',{enter=love.event.quit})
+SCN.add('_quit',{load=love.event.quit})
 SCN.add('_console',require'Zenitha/scene/console')
 SCN.add('_zenitha',require'Zenitha/scene/demo')
 SCN.add('_test',require'Zenitha/scene/test')
