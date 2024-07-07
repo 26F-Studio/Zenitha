@@ -7,13 +7,13 @@
 ---@field g? number
 ---@field b? number
 ---@field a? number
----@field color? number[]
+---@field color? number[]|Zenitha.ColorStr
 ---@field fontSize? number
 ---@field fontType? string|nil
 ---@field duration? number
 ---@field inPoint? number
 ---@field outPoint? number
----@field style? string
+---@field style? Zenitha.TextAnimStyle
 ---@field styleArg? any
 
 local setColor=GC.setColor
@@ -23,8 +23,9 @@ local floor,rnd=math.floor,math.random
 local max,min=math.max,math.min
 local ins,rem=table.insert,table.remove
 
-local textFX={}
-function textFX.appear(T)
+---@enum (key) Zenitha.TextAnimStyle
+local textFX={
+appear=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
@@ -32,8 +33,8 @@ function textFX.appear(T)
         nil,nil,
         T._ox,T._oy
     )
-end
-function textFX.fly(T)
+end,
+fly=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x+(T._t-.5)^3*(T.arg or 300),T.y,
@@ -41,8 +42,8 @@ function textFX.fly(T)
         nil,nil,
         T._ox,T._oy
     )
-end
-function textFX.stretch(T)
+end,
+stretch=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
@@ -50,8 +51,8 @@ function textFX.stretch(T)
         max(1-T._t/T.inPoint,0)*(T.arg or 1)+1 or 1,1,
         T._ox,T._oy
     )
-end
-function textFX.drive(T)
+end,
+drive=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
@@ -60,8 +61,8 @@ function textFX.drive(T)
         T._ox,T._oy,
         (max(1-T._t/T.inPoint,0)*(T.driveX or 2)) or 0,0
     )
-end
-function textFX.spin(T)
+end,
+spin=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
@@ -69,8 +70,8 @@ function textFX.spin(T)
         nil,nil,
         T._ox,T._oy
     )
-end
-function textFX.flicker(T)
+end,
+flicker=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1)*rnd())
     draw(
         T.text,T.x,T.y,
@@ -78,8 +79,8 @@ function textFX.flicker(T)
         nil,nil,
         T._ox,T._oy
     )
-end
-function textFX.zoomout(T)
+end,
+zoomout=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
@@ -87,8 +88,8 @@ function textFX.zoomout(T)
         T._t^.5*(T.arg or .1)+1,nil,
         T._ox,T._oy
     )
-end
-function textFX.beat(T)
+end,
+beat=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y,
@@ -96,8 +97,8 @@ function textFX.beat(T)
         1+(T.arg or .5)*max(1-T._t/T.inPoint,0)^.6,nil,
         T._ox,T._oy
     )
-end
-function textFX.score(T)
+end,
+score=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
         T.text,T.x,T.y-0-T._t^.2*(T.arg or 30),
@@ -105,7 +106,8 @@ function textFX.score(T)
         nil,nil,
         T._ox,T._oy
     )
-end
+end,
+}
 
 ---@class Zenitha.Text
 local TEXT={_texts={}}
