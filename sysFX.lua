@@ -52,7 +52,8 @@ end
 ---@field wid number
 FX.line={}
 function FX.line:draw()
-    gc_setColor(1,1,1,self.a*(1-self.t))
+    gc_setColor(self.r,self.g,self.b,self.a*(1-self.t))
+    gc_setLineWidth(self.wid)
     gc_line(self.x1,self.y1,self.x2,self.y2)
 end
 function SYSFX.line(duration,x1,y1,x2,y2,wid,r,g,b,a)
