@@ -83,14 +83,15 @@ local easeTemplates={
 ---@field duration number default to 1
 ---@field time number used when no timeFunc
 ---@field loop false|'repeat'|'yoyo'
----@field loopCount number how many times to loop
+---@field loopCount number current loop number (start from 1)
+---@field totalLoop number the total number of times to loop
 ---@field flipMode boolean true when loop is `'yoyo'`, making time flow back and forth
 ---@field ease Zenitha.Tween.basicCurve[]
 ---@field tags Set<Zenitha.Tween.Tag>
 ---@field unqTag Zenitha.Tween.Tag
----@field private doFunc fun(t:number)
+---@field private doFunc fun(t:number, loopNo:number)
 ---@field private timeFunc? fun():number custom how time goes
----@field private onRepeat function
+---@field private onRepeat fun(loopNo:number)
 ---@field private onFinish function
 ---@field private onKill function
 local Tween={}
@@ -108,12 +109,12 @@ function Tween:setDo(doFunc)
     return self
 end
 
----Set onRepeat callback function
+---Set onRepeat callback function `onRepeat(finishedLoopCount)`
 ---@param func function
 ---@return Zenitha.Tween
 function Tween:setOnRepeat(func)
     assert(type(func)=='function',"[tween]:setOnRepeat(onRepeat): Need function")
-    -- assert(not self.running,"[tween]:setOnRepeat(func): Can't set ease when running")
+    -- assert(not self.running,"[tween]:setOnRepeat(func): Can't set OnRepeat when running")
     self.onRepeat=func
     return self
 end
@@ -123,7 +124,7 @@ end
 ---@return Zenitha.Tween
 function Tween:setOnFinish(func)
     assert(type(func)=='function',"[tween]:setOnFinish(onFinish): Need function")
-    -- assert(not self.running,"[tween]:setOnFinish(func): Can't set ease when running")
+    -- assert(not self.running,"[tween]:setOnFinish(func): Can't set OnFinish when running")
     self.onFinish=func
     return self
 end
@@ -133,7 +134,7 @@ end
 ---@return Zenitha.Tween
 function Tween:setOnKill(func)
     assert(type(func)=='function',"[tween]:setOnKill(onKill): Need function")
-    -- assert(not self.running,"[tween]:setOnKill(func): Can't set ease when running")
+    -- assert(not self.running,"[tween]:setOnKill(func): Can't set OnKill when running")
     self.onKill=func
     return self
 end
@@ -169,15 +170,16 @@ end
 
 ---Set Looping
 ---@param loopMode false|'repeat'|'yoyo'
----@param loopCount? number default to Infinity
+---@param totalLoop? number default to Infinity
 ---@return Zenitha.Tween
-function Tween:setLoop(loopMode,loopCount)
+function Tween:setLoop(loopMode,totalLoop)
     assert(not self.timeFunc,"[tween]:setLoop(loopMode): Looping and timeFunc can't exist together")
     assert(not loopMode or loopMode=='repeat' or loopMode=='yoyo',"[tween]:setLoop(loopMode): Need false|'repeat'|'yoyo'")
-    assert(not loopCount or type(loopCount)=='number' and loopCount>=0,"[tween]:setLoop(loopMode,loopCount): loopCount need >=0")
+    assert(not totalLoop or type(totalLoop)=='number' and totalLoop>=0,"[tween]:setLoop(loopMode,totalLoop): totalLoop need >=0")
     -- assert(not self.running,"[tween]:setLoop(loopMode): Can't set loop when running")
     self.loop=loopMode
-    self.loopCount=loopCount or 1e99
+    self.loopCount=1
+    self.totalLoop=totalLoop or 1e99
     self.flipMode=false
     return self
 end
@@ -192,7 +194,7 @@ function Tween:setTag(tag)
     return self
 end
 
----Set uniqueID (kill the others which has same uniqueID)
+---Set uniqueID (when start running, other active animations with same uniqueID will be killed)
 ---@param uniqueTag Zenitha.Tween.Tag
 ---@return Zenitha.Tween
 function Tween:setUnique(uniqueTag)
@@ -204,7 +206,7 @@ end
 ---Copy an animation ojbect (idk what this is for)
 ---@return Zenitha.Tween
 function Tween:copy()
-    local anim=TWEEN.new(NULL)
+    local anim=TWEEN.new()
     TABLE.update(anim,self,2)
     return anim
 end
@@ -246,12 +248,12 @@ function Tween:skip(simBound)
         else
             if self.loop=='repeat' then
                 self.time=self.duration
-                self.loopCount=1
+                self.loopCount=self.totalLoop
                 self:update(0)
             elseif self.loop=='yoyo' then
                 self.time=self.duration
                 self.flipMode=self.loopCount%2==1==self.flipMode
-                self.loopCount=1
+                self.loopCount=self.totalLoop
                 self:update(0)
             end
         end
@@ -285,7 +287,7 @@ function Tween:update(dt)
     if self.timeFunc then
         local t=self.timeFunc()
         if t then
-            self.doFunc(curveValue(clamp(self.flipMode and 1-t or t,0,1),self.ease))
+            self.doFunc(curveValue(clamp(self.flipMode and 1-t or t,0,1),self.ease),self.loopCount)
         else
             self.onFinish()
             self:kill()
@@ -293,15 +295,15 @@ function Tween:update(dt)
     else
         self.time=self.time+dt
         local t=min(self.time/self.duration,1)
-        self.doFunc(curveValue(self.flipMode and 1-t or t,self.ease))
+        self.doFunc(curveValue(self.flipMode and 1-t or t,self.ease),self.loopCount)
         if t>=1 then
-            if self.loop and self.loopCount>1 then
+            if self.loop and self.loopCount<self.totalLoop then
                 self.time=0
-                self.loopCount=self.loopCount-1
+                self.onRepeat(self.loopCount)
+                self.loopCount=self.loopCount+1
                 if self.loop=='yoyo' then
                     self.flipMode=not self.flipMode
                 end
-                self.onRepeat()
             else
                 self.onFinish()
                 self:kill()
@@ -316,14 +318,14 @@ end
 local TWEEN={}
 
 ---Create a new tween animation
----@param doFunc fun(t:number)
+---@param doFunc? fun(t:number, loopNo:number)
 ---@return Zenitha.Tween
 function TWEEN.new(doFunc)
-    assert(type(doFunc)=='function',"TWEEN.new(doFunc): Need function")
+    assert(doFunc==nil or type(doFunc)=='function',"TWEEN.new(doFunc): Need function")
     local anim=setmetatable({
         running=false,
         duration=1,
-        doFunc=doFunc,
+        doFunc=doFunc or NULL,
         ease=easeTemplates.InOutQuad,
         tags={},
         unqTag=nil,
