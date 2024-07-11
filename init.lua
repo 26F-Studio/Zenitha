@@ -1242,7 +1242,7 @@ function love.run()
                             gc.setLineWidth(1)
                             gc.line(x,0,x,SCR.h)
                             gc.line(0,y,SCR.w,y)
-                            GC.shadedPrint(floor(mx+.5)..","..floor(my+.5),x,y,'left',1,8)
+                            GC.strokePrint('full',1,COLOR.D,COLOR.L,floor(mx+.5)..","..floor(my+.5),x,y,'left')
                     end
                 gc_replaceTransform(SCR.origin)
                     WAIT._draw()

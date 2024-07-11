@@ -23,7 +23,7 @@ local GC=setmetatable({},{
 ---@param y number
 function GC.mStr(obj,x,y) printf(obj,x-1260,y,2520,'center') end
 
----Draw an obj with x=obj:getWidth()/2
+---Draw an object with x=obj:getWidth()/2
 ---@param obj love.Texture|love.Drawable
 ---@param x? number
 ---@param y? number
@@ -31,7 +31,7 @@ function GC.mStr(obj,x,y) printf(obj,x-1260,y,2520,'center') end
 ---@param k? number
 function GC.mDrawX(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end
 
----Draw an obj with y=obj:getWidth()/2
+---Draw an object with y=obj:getWidth()/2
 ---@param obj love.Texture|love.Drawable
 ---@param x? number
 ---@param y? number
@@ -39,7 +39,7 @@ function GC.mDrawX(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end
 ---@param k? number
 function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end
 
----Draw an obj with both middle X & Y
+---Draw an object with both middle X & Y
 ---@param obj love.Texture|love.Drawable
 ---@param x? number
 ---@param y? number
@@ -47,7 +47,7 @@ function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end
 ---@param k? number
 function GC.mDraw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
 
----Draw an obj with both middle X & Y
+---Draw an object with both middle X & Y
 ---@param obj love.Texture|love.Drawable
 ---@param x? number
 ---@param y? number
@@ -58,7 +58,7 @@ function GC.mDrawQX(obj,quad,x,y,a,k)
     draw(obj,quad,x,y,a,k,nil,w*.5,h*.5)
 end
 
----Draw an obj with both middle X & Y
+---Draw an object with both middle X & Y
 ---@param obj love.Texture|love.Drawable
 ---@param x? number
 ---@param y? number
@@ -69,7 +69,7 @@ function GC.mDrawQY(obj,quad,x,y,a,k)
     draw(obj,quad,x,y,a,k,nil,w*.5,h*.5)
 end
 
----Draw an obj with both middle X & Y
+---Draw an object with both middle X & Y
 ---@param obj love.Texture|love.Drawable
 ---@param x? number
 ---@param y? number
@@ -131,69 +131,76 @@ function GC.safePrintf(...)
     return pcall(printf,...)
 end
 
----Draw an obj with little bias
+---Draw an offset stroke based on the specified object (extended love.gc.draw)
+---@param strokeMode 'side'|'corner'|'full' other values will be treated as 'full'
+---@param d number
 ---@param obj love.Texture|love.Drawable
 ---@param x number
 ---@param y number
----@param a? number
----@param k? number
----@param d number
----@param shadeCount 4|8
-function GC.outDraw(obj,x,y,a,k,d,shadeCount)
-    local w,h=obj:getWidth()*.5,obj:getHeight()*.5
-    draw(obj,x-d,y-d,a,k,nil,w,h)
-    draw(obj,x-d,y+d,a,k,nil,w,h)
-    draw(obj,x+d,y-d,a,k,nil,w,h)
-    draw(obj,x+d,y+d,a,k,nil,w,h)
-    if shadeCount==8 then
-        draw(obj,x-d,y,a,k,nil,w,h)
-        draw(obj,x+d,y,a,k,nil,w,h)
-        draw(obj,x,y-d,a,k,nil,w,h)
-        draw(obj,x,y+d,a,k,nil,w,h)
-    elseif shadeCount~=4 then
-        errorf("GC.outDraw(...,shadeCount): Need 4 or 8, got %s",shadeCount)
+---@param r? number rotation
+---@param sx? number scale
+---@param sy? number scale
+---@param ox? number offset
+---@param oy? number offset
+---@param kx? number shear
+---@param ky? number shear
+function GC.strokeDraw(strokeMode,d,obj,x,y,r,sx,sy,ox,oy,kx,ky)
+    if strokeMode~='corner' then
+        draw(obj,x-d,y,r,sx,sy,ox,oy,kx,ky)
+        draw(obj,x+d,y,r,sx,sy,ox,oy,kx,ky)
+        draw(obj,x,y-d,r,sx,sy,ox,oy,kx,ky)
+        draw(obj,x,y+d,r,sx,sy,ox,oy,kx,ky)
+    end
+    if strokeMode~='side' then
+        d=d/1.4142135623730951
+        draw(obj,x-d,y-d,r,sx,sy,ox,oy,kx,ky)
+        draw(obj,x-d,y+d,r,sx,sy,ox,oy,kx,ky)
+        draw(obj,x+d,y-d,r,sx,sy,ox,oy,kx,ky)
+        draw(obj,x+d,y+d,r,sx,sy,ox,oy,kx,ky)
     end
 end
 
----Print a string with shade around
----@param str string|number
+---Print text with stroke (extended love.gc.printf)
+---@param strokeMode? 'side'|'corner'|'full' other values will be treated as 'full'
+---@param d number
+---@param strokeColor Zenitha.Color Stroke color
+---@param textColor? Zenitha.Color Center color (leave nil to disable text)
+---@param str string
 ---@param x number
 ---@param y number
----@param mode 'center'|'right'|'left'
----@param d number
----@param shadeCount 4|8
----@param c1? Zenitha.Color Shade color
----@param c2? Zenitha.Color Center color
-function GC.shadedPrint(str,x,y,mode,d,shadeCount,c1,c2)
+---@param align? love.AlignMode
+---@param r? number rotation
+---@param sx? number scale
+---@param sy? number scale
+---@param ox? number offset
+---@param oy? number offset
+---@param kx? number shear
+---@param ky? number shear
+function GC.strokePrint(strokeMode,d,strokeColor,textColor,str,x,y,align,r,sx,sy,ox,oy,kx,ky)
     local w=1280
-    if mode=='center' then
+    if align=='center' then
         x=x-w*.5
-    elseif mode=='right' then
+    elseif align=='right' then
         x=x-w
     end
-    if not d then d=1 end
-    setColor(c1 or COLOR.D)
-    if shadeCount==4 then
-        d=d/1.4
-        printf(str,x-d,y-d,w,mode)
-        printf(str,x-d,y+d,w,mode)
-        printf(str,x+d,y-d,w,mode)
-        printf(str,x+d,y+d,w,mode)
-    elseif shadeCount==8 then
-        printf(str,x-d,y,w,mode)
-        printf(str,x+d,y,w,mode)
-        printf(str,x,y-d,w,mode)
-        printf(str,x,y+d,w,mode)
-        d=d/1.4
-        printf(str,x-d,y-d,w,mode)
-        printf(str,x-d,y+d,w,mode)
-        printf(str,x+d,y-d,w,mode)
-        printf(str,x+d,y+d,w,mode)
-    else
-        errorf("GC.shadedPrint(...,shadeCount,...): Need 4 or 8, got %s",shadeCount)
+    setColor(strokeColor or COLOR.L)
+    if strokeMode~='corner' then
+        printf(str,x-d,y,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x+d,y,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x,y-d,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x,y+d,w,align,r,sx,sy,ox,oy,kx,ky)
     end
-    setColor(c2 or COLOR.L)
-    printf(str,x,y,w,mode)
+    if strokeMode~='side' then
+        d=d/1.4142135623730951
+        printf(str,x-d,y-d,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x-d,y+d,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x+d,y-d,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x+d,y+d,w,align,r,sx,sy,ox,oy,kx,ky)
+    end
+    if textColor then
+        setColor(textColor)
+        printf(str,x,y,w,align,r,sx,sy,ox,oy,kx,ky)
+    end
 end
 
 ---Draw a rectangle, but with middle point
@@ -610,8 +617,8 @@ do -- function GC.load(L), GC.execute(t)
         mDrawX=   'mDrawX',
         mDrawY=   'mDrawY',
         mDraw=    'mDraw',
-        outDraw=  'outDraw',
-        sdPrint=  'shadedPrint',
+        stDraw=   'strokeDraw',
+        stPrint=  'strokePrint',
 
         draw=     'draw',
         line=     'line',
