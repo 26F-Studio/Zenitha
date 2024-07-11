@@ -2097,6 +2097,12 @@ function WIDGET._reset()
     end
 end
 
+function WIDGET._setupWidgetListMeta(list)
+    if getmetatable(list)~=indexMeta then
+        setmetatable(list,indexMeta)
+    end
+end
+
 ---Set WIDGET.active to widget list (called by Zenitha when scene changed)
 ---@param list Zenitha.Widget.base[]
 function WIDGET._setWidgetList(list)
@@ -2106,12 +2112,6 @@ function WIDGET._setWidgetList(list)
     if list then
         local x,y=xOy:inverseTransformPoint(love.mouse.getPosition())
         WIDGET._cursorMove(x,y,'init')
-
-        -- Set metatable for new widget lists
-        if getmetatable(list)~=indexMeta then
-            setmetatable(list,indexMeta)
-        end
-
         WIDGET._reset()
     end
 end

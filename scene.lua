@@ -147,6 +147,7 @@ function SCN.add(name,scene)
     assertf(not scenes[name],"SCN.add(name,scene): scene '%s' already exists",name)
 
     if scene.widgetList==nil then scene.widgetList={} end
+    WIDGET._setupWidgetListMeta(scene.widgetList)
 
     -- Check each field in scene object
     for k in next,scene do

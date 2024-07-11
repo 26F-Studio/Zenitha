@@ -1,8 +1,8 @@
 local kb=love.keyboard
 local ins,rem=table.insert,table.remove
 
-local outputBox=WIDGET.new{type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25,fixContent=true}
-local inputBox=WIDGET.new{type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
+local outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25,fixContent=true}
+local inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
 
 -- Console Log
 local function log(str) outputBox:push(str) end
@@ -776,10 +776,10 @@ function scene.keyDown(key,isRep)
 end
 
 scene.widgetList={
-    WIDGET.new{type='button',pos={1,1},w=80,x=-60,y=-460,color='lR',fontSize=20,text="QUIT",  code=function() SCN.back() end},
-    WIDGET.new{type='button',pos={1,1},w=80,x=-60,y=-360,color='lG',fontSize=20,text="UP",    code=function() scene.keyDown('up') end},
-    WIDGET.new{type='button',pos={1,1},w=80,x=-60,y=-260,color='lY',fontSize=20,text="DOWN",  code=function() scene.keyDown('down') end},
-    WIDGET.new{type='button',pos={1,1},w=80,x=-60,y=-160,color='lC',fontSize=20,text="PASTE", code=function() inputBox:addText(love.system.getClipboardText() or "") end},
+    WIDGET.new{type='button',name='quit', pos={1,1},w=80,x=-60,y=-460,color='lR',fontSize=20,text="QUIT",  code=function() SCN.back() end},
+    WIDGET.new{type='button',name='up',   pos={1,1},w=80,x=-60,y=-360,color='lG',fontSize=20,text="UP",    code=function() scene.keyDown('up') end},
+    WIDGET.new{type='button',name='down', pos={1,1},w=80,x=-60,y=-260,color='lY',fontSize=20,text="DOWN",  code=function() scene.keyDown('down') end},
+    WIDGET.new{type='button',name='paste',pos={1,1},w=80,x=-60,y=-160,color='lC',fontSize=20,text="PASTE", code=function() inputBox:addText(love.system.getClipboardText() or "") end},
     outputBox,
     inputBox,
 }
