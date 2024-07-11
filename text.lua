@@ -2,6 +2,8 @@
 ---@field text? string
 ---@field x? number
 ---@field y? number
+---@field kx? number
+---@field ky? number
 ---@field align? Zenitha.TextAlignMode|{[1]:number, [2]:number}
 ---@field r? number
 ---@field g? number
@@ -30,7 +32,7 @@ appear=function(T)
     draw(
         T.text,T.x,T.y,
         nil,
-        nil,nil,
+        T.kx,T.ky,
         T._ox,T._oy
     )
 end,
@@ -39,7 +41,7 @@ fly=function(T)
     draw(
         T.text,T.x+(T._t-.5)^3*(T.arg or 300),T.y,
         nil,
-        nil,nil,
+        T.kx,T.ky,
         T._ox,T._oy
     )
 end,
@@ -48,7 +50,7 @@ stretch=function(T)
     draw(
         T.text,T.x,T.y,
         nil,
-        max(1-T._t/T.inPoint,0)*(T.arg or 1)+1 or 1,1,
+        (max(1-T._t/T.inPoint,0)*(T.arg or 1)+1)*T.kx,T.ky,
         T._ox,T._oy
     )
 end,
@@ -57,7 +59,7 @@ drive=function(T)
     draw(
         T.text,T.x,T.y,
         nil,
-        nil,nil,
+        T.kx,T.ky,
         T._ox,T._oy,
         (max(1-T._t/T.inPoint,0)*(T.driveX or 2)) or 0,0
     )
@@ -67,7 +69,7 @@ spin=function(T)
     draw(
         T.text,T.x,T.y,
         (max(1-T._t/T.inPoint,0)^2-max(1-(1-T._t)/T.outPoint,0)^2)*(T.arg or .4),
-        nil,nil,
+        T.kx,T.ky,
         T._ox,T._oy
     )
 end,
@@ -76,25 +78,27 @@ flicker=function(T)
     draw(
         T.text,T.x,T.y,
         nil,
-        nil,nil,
+        T.kx,T.ky,
         T._ox,T._oy
     )
 end,
 zoomout=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
+    local k=T._t^.5*(T.arg or .1)+1
     draw(
         T.text,T.x,T.y,
         nil,
-        T._t^.5*(T.arg or .1)+1,nil,
+        k*T.kx,k*T.ky,
         T._ox,T._oy
     )
 end,
 beat=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
+    local k=1+(T.arg or .5)*max(1-T._t/T.inPoint,0)^.6
     draw(
         T.text,T.x,T.y,
         nil,
-        1+(T.arg or .5)*max(1-T._t/T.inPoint,0)^.6,nil,
+        k*T.kx,k*T.ky,
         T._ox,T._oy
     )
 end,
@@ -103,7 +107,7 @@ score=function(T)
     draw(
         T.text,T.x,T.y-0-T._t^.2*(T.arg or 30),
         nil,
-        nil,nil,
+        T.kx,T.ky,
         T._ox,T._oy
     )
 end,
@@ -152,6 +156,7 @@ function TEXT:add(data)
     local T={
         text=GC.newText(FONT.get(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),
         x=data.x or 0,y=data.y or 0,
+        kx=data.k or data.kx or 1,ky=data.k or data.ky or data.kx or 1,
         align=alignModes[data.align] or data.align or alignModes.center,
         r=data.r,g=data.g,b=data.b,a=data.a,
         duration=data.duration or 1,
