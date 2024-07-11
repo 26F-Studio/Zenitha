@@ -2,6 +2,7 @@
 ---@field text? string
 ---@field x? number
 ---@field y? number
+---@field k? number
 ---@field kx? number
 ---@field ky? number
 ---@field align? Zenitha.TextAlignMode|{[1]:number, [2]:number}

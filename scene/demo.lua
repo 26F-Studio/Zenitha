@@ -38,7 +38,7 @@ local scene={
 
         {type='button',      text='Quit',      x=600,y=540,w=200,h=80,code=function() love.event.quit() end},
         {type='button',      text='Console',   x=600,y=620,w=190,h=60,code=WIDGET.c_goScn'_console'},
-        {type='button',      text='Text',      x=550,y=690,w=90,h=60,code=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,fontSize=100} end},
+        {type='button',      text='Text',      x=550,y=690,w=90,h=60,code=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,k=2,fontSize=50} end},
         {type='button',      text='Wait',      x=650,y=690,w=90,h=60,code=function() WAIT.new{timeout=1} end},
         {type='button',      text='Msg',       x=550,y=760,w=90,h=60,code=function() MSG.new('info',"Test message",5) end},
         {type='button',      text='Task',      x=650,y=760,w=90,h=60,code=function() TASK.new(function() for a=0,MATH.tau,MATH.tau/32 do SYSFX.ripple(1,SCR.w0/2+260*math.cos(a),SCR.h0/2+260*math.sin(a),50) DEBUG.yieldT(.01) end end) end},
