@@ -36,7 +36,7 @@ end
 
 ---Shortcut for `print(debug.traceback())`
 function DEBUG.trace()
-    print(debug.traceback(nil,2))
+    print(debug.traceback("DEBUG",2))
 end
 
 ---Yield until the scene swapping animation finished
