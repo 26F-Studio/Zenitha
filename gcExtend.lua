@@ -1,3 +1,5 @@
+---@diagnostic disable: inject-field
+
 local gc=love.graphics
 local getColor,setColor,prints,printf,draw,drawL=gc.getColor,gc.setColor,gc.print,gc.printf,gc.draw,gc.drawLayer
 local newText=gc.newText
@@ -6,13 +8,10 @@ local rectangle,circle=gc.rectangle,gc.circle
 local applyTransform=gc.applyTransform
 local sin,cos=math.sin,math.cos
 local pcall=pcall
-local lerp,lLerp=MATH.lerp,MATH.lLerp
+local lerp=MATH.lerp
 local NULL=NULL
 
-local GC=setmetatable({},{
-    __index=gc,
-    __metatable=true,
-})
+local GC=TABLE.copyAll(gc,0)
 
 --------------------------------------------------------------
 -- Aligning Draw
@@ -456,23 +455,26 @@ function GC.stc_stop()
     gc_setStencilTest()
 end
 
-local rect_x,rect_y,rect_w,rect_h
+local rect_x,rect_y,rect_w,rect_h,rect_rx,rect_ry,rect_seg
 local function stencil_rectangle()
-    rectangle('fill',rect_x,rect_y,rect_w,rect_h)
+    rectangle('fill',rect_x,rect_y,rect_w,rect_h,rect_rx,rect_ry,rect_seg)
 end
 ---Draw a rectangle as stencil
 ---@param x number
 ---@param y number
 ---@param w number
 ---@param h number
-function GC.stc_rect(x,y,w,h)
-    rect_x,rect_y,rect_w,rect_h=x,y,w,h
+---@param rx? number
+---@param ry? number
+---@param seg? number
+function GC.stc_rect(x,y,w,h,rx,ry,seg)
+    rect_x,rect_y,rect_w,rect_h,rect_rx,rect_ry,rect_seg=x,y,w,h,rx,ry,seg
     gc_stencil(stencil_rectangle,stc_action,stc_value,true)
 end
 
-local circle_x,circle_y,circle_r,circle_seg
+local circ_x,circ_y,circ_r,circ_seg
 local function stencil_circle()
-    circle('fill',circle_x,circle_y,circle_r,circle_seg)
+    circle('fill',circ_x,circ_y,circ_r,circ_seg)
 end
 ---Draw a circle as stencil
 ---@param x number
@@ -480,7 +482,7 @@ end
 ---@param r number
 ---@param seg? number
 function GC.stc_circ(x,y,r,seg)
-    circle_x,circle_y,circle_r,circle_seg=x,y,r,seg
+    circ_x,circ_y,circ_r,circ_seg=x,y,r,seg
     gc_stencil(stencil_circle,stc_action,stc_value,true)
 end
 
