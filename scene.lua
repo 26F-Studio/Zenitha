@@ -60,7 +60,6 @@ local SCN={
 
     swapping=false, -- If Swapping
     state={
-        goingNew=false,   -- If going to new scene (for separating .go and .swapTo when swapping)
         target=false,     -- Swapping target
         swapStyle=false,  -- Swapping style
         draw=false,       -- Swap draw func
@@ -70,6 +69,7 @@ local SCN={
     stack={}, -- Scene stack
     prev=false,
     cur=false,
+    stackChange=0, -- "How many scenes added to (removed from) stack in this swapping", only make sense when swapping (leave-unload-load-enter), will be reset to 0 after `enter` event
     args={}, -- Arguments from previous scene
 
     scenes=scenes,
@@ -198,20 +198,19 @@ function SCN._swapUpdate(dt)
     if S.timeRem<S.timeChange and S.timeRem+dt>=S.timeChange then
         -- Actually change scene at this moment
         SCN.prev=SCN.cur
-        if S.goingNew then
-            SCN._push()
-            S.goingNew=false
-        end
 
         local scn=scenes[SCN.prev]
-        if scn and scn.unload then scn.unload(SCN.prev,unpack(SCN.args)) end
+        if scn and scn.unload then scn.unload(S.target,unpack(SCN.args)) end
+        -- print('unload',SCN.stackChange,S.target)
 
         SCN._load(S.target)
     end
     if S.timeRem<0 then
         SCN.swapping=false
         local scn=scenes[SCN.cur]
-        if scn.enter then scn.enter(SCN.cur,unpack(SCN.args)) end
+        if scn.enter then scn.enter(SCN.prev,unpack(SCN.args)) end
+        -- print('enter',SCN.stackChange,SCN.prev)
+        SCN.stackChange=0
     end
 end
 
@@ -233,16 +232,19 @@ function SCN._load(name)
     end
 
     if scn.load then scn.load(SCN.prev,unpack(SCN.args)) end
+    -- print('load',SCN.stackChange,SCN.prev)
 end
 
 ---Push a scene to stack
 ---@param tar? string
 function SCN._push(tar)
+    SCN.stackChange=SCN.stackChange+1
     table.insert(SCN.stack,tar or '_')
 end
 
 ---Pop a scene from stack
 function SCN._pop()
+    SCN.stackChange=SCN.stackChange-1
     table.remove(SCN.stack)
 end
 
@@ -253,6 +255,10 @@ end
 function SCN.swapTo(tar,swapStyle,...)
     if scenes[tar] then
         if not SCN.swapping then
+            -- Leave scene
+            if SCN.leave then SCN.leave(tar,unpack(SCN.args)) end
+            -- print('leave',SCN.stackChange,tar)
+
             swapStyle=swapStyle or defaultSwap
             if not swapStyles[swapStyle] then
                 MSG.new('error',"No swap style named '"..swapStyle.."'")
@@ -278,7 +284,7 @@ end
 function SCN.go(tar,swapStyle,...)
     if scenes[tar] then
         if not SCN.swapping then
-            SCN.state.goingNew=true
+            SCN._push()
             SCN.swapTo(tar,swapStyle,...)
         end
     else
@@ -294,12 +300,9 @@ function SCN.back(swapStyle,...)
 
     local m=#SCN.stack
     if m>1 then
-        -- Leave scene
-        if SCN.leave then SCN.leave(SCN.stack[#SCN.stack-1],unpack(SCN.args)) end
-
-        -- Poll&Back to previous Scene
-        SCN.swapTo(SCN.stack[#SCN.stack-1],swapStyle,...)
         SCN._pop()
+        -- Poll&Back to previous Scene
+        SCN.swapTo(SCN.stack[#SCN.stack],swapStyle,...)
     else
         ZENITHA._quit(swapStyle)
     end

@@ -202,8 +202,8 @@ function GC.strokePrint(strokeMode,d,strokeColor,textColor,str,x,y,align,r,sx,sy
     end
 end
 
----Draw a rectangle, but with middle point
----@param mode love.DrawMode # How to draw the rectangle.
+---Draw a rectangle but center aligned
+---@param mode love.DrawMode
 ---@param x number
 ---@param y number
 ---@param w number
@@ -215,18 +215,18 @@ function GC.mRect(mode,x,y,w,h,rx,ry)
 end
 
 ---Draw a regular polygon
----@param mode 'fill'|'line'
+---@param mode love.DrawMode
 ---@param x? number
 ---@param y? number
 ---@param rad number Radius
 ---@param segments number
----@param phase? number
-function GC.regPolygon(mode,x,y,rad,segments,phase)
+---@param ang? number
+function GC.regPolygon(mode,x,y,rad,segments,ang)
     if not x then x=0 end
     if not y then y=0 end
+    if not ang then ang=0 end
 
     local l={}
-    local ang=phase or 0
     local angStep=6.283185307179586/segments
     for i=1,segments do
         l[2*i-1]=x+rad*cos(ang)
@@ -237,7 +237,7 @@ function GC.regPolygon(mode,x,y,rad,segments,phase)
 end
 
 ---Draw a regular polygon with rounded corner
----@param mode 'fill'|'line'
+---@param mode love.DrawMode
 ---@param x? number
 ---@param y? number
 ---@param rad number Radius
@@ -437,14 +437,14 @@ function GC.stc_reset()
 end
 
 ---Set stencil test mode (just love.graphics.setStencilTest with default)
----@param compMode? 'equal'|'notequal'|'less'|'lequal'|'gequal'|'greater'|'never'|'always'
+---@param compMode? love.CompareMode
 ---@param compVal? number
 function GC.stc_setComp(compMode,compVal)
     gc_setStencilTest(compMode or 'equal',compVal or 1)
 end
 
 ---Set stencil draw mode (just love.graphics.stencil)
----@param drawMode 'replace'|'increment'|'decrement'|'incrementwrap'|'decrementwrap'|'invert'
+---@param drawMode love.StencilAction
 ---@param drawVal number
 function GC.stc_setPen(drawMode,drawVal)
     stc_action,stc_value=drawMode,drawVal
