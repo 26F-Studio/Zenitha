@@ -64,7 +64,7 @@ local c={
     Translucents={{HEX'060606CC'},{HEX'3C3C3CCC'},{HEX'7A7A7ACC'},{HEX'DBDBDBCC'},{HEX'FEFEFECC'}},
 }
 ---@enum (key) Zenitha.ColorStr
-local COLOR=setmetatable({
+local COLOR={
     DarkRed=    c.Reds[1],     darkRed=    c.Reds[2],     Red=    c.Reds[3],     lightRed=    c.Reds[4],     LightRed=    c.Reds[5],
     DarkFlame=  c.Flames[1],   darkFlame=  c.Flames[2],   Flame=  c.Flames[3],   lightFlame=  c.Flames[4],   LightFlame=  c.Flames[5],
     DarkOrange= c.Oranges[1],  darkOrange= c.Oranges[2],  Orange= c.Oranges[3],  lightOrange= c.Oranges[4],  LightOrange= c.Oranges[5],
@@ -188,7 +188,8 @@ local COLOR=setmetatable({
     T=c.Translucents[3], -- Translucent
     lT=c.Translucents[4], -- lightTranslucent
     LT=c.Translucents[5], -- LightTranslucent
-},{__index=function(_,k)
+}
+setmetatable(COLOR,{__index=function(_,k)
     assert(type(k)=='string', "COLOR[name]: Need string")
     errorf("COLOR[name]:  No color '%s'",k)
 end,__metatable=true})
