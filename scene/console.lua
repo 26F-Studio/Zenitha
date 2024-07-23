@@ -332,13 +332,13 @@ local commands={} do
                     WIDGET.active.bye:setVisible(false)
                     outputBox.h=SCR.h0-20
                     TASK.new(function()
-                        DEBUG.yieldT(0.5)
+                        TASK.yieldT(0.5)
                         for i=10,0,-1 do
                             log{COLOR.R,STRING.repD("Deleting all data in $1...",i)}
-                            DEBUG.yieldT(1)
+                            TASK.yieldT(1)
                         end
                         outputBox:setVisible(false)
-                        DEBUG.yieldT(0.26)
+                        TASK.yieldT(0.26)
                         FILE.clear_s('')
                         love.event.quit()
                     end)

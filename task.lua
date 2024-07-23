@@ -115,4 +115,23 @@ function TASK.clear()
     TABLE.clear(tasks)
 end
 
+local yield=coroutine.yield
+
+---Yield for some times
+---@param count number
+function TASK.yieldN(count)
+    for _=1,count do yield() end
+end
+
+---Yield for some seconds
+function TASK.yieldT(time)
+    local t=love.timer.getTime()
+    while love.timer.getTime()-t<time do yield() end
+end
+
+---Yield until the scene swapping animation finished
+function TASK.yieldUntilNextScene()
+    while SCN.swapping do yield() end
+end
+
 return TASK

@@ -98,7 +98,7 @@
 --   ```
 --      TASK.new(function() -- Simulate Server
 --          TCP.S_start(10026)
---          DEBUG.yieldT(0.26) -- Wait a bit, or getting a nil from TCP:S_receive()
+--          TASK.yieldT(0.26) -- Wait a bit, or getting a nil from TCP:S_receive()
 --          print(TCP.S_receive()) -- "Hello server!"
 --      end)
 --      TASK.new(function() -- Simulate Client

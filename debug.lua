@@ -39,21 +39,4 @@ function DEBUG.trace()
     print(debug.traceback("DEBUG",2))
 end
 
----Yield until the scene swapping animation finished
-function DEBUG.yieldUntilNextScene()
-    while SCN.swapping do yield() end
-end
-
----Yield for some times
----@param count number
-function DEBUG.yieldN(count)
-    for _=1,count do yield() end
-end
-
----Yield for some seconds
-function DEBUG.yieldT(time)
-    local t=love.timer.getTime()
-    while love.timer.getTime()-t<time do yield() end
-end
-
 return DEBUG
