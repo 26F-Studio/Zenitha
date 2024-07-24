@@ -610,7 +610,7 @@ end
 ---@generic K,V
 ---@param t table<K,V>
 ---@param val V
----@return K|nil
+---@return V|nil
 function TABLE.next(t,val)
     if val==nil then return t[1] end
     for i=1,#t do if t[i]==val then return t[i+1] end end
