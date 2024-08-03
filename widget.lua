@@ -1430,11 +1430,11 @@ function Widgets.selector:scroll(dx,dy)
     if n then
         local s=self._select
         if n==1 then
-            if s==1 then return end
-            s=s-1
-        elseif n==-1 then
             if s==#self.list then return end
             s=s+1
+        elseif n==-1 then
+            if s==1 then return end
+            s=s-1
         end
         self.code(self.list[s])
         self._select=s
