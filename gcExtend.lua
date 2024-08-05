@@ -589,6 +589,9 @@ end
 --------------------------------------------------------------
 
 do -- function GC.load(L), GC.execute(t)
+    ---@alias Zenitha.drawingCommand {[1]:Zenitha.drawingCommandType, [number]:any}
+
+    ---@enum (key) Zenitha.drawingCommandType
     local cmds={
         push=     'push',
         pop=      'pop',
@@ -667,7 +670,7 @@ do -- function GC.load(L), GC.execute(t)
     ---Run a set of graphics commands in table-format
     ---
     ---See commands list by going to declaration of this function, then scroll up.
-    ---@param t table[]|string[]
+    ---@param t Zenitha.drawingCommand[]
     ---## Example
     ---```lua
     ---GC.execute{
@@ -681,10 +684,10 @@ do -- function GC.load(L), GC.execute(t)
 
     local sizeLimit=gc.getSystemLimits().texturesize
     ---Similar to GC.execute, but draw on a canvas.
-    ---@param list number[]|Mat<number>|Mat<table>|Mat<string>
+    ---@param list {w:number, h:number, [number]:Zenitha.drawingCommand}
     ---## Example
     ---```lua
-    ---GC.load{100,100 -- size of canvas
+    ---GC.load{w=100,h=100 -- size of canvas
     ---    {'setCL',1,0,0},
     ---    {'dRect','fill',0,0,100,100},
     ---    {'setCL',1,1,0},
@@ -692,7 +695,7 @@ do -- function GC.load(L), GC.execute(t)
     ---} --> canvas
     ---```
     function GC.load(list)
-        local w,h=tonumber(list[1]),tonumber(list[2])
+        local w,h=tonumber(list.w),tonumber(list.h)
         assert(w and h and w>0 and h>0 and w%1==0 and h%1==0,"GC.load(L): L[1] and L[2] need int >=1")
         gc.push()
             local canvas
@@ -711,8 +714,7 @@ do -- function GC.load(L), GC.execute(t)
             gc.origin()
             gc.setColor(1,1,1)
             gc.setLineWidth(1)
-            for i=3,#list do
-                ---@type any
+            for i=1,#list do
                 local code=list[i]
                 local cmd=code[1]
                 if type(cmd)=='string' then

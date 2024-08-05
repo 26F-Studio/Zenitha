@@ -127,11 +127,11 @@ local function alignDraw(self,drawable,x,y,ang,kx,ky)
     gc_draw(drawable,x,y,ang,kx,ky,ox,oy)
 end
 
-local leftAngle=GC.load{20,20,
+local leftAngle=GC.load{w=20,h=20,
     {'setLW',5},
     {'line', 18,2,1,10,18,18},
 }
-local rightAngle=GC.load{20,20,
+local rightAngle=GC.load{w=20,h=20,
     {'setLW',5},
     {'line', 2,2,19,10,2,18},
 }
