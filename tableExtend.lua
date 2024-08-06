@@ -22,6 +22,20 @@ function TABLE.new(val,count)
     return L
 end
 
+---Create the subset list of a list, like string.sub
+---@generic T
+---@param org T original table
+---@param start number
+---@param stop? number leave nil to the end
+---@return T
+function TABLE.sub(org,start,stop)
+    local L={}
+    for i=start,stop or #org do
+        L[#L+1]=org[i]
+    end
+    return L
+end
+
 ---Create a copy of [1~#] elements
 ---@generic T
 ---@param org T original table
@@ -134,16 +148,6 @@ function TABLE.rotate(matrix,direction)
         errorf("TABLE.rotate(matrix,dir): Invalid rotate direction '%s'",direction)
     end
     return icb
-end
-
----Create a new table with __index and __call, both cause indexFunc to be called
----@param indexFunc fun(self:table, key:any):any
----@return table
-function TABLE.newPool(indexFunc)
-    return setmetatable({},{
-        __call=indexFunc,
-        __index=indexFunc,
-    })
 end
 
 --------------------------------------------------------------
@@ -388,7 +392,7 @@ end
 ---@param t any[]
 ---@param val any
 ---@param start? number
----@return number|nil
+---@return number|nil key
 function TABLE.find(t,val,start)
     for i=start or 1,#t do if t[i]==val then return i end end
 end
@@ -396,7 +400,7 @@ end
 ---TABLE.find for ordered list only, faster (binary search)
 ---@param t any[]
 ---@param val any
----@return number|nil
+---@return number|nil key
 function TABLE.findOrdered(t,val)
     if val<t[1] or val>t[#t] then return end
     local i,j=1,#t
@@ -416,7 +420,7 @@ end
 ---@generic K,V
 ---@param t table<K,V>
 ---@param val V
----@return K|nil
+---@return K|nil key
 function TABLE.findAll(t,val)
     for k,v in next,t do if v==val then return k end end
 end
@@ -444,6 +448,34 @@ function TABLE.replaceAll(t,v_old,v_new)
             t[k]=v_new
         end
     end
+end
+
+---Find the minimum value (and key) in whole table
+---@generic K,V
+---@param t table<K,V>
+---@return V|nil value, K|nil key
+function TABLE.minAll(t)
+    local min,key=MATH.inf,nil
+    for k,v in next,t do
+        if v<min then
+            min,key=v,k
+        end
+    end
+    return min,key
+end
+
+---Find the maximum value (and key) in whole table
+---@generic K,V
+---@param t table<K,V>
+---@return V|nil value, K|nil key
+function TABLE.maxAll(t)
+    local max,key=-MATH.inf,nil
+    for k,v in next,t do
+        if v>max then
+            max,key=v,k
+        end
+    end
+    return max,key
 end
 
 --------------------------------------------------------------
