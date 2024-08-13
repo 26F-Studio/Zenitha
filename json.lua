@@ -23,6 +23,7 @@
 -- Editted by MrZ
 
 local ins,char=table.insert,string.char
+---@class Zenitha.Json
 local json = {}
 
 -------------------------------------------------------------------------------

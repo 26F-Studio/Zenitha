@@ -1,3 +1,6 @@
+local printSend=false
+local printRecv=false
+
 ---@class Zenitha.HttpRequest
 ---@field body? table|nil|string must be table if given, will be encoded to json
 ---@field pool? string default to `'_default'` if not given
@@ -7,6 +10,8 @@
 ---@field path? string|nil append to url
 ---@field _poolPtr? string internal use only
 ---@field _destroy? true internal use only
+---@field printSend? true
+---@field printRecv? true
 
 local sendCHN=love.thread.getChannel('inputChannel')
 local recvCHN=love.thread.getChannel('outputChannel')
@@ -18,8 +23,8 @@ local threadCount=0
 
 ---@language LUA
 local threadCode=[[
-    local debugPrint=false
     local id=...
+    local printSend,printRecv
 
     local http=require'socket.http'
     local ltn12=require'ltn12'
@@ -30,6 +35,9 @@ local threadCode=[[
     while true do
         local arg=sendCHN:demand()
 
+        printSend,arg.printSend=arg.printSend
+        printRecv,arg.printRecv=arg.printRecv
+
         if arg._destroy then
             recvCHN:push{
                 destroy=true,
@@ -38,7 +46,7 @@ local threadCode=[[
             break
         end
 
-        if debugPrint then
+        if printSend then
             print("\n------SEND------")
             for k,v in next,arg do print(k,v) end
         end
@@ -61,7 +69,7 @@ local threadCode=[[
             detail=detail,
         }
 
-        if debugPrint then
+        if printRecv then
             print("\n------RECV------")
             for k,v in next,result do print(k,v) end
         end
@@ -123,6 +131,9 @@ function HTTP.request(arg)
 
     if arg.pool==nil then arg.pool='_default' end
     arg._poolPtr=tostring(msgPool[arg.pool])
+
+    if printSend then arg.printSend=true end
+    if printRecv then arg.printRecv=true end
 
     sendCHN:push(arg)
 end

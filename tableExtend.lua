@@ -2,6 +2,8 @@ local rnd,floor=math.random,math.floor
 local find,gsub,gmatch=string.find,string.gsub,string.gmatch
 local rem=table.remove
 local next,type,select=next,type,select
+
+---@class Zenitha.TableExt
 local TABLE={}
 
 for k,v in next,table do TABLE[k]=v end

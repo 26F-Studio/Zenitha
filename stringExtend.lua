@@ -11,7 +11,7 @@ local char,byte=string.char,string.byte
 
 local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
 
----@class stringlib
+---@class Zenitha.StringExt
 local STRING={}
 
 for k,v in next,string do STRING[k]=v end
@@ -560,6 +560,9 @@ end
 ---STRING.simplifyPath('Documents/Project/xxx.lua') --> 'D/P/xxx.lua'
 ---STRING.simplifyPath('Documents/Project/xxx.lua',3) --> 'Doc/Pro/xxx.lua'
 ---```
+---@param path string
+---@param len? number default to 1
+---@return string
 function STRING.simplifyPath(path,len)
     local l=STRING.split(path,'/')
     for i=1,#l-1 do l[i]=sub(l[i],1,len or 1) end
@@ -634,9 +637,10 @@ do
         end
         return d
     end
-    upperData=parseFile('Zenitha/upcaser.txt')
-    lowerData=parseFile('Zenitha/lowcaser.txt')
-    diaData=parseFile('Zenitha/diacritics.txt')
+    local zPath=(...):match('.+%.'):gsub('%.','/')
+    upperData=parseFile(zPath..'upcaser.txt')
+    lowerData=parseFile(zPath..'lowcaser.txt')
+    diaData=parseFile(zPath..'diacritics.txt')
 end
 
 return STRING

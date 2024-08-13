@@ -1,11 +1,15 @@
 local printEvent=true
 local printMsg=false
-local printException=false
+local printException=true
+
+local zPath=(...):match('.+%.')
 
 require'love.timer'
 local socket=require'socket'
-local TABLE=require'Zenitha.tableExtend'
-local JSON=require'Zenitha.json'
+---@type Zenitha.TableExt
+local TABLE=require(zPath..'tableExtend')
+---@type Zenitha.Json
+local JSON=require(zPath..'json')
 
 local ins,rem=table.insert,table.remove
 local function printf(str,...) print(str:format(...)) end

@@ -354,53 +354,56 @@ local globalEvent={
 
 --------------------------------------------------------------
 
+local require=simpRequire((...)..'.')
+
 -- Extended lua basic libraries
-MATH=       require'Zenitha.mathExtend'
-STRING=     require'Zenitha.stringExtend'
-TABLE=      require'Zenitha.tableExtend'
+MATH=       require'mathExtend'
+STRING=     require'stringExtend'
+TABLE=      require'tableExtend'
 
 -- Pure lua modules (simple)
-COLOR=      require'Zenitha.color'
+COLOR=      require'color'
 RGB9={}     --[[Get color literal with `RGB9[960]`(Red)   ]] for r=0,9 do for g=0,9 do for b=0,9 do RGB9[100*r+10*g+b]={r/9,g/9,b/9} end end end
 RGBA9={}    --[[Get color literal with `RGBA9[9609]`(Red) ]] for r=0,9 do for g=0,9 do for b=0,9 do for a=0,9 do RGBA9[1000*r+100*g+10*b+a]={r/9,g/9,b/9,a/9} end end end end
 RGB5={}     --[[Get color literal with `RGB5[520]`(Red)   ]] for r=0,5 do for g=0,5 do for b=0,5 do RGB5[100*r+10*g+b]={r/5,g/5,b/5} end end end
 RGBA5={}    --[[Get color literal with `RGBA5[5205]`(Red) ]] for r=0,5 do for g=0,5 do for b=0,5 do for a=0,5 do RGBA5[1000*r+100*g+10*b+a]={r/5,g/5,b/5,a/5} end end end end
 RGB2={}     --[[Get color literal with `RGB2[210]`(Red)   ]] for r=0,2 do for g=0,2 do for b=0,2 do RGB2[100*r+10*g+b]={r/2,g/2,b/2} end end end
-DEBUG=      require'Zenitha.debug'
-LOG=        require'Zenitha.log'
-JSON=       require'Zenitha.json'
+DEBUG=      require'debug'
+LOG=        require'log'
+JSON=       require'json'
 
 -- Pure lua modules (complex, with update/draw)
-LANG=       require'Zenitha.languages'
-REQUIRE=    require'Zenitha.require'
-PROFILE=    require'Zenitha.profile'
-TASK=       require'Zenitha.task'
-HASH=       require'Zenitha.sha2'
+LANG=       require'languages'
+REQUIRE=    require'require'
+PROFILE=    require'profile'
+TASK=       require'task'
+HASH=       require'sha2'
 
 -- Love-based modules (simple)
-VIB=        require'Zenitha.vibrate'
-WHEELMOV=   require'Zenitha.wheelToArrow'
-FONT=       require'Zenitha.font'
-IMG=        require'Zenitha.image'
-FILE=       require'Zenitha.file'
-SCR=        require'Zenitha.screen'
-GC=         require'Zenitha.gcExtend'
-TCP=        require'Zenitha.tcp'
-MIDI=       require'Zenitha.midi'
+VIB=        require'vibrate'
+WHEELMOV=   require'wheelToArrow'
+FONT=       require'font'
+IMG=        require'image'
+FILE=       require'file'
+SCR=        require'screen'
+GC=         require'gcExtend'
+TCP=        require'tcp'
+MIDI=       require'midi'
 
 -- Love-based modules (complex, with update/draw)
-HTTP=       require'Zenitha.http'
-SCN=        require'Zenitha.scene'
-TEXT=       require'Zenitha.text'
-SYSFX=      require'Zenitha.sysFX'
-TWEEN=      require'Zenitha.tween'
-WAIT=       require'Zenitha.wait'
-MSG=        require'Zenitha.message'
-BG=         require'Zenitha.background'
-WIDGET=     require'Zenitha.widget'
-SFX=        require'Zenitha.sfx'
-BGM=        require'Zenitha.bgm'
-VOC=        require'Zenitha.voice'
+HTTP=       require'http'
+WS=         require'websocket'
+SCN=        require'scene'
+TEXT=       require'text'
+SYSFX=      require'sysFX'
+TWEEN=      require'tween'
+WAIT=       require'wait'
+MSG=        require'message'
+BG=         require'background'
+WIDGET=     require'widget'
+SFX=        require'sfx'
+BGM=        require'bgm'
+VOC=        require'voice'
 
 --------------------------------------------------------------
 
@@ -411,8 +414,8 @@ local setFont=FONT.set
 
 -- Set default font
 FONT.load({
-    _norm='Zenitha/norm.ttf',
-    _mono='Zenitha/mono.ttf',
+    _norm=(...)..'/norm.ttf',
+    _mono=(...)..'/mono.ttf',
 })
 FONT.setDefaultFont('_norm')
 FONT.setDefaultFallback('_norm')
@@ -1420,9 +1423,9 @@ ZENITHA.globalEvent=setmetatable(globalEvent,{
 --------------------------------------------------------------
 
 SCN.add('_quit',{load=love.event.quit})
-SCN.add('_console',require'Zenitha/scene/console')
-SCN.add('_zenitha',require'Zenitha/scene/demo')
-SCN.add('_test',require'Zenitha/scene/test')
+SCN.add('_console',require'scene.console')
+SCN.add('_zenitha',require'scene.demo')
+SCN.add('_test',require'scene.test')
 
 -- Every little bit helps in saving resources (maybe)
 collectgarbage()
