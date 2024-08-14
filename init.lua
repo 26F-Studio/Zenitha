@@ -196,10 +196,9 @@ ZENITHA={}
 --------------------------------------------------------------
 
 -- #define
-local ms,kb=love.mouse,love.keyboard
-local MSisDown,KBisDown=ms.isDown,kb.isDown
+local MSisDown,KBisDown=love.mouse.isDown,love.keyboard.isDown
 
-local gc=love.graphics
+local gc=love.graphics or setmetatable({},{__index=function() return NULL end})
 local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
 local gc_setColor,gc_circle=gc.setColor,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
@@ -207,7 +206,7 @@ local gc_print,gc_printf=gc.print,gc.printf
 local max,min=math.max,math.min
 local floor,abs=math.floor,math.abs
 math.randomseed(os.time()*2600)
-kb.setKeyRepeat(true)
+love.keyboard.setKeyRepeat(true)
 
 --------------------------------------------------------------
 
@@ -648,7 +647,7 @@ function love.touchpressed(id,x,y,_,_,pressure)
     lastClicks[id]={x=x,y=y}
     if WIDGET.sel and WIDGET.sel.type=='inputBox' and not WIDGET.sel:isAbove(x,y) then
         WIDGET.unFocus(true)
-        kb.setTextInput(false)
+        love.keyboard.setTextInput(false)
     end
     WIDGET._cursorMove(x,y,'press')
     WIDGET._press(x,y,1)
@@ -1086,7 +1085,7 @@ function love.errorhandler(msg)
 
         return love.run()
     else
-        ms.setVisible(true)
+        love.mouse.setVisible(true)
 
         local errorMsg
         errorMsg=mainLoopStarted and
