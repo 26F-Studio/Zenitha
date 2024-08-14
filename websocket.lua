@@ -2,7 +2,7 @@ local zPath=(...):match('.+%.')
 
 local defaultHost='127.0.0.1'
 local defaultPort='80'
-local defaultPath=''
+local defaultPath='/'
 
 -- lua + LÖVE threading websocket client
 -- Original pure lua ver. by flaribbit and Particle_G
@@ -12,7 +12,7 @@ local defaultPath=''
 ---@field host? string
 ---@field port? string
 ---@field path? string
----@field subPath string
+---@field subPath? string
 ---@field headers? table
 ---@field connTimeout? number default to 2.6
 ---@field pongTimeout? number default to 16
@@ -59,7 +59,7 @@ function WS.new(args)
     assert(args.host==nil or type(args.host)=='string','WS.new: arg.host must be string (if exist)')
     assert(args.port==nil or type(args.port)=='string','WS.new: arg.port must be string (if exist)')
     assert(args.path==nil or type(args.path)=='string','WS.new: arg.path must be string (if exist)')
-    assert(type(args.subPath)=='string','WS.new: arg.subPath must be string')
+    assert(args.subPath==nil or type(args.subPath)=='string','WS.new: arg.subPath must be string (if exist)')
     assert(args.headers==nil or type(args.headers)=='table','WS.new: arg.headers must be table (if exist)')
     assert(args.connTimeout==nil or type(args.connTimeout)=='number','WS.new: arg.connTimeout must be number (if exist)')
     assert(args.pongTimeout==nil or type(args.pongTimeout)=='number','WS.new: arg.pongTimeout must be number (if exist)')
@@ -77,7 +77,7 @@ function WS.new(args)
     local ws=setmetatable({
         host=args.host or defaultHost,
         port=args.port or defaultPort,
-        path=args.path or defaultPath..args.subPath,
+        path=args.path or defaultPath..(args.subPath or ''),
         headers=heders,
         thread=love.thread.newThread(zPath:gsub('%.','/')..'websocket_thread.lua'),
         connTimeout=args.connTimeout or 2.6,
@@ -181,7 +181,7 @@ function WS:update()
         self.state='dead'
         local err=self.thread:getError()
         if err then
-            MSG.new('warn',"WS error: "..err:match(":.-:(.-)\n"))
+            MSG.new('warn',"WS error: "..(err:match(":.-:(.-)\n") or err or "?"))
         end
     end
 end

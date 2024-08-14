@@ -28,12 +28,11 @@ do-- Connect
 
     SOCK:settimeout(connTimeout)
     local res,err=SOCK:connect(host,port)
-    if debugPrint then print('Conn',res,err) end
+    if debugPrint then print('Conn<',res,err) end
     assert(res,err)
 
     -- WebSocket handshake
-    SOCK:send(
-        'GET '..path..' HTTP/1.1\r\n'..
+    local sendMes='GET '..path..' HTTP/1.1\r\n'..
         'Host: '..host..':'..port..'\r\n'..
         'Connection: Upgrade\r\n'..
         'Upgrade: websocket\r\n'..
@@ -41,11 +40,15 @@ do-- Connect
         'Sec-WebSocket-Key: osT3F7mvlojIvf3/8uIsJQ==\r\n'..-- secKey
         headers..
         '\r\n'
-    )
+    if debugPrint then
+        print('Send>')
+        print(sendMes)
+    end
+    SOCK:send(sendMes)
 
     -- First line of HTTP
     res,err=SOCK:receive('*l')
-    if debugPrint then print('Headers',res,err) end
+    if debugPrint then print('Headers<',res,err) end
     assert(res,err)
     local code,ctLen
     code=res:find(' ')
@@ -54,7 +57,7 @@ do-- Connect
     -- Get body length from headers and remove headers
     repeat
         res,err=SOCK:receive('*l')
-        if debugPrint then print('Headers',res,err) end
+        if debugPrint then print('Body<',res,err) end
         assert(res,err)
         if not ctLen and res:find('content-length') then
             ctLen=tonumber(res:match('%d+')) or 0
@@ -69,7 +72,7 @@ do-- Connect
     -- Content(?)
     if ctLen then
         res,err=SOCK:receive(ctLen)
-        if debugPrint then print('Extra',res,err) end
+        if debugPrint then print('Extra<',res,err) end
         if code~='101' then
             res=JSON.decode(assert(res,err))
             error((code or "XXX")..":"..(res and res.reason or "Server Error"))
@@ -185,7 +188,7 @@ local readThread=coroutine.wrap(function()
             lBuffer=lBuffer..res
             if fin then
                 CHN_push(readCHN,lBuffer)
-                if debugPrint then print('mMes',lBuffer) end
+                if debugPrint then print('mMes<',lBuffer) end
                 lBuffer=""
             end
         elseif op==9 then-- 9=ping
@@ -194,7 +197,7 @@ local readThread=coroutine.wrap(function()
             CHN_push(readCHN,op)
             if fin then
                 CHN_push(readCHN,res)
-                if debugPrint then print('Mes',res) end
+                if debugPrint then print('Mes<',res) end
                 lBuffer=""
             else
                 lBuffer=res
