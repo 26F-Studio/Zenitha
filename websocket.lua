@@ -13,28 +13,28 @@ local defaultPath=''
 ---@field port? string
 ---@field path? string
 ---@field subPath string
----@field head? table
+---@field headers? table
+---@field connTimeout? number default to 2.6
+---@field pongTimeout? number default to 16
+---@field sleepInterval? number default to 0.26
 ---@field pingInterval? number default to 6
----@field keepAliveTime? number default to 16
----@field timeout? number
 
----@alias Zenitha.WebSocket.status 'connecting'|'running'|'dead'
+---@alias Zenitha.WebSocket.state 'connecting'|'running'|'dead'
 
 ---@class Zenitha.WebSocket
 ---@field host string
 ---@field port string
 ---@field path string
----@field head string
----@field timeout number
+---@field headers string
 ---@field thread love.Thread
 ---@field confCHN love.Channel
 ---@field sendCHN love.Channel
 ---@field readCHN love.Channel
+---@field connTimeout number
+---@field pongTimeout number
+---@field sleepInterval number
 ---@field pingInterval number
----@field keepAliveTime number
----@field status Zenitha.WebSocket.status
----@field lastPingTime number
----@field lastPongTime number
+---@field state Zenitha.WebSocket.state
 local WS={}
 WS.__index=WS
 WS.__metatable=true
@@ -60,15 +60,16 @@ function WS.new(args)
     assert(args.port==nil or type(args.port)=='string','WS.new: arg.port must be string (if exist)')
     assert(args.path==nil or type(args.path)=='string','WS.new: arg.path must be string (if exist)')
     assert(type(args.subPath)=='string','WS.new: arg.subPath must be string')
-    assert(args.head==nil or type(args.head)=='table','WS.new: arg.head must be table (if exist)')
+    assert(args.headers==nil or type(args.headers)=='table','WS.new: arg.headers must be table (if exist)')
+    assert(args.connTimeout==nil or type(args.connTimeout)=='number','WS.new: arg.connTimeout must be number (if exist)')
+    assert(args.pongTimeout==nil or type(args.pongTimeout)=='number','WS.new: arg.pongTimeout must be number (if exist)')
+    assert(args.sleepInterval==nil or type(args.sleepInterval)=='number','WS.new: arg.sleepInterval must be number (if exist)')
     assert(args.pingInterval==nil or type(args.pingInterval)=='number','WS.new: arg.pingInterval must be number (if exist)')
-    assert(args.keepAliveTime==nil or type(args.keepAliveTime)=='number','WS.new: arg.keepAliveTime must be number (if exist)')
-    assert(args.timeout==nil or type(args.timeout)=='number','WS.new: arg.timeout must be number (if exist)')
 
     -- Encode header as string
-    local head=""
-    for k,v in next,args.head or {} do
-        head=head..k..": "..v..'\r\n'
+    local heders=""
+    for k,v in next,args.headers or {} do
+        heders=heders..k..": "..v..'\r\n'
     end
 
     -- Create websocket object
@@ -77,13 +78,12 @@ function WS.new(args)
         host=args.host or defaultHost,
         port=args.port or defaultPort,
         path=args.path or defaultPath..args.subPath,
-        head=head,
-        timeout=args.timeout or 2.6,
+        headers=heders,
         thread=love.thread.newThread(zPath:gsub('%.','/')..'websocket_thread.lua'),
+        connTimeout=args.connTimeout or 2.6,
+        pongTimeout=args.pongTimeout or 16,
+        sleepInterval=args.sleepInterval or 0.26,
         pingInterval=args.pingInterval or 6,
-        keepAliveTime=args.keepAliveTime or 16,
-        lastPingTime=0,
-        lastPongTime=0,
     },{__index=WS})
     return ws
 end
@@ -91,23 +91,29 @@ end
 ---@return boolean success Will fail if this websocket is still/already running
 function WS:connect()
     if self.thread:isRunning() then return false end
-    self.status='connecting'
+    self.state='connecting'
     self.confCHN=love.thread.newChannel()
     self.sendCHN=love.thread.newChannel()
     self.readCHN=love.thread.newChannel()
-    self.confCHN:push(self.host)
-    self.confCHN:push(self.port)
-    self.confCHN:push(self.path)
-    self.confCHN:push(self.head)
-    self.confCHN:push(self.timeout or 2.6)
+    self.confCHN:push{
+        host=self.host,
+        port=self.port,
+        path=self.path,
+        headers=self.headers,
+        connTimeout=self.connTimeout,
+        pongTimeout=self.pongTimeout,
+        sleepInterval=self.sleepInterval,
+        pingInterval=self.pingInterval,
+    }
     self.thread:start(zPath,self.confCHN,self.sendCHN,self.readCHN)
     return true
 end
 
----@param time number
-function WS:setSleepInterval(time)
-    assert(type(time)=='number','WS:setSleepInterval(time): time must be number')
-    self.confCHN:push(time)
+---@param name 'connTimeout'|'pongTimeout'|'sleepInterval'|'pingInterval'
+---@param value any
+function WS:conf(name,value)
+    assert(type(value)=='number','WS:confTime(name,time): time must be number')
+    self.confCHN:push({name,value})
 end
 
 ---@enum Zenitha.WebSocket.OPcode
@@ -132,25 +138,21 @@ local OPcode={
 ---@param op? Zenitha.WebSocket.OPcode leave nil for binary
 function WS:send(message,op)
     assert(type(message)=='string','WS.send: message must be string')
-    if self.status=='running' then
+    if self.state=='running' then
         self.sendCHN:push(op and OPcode[op] or 2)-- 2=binary
         self.sendCHN:push(message)
-        self.lastPingTime=love.timer.getTime()
     end
     self:update()
 end
 
 ---@return string?, (Zenitha.WebSocket.OPcode | number)?
-function WS:read()
+function WS:receive()
     self:update()
-    if self.status~='connecting' and self.readCHN:getCount()>=2 then
+    if self.state~='connecting' and self.readCHN:getCount()>=2 then
         local op,message=self.readCHN:pop(),self.readCHN:pop()
         if op==8 then-- 8=close
-            self.status='dead'
-        elseif op==9 then-- 9=ping
-            self:send(message or "",'pong')
+            self.state='dead'
         end
-        self.lastPongTime=love.timer.getTime()
         return message,OPname[op] or op
     end
 end
@@ -158,35 +160,25 @@ end
 function WS:close()
     self.sendCHN:push(8)-- 8=close
     self.sendCHN:push("")
-    self.status='dead'
+    self.state='dead'
 end
 
 function WS:update()
-    if self.status=='dead' then return end
-    local time=love.timer.getTime()
+    if self.state=='dead' then return end
     if self.thread:isRunning() then
-        if self.status=='connecting' then
+        if self.state=='connecting' then
             local mes=self.readCHN:pop()
             if mes then
                 if mes=='success' then
-                    self.status='running'
-                    self.lastPingTime=time
-                    self.lastPongTime=time
+                    self.state='running'
                 else
-                    self.status='dead'
+                    self.state='dead'
                     MSG.new('warn',"WS failed: "..mes)
                 end
             end
-        elseif self.status=='running' then
-            if time-self.lastPingTime>self.pingInterval then
-                self:send("",'ping')
-            end
-            if time-self.lastPongTime>self.keepAliveTime then
-                self:close()
-            end
         end
     else
-        self.status='dead'
+        self.state='dead'
         local err=self.thread:getError()
         if err then
             MSG.new('warn',"WS error: "..err:match(":.-:(.-)\n"))

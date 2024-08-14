@@ -102,6 +102,20 @@ local function addThread(num)
 end
 
 ---Send a HTTP request
+---```lua
+---    HTTP.request{
+---        pool='login',
+---        url='example.com',
+---        path='/api/v1/userlogin',
+---        headers={
+---            ['User-Agent']='Zenitha',
+---        },
+---        body={username='user'},
+---    }
+---    local res
+---    repeat res=HTTP.pollMsg('login') until res
+---    print(res.code,res.body)
+---```
 ---@param arg Zenitha.HttpRequest
 function HTTP.request(arg)
     arg.method=arg.method or arg.body and 'POST' or 'GET'

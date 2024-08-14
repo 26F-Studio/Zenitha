@@ -106,6 +106,41 @@
 --          TCP.C_send("Hello server!")
 --      end)
 --   ```
+--  `WS`, a simple http websocket with LuaSocket.
+--   ```
+--      local ws=WS.new({
+--          host="localhost",
+--          port="80",
+--          path="/ws",
+--          subPath="/res",
+--          subPath="/res",
+--      })
+--      ws:connect()
+--      TASK.new(function() -- Simulate Client
+--          repeat coroutine.yield() until ws.state~='connecting'
+--          ws:send("Hello server!")
+--          repeat
+--              local mes,op=ws:receive()
+--              if mes then
+--                  print(mes,op) -- "Hello Cliend!", 1 (text type)
+--              end
+--          until ws.state~='running'
+--          print("WS disconnected")
+--      end)
+--   ```
+--  `HTTP`, a simple http client with LuaSocket.
+--   ```
+--      HTTP.setThreadCount(1)
+--      HTTP.setHost("127.0.0.1")
+---     HTTP.request{
+---         pool='login',
+---         path='/api/v1/userlogin',
+---         body={username='MrZ_26'},
+---     }
+---     local res
+---     repeat res=HTTP.pollMsg('login') until res
+---     print(res.code,res.body) -- "200", "<html>Welcome, MrZ_26</html>"
+--   ```
 --  `TWEEN`, a simple tweening module allow you making smooth animation with several lines of codes
 --   ```
 --      TWEEN.new(function(v) Pos=200+100*v end) -- update Pos with v which goes from 0 to 1
