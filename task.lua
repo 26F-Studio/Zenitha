@@ -31,6 +31,16 @@ function TASK.lock(name,time)
     end
 end
 
+---Same as `TASK.lock`, but lock will be forced set even if the lock is not expired
+---@param name any
+---@param time? number
+---@return boolean
+function TASK.forceLock(name,time)
+    local res=timer()>=locks[name]
+    locks[name]=timer()+(time or 1e99)
+    return res
+end
+
 ---Invalidate a lock
 ---@param name any
 function TASK.unlock(name)
@@ -43,6 +53,13 @@ end
 function TASK.getLock(name)
     local v=locks[name]-timer()
     return v>0 and v
+end
+
+---Clear the locks which are expired
+function TASK.freshLock()
+    for k,v in next,locks do
+        if timer()>v then locks[k]=nil end
+    end
 end
 
 ---Invalidate all locks
