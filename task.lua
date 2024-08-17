@@ -6,6 +6,7 @@ local timer=love.timer.getTime
 local TASK={}
 
 -- Locks
+---@type Map<number>
 local locks=setmetatable({},{
     __index=function(self,k) rawset(self,k,-1e99) return -1e99 end,
     __newindex=function(self,k) rawset(self,k,-1e99) end,
@@ -55,7 +56,7 @@ function TASK.getLock(name)
     return v>0 and v
 end
 
----Clear the locks which are expired
+---Remove the locks which are already expired
 function TASK.freshLock()
     for k,v in next,locks do
         if timer()>v then locks[k]=nil end
