@@ -75,6 +75,7 @@ function WS.new(args)
     -- Create websocket object
     ---@type Zenitha.WebSocket
     local ws=setmetatable({
+        state='dead',
         host=args.host or defaultHost,
         port=args.port or defaultPort,
         path=args.path or defaultPath..(args.subPath or ''),
