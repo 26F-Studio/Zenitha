@@ -161,7 +161,6 @@ end
 function WS:close()
     self.sendCHN:push(8)-- 8=close
     self.sendCHN:push("")
-    self.state='dead'
 end
 
 function WS:update()
