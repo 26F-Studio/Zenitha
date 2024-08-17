@@ -1,4 +1,3 @@
-local yield=coroutine.yield
 local DEBUG={}
 
 
