@@ -98,6 +98,18 @@ function TABLE.getValues(org)
     return L
 end
 
+---Set all values to k
+---@generic T
+---@param org table<any,T>
+---@return table<T,true>
+function TABLE.getValueSet(org)
+    local T={}
+    for _,v in next,org do
+        T[v]=true
+    end
+    return T
+end
+
 ---Create a table of two lists connected
 ---@generic T1,T2
 ---@param L1 T1[] list 1
