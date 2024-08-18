@@ -213,7 +213,6 @@ function STRING.trimIndent(str,keep)
         if s==1 then return str end
 
         for i=1,#list do
-            print(i,min(s,find(list[i],'%S') or #list[i]+1))
             list[i]=sub(list[i],min(s,find(list[i],'%S') or #list[i]+1))
         end
         return table.concat(list,'\n')
