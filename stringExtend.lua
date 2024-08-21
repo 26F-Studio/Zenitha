@@ -250,9 +250,14 @@ function STRING.split(str,sep,regex)
     local p2 -- target
     if regex then
         while p1<=#str do
-            p2=find(str,sep,p1) or #str+1
+            local p3
+            p2,p3=find(str,sep,p1)
+            if not p2 then
+                L[#L+1]=sub(str,p1,#str)
+                break
+            end
             L[#L+1]=sub(str,p1,p2-1)
-            p1=p2+#sep
+            p1=p3+1
         end
     else
         while p1<=#str do
