@@ -358,7 +358,20 @@ function TABLE.reverse(org)
     end
 end
 
----Pop & return random [1~#] of table
+---Get random [1~#] of table
+---@generic T
+---@param t T[]
+---@return T
+function TABLE.getRandom(t)
+    local l=#t
+    if l>0 then
+        return t[rnd(l)]
+    else
+        error("TABLE.popRandom(t): Table is empty")
+    end
+end
+
+---Remove & return random [1~#] of table (not really "pop"!)
 ---@generic T
 ---@param t T[]
 ---@return T
