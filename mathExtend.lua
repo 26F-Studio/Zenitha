@@ -29,6 +29,44 @@ function MATH.sign(a)
     return a>0 and 1 or a<0 and -1 or 0
 end
 
+---Get absolute value of a 1D-3D vector
+---@param x number
+---@param y number
+---@param z number
+---@return number, number, number
+---@overload fun(x:number):number
+---@overload fun(x:number, y:number):number, number
+function MATH.vecAbs(x,y,z)
+    if z then
+        return (x*x+y*y+z*z)^.5
+    elseif y then
+        return (x*x+y*y)^.5
+    else
+        return x>0 and x or -x
+    end
+end
+
+---Get normalized 1D-3D vector
+---@param x number
+---@param y number
+---@param z number
+---@return number, number, number
+---@overload fun(x:number):number
+---@overload fun(x:number, y:number):number, number
+function MATH.vecDir(x,y,z)
+    if z then
+        local r=(x*x+y*y+z*z)^.5
+        if r==0 then return 0,0,0 end
+        return x/r,y/r,z/r
+    elseif y then
+        local r=(x*x+y*y)^.5
+        if r==0 then return 0,0 end
+        return x/r,y/r
+    else
+        return x>0 and 1 or x<0 and -1 or 0
+    end
+end
+
 ---Sum table in [1~#]
 ---@param t number[]
 ---@return number
