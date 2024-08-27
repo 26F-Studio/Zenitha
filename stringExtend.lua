@@ -8,6 +8,7 @@ local match,gmatch=string.match,string.gmatch
 local rep,rev=string.rep,string.reverse
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
+local ins,rem=table.insert,table.remove
 
 local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
 
@@ -267,6 +268,15 @@ function STRING.split(str,sep,regex)
         end
     end
     return L
+end
+
+---Split a string into single-byte strings
+function STRING.atomize(str)
+    local l={}
+    for i=1,#str do
+        ins(l,sub(str,i,i))
+    end
+    return l
 end
 
 ---Calculate the edit distance between two strings

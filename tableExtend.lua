@@ -123,6 +123,21 @@ function TABLE.combine(L1,L2)
     return L
 end
 
+---Create a transposed copy of a matrix
+---@generic T
+---@param matrix T
+---@return T
+function TABLE.transpose(matrix)
+    local newMat={}
+    for y=1,#matrix[1] do
+        newMat[y]={}
+        for x=1,#matrix do
+            newMat[y][x]=matrix[x][y]
+        end
+    end
+    return newMat
+end
+
 ---Create a rotated copy of a matrix
 ---@generic T
 ---@param matrix Mat<T>
