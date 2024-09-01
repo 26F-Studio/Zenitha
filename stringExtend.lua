@@ -178,7 +178,7 @@ end
 ---@return string
 function STRING.remDiacritics(str)
     for _,pair in next,diaData do
-        str=str:gsub(pair[1],pair[2])
+        str=gsub(str,pair[1],pair[2])
     end
     return str
 end
@@ -192,6 +192,15 @@ function STRING.trim(str)
     -- str=rev(sub(str,p))
     -- return rev(sub(str,(find(str,'%S'))))
     return match(str,"^%s*(.-)%s*$") or ""
+end
+
+---Count the number of occurrences of a regex pattern in a string
+---@param str string
+---@param regex string
+---@return number
+function STRING.count(str,regex)
+    local _,count=gsub(str,regex,'')
+    return count
 end
 
 ---Trim spaces and tabs at the beginning of all lines, useful for inline multi-line strings
