@@ -99,13 +99,15 @@ function TABLE.getValues(org)
 end
 
 ---Set all values to k
----@generic T
----@param org table<any,T>
----@return table<T,true>
-function TABLE.getValueSet(org)
+---@generic T1,T2
+---@param org table<any,T1>
+---@param val? T2
+---@return table<T1,T2|true>
+function TABLE.getValueSet(org,val)
+    if val==nil then val=true end
     local T={}
     for _,v in next,org do
-        T[v]=true
+        T[v]=val
     end
     return T
 end
