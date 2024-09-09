@@ -9,6 +9,9 @@ local defaultFont,defaultFallBack
 ---@type table<string, string>
 local fallbackMap={}
 
+---@type table<string, {[1]:string,[2]:string}>
+local filterMap={}
+
 ---@type love.Font
 local curFont=nil -- Current using font object
 
@@ -33,6 +36,9 @@ function FONT.setFallback(font,fallback)
     fallbackMap[font]=fallback
 end
 
+function FONT.setFilter(font,min,mag)
+    filterMap[font]={min,mag}
+end
 
 ---Get love's default font object
 ---@param size number
@@ -85,6 +91,9 @@ local function _get(size,name)
     if not f then
         assertf(type(size)=='number' and size>0 and size%1==0,"Need int >=1, got %s",size)
         f=love.graphics.newFont(fontFiles[name],size,'normal',love.graphics.getDPIScale()*SCR.k*2)
+        if filterMap[name] then
+            f:setFilter(filterMap[name][1],filterMap[name][2])
+        end
         local fallbackName=fallbackMap[name] or defaultFallBack and name~=defaultFallBack and defaultFallBack
         if fallbackName then
             f:setFallbacks(_get(size,fallbackName))
