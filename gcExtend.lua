@@ -571,12 +571,12 @@ function GC.newCamera()
 end
 
 --------------------------------------------------------------
--- TODO: text warping
+-- TODO: text wraping
 
 local function measureWidth(font,str)
     return newText(font,str):getWidth()
 end
-function GC.warpText(font,str,width)
+function GC.wrapText(font,str,width)
     local list={}
 
     -- TODO:
