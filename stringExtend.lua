@@ -8,9 +8,6 @@ local match,gmatch=string.match,string.gmatch
 local rep,rev=string.rep,string.reverse
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
-local ins,rem=table.insert,table.remove
-
-local b16={[0]='0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}
 
 ---@class Zenitha.StringExt
 local STRING={}
@@ -283,7 +280,7 @@ end
 function STRING.atomize(str)
     local l={}
     for i=1,#str do
-        ins(l,sub(str,i,i))
+        l[i]=sub(str,i,i)
     end
     return l
 end
@@ -464,17 +461,32 @@ function STRING.toOct(num,len)
     return tonumber(len) and rep('0',tonumber(len)-#s)..s or s
 end
 
----Convert a number to hexadecimal string
+local b16=STRING.atomize('123456789ABCDEF')
+b16[0]='0'
+
+---Convert an integer to hexadecimal string
 ---@param num number
 ---@param len? number
 ---@return string
 function STRING.toHex(num,len)
     local s=''
+    local neg
+    if num<0 then
+        neg=true
+        num=-num
+    end
     while num>0 do
         s=b16[num%16]..s
         num=floor(num/16)
     end
-    return tonumber(len) and rep('0',tonumber(len)-#s)..s or s
+    len=tonumber(len) or 1
+    if len>#s then
+        s=rep('0',len-#s)..s
+    end
+    if neg then
+        s='-'..s
+    end
+    return s
 end
 
 local rshift=bit.rshift
