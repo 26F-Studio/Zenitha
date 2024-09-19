@@ -1,7 +1,7 @@
 local data=love.data
 local assert,tostring,tonumber=assert,tostring,tonumber
-local floor,lg=math.floor,math.log10
-local min=math.min
+local floor,min=math.floor,math.min
+local log,lg=math.log,math.log10
 local find,format=string.find,string.format
 local sub,gsub=string.sub,string.gsub
 local match,gmatch=string.match,string.gmatch
@@ -343,6 +343,18 @@ function STRING.time(t)
         t<31556736 and format('%dm%dd%dh',floor(t/2629728),floor(t/86400%86400),floor(t/3600%3600)) or
         t<3155673600 and format('%dy%dm%dd',floor(t/31556736),floor(t/2629728%2629728),floor(t/86400%86400)) or
         format('%.2fcentury',floor(t/3155673600))
+end
+
+local units={[0]=" B"," KB"," MB"," GB"," TB"," PB"," EB"," ZB"," YB"}
+function STRING.fileSize(s)
+    if s<=0 then
+        return "0 B"
+    else
+        local u=floor(log(s,1024)+1e-6)
+        local n=10^(3*u)
+        local digits=floor(lg(s/n))+1
+        return format('%g%s',floor(s/n*10^(3-digits))/10^(3-digits),units[u])
+    end
 end
 
 ---Warning: don't support number format like .26, must have digits before the dot, like 0.26
