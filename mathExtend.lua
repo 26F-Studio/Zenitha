@@ -221,6 +221,32 @@ function MATH.randNorm()
     end
 end
 
+---Find which interval the number is in
+---## Example
+---```lua
+---MATH.selectFreq(50,{10,20,30,40}) -- 3, because 50 will drop into the 3rd interval [30,60)
+---```
+---@param v number
+---@param fList number[] positive numbers
+function MATH.selectFreq(v,fList)
+    for i=1,#fList do
+        v=v-fList[i]
+        if v<0 then return i end
+    end
+    error("WTF")
+end
+
+---Same to MATH.selectFreq but with any table. Notice: keys are not in order
+---@param v number
+---@param fList Map<number> positive numbers
+function MATH.selectFreqAll(v,fList)
+    for k,f in next,fList do
+        v=v-f
+        if v<0 then return k end
+    end
+    error("WTF")
+end
+
 ---Restrict a number in a range
 ---@param v number
 ---@param low number
