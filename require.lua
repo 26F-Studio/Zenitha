@@ -39,10 +39,11 @@ return function(libName)
         end
     end
     -- arg #2: if system is OS X, it's nil, otherwise it's 'libName'
-    local success,res=pcall(_require,(not love.system.getOS()=='OS X' or nil) and libName)
+    local success,res=pcall(_require,(love.system.getOS()~='OS X' or nil) and libName)
     if success and res then
         return res
     else
-        MSG.new('error',"Cannot load "..libName..": "..res)
+        print("Cannot load "..libName..": "..res)
+        MSG.new('error',"Cannot load "..libName..": "..res:match('[ -~]+'))
     end
 end
