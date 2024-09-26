@@ -326,7 +326,6 @@ Bezier.__index=Bezier
 function Bezier:render(seg,dist)
     assert(type(seg)=='number' and seg>0 and seg%1==0,"Bezier:render(seg,dist): seg need positive int")
     local list=self.points
-    print(TABLE.dump(list))
     assert(list and #list>1,"Bezier:render: points need at least 2")
 
     local p=1 -- r goes first, Find first data point
