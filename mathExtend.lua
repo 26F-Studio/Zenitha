@@ -315,7 +315,7 @@ end
 
 local clamp,lerp=MATH.clamp,MATH.lerp
 
----Get mix value (linear) of a list of numbers with a ratio (clampped in [0,1])
+---Get mix value (linear) of a list of numbers with a ratio (clamped)
 ---@param list number[]
 ---@param t number
 ---@return number
@@ -324,8 +324,8 @@ function MATH.lLerp(list,t)
     return lerp(list[floor(index)],list[ceil(index)],index%1)
 end
 
----Inverse function of MATH.lLerp
----@param list number[] need #list>2 and ascending, or result is undefined
+---Inverse function of MATH.lLerp (clamped)
+---@param list number[] need #list>2 and ascending, otherwise result is undefined
 ---@param value number
 ---@return number
 function MATH.ilLerp(list,value)
@@ -340,7 +340,8 @@ function MATH.ilLerp(list,value)
             i=mid
         end
     end
-    return MATH.iLerp(list[i],list[j],value)
+    local k=MATH.iLerp(list[i],list[j],value)
+    return (i-1+k)/(#list-1)
 end
 
 ---Specify a line pass (x1,y1) and (x2,y2), got the y value when x=t
