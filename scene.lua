@@ -28,6 +28,7 @@
 ---@field focus? fun(focus:boolean)
 ---@field update? fun(dt:number)
 ---@field draw? fun()
+---@field overDraw? fun()
 
 ---@class Zenitha.SceneSwap
 ---@field duration number
@@ -50,7 +51,7 @@ local eventNames={
     'lowMemory',
     'resize','focus',
 
-    'update','draw',
+    'update','draw','overDraw',
 }
 
 local SCN={

@@ -1233,6 +1233,10 @@ function love.run()
                     if mouseShow then globalEvent.drawCursor(time,mx,my) end
                 gc_replaceTransform(SCR.xOy_ul)
                     globalEvent.drawSysInfo()
+                gc_replaceTransform(xOy)
+                    if SCN.overDraw then
+                        SCN.overDraw()
+                    end
                 gc_replaceTransform(SCR.origin)
                     if SCN.swapping then
                         SCN.state.draw(SCN.state.timeRem)
