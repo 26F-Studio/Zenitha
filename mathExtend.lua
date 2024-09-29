@@ -144,14 +144,14 @@ end
 
 ---Select random one between a and b (50% - 50%)
 ---@generic A,B
----@param a A
----@param b B
+---@param head A
+---@param tail B
 ---@return A|B
-function MATH.coin(a,b)
+function MATH.coin(head,tail)
     if rnd()<.5 then
-        return a
+        return head
     else
-        return b
+        return tail
     end
 end
 
