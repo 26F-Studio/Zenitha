@@ -402,7 +402,7 @@ RGBA9={}    --[[Get color literal with `RGBA9[9609]`(Red) ]] for r=0,9 do for g=
 RGB5={}     --[[Get color literal with `RGB5[520]`(Red)   ]] for r=0,5 do for g=0,5 do for b=0,5 do RGB5[100*r+10*g+b]={r/5,g/5,b/5} end end end
 RGBA5={}    --[[Get color literal with `RGBA5[5205]`(Red) ]] for r=0,5 do for g=0,5 do for b=0,5 do for a=0,5 do RGBA5[1000*r+100*g+10*b+a]={r/5,g/5,b/5,a/5} end end end end
 RGB2={}     --[[Get color literal with `RGB2[210]`(Red)   ]] for r=0,2 do for g=0,2 do for b=0,2 do RGB2[100*r+10*g+b]={r/2,g/2,b/2} end end end
-DEBUG=      require'debug'
+DEBUG=      require'debugExtend'
 LOG=        require'log'
 JSON=       require'json'
 
