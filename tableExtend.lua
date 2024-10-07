@@ -16,6 +16,7 @@ for k,v in next,table do TABLE[k]=v end
 ---@param val T value to fill
 ---@param count number how many elements
 ---@return T[]
+---@nodiscard
 function TABLE.new(val,count)
     local L={}
     for i=1,count do
@@ -30,6 +31,7 @@ end
 ---@param start number
 ---@param stop? number leave nil to the end
 ---@return T
+---@nodiscard
 function TABLE.sub(org,start,stop)
     local L={}
     for i=start,stop or #org do
@@ -43,6 +45,7 @@ end
 ---@param org T original table
 ---@param depth? number how many layers will be recreate, default to inf
 ---@return T
+---@nodiscard
 function TABLE.copy(org,depth)
     if not depth then depth=1e99 end
     local L={}
@@ -61,6 +64,7 @@ end
 ---@param org T original table
 ---@param depth? number how many layers will be recreate, default to inf
 ---@return T
+---@nodiscard
 function TABLE.copyAll(org,depth)
     if not depth then depth=1e99 end
     local L={}
@@ -103,6 +107,7 @@ end
 ---@param org table<any,T1>
 ---@param val? T2
 ---@return table<T1,T2|true>
+---@nodiscard
 function TABLE.getValueSet(org,val)
     if val==nil then val=true end
     local T={}
@@ -117,6 +122,7 @@ end
 ---@param L1 T1[] list 1
 ---@param L2 T2[] list 2
 ---@return (T1|T2)[]
+---@nodiscard
 function TABLE.combine(L1,L2)
     local L={}
     local l0=#L1
@@ -129,6 +135,7 @@ end
 ---@generic T
 ---@param matrix T
 ---@return T
+---@nodiscard
 function TABLE.transpose(matrix)
     local newMat={}
     for y=1,#matrix[1] do
@@ -145,6 +152,7 @@ end
 ---@param matrix Mat<T>
 ---@param direction 'R'|'L'|'F'|'0' CW, CCW, 180 deg, 0 deg (copy)
 ---@return Mat<T>
+---@nodiscard
 function TABLE.rotate(matrix,direction)
     local icb={}
     if direction=='R' then -- Rotate CW
@@ -188,6 +196,7 @@ end
 ---@param a any[]
 ---@param b any[]
 ---@return boolean
+---@nodiscard
 function TABLE.equal(a,b)
     if #a~=#b then return false end
     if a==b then return true end
@@ -201,6 +210,7 @@ end
 ---@param a table
 ---@param b table
 ---@return boolean
+---@nodiscard
 function TABLE.equalAll(a,b)
     if #a~=#b then return false end
     if a==b then return true end
@@ -214,18 +224,17 @@ end
 ---@generic T1,T2
 ---@param org T1[] original list
 ---@param new T2[] new list
----@return (T1|T2)[] #org with new data
 function TABLE.connect(org,new)
     local l0=#org
     for i=1,#new do
         org[l0+i]=new[i]
     end
-    return org
 end
 
 ---Delete items in [1~#] of org which also in [1~#] of sub
----@param org table
----@param sub table
+---@generic T
+---@param org T[]
+---@param sub T[]
 function TABLE.subtract(org,sub)
     for i=#org,1,-1 do
         for j=#sub,1,-1 do
@@ -238,8 +247,9 @@ function TABLE.subtract(org,sub)
 end
 
 ---Delete all items in org which also in sub
----@param org table
----@param sub table
+---@generic T
+---@param org Map<T>
+---@param sub Map<T>
 function TABLE.subtractAll(org,sub)
     for _,v in next,sub do
         while true do
@@ -379,6 +389,7 @@ end
 ---@generic T
 ---@param t T[]
 ---@return T
+---@nodiscard
 function TABLE.getRandom(t)
     local l=#t
     if l>0 then
@@ -392,6 +403,7 @@ end
 ---@generic T
 ---@param t T[]
 ---@return T
+---@nodiscard
 function TABLE.popRandom(t)
     local l=#t
     if l>0 then
@@ -437,6 +449,7 @@ end
 ---@param val any
 ---@param start? number
 ---@return number|nil key
+---@nodiscard
 function TABLE.find(t,val,start)
     for i=start or 1,#t do if t[i]==val then return i end end
 end
@@ -445,6 +458,7 @@ end
 ---@param t any[]
 ---@param val any
 ---@return number|nil key
+---@nodiscard
 function TABLE.findOrdered(t,val)
     if val<t[1] or val>t[#t] then return end
     local i,j=1,#t
@@ -465,6 +479,7 @@ end
 ---@param t table<K,V>
 ---@param val V
 ---@return K|nil key
+---@nodiscard
 function TABLE.findAll(t,val)
     for k,v in next,t do if v==val then return k end end
 end
@@ -498,6 +513,7 @@ end
 ---@generic K,V
 ---@param t table<K,V>
 ---@return V|nil value, K|nil key
+---@nodiscard
 function TABLE.minAll(t)
     local min,key=MATH.inf,nil
     for k,v in next,t do
@@ -512,6 +528,7 @@ end
 ---@generic K,V
 ---@param t table<K,V>
 ---@return V|nil value, K|nil key
+---@nodiscard
 function TABLE.maxAll(t)
     local max,key=-MATH.inf,nil
     for k,v in next,t do
@@ -570,6 +587,7 @@ do -- function TABLE.dumpDeflate(t,depth)
     ---@param t table
     ---@param depth? number how many layers will be dumped, default to inf
     ---@return string
+    ---@nodiscard
     function TABLE.dumpDeflate(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
         return dump(t,1,depth or 1e99)
@@ -636,6 +654,7 @@ do -- function TABLE.dump(t,depth)
     ---@param t table
     ---@param depth? number how many layers will be dumped, default to inf
     ---@return string
+    ---@nodiscard
     function TABLE.dump(t,depth)
         assert(type(t)=='table',"Only table can be dumped")
         return dump(t,1,depth or 1e99)
@@ -648,6 +667,7 @@ end
 ---Get element count of table
 ---@param t table
 ---@return number
+---@nodiscard
 function TABLE.getSize(t)
     local size=0
     for _ in next,t do size=size+1 end
@@ -658,6 +678,7 @@ end
 ---@param t any[]
 ---@param val any
 ---@return number
+---@nodiscard
 function TABLE.count(t,val)
     local count=0
     for i=1,#t do
@@ -672,6 +693,7 @@ end
 ---@param t table
 ---@param val any
 ---@return number
+---@nodiscard
 function TABLE.countAll(t,val)
     local count=0
     for _,v in next,t do
@@ -687,6 +709,7 @@ end
 ---@param t table<K,V>
 ---@param val V
 ---@return V|nil
+---@nodiscard
 function TABLE.next(t,val)
     if val==nil then return t[1] end
     for i=1,#t do if t[i]==val then return t[i+1] end end
@@ -728,6 +751,7 @@ end
 ---@param t table
 ---@param k any
 ---@return fun():any
+---@nodiscard
 function TABLE.func_getVal(t,k)
     return function() return t[k] end
 end
@@ -736,6 +760,7 @@ end
 ---@param t table
 ---@param k any
 ---@return fun()
+---@nodiscard
 function TABLE.func_revVal(t,k)
     return function() t[k]=not t[k] end
 end
@@ -744,6 +769,7 @@ end
 ---@param t table
 ---@param k any
 ---@return fun(v:any)
+---@nodiscard
 function TABLE.func_setVal(t,k)
     return function(v) t[k]=v end
 end
@@ -797,6 +823,7 @@ do -- function TABLE.newResourceTable(src,loadFunc)
     ---@param loadFunc fun(resID:any):any Will receive resourceID from src table, must return a non-nil value
     ---@param lazy? boolean
     ---@return table
+    ---@nodiscard
     function TABLE.newResourceTable(src,loadFunc,lazy)
         local new={}
         link(new,src,loadFunc)

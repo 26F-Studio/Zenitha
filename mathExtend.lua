@@ -18,6 +18,7 @@ local tau=MATH.tau
 ---Check if a number is NaN
 ---@param n number
 ---@return boolean
+---@nodiscard
 function MATH.isnan(n)
     return n~=n
 end
@@ -25,6 +26,7 @@ end
 ---Get a number's sign
 ---@param a number
 ---@return -1|0|1
+---@nodiscard
 function MATH.sign(a)
     return a>0 and 1 or a<0 and -1 or 0
 end
@@ -36,6 +38,7 @@ end
 ---@return number, number, number
 ---@overload fun(x:number):number
 ---@overload fun(x:number, y:number):number, number
+---@nodiscard
 function MATH.vecAbs(x,y,z)
     if z then
         return (x*x+y*y+z*z)^.5
@@ -53,6 +56,7 @@ end
 ---@return number, number, number
 ---@overload fun(x:number):number
 ---@overload fun(x:number, y:number):number, number
+---@nodiscard
 function MATH.vecDir(x,y,z)
     if z then
         local r=(x*x+y*y+z*z)^.5
@@ -70,6 +74,7 @@ end
 ---Sum table in [1~#]
 ---@param t number[]
 ---@return number
+---@nodiscard
 function MATH.sum(t)
     local s=0
     for i=1,#t do s=s+t[i] end
@@ -79,6 +84,7 @@ end
 ---Sum table
 ---@param t Map<number>
 ---@return number
+---@nodiscard
 function MATH.sumAll(t)
     local s=0
     for _,v in next,t do s=s+v end
@@ -88,6 +94,7 @@ end
 ---STATISTIC
 ---@param data number[]
 ---@return number
+---@nodiscard
 function MATH.average(data)
     return MATH.sum(data)/#data
 end
@@ -95,6 +102,7 @@ end
 ---STATISTIC
 ---@param data number[]
 ---@return number
+---@nodiscard
 function MATH.median(data)
     local t=TABLE.copy(data)
     table.sort(t)
@@ -105,6 +113,7 @@ end
 ---STATISTIC
 ---@param data number[]
 ---@return number
+---@nodiscard
 function MATH.totalSquareSum(data)
     local avg=MATH.average(data)
     local sum=0
@@ -114,15 +123,16 @@ function MATH.totalSquareSum(data)
     return sum
 end
 
-function MATH.variance(data)       return MATH.totalSquareSum(data)/#data     end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]
-function MATH.sampleVariance(data) return MATH.totalSquareSum(data)/(#data-1) end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]
-function MATH.stdDev(data)         return MATH.variance(data)^.5              end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]
-function MATH.sampleStdDev(data)   return MATH.sampleVariance(data)^.5        end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]
+function MATH.variance(data)       return MATH.totalSquareSum(data)/#data     end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
+function MATH.sampleVariance(data) return MATH.totalSquareSum(data)/(#data-1) end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
+function MATH.stdDev(data)         return MATH.variance(data)^.5              end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
+function MATH.sampleStdDev(data)   return MATH.sampleVariance(data)^.5        end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
 
 ---Round a number with specified unit
 ---@param n number
 ---@param u number
 ---@return number
+---@nodiscard
 function MATH.roundUnit(n,u)
     return floor(n/u+.5)*u
 end
@@ -131,6 +141,7 @@ end
 ---@param x number
 ---@param base number
 ---@return number
+---@nodiscard
 function MATH.roundLog(x,base)
     return floor(log(x,base)+.5)
 end
@@ -138,6 +149,7 @@ end
 ---Get a random boolean with specified chance, 50% if not given
 ---@param chance? number 0~1
 ---@return boolean
+---@nodiscard
 function MATH.roll(chance)
     return rnd()<(chance or .5)
 end
@@ -147,6 +159,7 @@ end
 ---@param head A
 ---@param tail B
 ---@return A|B
+---@nodiscard
 function MATH.coin(head,tail)
     if rnd()<.5 then
         return head
@@ -159,6 +172,7 @@ end
 ---@param a number
 ---@param b number
 ---@return number
+---@nodiscard
 function MATH.rand(a,b)
     return a+rnd()*(b-a)
 end
@@ -166,6 +180,7 @@ end
 ---Get a random value from a table
 ---@param map table
 ---@return integer
+---@nodiscard
 function MATH.randFrom(map)
     local count=0
     for _ in next,map do
@@ -182,6 +197,7 @@ end
 ---Get a random integer with specified frequency list
 ---@param fList number[] positive numbers
 ---@return integer
+---@nodiscard
 function MATH.randFreq(fList)
     local sum=MATH.sum(fList)
     local r=rnd()*sum
@@ -195,6 +211,7 @@ end
 ---Get a random key with specified frequency table
 ---@param fList Map<number> positive numbers
 ---@return integer
+---@nodiscard
 function MATH.randFreqAll(fList)
     local sum=MATH.sumAll(fList)
     local r=rnd()*sum
@@ -205,9 +222,10 @@ function MATH.randFreqAll(fList)
     error("MATH.randFreqAll(fList): Need simple positive number list")
 end
 
+local randNormBF
 ---Get a random numbers in gaussian distribution (Box-Muller algorithm + stream buffer)
 ---@return number
-local randNormBF
+---@nodiscard
 function MATH.randNorm()
     if randNormBF then
         local res=randNormBF
@@ -228,6 +246,7 @@ end
 ---```
 ---@param v number
 ---@param fList number[] positive numbers
+---@nodiscard
 function MATH.selectFreq(v,fList)
     for i=1,#fList do
         v=v-fList[i]
@@ -239,6 +258,7 @@ end
 ---Same to MATH.selectFreq but with any table. Notice: keys are not in order
 ---@param v number
 ---@param fList Map<number> positive numbers
+---@nodiscard
 function MATH.selectFreqAll(v,fList)
     for k,f in next,fList do
         v=v-f
@@ -252,6 +272,7 @@ end
 ---@param low number
 ---@param high number
 ---@return number
+---@nodiscard
 function MATH.clamp(v,low,high)
     if v<=low then
         return low
@@ -267,6 +288,7 @@ end
 ---@param low number
 ---@param high number
 ---@return boolean
+---@nodiscard
 function MATH.between(v,low,high)
     return v>=low and v<=high
 end
@@ -276,6 +298,7 @@ end
 ---@param v2 number
 ---@param t number 0~1 at most time
 ---@return number
+---@nodiscard
 function MATH.lerp(v1,v2,t)
     return v1+(v2-v1)*t
 end
@@ -285,6 +308,7 @@ end
 ---@param v2 number
 ---@param value number
 ---@return number
+---@nodiscard
 function MATH.iLerp(v1,v2,value)
     return (value-v1)/(v2-v1)
 end
@@ -294,6 +318,7 @@ end
 ---@param v2 number
 ---@param t number 0~1 at most time
 ---@return number
+---@nodiscard
 function MATH.cLerp(v1,v2,t)
     return
         t<=0 and v1 or
@@ -306,6 +331,7 @@ end
 ---@param v2 number
 ---@param value number
 ---@return number
+---@nodiscard
 function MATH.icLerp(v1,v2,value)
     return
         value<=v1 and 0 or
@@ -319,6 +345,7 @@ local clamp,lerp=MATH.clamp,MATH.lerp
 ---@param list number[]
 ---@param t number
 ---@return number
+---@nodiscard
 function MATH.lLerp(list,t)
     local index=(#list-1)*clamp(t,0,1)+1
     return lerp(list[floor(index)],list[ceil(index)],index%1)
@@ -328,6 +355,7 @@ end
 ---@param list number[] need #list>2 and ascending, otherwise result is undefined
 ---@param value number
 ---@return number
+---@nodiscard
 function MATH.ilLerp(list,value)
     local i,j=1,#list
     if value<=list[1] then return 0 end
@@ -353,6 +381,7 @@ end
 ---@param y2 number
 ---@param t number
 ---@return number
+---@nodiscard
 function MATH.interpolate(x1,y1,x2,y2,t)
     return y1+(t-x1)*(y2-y1)/(x2-x1)
 end
@@ -364,6 +393,7 @@ end
 ---@param b number
 ---@param d number
 ---@return number
+---@nodiscard
 function MATH.linearApproach(a,b,d)
     return b>a and min(a+d,b) or max(a-d,b)
 end
@@ -375,6 +405,7 @@ end
 ---@param b number
 ---@param k number
 ---@return number
+---@nodiscard
 function MATH.expApproach(a,b,k)
     return b+(a-b)*exp(-k)
 end
@@ -385,6 +416,7 @@ end
 ---@param x2 number
 ---@param y2 number
 ---@return number
+---@nodiscard
 function MATH.distance(x1,y1,x2,y2)
     return ((x1-x2)^2+(y1-y2)^2)^.5
 end
@@ -395,6 +427,7 @@ end
 ---@param y1 number
 ---@param x2 number
 ---@param y2 number
+---@nodiscard
 function MATH.mDist2(p,x1,y1,x2,y2)
     return
         p==0 and max(abs(x1-x2),abs(y1-y2)) or
@@ -411,6 +444,7 @@ end
 ---@param x2 number
 ---@param y2 number
 ---@param z2 number
+---@nodiscard
 function MATH.mDist3(p,x1,y1,z1,x2,y2,z2)
     return
         p==0 and max(abs(x1-x2),abs(y1-y2),abs(z1-z2)) or
@@ -423,6 +457,7 @@ end
 ---@param p 0|number 0 for Chebyshev distance
 ---@param v1 number[]
 ---@param v2 number[]
+---@nodiscard
 function MATH.mDistV(p,v1,v2)
     assert(#v1==#v2,"MATH.mDistV(p,v1,v2): Need #v1==#v2")
     if p==0 then
@@ -448,6 +483,7 @@ end
 ---@param poly number[] {x1,y1,x2,y2,...}
 ---@param evenOddRule boolean
 ---@return boolean
+---@nodiscard
 function MATH.pointInPolygon(x,y,poly,evenOddRule)
     local x1,y1,x2,y2
     local len=#poly
@@ -477,6 +513,7 @@ end
 ---@param a number
 ---@param b number
 ---@return number
+---@nodiscard
 function MATH.gcd(a,b)
     repeat
         a=a%b

@@ -79,6 +79,7 @@ end
 ---@param str string
 ---@param ... any
 ---@return string
+---@nodiscard
 function STRING.repD(str,...)
     local l={...}
     for i=#l,1,-1 do
@@ -91,6 +92,7 @@ end
 ---@param str string
 ---@param switch string
 ---@return boolean
+---@nodiscard
 function STRING.sArg(str,switch)
     if find(str..' ',switch..' ') then
         return true
@@ -104,6 +106,7 @@ end
 ---@param str2 string
 ---@param pos number
 ---@return string
+---@nodiscard
 function STRING.paste(str,str2,pos)
     local mPos=#str-#str2+1
     if pos<0 then pos=pos+#str+1 end
@@ -129,6 +132,7 @@ local shiftMap={
 ---string.upper, but can also shift numbers to signs
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.shift(str)
     return shiftMap[str] or upper(str)
 end
@@ -144,6 +148,7 @@ local unshiftMap={
 ---string.lower, but can also unshift signs to numbers
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.unshift(str)
     return unshiftMap[str] or lower(str)
 end
@@ -153,6 +158,7 @@ local upperData,lowerData,diaData -- Data is filled later in this file
 ---string.upper with utf8 support, warning: low performance
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.upperUTF8(str)
     for i=1,#upperData do
         local pair=upperData[i]
@@ -163,6 +169,7 @@ end
 ---string.lower with utf8 support, warning: low performance
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.lowerUTF8(str)
     for i=1,#lowerData do
         local pair=lowerData[i]
@@ -173,6 +180,7 @@ end
 ---remove diacritics, warning: low performance
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.remDiacritics(str)
     for _,pair in next,diaData do
         str=gsub(str,pair[1],pair[2])
@@ -183,6 +191,7 @@ end
 ---Trim %s at both ends of the string
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.trim(str)
     -- local p=find(str,'%S')
     -- if not p then return '' end
@@ -195,6 +204,7 @@ end
 ---@param str string
 ---@param regex string
 ---@return number
+---@nodiscard
 function STRING.count(str,regex)
     local _,count=gsub(str,regex,'')
     return count
@@ -213,6 +223,7 @@ end
 ---@param str string
 ---@param keep? boolean|number `true`: keep some indent based on 1st line; [number] trim specific number of spaces
 ---@return string
+---@nodiscard
 function STRING.trimIndent(str,keep)
     if keep then
         local list=STRING.split(str,'\n')
@@ -232,6 +243,7 @@ end
 ---@param str string
 ---@param sep string
 ---@param regex? boolean
+---@nodiscard
 function STRING.before(str,sep,regex)
     local p=find(str,sep,1,regex)
     if p then return sub(str,1,p-1) end
@@ -241,6 +253,7 @@ end
 ---@param str string
 ---@param sep string
 ---@param regex? boolean
+---@nodiscard
 function STRING.after(str,sep,regex)
     local _,p=find(str,sep,1,regex)
     if p then return sub(str,p+1) end
@@ -251,6 +264,7 @@ end
 ---@param sep string
 ---@param regex? boolean
 ---@return string[]
+---@nodiscard
 function STRING.split(str,sep,regex)
     local L={}
     local p1=1 -- start
@@ -277,6 +291,7 @@ function STRING.split(str,sep,regex)
 end
 
 ---Split a string into single-byte strings
+---@nodiscard
 function STRING.atomize(str)
     local l={}
     for i=1,#str do
@@ -289,6 +304,7 @@ end
 ---@param s1 string
 ---@param s2 string
 ---@return number
+---@nodiscard
 function STRING.editDist(s1,s2) -- By Copilot
     local len1,len2=#s1,#s2
     local t1,t2={},{}
@@ -312,6 +328,7 @@ end
 ---Check if the string is a valid email address
 ---@param str string
 ---@return boolean
+---@nodiscard
 function STRING.simpEmailCheck(str)
     local list=STRING.split(str,'@')
     if #list~=2 then return false end
@@ -326,6 +343,7 @@ end
 ---Convert time (second) to "MM:SS"
 ---@param t number
 ---@return string
+---@nodiscard
 function STRING.time_simp(t)
     return format('%02d:%02d',floor(t/60),floor(t%60))
 end
@@ -333,6 +351,7 @@ end
 ---Convert time (second) to seconds~year string (max 3 units)
 ---@param t number
 ---@return string
+---@nodiscard
 function STRING.time(t)
     return
         t<0 and "-0.000″" or
@@ -346,6 +365,7 @@ function STRING.time(t)
 end
 
 local units={[0]=" B"," KB"," MB"," GB"," TB"," PB"," EB"," ZB"," YB"}
+---@nodiscard
 function STRING.fileSize(s)
     if s<=0 then
         return "0 B"
@@ -360,6 +380,7 @@ end
 ---Warning: don't support number format like .26, must have digits before the dot, like 0.26
 ---@param str string
 ---@return number|nil, string|nil
+---@nodiscard
 function STRING.cutUnit(str)
     local _s,_e=find(str,'^-?%d+%.?%d*')
     if _e==#str then -- All numbers
@@ -374,6 +395,7 @@ end
 ---Get the type of a character
 ---@param c string
 ---@return 'space'|'word'|'sign'|'other'
+---@nodiscard
 function STRING.type(c)
     assert(type(c)=='string' and #c==1,"Need single-charater string")
     local t=byte(c)
@@ -397,6 +419,7 @@ end
 ---Simple utf8 coding
 ---@param num number
 ---@return string
+---@nodiscard
 function STRING.UTF8(num)
     assertf(type(num)=='number',"Wrong type (%s)",type(num))
     assertf(num>=0 and num<2^31,"Out of range (%d)",num)
@@ -412,6 +435,7 @@ end
 ---Parse binary number from string
 ---@param str string
 ---@return number
+---@nodiscard
 function STRING.binNum(str)
     assert(type(str)=='string',"STRING.binNum: Need string")
     local size=#str
@@ -436,6 +460,7 @@ for _,preU in next,preUnits do for _,secU in next,secUnits do table.insert(units
 ---Convert a number to a approximate integer with large unit
 ---@param num number
 ---@return string
+---@nodiscard
 function STRING.bigInt(num)
     if num<1000 then
         return tostring(num)
@@ -451,6 +476,7 @@ end
 ---@param num number
 ---@param len? number
 ---@return string
+---@nodiscard
 function STRING.toBin(num,len)
     local s=''
     while num>0 do
@@ -464,6 +490,7 @@ end
 ---@param num number
 ---@param len? number
 ---@return string
+---@nodiscard
 function STRING.toOct(num,len)
     local s=''
     while num>0 do
@@ -480,6 +507,7 @@ b16[0]='0'
 ---@param num number
 ---@param len? number
 ---@return string
+---@nodiscard
 function STRING.toHex(num,len)
     local s=''
     local neg
@@ -505,6 +533,7 @@ local rshift=bit.rshift
 ---Simple url encoding
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.urlEncode(str)
     local out=''
     for i=1,#str do
@@ -522,6 +551,7 @@ end
 ---@param text string
 ---@param key string
 ---@return string
+---@nodiscard
 function STRING.vcsEncrypt(text,key)
     local keyLen=#key
     local result=''
@@ -540,6 +570,7 @@ end
 ---@param text string
 ---@param key string
 ---@return string
+---@nodiscard
 function STRING.vcsDecrypt(text,key)
     local keyLen=#key
     local result=''
@@ -559,6 +590,7 @@ end
 ---@param seedRange? number default to 26
 ---@param seed? number default to 0
 ---@return string
+---@nodiscard
 function STRING.digezt(text,seedRange,seed)
     if not seed then seed=0 end
     if not seedRange then seedRange=26 end
@@ -584,6 +616,7 @@ end
 ---Cut a line off a string
 ---@param str string
 ---@return string, string #One line (do not include \n), and the rest of string
+---@nodiscard
 function STRING.readLine(str)
     local p=find(str,'\n')
     if p then
@@ -597,6 +630,7 @@ end
 ---@param str string
 ---@param n number
 ---@return string, string #`n` bytes, and the rest of string
+---@nodiscard
 function STRING.readChars(str,n)
     return sub(str,1,n),sub(str,n+1)
 end
@@ -610,6 +644,7 @@ end
 ---@param path string
 ---@param len? number default to 1
 ---@return string
+---@nodiscard
 function STRING.simplifyPath(path,len)
     local l=STRING.split(path,'/')
     for i=1,#l-1 do l[i]=sub(l[i],1,len or 1) end
@@ -619,6 +654,7 @@ end
 ---Pack binary data into string (Zlib+Base64)
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.packBin(str)
     ---@type string
     return data.encode('string','base64',data.compress('string','zlib',str))
@@ -627,6 +663,7 @@ end
 ---Unpack binary data from string (Zlib+Base64)
 ---@param str string
 ---@return string|any
+---@nodiscard
 function STRING.unpackBin(str)
     return data.decompress('string','zlib',data.decode('string','base64',str))
 end
@@ -634,6 +671,7 @@ end
 ---Pack text data into string (Gzip+Base64)
 ---@param str string
 ---@return string
+---@nodiscard
 function STRING.packText(str)
     ---@type string
     return data.encode('string','base64',data.compress('string','gzip',str))
@@ -642,6 +680,7 @@ end
 ---Unpack text data from string (Gzip+Base64)
 ---@param str string
 ---@return string|any
+---@nodiscard
 function STRING.unpackText(str)
     return data.decompress('string','gzip',data.decode('string','base64',str))
 end
@@ -649,6 +688,7 @@ end
 ---Pack table into string (JSON+Gzip+Base64)
 ---@param t table
 ---@return string
+---@nodiscard
 function STRING.packTable(t)
     return STRING.packText(JSON.encode(t))
 end
@@ -656,6 +696,7 @@ end
 ---Unpack table from string (JSON+Gzip+Base64)
 ---@param str string
 ---@return table
+---@nodiscard
 function STRING.unpackTable(str)
     return JSON.decode(STRING.unpackText(str))
 end
