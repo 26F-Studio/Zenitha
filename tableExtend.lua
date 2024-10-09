@@ -106,8 +106,9 @@ end
 ---@generic T1,T2
 ---@param org table<any,T1>
 ---@param val? T2
----@return table<T1,T2|true>
+---@return table<T1,T2>
 ---@nodiscard
+---@overload fun(org:table):table<any,true>
 function TABLE.getValueSet(org,val)
     if val==nil then val=true end
     local T={}
