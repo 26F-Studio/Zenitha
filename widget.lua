@@ -10,7 +10,7 @@
 ---@field h? number
 ---@field widthLimit? number
 ---
----@field color? Zenitha.ColorStr|Zenitha.Color
+---@field color? Zenitha.ColorStr|Zenitha.Color [text & button & button_fill & checkBox & switch & slider & selector]
 ---@field text? string|function
 ---@field fontSize? number
 ---@field fontType? string
@@ -21,17 +21,17 @@
 ---@field labelDistance? number
 ---@field disp? function Must return the value that widget should show
 ---@field code? function Called 'When triggered'
----@field visibleFunc? function Used to determine if widget is visible when scene changed
----@field visibleTick? function Used to change widget's visibility every frame
+---@field visibleFunc? function Used to change widget's visibility when scene changed
+---@field visibleTick? function Used to update widget's visibility every frame
 ---
 ---@field lineWidth? number
 ---@field cornerR? number Round corner ratio
 ---
----@field textColor? Zenitha.ColorStr|Zenitha.Color
----@field fillColor? Zenitha.ColorStr|Zenitha.Color
----@field frameColor? Zenitha.ColorStr|Zenitha.Color
----@field activeColor? Zenitha.ColorStr|Zenitha.Color
----@field idleColor? Zenitha.ColorStr|Zenitha.Color
+---@field textColor? Zenitha.ColorStr|Zenitha.Color [button & button_fill & slider]
+---@field fillColor? Zenitha.ColorStr|Zenitha.Color [switch & slider & slider_progress & inputBox & textBox & listBox]
+---@field frameColor? Zenitha.ColorStr|Zenitha.Color [inputBox]
+---@field activeColor? Zenitha.ColorStr|Zenitha.Color [textBox & listBox]
+---@field idleColor? Zenitha.ColorStr|Zenitha.Color [textBox & listBox]
 ---
 ---@field sound_press? string
 ---@field sound_hover? string
