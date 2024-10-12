@@ -226,7 +226,7 @@ function Widgets.base:getInfo()
     end
     return str
 end
-function Widgets.base:reset()
+function Widgets.base:reset(init)
     assert(not self.name or type(self.name)=='string',"[widget].name need string")
 
     assert(type(self.x)=='number',"[widget].x need number")
@@ -304,10 +304,12 @@ function Widgets.base:reset()
     if self._visible==nil then
         self._visible=true
     end
-    if self.visibleFunc then
-        self._visible=self.visibleFunc()
-    elseif self.visibleTick then
-        self._visible=self.visibleTick()
+    if not init then
+        if self.visibleFunc then
+            self._visible=self.visibleFunc()
+        elseif self.visibleTick then
+            self._visible=self.visibleTick()
+        end
     end
 end
 function Widgets.base:setVisible(bool)
@@ -360,8 +362,8 @@ Widgets.text=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.text:reset()
-    Widgets.base.reset(self)
+function Widgets.text:reset(init)
+    Widgets.base.reset(self,init)
 end
 function Widgets.text:draw()
     if self._text then
@@ -396,8 +398,8 @@ Widgets.image=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.image:reset()
-    Widgets.base.reset(self)
+function Widgets.image:reset(init)
+    Widgets.base.reset(self,init)
     assert(not self.k or not (self.w or self.h),"[image].w/h and .k cannot appear simultaneously")
     if not self._image then return end
 
@@ -414,7 +416,7 @@ function Widgets.image:reset()
 end
 function Widgets.image:setImage(_img)
     self.image=_img
-    self:reset()
+    self:reset(init)
 end
 function Widgets.image:draw()
     if self._image then
@@ -458,9 +460,9 @@ Widgets.button=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.button:reset()
+function Widgets.button:reset(init)
     if self.textColor==false then self.textColor=self.color end
-    Widgets.base.reset(self)
+    Widgets.base.reset(self,init)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number',"[button].w need number")
     assert(self.h and type(self.h)=='number',"[button].h need number")
@@ -624,8 +626,8 @@ Widgets.checkBox=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.checkBox:reset()
-    Widgets.base.reset(self)
+function Widgets.checkBox:reset(init)
+    Widgets.base.reset(self,init)
 
     assert(type(self.disp)=='function',"[checkBox].disp need function")
     assert(not self.sound_on or type(self.sound_on)=='string',"[checkBox].sound_on need string")
@@ -731,8 +733,8 @@ Widgets.switch=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.checkBox,__metatable=true})
-function Widgets.switch:reset()
-    Widgets.base.reset(self)
+function Widgets.switch:reset(init)
+    Widgets.base.reset(self,init)
 
     assert(type(self.disp)=='function',"[switch].disp need function")
 
@@ -887,8 +889,8 @@ local sliderShowFunc={
         return floor(S._pos0*100+.5)..'%'
     end,
 }
-function Widgets.slider:reset()
-    Widgets.base.reset(self)
+function Widgets.slider:reset(init)
+    Widgets.base.reset(self,init)
 
     assert(self.w and type(self.w)=='number',"[slider].w need number")
     assert(type(self.numFontSize)=='number',"[widget].numFontSize need number")
@@ -1095,8 +1097,8 @@ Widgets.slider_fill=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
-function Widgets.slider_fill:reset()
-    Widgets.base.reset(self)
+function Widgets.slider_fill:reset(init)
+    Widgets.base.reset(self,init)
 
     assert(self.w and type(self.w)=='number',"[slider_fill].w need number")
     assert(self.h and type(self.h)=='number',"[slider_fill].h need number")
@@ -1216,8 +1218,8 @@ Widgets.slider_progress=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
-function Widgets.slider_progress:reset()
-    Widgets.base.reset(self)
+function Widgets.slider_progress:reset(init)
+    Widgets.base.reset(self,init)
 
     assert(self.w and type(self.w)=='number',"[slider_progress].w need number")
     assert(self.h and type(self.h)=='number',"[slider_progress].h need number")
@@ -1320,8 +1322,8 @@ Widgets.selector=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.selector:reset()
-    Widgets.base.reset(self)
+function Widgets.selector:reset(init)
+    Widgets.base.reset(self,init)
 
     assert(self.w and type(self.w)=='number',"[selector].w need number")
     assert(type(self.list)=='table',"[selector].list need table")
@@ -1493,8 +1495,8 @@ Widgets.inputBox=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.inputBox:reset()
-    Widgets.base.reset(self)
+function Widgets.inputBox:reset(init)
+    Widgets.base.reset(self,init)
     assert(self.w and type(self.w)=='number',"[inputBox].w need number")
     assert(self.h and type(self.h)=='number',"[inputBox].h need number")
     assert(not self.sound_input or type(self.sound_input)=='string',"[inputBox].sound_input need string")
@@ -1673,8 +1675,8 @@ Widgets.textBox=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.textBox:reset()
-    Widgets.base.reset(self)
+function Widgets.textBox:reset(init)
+    Widgets.base.reset(self,init)
     if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
     assert(type(self.scrollBarColor)=='table',"[textBox].scrollBarColor need table")
     assert(self.w and type(self.w)=='number',"[textBox].w need number")
@@ -1874,8 +1876,8 @@ Widgets.listBox=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.listBox:reset()
-    Widgets.base.reset(self)
+function Widgets.listBox:reset(init)
+    Widgets.base.reset(self,init)
     if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
     assert(type(self.scrollBarColor)=='table',"[listBox].scrollBarColor need table")
     assert(not self.sound_click or type(self.sound_click)=='string',"[listBox].sound_click need string")
@@ -2321,7 +2323,7 @@ function WIDGET.new(args)
             errorf("WIDGET.new(args): Illegal argument %s for widget %s",k,t)
         end
     end
-    w:reset()
+    w:reset(true)
 
     return w
 end
