@@ -25,6 +25,24 @@ function TABLE.new(val,count)
     return L
 end
 
+---Create a new filled matrix
+---@generic T
+---@param val T value to fill
+---@param height number
+---@param width number
+---@return Mat<T>
+---@nodiscard
+function TABLE.newMat(val,height,width)
+    local L={}
+    for y=1,height do
+        L[y]={}
+        for x=1,width do
+            L[y][x]=val
+        end
+    end
+    return L
+end
+
 ---Create the subset list of a list, like string.sub
 ---@generic T
 ---@param org T original table
