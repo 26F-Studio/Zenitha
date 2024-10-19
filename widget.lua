@@ -1930,7 +1930,7 @@ function Widgets.listBox:push(t)
     ins(self._list,t)
 end
 function Widgets.listBox:pop()
-    if #self._list>0 then
+    if self._list[1] then
         rem(self._list)
         self:drag(0,0,0,0)
     end

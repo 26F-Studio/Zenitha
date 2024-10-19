@@ -1158,7 +1158,7 @@ function love.run()
     local drawCounter=100
 
     love.resize(gc.getWidth(),gc.getHeight())
-    if #errData>0 then
+    if errData[1] then
         SCN.stack={'error'}
         SCN._load('error')
     else

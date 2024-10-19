@@ -146,7 +146,7 @@ end
 
 ---Draw all messages (called by Zenitha)
 function MSG._draw()
-    if #mesList>0 then
+    if mesList[1] then
         GC.translate(0,startY)
         GC.setLineWidth(2)
         for i=1,#mesList do

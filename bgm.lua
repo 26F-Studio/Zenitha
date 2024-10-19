@@ -300,7 +300,7 @@ end
 ---@param time? nil|number
 function BGM.stop(time)
     assert(time==nil or type(time)=='number' and time>=0,"BGM.stop(time): Need >=0")
-    if #nowPlay>0 then
+    if nowPlay[1] then
         for i=1,#nowPlay do
             local obj=nowPlay[i]
             _clearTask(obj,'volume')
@@ -411,7 +411,7 @@ end
 ---Get if BGM playing now
 ---@return boolean
 function BGM.isPlaying()
-    return #nowPlay>0 and nowPlay[1].source:isPlaying()
+    return nowPlay[1] and nowPlay[1].source:isPlaying()
 end
 
 ---Get time of BGM playing now, 0 if not exists

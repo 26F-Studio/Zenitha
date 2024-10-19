@@ -270,7 +270,7 @@ local function serverLoop()
                     return
                 end
             elseif err=='timeout' then
-                if partial and #partial>0 then
+                if partial and partial[1] then
                     partialDataBuffer[id]=partialDataBuffer[id]..partial
                     if printMsg then
                         printf("[TCP_S] (p%s) %s",id,partial)

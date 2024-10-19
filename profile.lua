@@ -133,7 +133,7 @@ function profile.report(limit)
     local row=" +-----+----------------------+----------+--------+----------------------------------+ \n"
     local col=" | #   | Function             | Time     | Calls  | Code                             | \n"
     local sz=row..col..row
-    if #out>0 then
+    if out[1] then
         sz=sz.." | "..table.concat(out," | \n | ").." | \n"
     end
     return "\n"..sz..row

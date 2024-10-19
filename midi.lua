@@ -281,7 +281,7 @@ function MIDI.newSong(sData,handler)
     end
 
     -- Simplify bpmEvents to a bpm list
-    if #bpmEvents>0 then
+    if bpmEvents[1] then
         for i=1,#bpmEvents do bpmEvents[i]=bpmEvents[i].bpm end
         Song.beatPerMinute=table.concat(bpmEvents,',')
     elseif bpmEvents[1] then

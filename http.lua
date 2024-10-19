@@ -208,7 +208,7 @@ function HTTP.pollMsg(pool)
     if pool~=nil and type(pool)~='string' then error("HTTP.pollMsg(pool): Need string|nil") end
     HTTP._update()
     local p=msgPool[pool or '_default']
-    if #p>0 then
+    if p[1] then
         HTTP._msgCount=HTTP._msgCount-1
         return table.remove(p)
     end
