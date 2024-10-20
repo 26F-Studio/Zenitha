@@ -110,6 +110,17 @@ local commands={} do
     }
 
     -- File
+    commands.explorer={
+        code=function()
+            love.system.openURL(love.filesystem.getSaveDirectory())
+        end,
+        description="Open save directory",
+        details={
+            "Open the save directory in your system's file explorer.",
+            "",
+            "Usage: explorer",
+        },
+    }
     do -- tree
         local function tree(path,name,depth)
             local info=love.filesystem.getInfo(path..name)
@@ -316,9 +327,10 @@ local commands={} do
     commands.resetall={
         code=function(arg)
             if arg=="sure" then
-                log"FINAL WARNING!"
-                log"Please remember that resetting everything will delete all saved data. Delete them anyway?"
-                log"Once the data has been deleted, there is no way to recover it."
+                log{COLOR.R,"FINAL WARNING!"}
+                log{COLOR.R,"Resetting everything will DELETE ALL saved app data."}
+                log{COLOR.R,"Please remember that once the data has been deleted, NO WAY TO RECOVER."}
+                log{COLOR.R,"Delete them anyway?"}
                 log"Type: resetall really"
             elseif arg=="really" then
                 BGM.stop()
@@ -345,9 +357,8 @@ local commands={} do
                 end}
                 ins(WIDGET.active,button)
             else
-                log"Are you sure you want to reset everything?"
-                log"This will delete EVERYTHING in your saved app data, just like factory reset."
-                log"This cannot be undone."
+                log{COLOR.O,"Are you sure you want to reset?"}
+                log{COLOR.O,"This will delete EVERYTHING in save path, and cannot be undone."}
                 log"Type: resetall sure"
             end
         end,
@@ -730,6 +741,7 @@ function scene.keyDown(key,isRep)
             hisPtr=hisPtr-1
             inputBox:setText(history[hisPtr])
         end
+        return true
     elseif key=='down' then
         if hisPtr then
             hisPtr=hisPtr+1
@@ -740,6 +752,11 @@ function scene.keyDown(key,isRep)
                 inputBox:clear()
             end
         end
+        return true
+    elseif key=='left' then
+        return true
+    elseif key=='right' then
+        return true
     elseif key=='tab' then
         local str=inputBox:getText()
         if str~='' and not str:find("%s") then
