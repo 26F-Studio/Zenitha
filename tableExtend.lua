@@ -96,6 +96,18 @@ function TABLE.copyAll(org,depth)
     return L
 end
 
+---Get a new table which keys and values are swapped
+---@generic K,V
+---@param org table<K,V>
+---@return table<V,K>
+function TABLE.inverse(org)
+    local T={}
+    for k,v in next,org do
+        T[v]=k
+    end
+    return T
+end
+
 ---Get keys of a table as a list
 ---@param org table
 function TABLE.getKeys(org)
