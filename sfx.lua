@@ -102,7 +102,7 @@ end
 ---@param note number Note number, start from 0
 ---@return string Note name, e.g. `'C4'`
 function SFX.getNoteName(note)
-    if note<1 then
+    if note<0 then
         return '---'
     else
         local octave=floor(note/12)+1
