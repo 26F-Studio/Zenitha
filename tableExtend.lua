@@ -472,6 +472,42 @@ function TABLE.reIndex(org)
     end
 end
 
+---Flatten a nested table to a flat table (no table type value included)
+---## Example
+---```lua
+---local T={a=1,b={c=2},d={e={f=3}}}
+---TABLE.flatten(T)
+-----[[ Current state of T:
+---{
+---    ['a']=1,
+---    ['b/c']=2
+---    ['d/e/f']=3
+---}
+---]]
+---```
+---@param org table
+---@param depth? number how many layer will be entered and flattened, default to inf
+function TABLE.flatten(org,depth)
+    if not depth then depth=1e99 end
+    while depth>0 do
+        local tKeyList={}
+        for k,v in next,org do
+            if type(v)=='table' then
+                table.insert(tKeyList,k)
+            end
+        end
+        if #tKeyList==0 then return end
+        for i=1,#tKeyList do
+            local key=tKeyList[i]
+            for k,v in next,org[key] do
+                org[key..'/'..k]=v
+            end
+            org[key]=nil
+        end
+        depth=depth-1
+    end
+end
+
 --------------------------------------------------------------
 -- Find & Replace
 
@@ -753,7 +789,7 @@ end
 ---@generic T
 ---@param t T[]
 ---@param f fun(v:T, i:number)
----@param rev? boolean Reverse the order, allow removing elements
+---@param rev? boolean Reverse the order, allow removing elements from list
 function TABLE.foreach(t,f,rev)
     if rev then
         for i=#t,1,-1 do
@@ -766,7 +802,7 @@ function TABLE.foreach(t,f,rev)
     end
 end
 
----Execute func(table[k],k) for all elements in table (allow removing elements according to lua manual)
+---Execute func(table[k],k) for all elements in table (only allow removing elements with t[k]=nil)
 ---@param t table
 ---@param f fun(v:any, k:number)
 function TABLE.foreachAll(t,f)
