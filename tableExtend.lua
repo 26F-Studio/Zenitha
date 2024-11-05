@@ -46,14 +46,15 @@ end
 ---Create the subset list of a list, like string.sub
 ---@generic T
 ---@param org T original table
----@param start number
----@param stop? number leave nil to the end
+---@param start? number start pos (default 1)
+---@param stop? number end pos (default #org)
 ---@return T
 ---@nodiscard
 function TABLE.sub(org,start,stop)
+    if not start then start=1 end
     local L={}
-    for i=start,stop or #org do
-        L[#L+1]=org[i]
+    for i=0,(stop or #org)-start do
+        L[i+1]=org[start+i]
     end
     return L
 end

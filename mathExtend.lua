@@ -72,13 +72,15 @@ function MATH.vecDir(x,y,z)
 end
 
 ---Sum table in [1~#]
----@param t number[]
+---@param data number[]
+---@param s? integer start pos (default 1)
+---@param e? integer end pos (default #t)
 ---@return number
 ---@nodiscard
-function MATH.sum(t)
-    local s=0
-    for i=1,#t do s=s+t[i] end
-    return s
+function MATH.sum(data,s,e)
+    local sum=0
+    for i=s or 1,e or #data do sum=sum+data[i] end
+    return sum
 end
 
 ---Sum table
@@ -86,25 +88,33 @@ end
 ---@return number
 ---@nodiscard
 function MATH.sumAll(t)
-    local s=0
-    for _,v in next,t do s=s+v end
-    return s
+    local sum=0
+    for _,v in next,t do sum=sum+v end
+    return sum
 end
 
 ---STATISTIC
 ---@param data number[]
+---@param s? integer start pos (default 1)
+---@param e? integer end pos (default #t)
 ---@return number
 ---@nodiscard
-function MATH.average(data)
-    return MATH.sum(data)/#data
+function MATH.average(data,s,e)
+    if not s then s=1 end
+    if not e then e=#data end
+    return MATH.sum(data,s,e)/(e-s+1)
 end
 
 ---STATISTIC
 ---@param data number[]
+---@param s? integer start pos (default 1)
+---@param e? integer end pos (default #t)
 ---@return number
 ---@nodiscard
-function MATH.median(data)
-    local t=TABLE.copy(data)
+function MATH.median(data,s,e)
+    if not s then s=1 end
+    if not e then e=#data end
+    local t=TABLE.sub(data,s,e)
     table.sort(t)
     local n=#t/2
     return n%1==0 and (t[n]+t[n+1])/2 or t[n+.5]
@@ -115,7 +125,7 @@ end
 ---@return number
 ---@nodiscard
 function MATH.totalSquareSum(data)
-    local avg=MATH.average(data)
+    local avg=MATH.average(data,1,#data)
     local sum=0
     for i=1,#data do
         sum=sum+(data[i]-avg)^2
