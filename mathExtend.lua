@@ -386,6 +386,18 @@ function MATH.interpolate(x1,y1,x2,y2,t)
     return y1+(t-x1)*(y2-y1)/(x2-x1)
 end
 
+---Same to MATH.interpolate but clamped
+---@param x1 number
+---@param y1 number
+---@param x2 number
+---@param y2 number
+---@param t number
+---@return number
+---@nodiscard
+function MATH.clampInterpolate(x1,y1,x2,y2,t)
+    return t<=x1 and y1 or t>=x2 and y2 or y1+(t-x1)*(y2-y1)/(x2-x1)
+end
+
 ---Get a closer value from a to b with difference d
 ---
 ---Automatically choose +d or -d, then clamped at b
