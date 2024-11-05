@@ -128,6 +128,13 @@ function MATH.sampleVariance(data) return MATH.totalSquareSum(data)/(#data-1) en
 function MATH.stdDev(data)         return MATH.variance(data)^.5              end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
 function MATH.sampleStdDev(data)   return MATH.sampleVariance(data)^.5        end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
 
+---Round a number to nearest integer (round up for .5)
+---Will lower performance a bit, you should just use floor(n+0.5)
+---@param n number
+function MATH.round(n)
+    return floor(n+.5)
+end
+
 ---Round a number with specified unit
 ---@param n number
 ---@param u number
