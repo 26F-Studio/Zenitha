@@ -39,8 +39,8 @@
 ---@field ang? number [image]
 ---@field k? number [image]
 ---
----@field sound_on? string [checkBox]
----@field sound_off? string [checkBox]
+---@field sound_on? string|false [checkBox]
+---@field sound_off? string|false [checkBox]
 ---
 ---@field axis? {minVal:number, maxVal:number, step?:number} [slider]
 ---@field smooth? boolean Unit point visibility [slider]

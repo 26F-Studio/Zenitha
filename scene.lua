@@ -2,8 +2,8 @@
 ---@field widgetList? Zenitha.WidgetArg[]|Zenitha.Widget.base[]
 ---@field scrollHeight? number|nil
 ---
----@field load? fun(fromScene:string, ...)  Called when scene loaded
----@field enter? fun(fromScene:string, ...) Called when scene swapping finished
+---@field load? fun(fromScene:string|false, ...)  Called when scene loaded (false when loading first scene)
+---@field enter? fun(fromScene:string|false, ...) Called when scene swapping finished (false when entering first scene)
 ---@field leave? fun(toScene:string, ...)   Called when scene swapping started
 ---@field unload? fun(toScene:string, ...)  Called when scene unloaded
 ---@field mouseDown? fun(x:number, y:number, k:number, presses:number):boolean? Able to interrupt cursor & widget control
@@ -35,7 +35,7 @@
 ---@field timeChange number
 ---@field draw function Called with timeRemain(duration~0)
 
----@type table<string, Zenitha.Scene>
+---@type Map<Zenitha.Scene>
 local scenes={}
 
 local eventNames={
