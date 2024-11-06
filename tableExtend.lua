@@ -44,6 +44,8 @@ function TABLE.newMat(val,height,width)
 end
 
 ---Create the subset list of a list, like string.sub
+---
+---leave `start&stop` as `nil` will simply copy
 ---@generic T
 ---@param org T original table
 ---@param start? number start pos (default 1)
