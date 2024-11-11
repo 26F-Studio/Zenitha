@@ -18,8 +18,8 @@ local scene={
         _sceneDraw()
 
         GC.stc_reset()
-        GC.stc_circ(400+100*math.cos(love.timer.getTime()*1.26),240+100*math.sin(love.timer.getTime()*1.26),126)
-        GC.setColor(COLOR.rainbow_light(love.timer.getTime()))
+        GC.stc_circ(400+100*math.cos(ZENITHA.timer.getTime()*1.26),240+100*math.sin(ZENITHA.timer.getTime()*1.26),126)
+        GC.setColor(COLOR.rainbow_light(ZENITHA.timer.getTime()))
         _sceneDraw()
         GC.stc_stop()
     end,

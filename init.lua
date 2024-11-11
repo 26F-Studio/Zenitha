@@ -165,6 +165,7 @@
 --  All ZENITHA module VARs are named in all UPPERCASE.
 ---@class Zenitha.Main
 ZENITHA={}
+local ZENITHA=ZENITHA
 
 --------------------------------------------------------------
 
@@ -195,10 +196,55 @@ ZENITHA={}
 
 --------------------------------------------------------------
 
--- #define
-local MSisDown,KBisDown=love.mouse.isDown,love.keyboard.isDown
+-- Useful constants
+---@type table Empty table used as placeholder
+NONE=setmetatable({},{__newindex=function() error("NONE: Attempt to modify constant table") end,__metatable=true})
+---@type function Empty function used as placeholder
+NULL=function(...) end
+TRUE=function() return true end
+FALSE=function() return false end
 
-local gc=love.graphics or setmetatable({},{__index=function() return NULL end})
+---@type 'macOS'|'Windows'|'Linux'|'Android'|'iOS'|'unknown'
+SYSTEM=love.system and love.system.getOS():gsub('OS X','macOS') or 'unknown'
+---@type boolean (NOT RELIABLE) true if the system is Android or iOS
+MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
+---@type string Editting text, used by inputBox widget
+EDITING=""
+
+ZENITHA.mouse=love.mouse or {
+    isDown=FALSE,
+    setVisible=NULL,
+    getPosition=function() return 0,0 end,
+    getRelativeMode=FALSE,
+    isGrabbed=FALSE,
+    isVisible=FALSE,
+}
+ZENITHA.keyboard=love.keyboard or {
+    isDown=FALSE,
+    setKeyRepeat=NULL,
+    setTextInput=NULL,
+    hasTextInput=FALSE,
+}
+ZENITHA.graphics=love.graphics or setmetatable({
+    getWidth=function() return 0 end,
+    getHeight=function() return 0 end,
+    getDimensions=function() return 0,0 end,
+    getDPIScale=function() return 1 end,
+},{__index=function() return NULL end})
+ZENITHA.timer=love.timer or setmetatable({
+    step=NULL,
+    sleep=NULL,
+    getFPS=function() return MATH.inf end,
+    getTime=os.clock(),
+},{__index=function() return NULL end})
+
+---@type love.Canvas Empty canvas used as placeholder
+PAPER=ZENITHA.graphics.newCanvas(1,1)
+
+-- #define
+local MSisDown,KBisDown=ZENITHA.mouse.isDown,ZENITHA.keyboard.isDown
+
+local gc=ZENITHA.graphics
 local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
 local gc_setColor,gc_circle=gc.setColor,gc.circle
 local gc_print,gc_printf=gc.print,gc.printf
@@ -206,24 +252,11 @@ local gc_print,gc_printf=gc.print,gc.printf
 local max,min=math.max,math.min
 local floor,abs=math.floor,math.abs
 math.randomseed(os.time()*2600)
-love.keyboard.setKeyRepeat(true)
+ZENITHA.keyboard.setKeyRepeat(true)
 
 --------------------------------------------------------------
 
 -- Useful global values/variables
----@type table Empty table used as placeholder
-NONE=setmetatable({},{__newindex=function() error("NONE: Attempt to modify constant table") end,__metatable=true})
----@type function Empty function used as placeholder
-NULL=function(...) end
----@type love.Canvas Empty canvas used as placeholder
-PAPER=love.graphics.newCanvas(1,1)
-
----@type 'macOS'|'Windows'|'Linux'|'Android'|'iOS'
-SYSTEM=love.system.getOS():gsub('OS X','macOS')
----@type boolean (NOT RELIABLE) true if the system is Android or iOS
-MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
----@type string Editting text, used by inputBox widget
-EDITING=""
 
 ---print with formatted string
 ---@param str string
@@ -261,7 +294,7 @@ local jsState={} ---@type Zenitha.JoystickState[]
 local errData={} ---@type Zenitha.Exception[]
 local bigCanvases=setmetatable({},{
     __index=function(self,k)
-        self[k]=gc.newCanvas(nil,nil,{msaa=select(3,love.window.getMode()).msaa})
+        self[k]=gc.newCanvas(nil,nil,love.window and {msaa=select(3,love.window.getMode()).msaa} or nil)
         return self[k]
     end,
 })
@@ -647,7 +680,7 @@ function love.touchpressed(id,x,y,_,_,pressure)
     lastClicks[id]={x=x,y=y}
     if WIDGET.sel and WIDGET.sel.type=='inputBox' and not WIDGET.sel:isAbove(x,y) then
         WIDGET.unFocus(true)
-        love.keyboard.setTextInput(false)
+        ZENITHA.keyboard.setTextInput(false)
     end
     WIDGET._cursorMove(x,y,'press')
     WIDGET._press(x,y,1)
@@ -1073,11 +1106,13 @@ function love.errorhandler(msg)
         table.insert(errData,{msg=err,scene=sceneStack})
 
         -- Write messages to log file
-        love.filesystem.append('error.log',
-            os.date("%Y/%m/%d %A %H:%M:%S\n")..
-            #errData.." crash(es) "..SYSTEM.."-"..versionText.."  scene: "..sceneStack.."\n"..
-            table.concat(err,"\n",1,c-2).."\n\n"
-        )
+        if love.filesystem then
+            love.filesystem.append('error.log',
+                os.date("%Y/%m/%d %A %H:%M:%S\n")..
+                #errData.." crash(es) "..SYSTEM.."-"..versionText.."  scene: "..sceneStack.."\n"..
+                table.concat(err,"\n",1,c-2).."\n\n"
+            )
+        end
 
         -- Get screencapture
         GC.getScreenShot(errData[#errData],'shot')
@@ -1085,19 +1120,21 @@ function love.errorhandler(msg)
 
         return love.run()
     else
-        love.mouse.setVisible(true)
+        ZENITHA.setVisible(true)
 
         local errorMsg
         errorMsg=mainLoopStarted and
             "Too many errors or fatal error occured.\nPlease restart the game." or
             "An error has occurred during loading.\nError info has been created, and you can send it to the author."
         return function()
-            love.event.pump()
-            for E,a,b in love.event.poll() do
-                if E=='quit' or a=='escape' then
-                    return true
-                elseif E=='resize' then
-                    SCR._resize(a,b)
+            if love.event then
+                love.event.pump()
+                for E,a,b in love.event.poll() do
+                    if E=='quit' or a=='escape' then
+                        return true
+                    elseif E=='resize' then
+                        SCR._resize(a,b)
+                    end
                 end
             end
             gc.clear(.3,.5,.9)
@@ -1115,7 +1152,7 @@ function love.errorhandler(msg)
             end
             gc.pop()
             gc.present()
-            love.timer.sleep(.26)
+            ZENITHA.timer.sleep(.26)
         end
     end
 end
@@ -1141,10 +1178,10 @@ function love.run()
     mainLoopStarted=true
 
     local SCN_swapUpdate=SCN._swapUpdate
-    local STEP,SLEEP=love.timer.step,love.timer.sleep
-    local FPS,MINI=love.timer.getFPS,love.window.isMinimized
-    local PUMP,POLL=love.event.pump,love.event.poll
-    local timer=love.timer.getTime
+    local STEP,SLEEP=ZENITHA.timer.step,ZENITHA.timer.sleep
+    local FPS,MINI=ZENITHA.timer.getFPS,love.window and love.window.isMinimized or FALSE
+    local PUMP,POLL=love.event and love.event.pump or NULL,love.event.poll
+    local timer=ZENITHA.timer.getTime
 
     local frameTimeList={}
     local lastLoopTime=timer()
@@ -1174,13 +1211,15 @@ function love.run()
         lastLoopTime=time
 
         -- EVENT
-        PUMP()
-        for N,A,B,C,D,E in POLL() do
-            if love[N] then
-                love[N](A,B,C,D,E)
-            elseif N=='quit' then
-                globalEvent.quit()
-                return A or true
+        if PUMP then
+            PUMP()
+            for N,A,B,C,D,E in POLL() do
+                if love[N] then
+                    love[N](A,B,C,D,E)
+                elseif N=='quit' then
+                    globalEvent.quit()
+                    return A or true
+                end
             end
         end
 
@@ -1460,7 +1499,7 @@ ZENITHA.globalEvent=setmetatable(globalEvent,{
 
 --------------------------------------------------------------
 
-SCN.add('_quit',{load=love.event.quit})
+SCN.add('_quit',{load=love.event and love.event.quit or NULL})
 SCN.add('_console',require'scene.console')
 SCN.add('_zenitha',require'scene.demo')
 SCN.add('_test',require'scene.test')

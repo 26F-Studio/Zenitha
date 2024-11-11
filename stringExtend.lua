@@ -1,4 +1,9 @@
-local data=love.data
+local data=love.data or {
+    encode=NULL,
+    compress=NULL,
+    decompress=NULL,
+    decode=NULL,
+}
 local assert,tostring,tonumber=assert,tostring,tonumber
 local floor,min=math.floor,math.min
 local log,lg=math.log,math.log10

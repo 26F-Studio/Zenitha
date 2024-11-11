@@ -1,3 +1,13 @@
+if not love.graphics then
+    print("BG lib is not loaded (need love.graphics)")
+    return setmetatable({},{
+        __index=function(t,k)
+            t[k]=NULL
+            return t[k]
+        end
+    })
+end
+
 ---@class Zenitha.Background
 ---@field init function
 ---@field resize function
@@ -6,7 +16,7 @@
 ---@field event function
 ---@field discard function
 
-local gc_clear=love.graphics.clear
+local gc_clear=ZENITHA.graphics.clear
 
 ---@type Zenitha.Background[]
 local BGs={} -- Stored backgrounds
@@ -108,7 +118,7 @@ do -- Built-in: Color
     })
 end
 do -- Built-in: Image
-    local gc_setColor=love.graphics.setColor
+    local gc_setColor=ZENITHA.graphics.setColor
     local back={}
     local image=false
     local alpha=.26

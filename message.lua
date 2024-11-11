@@ -1,3 +1,13 @@
+if not love.graphics then
+    print("MSG lib is not loaded (need love.graphics)")
+    return setmetatable({},{
+        __index=function(t,k)
+            t[k]=NULL
+            return t[k]
+        end
+    })
+end
+
 ---@alias Zenitha.MessageType Zenitha._MessageType|string
 ---@enum (key) Zenitha._MessageType
 local msgStyle={

@@ -1,16 +1,11 @@
-local kb=love.keyboard
+local kb=ZENITHA.keyboard
 local ins,rem=table.insert,table.remove
 
-local outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25,fixContent=true}
-local inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
+local outputBox,inputBox
 
 -- Console Log
 local function log(str) outputBox:push(str) end
 _CL=log
-
-log{COLOR.lP,"Zenitha Console"}
-log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
-log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
 
 local history,hisPtr={"?"},false
 local sumode=false
@@ -610,7 +605,7 @@ local combKey={
 
 -- Environment for user's function
 local userG={
-    timer=love.timer.getTime,
+    timer=ZENITHA.timer.getTime,
 
     assert=assert,error=error,
     tonumber=tonumber,tostring=tostring,
@@ -659,6 +654,14 @@ setmetatable(userG.os,dangerousLibMeta)
 local scene={}
 
 function scene.load()
+    if not outputBox then
+        outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25,fixContent=true}
+        inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
+        log{COLOR.lP,"Zenitha Console"}
+        log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
+        log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
+    end
+
     outputBox.w,outputBox.h=SCR.w0-40,math.max(SCR.h0-120,20)
     inputBox.y,inputBox.w=math.max(SCR.h0-120,20)+20,SCR.w0-40
     outputBox:reset()

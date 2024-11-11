@@ -1,4 +1,17 @@
-local noSound=not (love.audio and love.sound)
+if not (love.filesystem and love.audio and love.sound) then
+    print("SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
+    return setmetatable({
+        init=function()
+            error("attempt to use SFX.init, but SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
+        end
+    },{
+        __index=function(t,k)
+            t[k]=NULL
+            return t[k]
+        end
+    })
+end
+
 local type=type
 local ins,rem=table.insert,table.remove
 local floor,rnd=math.floor,math.random
@@ -43,7 +56,6 @@ end
 ---@param path string
 ---@param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
 function SFX.load(name,path,lazyLoad)
-    if noSound then return end
     if type(name)=='table' then
         local success=0
         local fail=0
@@ -117,7 +129,6 @@ end
 ---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
 ---```
 function SFX.loadSample(pack)
-    if noSound then return end
     assert(type(pack)=='table',"Usage: SFX.loadsample(table)")
     assert(pack.name,"No field: name")
     assert(pack.path,"No field: path")
@@ -189,7 +200,6 @@ end
 ---@param pos? number -1~1
 ---@param pitch? number 0 = default, 12 = an Oct. lower
 function SFX.play(name,vol,pos,pitch)
-    if noSound then return end
     vol=(vol or 1)*volume
     if vol<=0 then return end
 

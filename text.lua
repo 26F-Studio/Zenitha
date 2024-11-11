@@ -1,3 +1,14 @@
+if not love.graphics then
+    print("TEXT lib is not loaded (need love.graphics)")
+    return {
+        clear=NULL,
+        add=NULL,
+        update=NULL,
+        draw=NULL,
+        new=NULL,
+    }
+end
+
 ---@class Zenitha.TextAnimArg
 ---@field text? string
 ---@field x? number

@@ -1,3 +1,12 @@
+if not love.graphics then
+    print("IMG lib is not loaded (need love.graphics)")
+    return setmetatable({},{
+        __index=function(_)
+            error("attempt to use IMG lib, but IMG lib is not loaded (need love.graphics)")
+        end
+    })
+end
+
 local IMG={}
 
 local initialized=false
@@ -7,7 +16,7 @@ local IMGlistMeta={
         local ok,res
         if type(path)=='string' then -- string, load image from path
             assert(path,STRING.repD("IMG[]: No field '$1'",tostring(k)))
-            ok,res=pcall(love.graphics.newImage,path)
+            ok,res=pcall(ZENITHA.graphics.newImage,path)
         else -- not string (neither table), keep the value
             ok,res=true,path
         end

@@ -1,3 +1,17 @@
+if not (love.audio and love.sound) then
+    print("VOC lib is not loaded (need love.audio & love.sound)")
+    return setmetatable({
+        init=function()
+            error("attempt to use VOC.init, but VOC lib is not loaded (need love.audio & love.sound)")
+        end
+    },{
+        __index=function(t,k)
+            t[k]=NULL
+            return t[k]
+        end
+    })
+end
+
 local rem=table.remove
 
 local initialized=false
@@ -67,7 +81,6 @@ function VOC._update() end
 ---Initialize VOC lib (only once), must be called before use
 ---@param list table
 function VOC.init(list)
-    if not (love.audio and love.sound) then return end
     if initialized then
         MSG.new('info',"VOC.init: Attempt to initialize VLC lib twice")
         return
@@ -79,8 +92,9 @@ function VOC.init(list)
 
     local function _loadVoiceFile(path,N,vocName)
         local fullPath=path..vocName..'.ogg'
-        if love.filesystem.getInfo(fullPath) then
-            sourceBank[vocName]={love.audio.newSource(fullPath,'stream')}
+        local suc,res=pcall(love.audio.newSource,fullPath,'stream')
+        if suc then
+            sourceBank[vocName]={res}
             table.insert(voiceSet[N],vocName)
             return true
         end

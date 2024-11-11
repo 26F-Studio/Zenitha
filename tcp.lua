@@ -1,3 +1,12 @@
+if not love.thread then
+    print("TCP lib is not loaded (need love.thread)")
+    return setmetatable({},{
+        __index=function(_,k)
+            error("attempt to use TCP."..k..", but TCP lib is not loaded (need love.thread)")
+        end
+    })
+end
+
 ---@alias Zenitha.TCP.sendID string 0 = server/broadcast, 1+ = client id, NUMBER ONLY
 ---@alias Zenitha.TCP.recvID Zenitha.TCP.sendID|Zenitha.TCP.sendID[]|nil 0 = server/broadcast, 1+ = client id, NUMBER ONLY, nil = broadcast
 

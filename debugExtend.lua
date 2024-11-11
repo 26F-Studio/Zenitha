@@ -1,13 +1,13 @@
 local DEBUG={}
 
 
-local loadTimeList,lastTimeStamp={},love.timer.getTime()
+local loadTimeList,lastTimeStamp={},ZENITHA.timer.getTime()
 ---Use this a few times in main.lua to mark time used for loading,
 ---then use `DEBUG.logLoadTime()` to log the times
 ---@param msg string
 function DEBUG.checkLoadTime(msg)
-    table.insert(loadTimeList,("%-26s \t%.3fs"):format(tostring(msg)..":",love.timer.getTime()-lastTimeStamp))
-    lastTimeStamp=love.timer.getTime()
+    table.insert(loadTimeList,("%-26s \t%.3fs"):format(tostring(msg)..":",ZENITHA.timer.getTime()-lastTimeStamp))
+    lastTimeStamp=ZENITHA.timer.getTime()
 end
 
 ---Log the times marked by `DEBUG.checkLoadTime()`

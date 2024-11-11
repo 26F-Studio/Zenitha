@@ -221,7 +221,7 @@ function SCN._load(name)
     SCN.stack[#SCN.stack]=name
     SCN.cur=name
 
-    love.keyboard.setTextInput(false)
+    ZENITHA.keyboard.setTextInput(false)
     SCN.mainTouchID=nil
 
     local scn=scenes[name]

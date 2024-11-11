@@ -1,3 +1,37 @@
+if not (love.math and love.graphics and love.window) then
+    print("SCR lib is not loaded (need love.math & love.graphics & love.window)")
+    local fakeTransform={
+        transformPoint=NULL,
+        inverseTransformPoint=NULL,
+    }
+    return setmetatable({
+        w0=0,h0=0,
+        w=0,h=0,diam=0,
+        W=0,H=0,
+        safeX=0,safeY=0,
+        safeW=0,safeH=0,
+        dpi=1,
+        x=0,y=0,k=1,
+        cx=0,cy=0,ex=0,ey=0,
+        origin=fakeTransform,
+        xOy=   fakeTransform,
+        xOy_m= fakeTransform,
+        xOy_ul=fakeTransform,
+        xOy_u= fakeTransform,
+        xOy_ur=fakeTransform,
+        xOy_l= fakeTransform,
+        xOy_r= fakeTransform,
+        xOy_dl=fakeTransform,
+        xOy_d= fakeTransform,
+        xOy_dr=fakeTransform,
+    },{
+        __index=function(_,k)
+            error("attempt to use SCR."..k..", but SCR lib is not loaded (need love.graphics & love.window)")
+        end
+    })
+end
+
+
 ---@class Zenitha.ScreenInfo
 local SCR={
     w0=800, -- Designing Rect width
@@ -36,7 +70,7 @@ local SCR={
 }
 
 -- Set the default designing rect size
-if love.graphics then SCR.w0,SCR.h0=love.graphics.getDimensions() end
+SCR.w0,SCR.h0=ZENITHA.graphics.getDimensions()
 
 ---Set `Designing Rect` size
 
@@ -63,7 +97,7 @@ end
 ---@param w number
 ---@param h number
 function SCR._resize(w,h)
-    SCR.w,SCR.h,SCR.dpi=w,h,love.graphics.getDPIScale()
+    SCR.w,SCR.h,SCR.dpi=w,h,ZENITHA.graphics.getDPIScale()
     SCR.W,SCR.H=SCR.w*SCR.dpi,SCR.h*SCR.dpi
     SCR.r=h/w
     SCR.diam=(w^2+h^2)^.5

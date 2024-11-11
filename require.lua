@@ -2,11 +2,11 @@ package.cpath=
     package.cpath.. -- Windows, .\?.dll; .\loadall.dll
     ';'..love.filesystem.getSaveDirectory()..'/lib/lib?.so'.. -- Android, %save%/lib/lib?.so
     ';./?.so'.. -- Linux
-    ';?.dylib' -- OS X
+    ';?.dylib' -- macOS
 package.cpath=package.cpath:gsub('\\','/')
 
 local _androidPlatform='armeabi-v7a'
-if love.system.getOS()=='Android' then
+if SYSTEM=='Android' then
     local p=io.popen('uname -m')
     if p then
         local arch=p:read('*a'):lower()
@@ -27,9 +27,9 @@ local loaded={}
 ---@param libName string
 return function(libName)
     local _require=require
-    if love.system.getOS()=='OS X' then
+    if SYSTEM=='macOS' then
         _require=package.loadlib(libName..'.dylib','luaopen_'..libName)
-    elseif love.system.getOS()=='Android' then
+    elseif SYSTEM=='Android' then
         if not loaded[libName] then
             love.filesystem.write(
                 'lib/lib'..libName..'.so',
@@ -38,8 +38,8 @@ return function(libName)
             loaded[libName]=true
         end
     end
-    -- arg #2: if system is OS X, it's nil, otherwise it's 'libName'
-    local success,res=pcall(_require,(love.system.getOS()~='OS X' or nil) and libName)
+    -- arg #2: if system is macOS, it's nil, otherwise it's 'libName'
+    local success,res=pcall(_require,(SYSTEM~='macOS' or nil) and libName)
     if success and res then
         return res
     else

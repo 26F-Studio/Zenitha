@@ -1,7 +1,7 @@
 local resume,status=coroutine.resume,coroutine.status
 local assert,rawset=assert,rawset
 local rem=table.remove
-local timer=love.timer.getTime
+local timer=ZENITHA.timer.getTime
 
 local TASK={}
 
@@ -143,8 +143,8 @@ end
 
 ---Yield for some seconds
 function TASK.yieldT(time)
-    local t=love.timer.getTime()
-    while love.timer.getTime()-t<time do yield() end
+    local t=timer()
+    while timer()-t<time do yield() end
 end
 
 ---Yield until the scene swapping animation finished

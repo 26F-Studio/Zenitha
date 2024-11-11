@@ -86,8 +86,8 @@ local gc_stc_reset,gc_stc_stop=GC.stc_reset,GC.stc_stop
 local gc_stc_circ,gc_stc_rect=GC.stc_circ,GC.stc_rect
 local gc_mRect=GC.mRect
 
-local kb=love.keyboard
-local timer=love.timer.getTime
+local kb=ZENITHA.keyboard
+local timer=ZENITHA.timer.getTime
 
 local assert,next=assert,next
 local floor,ceil=math.floor,math.ceil
@@ -2112,7 +2112,7 @@ function WIDGET._setWidgetList(list)
     WIDGET.active=list or NONE
 
     if list then
-        local x,y=xOy:inverseTransformPoint(love.mouse.getPosition())
+        local x,y=xOy:inverseTransformPoint(ZENITHA.mouse.getPosition())
         WIDGET._cursorMove(x,y,'init')
         WIDGET._reset()
     end
@@ -2274,7 +2274,7 @@ function WIDGET._update(dt)
             if W._visible~=v then
                 W._visible=v
                 if v then
-                    if W:isAbove(xOy:inverseTransformPoint(love.mouse.getPosition())) then
+                    if W:isAbove(xOy:inverseTransformPoint(ZENITHA.getPosition())) then
                         WIDGET.focus(W,'move')
                     end
                 else

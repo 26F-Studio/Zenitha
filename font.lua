@@ -1,4 +1,19 @@
-local set=love.graphics.setFont
+if not love.graphics then
+    print("FONT lib is not loaded (need love.graphics)")
+    return {
+        setDefaultFont=NULL,
+        setDefaultFallback=NULL,
+        setFallback=NULL,
+        setFilter=NULL,
+        load=NULL,
+        rawget=NULL,
+        rawset=NULL,
+        get=NULL,
+        set=NULL,
+    }
+end
+
+local set=ZENITHA.graphics.setFont
 
 ---@type love.File[], Mat<love.Font>
 local fontFiles,fontCache={},{}
@@ -46,7 +61,7 @@ end
 local function _rawget(size)
     if not fontCache[size] then
         assertf(type(size)=='number' and size>0 and size%1==0,"Need int >=1, got %s",size)
-        fontCache[size]=love.graphics.setNewFont(size,'normal',love.graphics.getDPIScale()*SCR.k*2)
+        fontCache[size]=ZENITHA.graphics.setNewFont(size,'normal',ZENITHA.graphics.getDPIScale()*SCR.k*2)
     end
     return fontCache[size]
 end
@@ -90,7 +105,7 @@ local function _get(size,name)
 
     if not f then
         assertf(type(size)=='number' and size>0 and size%1==0,"Need int >=1, got %s",size)
-        f=love.graphics.newFont(fontFiles[name],size,'normal',love.graphics.getDPIScale()*SCR.k*2)
+        f=ZENITHA.graphics.newFont(fontFiles[name],size,'normal',ZENITHA.graphics.getDPIScale()*SCR.k*2)
         if filterMap[name] then
             f:setFilter(filterMap[name][1],filterMap[name][2])
         end

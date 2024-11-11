@@ -1,6 +1,16 @@
 ---@diagnostic disable: inject-field
 
-local gc=love.graphics
+if not love.graphics then
+    print("GC lib is not loaded (need love.graphics)")
+    return setmetatable({},{
+        __index=function(t,k)
+            t[k]=NULL
+            return t[k]
+        end
+    })
+end
+
+local gc=ZENITHA.graphics
 local getColor,setColor,prints,printf,draw,drawL=gc.getColor,gc.setColor,gc.print,gc.printf,gc.draw,gc.drawLayer
 local newText=gc.newText
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
@@ -543,7 +553,7 @@ function Camera:update(dt)
     self.x=MATH.expApproach(self.x,self.x0,dt*self.moveSpeed)
     self.y=MATH.expApproach(self.y,self.y0,dt*self.moveSpeed)
     self.k=MATH.expApproach(self.k,self.k0,dt*self.moveSpeed)
-    self.a=MATH.expApproach(self.a,self.a0+(self.swing and self.swing*math.sin(love.timer.getTime()/1.26) or 0),dt*self.rotateSpeed)
+    self.a=MATH.expApproach(self.a,self.a0+(self.swing and self.swing*math.sin(ZENITHA.timer.getTime()/1.26) or 0),dt*self.rotateSpeed)
     self.transform:setTransformation(self.x,self.y,self.a,self.k)
 end
 

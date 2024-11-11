@@ -1,3 +1,17 @@
+if not (love.audio and love.sound) then
+    print("BGM lib is not loaded (need love.audio & love.sound)")
+    return setmetatable({
+        init=function()
+            error("attempt to use BGM.init, but BGM lib is not loaded (need love.audio & love.sound)")
+        end
+    },{
+        __index=function(t,k)
+            t[k]=NULL
+            return t[k]
+        end
+    })
+end
+
 ---@class Zenitha.BgmObj
 ---@field name string
 ---@field path string
@@ -143,13 +157,16 @@ local function _tryLoad(name)
         local obj=srcLib[name]
         if obj.source then
             return true
-        elseif love.filesystem.getInfo(obj.path) then
-            obj.source=audio.newSource(obj.path,'stream')
-            obj.source:setLooping(true)
-            ins(lastLoadNames,1,name)
-            return true
         else
-            LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
+            local suc,res=pcall(audio.newSource,obj.path,'stream')
+            if suc then
+                obj.source=res
+                obj.source:setLooping(true)
+                ins(lastLoadNames,1,name)
+                return true
+            else
+                LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
+            end
         end
     elseif name then
         LOG("No BGM: "..name,5)
