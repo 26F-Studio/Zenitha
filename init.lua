@@ -164,8 +164,9 @@
 --
 --  All ZENITHA module VARs are named in all UPPERCASE.
 ---@class Zenitha.Main
-ZENITHA={}
-local ZENITHA=ZENITHA
+local ZENITHA={}
+
+_G.ZENITHA=ZENITHA
 
 --------------------------------------------------------------
 
@@ -310,6 +311,7 @@ local drawFreq=100
 local sleepInterval=1/60
 local clickDist2=62
 local maxErrorCount=3
+---@class Zenitha.GlobalEvent
 local globalEvent={
     mouseDown=NULL, -- Able to interrupt scene event
     mouseMove=NULL, -- Able to interrupt scene event and widget interaction
