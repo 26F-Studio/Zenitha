@@ -2274,7 +2274,7 @@ function WIDGET._update(dt)
             if W._visible~=v then
                 W._visible=v
                 if v then
-                    if W:isAbove(xOy:inverseTransformPoint(ZENITHA.getPosition())) then
+                    if W:isAbove(xOy:inverseTransformPoint(ZENITHA.mouse.getPosition())) then
                         WIDGET.focus(W,'move')
                     end
                 else
