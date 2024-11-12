@@ -660,6 +660,8 @@ function scene.load()
         log{COLOR.lP,"Zenitha Console"}
         log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
         log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
+        ins(scene.widgetList,outputBox)
+        ins(scene.widgetList,inputBox)
     end
 
     outputBox.w,outputBox.h=SCR.w0-40,math.max(SCR.h0-120,20)
@@ -800,8 +802,8 @@ scene.widgetList={
     WIDGET.new{type='button',name='up',   pos={1,1},w=80,x=-60,y=-360,color='lG',fontSize=20,text="UP",    code=function() scene.keyDown('up') end},
     WIDGET.new{type='button',name='down', pos={1,1},w=80,x=-60,y=-260,color='lY',fontSize=20,text="DOWN",  code=function() scene.keyDown('down') end},
     WIDGET.new{type='button',name='paste',pos={1,1},w=80,x=-60,y=-160,color='lC',fontSize=20,text="PASTE", code=function() inputBox:addText(love.system.getClipboardText() or "") end},
-    outputBox,
-    inputBox,
+    outputBox,-- nil, actually added in scene.load
+    inputBox,-- nil, actually added in scene.load
 }
 
 return scene
