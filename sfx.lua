@@ -1,10 +1,56 @@
+local SFX={}
+
+local sub=string.sub
+local floor=math.floor
+
+local noteVal={
+    C=0,c=0,
+    D=2,d=2,
+    E=4,e=4,
+    F=5,f=5,
+    G=7,g=7,
+    A=9,a=9,
+    B=11,b=11,
+}
+local noteName={'C','C#','D','D#','E','F','F#','G','G#','A','A#','B'}
+function SFX.getTuneHeight(tune)
+    local octave=tonumber(tune:sub(-1,-1))
+    if octave then
+        local tuneHeight=noteVal[sub(tune,1,1)]
+        if tuneHeight then
+            tuneHeight=tuneHeight+(octave-1)*12
+            local s=sub(tune,2,2)
+            if s=='s' or s=='#' then
+                tuneHeight=tuneHeight+1
+            elseif s=='f' or s=='b' then
+                tuneHeight=tuneHeight-1
+            end
+            return tuneHeight
+        end
+    end
+end
+
+---Get note name with note number (start from 0, like midi)
+---
+---0 --> ' C1'
+---12 --> 'C2'
+---@param note number Note number, start from 0
+---@return string Note name, e.g. `'C4'`
+function SFX.getNoteName(note)
+    if note<0 then
+        return '---'
+    else
+        local octave=floor(note/12)+1
+        return noteName[note%12+1]..octave
+    end
+end
+
 if not (love.filesystem and love.audio and love.sound) then
     print("SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
-    return setmetatable({
-        init=function()
-            error("attempt to use SFX.init, but SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
-        end
-    },{
+    function SFX.init()
+        error("attempt to use SFX.init, but SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
+    end
+    return setmetatable(SFX,{
         __index=function(t,k)
             t[k]=NULL
             return t[k]
@@ -14,8 +60,7 @@ end
 
 local type=type
 local ins,rem=table.insert,table.remove
-local floor,rnd=math.floor,math.random
-local clamp=MATH.clamp
+local rnd,clamp=math.random,MATH.clamp
 
 ---@type string[]
 local nameList={}
@@ -26,8 +71,6 @@ local packSetting={}
 
 local volume=1
 local stereo=1
-
-local SFX={}
 
 ---@param name string
 ---@param path string
@@ -78,48 +121,6 @@ function SFX.load(name,path,lazyLoad)
         end
     end
     table.sort(nameList)
-end
-
-local noteVal={
-    C=0,c=0,
-    D=2,d=2,
-    E=4,e=4,
-    F=5,f=5,
-    G=7,g=7,
-    A=9,a=9,
-    B=11,b=11,
-}
-local noteName={'C','C#','D','D#','E','F','F#','G','G#','A','A#','B'}
-function SFX.getTuneHeight(tune)
-    local octave=tonumber(tune:sub(-1,-1))
-    if octave then
-        local tuneHeight=noteVal[tune:sub(1,1)]
-        if tuneHeight then
-            tuneHeight=tuneHeight+(octave-1)*12
-            local s=tune:sub(2,2)
-            if s=='s' or s=='#' then
-                tuneHeight=tuneHeight+1
-            elseif s=='f' or s=='b' then
-                tuneHeight=tuneHeight-1
-            end
-            return tuneHeight
-        end
-    end
-end
-
----Get note name with note number (start from 0, like midi)
----
----0 --> ' C1'
----12 --> 'C2'
----@param note number Note number, start from 0
----@return string Note name, e.g. `'C4'`
-function SFX.getNoteName(note)
-    if note<0 then
-        return '---'
-    else
-        local octave=floor(note/12)+1
-        return noteName[note%12+1]..octave
-    end
 end
 
 ---Load SFX samples from specified directory
