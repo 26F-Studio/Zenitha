@@ -133,14 +133,14 @@ end
 ---Log an warn message both in console and with popup
 ---@param info string
 function MSG.warnLog(info)
-    LOG("WARN: "..info)
+    LOG("[WARN] "..info)
     MSG.new('warn',STRING.filterASCII(info))
 end
 
 ---Log an error message both in console and with popup
 ---@param info string
 function MSG.errorLog(info)
-    LOG("ERROR: "..info)
+    LOG("[ERROR] "..info)
     MSG.new('error',STRING.filterASCII(info))
 end
 
