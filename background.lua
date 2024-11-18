@@ -1,5 +1,5 @@
 if not love.graphics then
-    print("BG lib is not loaded (need love.graphics)")
+    LOG("info","BG lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(t,k)
             t[k]=NULL

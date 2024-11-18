@@ -46,7 +46,7 @@ function SFX.getNoteName(note)
 end
 
 if not (love.filesystem and love.audio and love.sound) then
-    print("SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
+    LOG("info","SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
     function SFX.init()
         error("attempt to use SFX.init, but SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
     end
@@ -112,12 +112,12 @@ function SFX.load(name,path,lazyLoad)
         if fail>0 then
             LOG(fail.." SFX files missing")
         end
-        LOG(("%d SFX files added, total %d"):format(success,#nameList))
+        LOG("info",("%d SFX files added, total %d"):format(success,#nameList))
     else
         if loadOne(name,path,lazyLoad) then
-            LOG("SFX loaded: "..name)
+            LOG("info","SFX loaded: "..name)
         else
-            LOG("No SFX: "..path)
+            LOG("info","No SFX: "..path)
         end
     end
     table.sort(nameList)
@@ -141,7 +141,7 @@ function SFX.loadSample(pack)
     local base=(SFX.getTuneHeight(pack.base) or 37)-1
     local top=base+num-1
     packSetting[pack.name]={base=base,top=top}
-    LOG((num-1).." "..pack.name.." samples loaded")
+    LOG("info",(num-1).." "..pack.name.." samples loaded")
 end
 
 ---Get the number of SFX files loaded (not include SFX samples)

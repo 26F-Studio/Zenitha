@@ -1,5 +1,5 @@
 if not (love.math and love.graphics and love.window) then
-    print("SCR lib is not loaded (need love.math & love.graphics & love.window)")
+    LOG("info","SCR lib is not loaded (need love.math & love.graphics & love.window)")
     local fakeTransform={
         transformPoint=NULL,
         inverseTransformPoint=NULL,

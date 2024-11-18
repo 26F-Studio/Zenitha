@@ -1,5 +1,5 @@
 if not love.graphics then
-    print("MSG lib is not loaded (need love.graphics)")
+    LOG("info","MSG lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(t,k)
             t[k]=NULL
@@ -133,14 +133,14 @@ end
 ---Log an warn message both in console and with popup
 ---@param info string
 function MSG.warnLog(info)
-    LOG("[WARN] "..info)
+    LOG("warn",info)
     MSG.new('warn',STRING.filterASCII(info))
 end
 
 ---Log an error message both in console and with popup
 ---@param info string
 function MSG.errorLog(info)
-    LOG("[ERROR] "..info)
+    LOG("error",info)
     MSG.new('error',STRING.filterASCII(info))
 end
 

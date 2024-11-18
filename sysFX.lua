@@ -1,5 +1,5 @@
 if not love.graphics then
-    print("SYSFS lib is not loaded (need love.graphics)")
+    LOG("info","SYSFS lib is not loaded (need love.graphics)")
     return {
         _update=NULL,
         _draw=NULL,

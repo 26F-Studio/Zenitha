@@ -217,7 +217,7 @@ if SYSTEM=='Web' then
     else
         MSG.warnLog('Cannot check web compatible mode')
     end
-    LOG('WEB_COMPAT_MODE = '..tostring(WEB_COMPAT_MODE))
+    LOG("info",'WEB_COMPAT_MODE = '..tostring(WEB_COMPAT_MODE))
 end
 ---@type string Editting text, used by inputBox widget
 EDITING=""

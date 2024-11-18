@@ -1,5 +1,5 @@
 if not (love.audio and love.sound) then
-    print("VOC lib is not loaded (need love.audio & love.sound)")
+    LOG("info","VOC lib is not loaded (need love.audio & love.sound)")
     return setmetatable({
         init=function()
             error("attempt to use VOC.init, but VOC lib is not loaded (need love.audio & love.sound)")
@@ -123,7 +123,7 @@ function VOC.init(list)
 
             if n==1 then
                 if not _loadVoiceFile(path,list[i],list[i]) then
-                    LOG("No VOC: "..list[i],.1)
+                    LOG("info","No VOC: "..list[i],.1)
                 end
             end
             if not voiceSet[list[i]][1] then

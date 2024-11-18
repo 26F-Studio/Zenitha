@@ -1,5 +1,5 @@
 if not (love.audio and love.sound) then
-    print("BGM lib is not loaded (need love.audio & love.sound)")
+    LOG("info","BGM lib is not loaded (need love.audio & love.sound)")
     return setmetatable({
         init=function()
             error("attempt to use BGM.init, but BGM lib is not loaded (need love.audio & love.sound)")
@@ -165,11 +165,11 @@ local function _tryLoad(name)
                 ins(lastLoadNames,1,name)
                 return true
             else
-                LOG(STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
+                LOG("info",STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
             end
         end
     elseif name then
-        LOG("No BGM: "..name,5)
+        LOG("info","No BGM: "..name,5)
     end
 end
 

@@ -1,5 +1,5 @@
 if not love.graphics then
-    print("WAIT lib is not loaded (need love.graphics)")
+    LOG("info","WAIT lib is not loaded (need love.graphics)")
     return {
         _update=NULL,
         _draw=NULL,

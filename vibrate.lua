@@ -1,5 +1,5 @@
 if not love.system then
-    print("VIB lib is not loaded (need love.system)")
+    LOG("info","VIB lib is not loaded (need love.system)")
     return NULL
 end
 

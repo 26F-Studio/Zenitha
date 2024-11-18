@@ -1,5 +1,5 @@
 if not love.graphics then
-    print("FONT lib is not loaded (need love.graphics)")
+    LOG("info","FONT lib is not loaded (need love.graphics)")
     return {
         setDefaultFont=NULL,
         setDefaultFallback=NULL,

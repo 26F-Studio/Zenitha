@@ -151,7 +151,7 @@ local function decode_error(str, idx, msg)
             col_count = 1
         end
     end
-    error(string.format("%s at line %d col %d", msg, line_count, col_count))
+    errorf("%s at line %d col %d", msg, line_count, col_count)
 end
 
 local function codepoint_to_utf8(n)
@@ -166,7 +166,7 @@ local function codepoint_to_utf8(n)
     elseif n <= 0x10ffff then
         return char(f(n, 18) + 240, f(n % 262144, 12) + 128, f(n % 4096, 6) + 128, n % 64 + 128)
     end
-    error(string.format("invalid unicode codepoint '%x'", n))
+    errorf("invalid unicode codepoint '%x'", n)
 end
 
 local function parse_unicode_escape(s)
