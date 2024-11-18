@@ -130,6 +130,12 @@ function MSG.clear()
     TABLE.clear(mesList)
 end
 
+---Log an error message both in console and with popup
+function MSG.errorLog(info)
+    LOG(info)
+    MSG.new('error',STRING.filterASCII(info))
+end
+
 ---Update all messages (called by Zenitha)
 ---@param dt number
 function MSG._update(dt)
