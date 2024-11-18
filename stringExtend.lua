@@ -205,6 +205,13 @@ function STRING.trim(str)
     return match(str,"^%s*(.-)%s*$") or ""
 end
 
+---Remove all non-ASCII characters
+---@param str string
+---@return string
+function STRING.filterASCII(str)
+    return (gsub(str,'[^%z%s\x21-\x7E]',''))
+end
+
 ---Count the number of occurrences of a regex pattern in a string
 ---@param str string
 ---@param regex string
