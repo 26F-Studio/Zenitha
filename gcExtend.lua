@@ -172,7 +172,7 @@ end
 ---Print text with stroke (extended love.gc.printf)
 ---@param strokeMode? 'side'|'corner'|'full' other values will be treated as 'full'
 ---@param d number
----@param strokeColor Zenitha.Color Stroke color
+---@param strokeColor? Zenitha.Color Stroke color (default to white)
 ---@param textColor? Zenitha.Color Center color (leave nil to disable text)
 ---@param str string
 ---@param x number
