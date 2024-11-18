@@ -197,7 +197,7 @@ _G.ZENITHA=ZENITHA
 
 --------------------------------------------------------------
 
--- Useful constants
+-- Useful global constants & functions
 ---@type table Empty table used as placeholder
 NONE=setmetatable({},{__newindex=function() error("NONE: Attempt to modify constant table") end,__metatable=true})
 ---@type function Empty function used as placeholder
@@ -239,6 +239,13 @@ ZENITHA.timer=love.timer or setmetatable({
     getTime=os.clock(),
 },{__index=function() return NULL end})
 
+-- Bit module fallback
+if not bit then
+    local success
+    success,bit=pcall(require,'bit')
+    if not success then bit=require'Zenitha.bitop'.bit end
+end
+
 ---@type love.Canvas Empty canvas used as placeholder
 PAPER=ZENITHA.graphics.newCanvas(1,1)
 
@@ -254,10 +261,6 @@ local max,min=math.max,math.min
 local floor,abs=math.floor,math.abs
 math.randomseed(os.time()*2600)
 ZENITHA.keyboard.setKeyRepeat(true)
-
---------------------------------------------------------------
-
--- Useful global values/variables
 
 ---print with formatted string
 ---@param str string
@@ -285,6 +288,8 @@ function simpRequire(path)
         function(module) return path(module) end or
         function(module) return require(path..module) end
 end
+
+--------------------------------------------------------------
 
 -- Inside values
 local mainLoopStarted=false
