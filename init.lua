@@ -156,7 +156,7 @@
 --  And some useful utility functions like `ZENITHA.setMaxFPS` `ZENITHA.setDebugInfo` `ZENITHA.setVersionText`.
 --
 --  Experimental modules:
---  `WAIT`, `DEBUG`, `LOG`, `SYSFX`, `TEXT`, `VIB`, `WHEELMOV`, `REQUIRE`, `HTTP`, `MIDI`
+--  `WAIT`, `DEBUG`, `LOG`, `SYSFX`, `TEXT`, `VIB`, `WHEELMOV`, `SYSREQUIRE`, `HTTP`, `MIDI`
 --
 --  Exterior modules:
 --  `JSON`, json.lua by rxi;
@@ -458,7 +458,7 @@ JSON=       require'json'
 
 -- Pure lua modules (complex, with update/draw)
 LANG=       require'languages'
-REQUIRE=    require'require'
+SYSREQUIRE= require'sysRequire'
 PROFILE=    require'profile'
 TASK=       require'task'
 HASH=       require'sha2'
