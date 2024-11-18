@@ -215,7 +215,7 @@ if SYSTEM=='Web' then
     if love.thread then
         WEB_COMPAT_MODE=not love.thread.newThread('\n'):start()
     else
-        LOG('Cannot check web compatible mode')
+        MSG.warnLog('Cannot check web compatible mode')
     end
     LOG('WEB_COMPAT_MODE = '..tostring(WEB_COMPAT_MODE))
 end
