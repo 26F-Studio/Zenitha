@@ -209,6 +209,16 @@ FALSE=function() return false end
 SYSTEM=love.system and love.system.getOS():gsub('OS X','macOS') or 'unknown'
 ---@type boolean (NOT RELIABLE) true if the system is Android or iOS
 MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
+if SYSTEM=='Web' then
+    ---@type boolean? only exist when SYSTEM=='Web'
+    WEB_COMPAT_MODE=false
+    if love.thread then
+        WEB_COMPAT_MODE=not love.thread.newThread('\n'):start()
+    else
+        LOG('Cannot check web compatible mode')
+    end
+    LOG('WEB_COMPAT_MODE = '..tostring(WEB_COMPAT_MODE))
+end
 ---@type string Editting text, used by inputBox widget
 EDITING=""
 
