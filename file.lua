@@ -1,5 +1,5 @@
 if not love.filesystem then
-    LOG("debug","FILE lib is not loaded (need love.filesystem)")
+    LOG('debug',"FILE lib is not loaded (need love.filesystem)")
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use FILE."..k..", but FILE lib is not loaded (need love.filesystem)")

@@ -12,7 +12,7 @@ end
 
 ---Log the times marked by `DEBUG.checkLoadTime()`
 function DEBUG.logLoadTime()
-    for i=1,#loadTimeList do LOG("info",loadTimeList[i]) end
+    for i=1,#loadTimeList do LOG('info',loadTimeList[i]) end
 end
 
 ---Set metatable for _G, print messages when a new variable is created

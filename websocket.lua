@@ -1,5 +1,5 @@
 if not love.thread then
-    LOG("debug","WS lib is not loaded (need love.thread)")
+    LOG('debug',"WS lib is not loaded (need love.thread)")
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use WS."..k..", but WS lib is not loaded (need love.thread)")
@@ -182,7 +182,7 @@ function WS:update()
                     self.state='running'
                 else
                     self.state='dead'
-                    MSG.new('warn',"WS failed: "..mes)
+                    MSG.log('warn',"WS failed: "..mes)
                 end
             end
         end
@@ -190,7 +190,7 @@ function WS:update()
         self.state='dead'
         local err=self.thread:getError()
         if err then
-            MSG.new('warn',"WS error: "..(err:match(":.-:(.-)\n") or err or "?"))
+            MSG.log('warn',"WS error: "..(err:match(":.-:(.-)\n") or err or "?"))
         end
     end
 end

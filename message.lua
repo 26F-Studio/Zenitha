@@ -1,5 +1,5 @@
 if not love.graphics then
-    LOG("debug","MSG lib is not loaded (need love.graphics)")
+    LOG('debug',"MSG lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(t,k)
             t[k]=NULL
@@ -104,6 +104,7 @@ function MSG.new(icon,str,time)
         y=-h,
     })
 end
+local _new=MSG.new
 
 ---Set the y position of message popup
 ---@param y number
@@ -119,7 +120,7 @@ function MSG.traceback()
         :gsub(': in function',', in')
         :gsub(':',' ')
         :gsub('\t','')
-    MSG.new('error',msg:sub(
+    _new('error',msg:sub(
         msg:find("\n",2)+1,
         msg:find("\n%[C%], in 'xpcall'")
     ),5)
@@ -130,18 +131,13 @@ function MSG.clear()
     TABLE.clear(mesList)
 end
 
----Log an warn message both in console and with popup, with non ASCII filter
+---Log an info message both in console and with popup, with non ASCII filter
+---@param mode 'info'|'warn'|'error'
 ---@param info string
-function MSG.warnLog(info)
-    LOG("warn",info)
-    MSG.new('warn',STRING.filterASCII(info))
-end
-
----Log an error message both in console and with popup, with non ASCII filter
----@param info string
-function MSG.errorLog(info)
-    LOG("error",info)
-    MSG.new('error',STRING.filterASCII(info))
+---@param time? number
+function MSG.log(mode,info,time)
+    LOG(mode,info)
+    _new(mode,STRING.filterASCII(info),time or (mode=='warn' and 6 or mode=='error' and 10 or 4.2))
 end
 
 ---Update all messages (called by Zenitha)
@@ -202,5 +198,14 @@ function MSG._draw()
         GC.translate(0,-startY)
     end
 end
+
+setmetatable(MSG,{
+    __call=function(_,icon,str,time)
+        _new(icon,str,time)
+    end,
+    __metatable=true,
+})
+
+---@cast MSG +fun(icon:Zenitha.MessageType|love.Canvas, str:string, time?:number)
 
 return MSG

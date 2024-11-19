@@ -31,7 +31,7 @@
 --
 --  `MSG` (Message), an on-screen print, can be used to show notifications or warnings.
 --   ```
---      MSG.new('info',"Techmino is fun!")
+--      MSG('info',"Techmino is fun!")
 --   ```
 --  `GC`, extended lib of love.graphics.
 --   ```
@@ -90,7 +90,7 @@
 --
 --      function scene.keyDown(k)
 --          if k~='escape' then return end
---          if TASK.lock('sureQuit',1) then MSG.new('info',Text.pressAgainToQuit) return end
+--          if TASK.lock('sureQuit',1) then MSG('info',Text.pressAgainToQuit) return end
 --          love.event.quit()
 --      end
 --   ```
@@ -215,9 +215,9 @@ if SYSTEM=='Web' then
     if love.thread then
         WEB_COMPAT_MODE=not love.thread.newThread('\n'):start()
     else
-        MSG.warnLog('Cannot check web compatible mode')
+        MSG.log('warn','Cannot check web compatible mode')
     end
-    LOG("info",'WEB_COMPAT_MODE = '..tostring(WEB_COMPAT_MODE))
+    LOG('info','WEB_COMPAT_MODE = '..tostring(WEB_COMPAT_MODE))
 end
 ---@type string Editting text, used by inputBox widget
 EDITING=""
@@ -347,30 +347,30 @@ local globalEvent={
         if devMode then
             if     key=='f1'  then -- Show system info
                 local info=("System:%s[%s]\nLuaVer:%s\nJitVer:%s\nJitVerNum:%s"):format(SYSTEM,jit.arch,_VERSION,jit.version,jit.version_num)
-                print(info); MSG.new('info',info); return true
+                MSG.log('info',info); return true
             elseif key=='f2'  then -- Quick profiling
                 local info=PROFILE.switch() and "Profile start!" or "Profile report copied!"
-                print(info); MSG.new('info',info); return true
+                MSG.log('info',info); return true
             elseif key=='f3'  then -- Show screen info
                 local info=table.concat(SCR.info(),"\n")
-                print(info); MSG.new('info',info); return true
+                MSG.log('info',info); return true
             elseif key=='f4'  then -- Show everything in _G
                 for k,v in next,_G do print(k,v) end
-                MSG.new('info',"_G listed in console")
+                MSG('info',"_G listed in console")
             elseif key=='f5'  then -- Show selected widget info
                 local info=WIDGET.sel and WIDGET.sel:getInfo() or "No widget selected"
-                print(info); MSG.new('info',info); return true
+                MSG.log('info',info); return true
             elseif key=='f6'  then -- Show scene stack
                 local info="Scene stack:"..table.concat(SCN.stack,"->")
-                print(info); MSG.new('info',info); return true
+                MSG.log('info',info); return true
             elseif key=='f7'  then -- Open console
                 if love['_openConsole'] then love['_openConsole']() end
-                MSG.new('info',"Console opened")
-            elseif key=='f8'  then devMode=false MSG.new('info',"DEBUG OFF",.2);      return true
-            elseif key=='f9'  then devMode=1     MSG.new('info',"DEBUG 1 (Basic)");   return true
-            elseif key=='f10' then devMode=2     MSG.new('info',"DEBUG 2 (Widget)");  return true
-            elseif key=='f11' then devMode=3     MSG.new('info',"DEBUG 3 (Slow)");    return true
-            elseif key=='f12' then devMode=4     MSG.new('info',"DEBUG 4 (Sloooow)"); return true
+                MSG('info',"Console opened")
+            elseif key=='f8'  then devMode=false MSG('info',"DEBUG OFF",.2);      return true
+            elseif key=='f9'  then devMode=1     MSG('info',"DEBUG 1 (Basic)");   return true
+            elseif key=='f10' then devMode=2     MSG('info',"DEBUG 2 (Widget)");  return true
+            elseif key=='f11' then devMode=3     MSG('info',"DEBUG 3 (Slow)");    return true
+            elseif key=='f12' then devMode=4     MSG('info',"DEBUG 4 (Sloooow)"); return true
             elseif devMode==2 then -- Adjust Widget
                 local W=WIDGET.sel ---@type table
                 if not W then return end
@@ -393,7 +393,7 @@ local globalEvent={
             end
         elseif key=='f8' then
             devMode=1
-            MSG.new('info',"DEBUG 1 (Basic)",.2)
+            MSG('info',"DEBUG 1 (Basic)",.2)
             return true
         end
     end,
@@ -891,7 +891,7 @@ function love.joystickadded(JS)
         triggerleft=0,
         triggerright=0,
     })
-    MSG.new('info',"Joystick added")
+    MSG.log('info',"Joystick added")
 end
 ---@type love.joystickremoved
 ---@param JS love.Joystick
@@ -912,7 +912,7 @@ function love.joystickremoved(JS)
             love.gamepadaxis(JS,'righty',0)
             love.gamepadaxis(JS,'triggerleft',-1)
             love.gamepadaxis(JS,'triggerright',-1)
-            MSG.new('info',"Joystick removed")
+            MSG.log('info',"Joystick removed")
             table.remove(jsState,i)
             break
         end

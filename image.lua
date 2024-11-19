@@ -1,5 +1,5 @@
 if not love.graphics then
-    LOG("debug","IMG lib is not loaded (need love.graphics)")
+    LOG('debug',"IMG lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(_)
             error("attempt to use IMG lib, but IMG lib is not loaded (need love.graphics)")
@@ -24,7 +24,7 @@ local IMGlistMeta={
             self[k]=res
         else
             self[k]=PAPER
-            MSG.new('error',STRING.repD("Cannot load image '$1': $2",path,res))
+            MSG.log('error',STRING.repD("Cannot load image '$1': $2",path,res))
         end
         return self[k]
     end,
@@ -64,7 +64,7 @@ end
 ---```
 function IMG.init(imgTable)
     if initialized then
-        MSG.new('info',"IMG.init: Attempt to initialize IMG lib twice")
+        MSG.log('info',"IMG.init: Attempt to initialize IMG lib twice")
         return
     end
     initialized,IMG.init=true,nil

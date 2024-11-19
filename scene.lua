@@ -262,7 +262,7 @@ function SCN.swapTo(tar,swapStyle,...)
 
             swapStyle=swapStyle or defaultSwap
             if not swapStyles[swapStyle] then
-                MSG.new('error',"No swap style named '"..swapStyle.."'")
+                MSG.log('warn',"No swap style named '"..swapStyle.."'")
                 swapStyle=defaultSwap
             end
             SCN.swapping=true
@@ -274,7 +274,7 @@ function SCN.swapTo(tar,swapStyle,...)
             S.draw=swapStyles[swapStyle].draw
         end
     else
-        MSG.new('warn',"No Scene: "..tar)
+        MSG('warn',"No Scene: "..tar)
     end
 end
 
@@ -289,7 +289,7 @@ function SCN.go(tar,swapStyle,...)
             SCN.swapTo(tar,swapStyle,...)
         end
     else
-        MSG.new('warn',"No Scene: "..tar)
+        MSG('warn',"No Scene: "..tar)
     end
 end
 

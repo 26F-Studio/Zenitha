@@ -30,7 +30,7 @@ function scene.keyDown(key,isRep)
         if backCounter==0 then
             SCN.back()
         else
-            MSG.new('info',backCounter,2.6)
+            MSG('info',backCounter,2.6)
         end
     end
 end

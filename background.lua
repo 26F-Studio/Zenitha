@@ -1,5 +1,5 @@
 if not love.graphics then
-    LOG("debug","BG lib is not loaded (need love.graphics)")
+    LOG('debug',"BG lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(t,k)
             t[k]=NULL
@@ -56,7 +56,7 @@ function BG.send(name,...)
     if BGs[name] then
         BGs[name].event(...)
     else
-        MSG.new('warning',"No background named '"..name.."' to send data to")
+        MSG.log('warn',"No background named '"..name.."' to send data to")
     end
 end
 
@@ -72,7 +72,7 @@ function BG.set(name)
     name=name or BG.default
     if BG.locked then return end
     if not BGs[name] then
-        MSG.new('warning',"No background named '"..name.."' to set")
+        MSG.log('warn',"No background named '"..name.."' to set")
         return
     end
     if name~=BG.cur then

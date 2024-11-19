@@ -1,5 +1,5 @@
 if not (love.audio and love.sound) then
-    LOG("debug","VOC lib is not loaded (need love.audio & love.sound)")
+    LOG('debug',"VOC lib is not loaded (need love.audio & love.sound)")
     return setmetatable({
         init=function()
             error("attempt to use VOC.init, but VOC lib is not loaded (need love.audio & love.sound)")
@@ -82,7 +82,7 @@ function VOC._update() end
 ---@param list table
 function VOC.init(list)
     if initialized then
-        MSG.new('info',"VOC.init: Attempt to initialize VLC lib twice")
+        MSG.log('info',"VOC.init: Attempt to initialize VLC lib twice")
         return
     end
     initialized,VOC.init=true,nil
@@ -123,7 +123,7 @@ function VOC.init(list)
 
             if n==1 then
                 if not _loadVoiceFile(path,list[i],list[i]) then
-                    LOG("info","No VOC: "..list[i],.1)
+                    LOG('info',"No VOC: "..list[i],.1)
                 end
             end
             if not voiceSet[list[i]][1] then

@@ -379,7 +379,7 @@ local commands={} do
     commands.msg={
         code=function(arg)
             if arg:match("^[a-z]+$") and ("<info|check|warn|error|other>"):find(arg) then
-                MSG.new(arg,"Test message",6)
+                MSG(arg,"Test message",6)
             else
                 log{COLOR.I,"Show a message on the up-left corner"}
                 log""

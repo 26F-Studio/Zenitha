@@ -1,5 +1,5 @@
 if not love.thread then
-    LOG("debug","CP lib is not loaded (need love.thread)")
+    LOG('debug',"CP lib is not loaded (need love.thread)")
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use TCP."..k..", but TCP lib is not loaded (need love.thread)")
@@ -77,7 +77,7 @@ function TCP.S_start(port)
     if result.success then
         S_running=true
     else
-        MSG.new('error', result.message)
+        MSG.log('error',result.message)
     end
 end
 
@@ -157,7 +157,7 @@ function TCP.C_connect(ip,port)
     if result.success then
         C_running=true
     else
-        MSG.new('error', result.message)
+        MSG.log('error',result.message)
     end
 end
 

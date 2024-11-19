@@ -1,7 +1,7 @@
 ---@diagnostic disable: inject-field
 
 if not love.graphics then
-    LOG("debug","GC lib is not loaded (need love.graphics)")
+    LOG('debug',"GC lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(t,k)
             t[k]=NULL

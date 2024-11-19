@@ -45,8 +45,8 @@ function loadlib.pkg(libName)
     if success and res then
         return res
     else
-        print("Cannot load "..libName..": "..res)
-        MSG.new('error',"Cannot load "..libName..": "..res:match('[ -~]+'))
+        LOG('error',"Cannot load "..libName..": "..res)
+        MSG('error',"Cannot load "..libName..": "..res:match('[ -~]+'))
     end
 end
 
@@ -64,7 +64,7 @@ if suc then
 
     local function defaultErrorHandler(errInfo)
         for i=1,#errInfo do
-            MSG.errorLog(errInfo[i])
+            MSG.log('error',errInfo[i])
         end
     end
 
