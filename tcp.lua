@@ -1,5 +1,5 @@
 if not love.thread then
-    LOG("info","CP lib is not loaded (need love.thread)")
+    LOG("debug","CP lib is not loaded (need love.thread)")
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use TCP."..k..", but TCP lib is not loaded (need love.thread)")

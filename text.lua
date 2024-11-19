@@ -1,5 +1,5 @@
 if not love.graphics then
-    LOG("info","TEXT lib is not loaded (need love.graphics)")
+    LOG("debug","TEXT lib is not loaded (need love.graphics)")
     return {
         clear=NULL,
         add=NULL,

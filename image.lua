@@ -1,5 +1,5 @@
 if not love.graphics then
-    LOG("info","IMG lib is not loaded (need love.graphics)")
+    LOG("debug","IMG lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(_)
             error("attempt to use IMG lib, but IMG lib is not loaded (need love.graphics)")

@@ -6,7 +6,7 @@ local ins=table.insert
 local clamp=MATH.clamp
 
 local startTime=os.time()
-local showLevel=1
+local showLevel=10
 local logs={}
 
 ---@alias Zenitha.log {[1]:integer, [2]:integer, [3]:string} level, timestamp, message

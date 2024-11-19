@@ -1,5 +1,5 @@
 if not love.system then
-    LOG("info","VIB lib is not loaded (need love.system)")
+    LOG("debug","VIB lib is not loaded (need love.system)")
     return NULL
 end
 

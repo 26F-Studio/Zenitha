@@ -1,5 +1,5 @@
 if not (love.audio and love.sound) then
-    LOG("info","VOC lib is not loaded (need love.audio & love.sound)")
+    LOG("debug","VOC lib is not loaded (need love.audio & love.sound)")
     return setmetatable({
         init=function()
             error("attempt to use VOC.init, but VOC lib is not loaded (need love.audio & love.sound)")

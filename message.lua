@@ -1,5 +1,5 @@
 if not love.graphics then
-    LOG("info","MSG lib is not loaded (need love.graphics)")
+    LOG("debug","MSG lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(t,k)
             t[k]=NULL
@@ -130,14 +130,14 @@ function MSG.clear()
     TABLE.clear(mesList)
 end
 
----Log an warn message both in console and with popup
+---Log an warn message both in console and with popup, with non ASCII filter
 ---@param info string
 function MSG.warnLog(info)
     LOG("warn",info)
     MSG.new('warn',STRING.filterASCII(info))
 end
 
----Log an error message both in console and with popup
+---Log an error message both in console and with popup, with non ASCII filter
 ---@param info string
 function MSG.errorLog(info)
     LOG("error",info)
