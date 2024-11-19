@@ -1524,8 +1524,3 @@ SCN.add('_test',require'scene.test')
 
 -- Every little bit helps in saving resources (maybe)
 collectgarbage()
-
-LOG("debug","TEST")
-LOG("info","TEST")
-LOG("warn","TEST")
-LOG("error","TEST")

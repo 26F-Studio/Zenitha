@@ -21,16 +21,16 @@ end
 
 ---@enum (key) Zenitha.logLevel
 local logLevelNum={
-    debug=5,
-    info=10,
-    warn=15,
-    error=20,
+    debug=15, -- 10~19
+    info=25,  -- 20~29
+    warn=35,  -- 30~39
+    error=45, -- 40~49
 }
 local logLevelStr={
-    '<'..AE._G..'DEBUG'..AE..'>',
-    '<'..AE._B..'INFO'..AE..'>',
-    '<'..AE._Y..'WARN'..AE..'>',
-    '<'..AE._R..'ERROR'..AE..'>',
+    '['..AE._G..'DEBUG'..AE..']',
+    '['..AE._B..'INFO'..AE..'] ',
+    '['..AE._Y..'WARN'..AE..'] ',
+    '['..AE._R..'ERROR'..AE..']',
 }
 
 ---Create a log message
@@ -41,13 +41,13 @@ local LOG=setmetatable({},{
     __call=function(_,_1,_2)
         if not _2 then
             -- LOG(str)
-            LOG._(3,_1)
+            LOG._(15,_1)
         elseif type(_1)=='number' then
             -- LOG(num,str)
             LOG._(_1,_2)
         else
             -- LOG(str,str)
-            LOG._(logLevelNum[_1] or 3,_2)
+            LOG._(logLevelNum[_1] or 15,_2)
         end
     end,
     __metatable=true,
@@ -56,14 +56,14 @@ local LOG=setmetatable({},{
 ---@param l Zenitha.log
 ---@return string
 local function dumpLog(l)
-    return format("%s\27[3m%d \27[0;30m%s\27[0m - %s",logLevelStr[floor((l[1]+4)/5)],l[1],os.date("%H:%M:%S",l[2]),l[3])
+    return format("%s\27[3m %2d \27[0;30m%s\27[0m | %s",logLevelStr[floor(l[1]/10)],l[1],os.date("%H:%M:%S",l[2]),l[3])
 end
 
 ---Create a log message
----@param level integer 1~20
+---@param level integer 10~49
 ---@param message string
 function LOG._(level,message)
-    level=clamp(floor(level),1,20)
+    level=clamp(floor(level),10,49)
     log(level,message)
     if level>=showLevel then
         print(dumpLog(logs[#logs]))
@@ -71,9 +71,9 @@ function LOG._(level,message)
 end
 
 ---Set the minimal level of logs to be printed to console
----@param level integer 1~20
+---@param level integer 10~49
 function LOG.setShowLevel(level)
-    showLevel=clamp(floor(level),1,20)
+    showLevel=clamp(floor(level),10,49)
 end
 
 ---Get raw logs data
