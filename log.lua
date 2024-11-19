@@ -26,11 +26,12 @@ local logLevelNum={
     warn=35,  -- 30~39
     error=45, -- 40~49
 }
-local logLevelStr={
+local logColor={AE._G,AE._B,AE._Y,AE._R}
+local logStr={
     '['..AE._G..'DEBUG'..AE..']',
     '['..AE._B..'INFO'..AE..'] ',
     '['..AE._Y..'WARN'..AE..'] ',
-    '['..AE._R..'ERROR'..AE..']',
+    '['..AE._R..'ERROR'..AE..']'
 }
 
 ---Create a log message
@@ -56,7 +57,8 @@ local LOG=setmetatable({},{
 ---@param l Zenitha.log
 ---@return string
 local function dumpLog(l)
-    return format("%s\27[3m %2d \27[0;30m%s\27[0m | %s",logLevelStr[floor(l[1]/10)],l[1],os.date("%H:%M:%S",l[2]),l[3])
+    local lv=floor(l[1]/10)
+    return format("\27[30m %s %s\27[7m%2d\27[0m%s\27[0m %s",os.date("%H:%M:%S",l[2]),logColor[lv],l[1],logStr[lv],l[3])
 end
 
 ---Create a log message

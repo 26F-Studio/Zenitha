@@ -1,6 +1,6 @@
 local floor=math.floor
 local find,match=string.find,string.match
-local sub,gsub=string.sub,string.gsub
+local gsub=string.gsub
 
 local AE={
     r='\27[0m',
@@ -15,6 +15,7 @@ local AE={
     d='\27[0;9m',
     _R='\27[91m',_G='\27[92m',_Y='\27[93m',_B='\27[94m',_M='\27[95m',_C='\27[96m',
     _r='\27[31m',_g='\27[32m',_y='\27[33m',_b='\27[34m',_m='\27[35m',_c='\27[36m',
+    v='\27[7m',
 }
 
 local colorNum={
