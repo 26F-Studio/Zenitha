@@ -447,6 +447,7 @@ TABLE=      require'tableExtend'
 
 -- Pure lua modules (simple)
 COLOR=      require'color'
+AE=         require'escape'
 RGB9={}     --[[Get color literal with `RGB9[960]`(Red)   ]] for r=0,9 do for g=0,9 do for b=0,9 do RGB9[100*r+10*g+b]={r/9,g/9,b/9} end end end
 RGBA9={}    --[[Get color literal with `RGBA9[9609]`(Red) ]] for r=0,9 do for g=0,9 do for b=0,9 do for a=0,9 do RGBA9[1000*r+100*g+10*b+a]={r/9,g/9,b/9,a/9} end end end end
 RGB5={}     --[[Get color literal with `RGB5[520]`(Red)   ]] for r=0,5 do for g=0,5 do for b=0,5 do RGB5[100*r+10*g+b]={r/5,g/5,b/5} end end end
@@ -1523,3 +1524,8 @@ SCN.add('_test',require'scene.test')
 
 -- Every little bit helps in saving resources (maybe)
 collectgarbage()
+
+LOG("debug","TEST")
+LOG("info","TEST")
+LOG("warn","TEST")
+LOG("error","TEST")
