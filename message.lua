@@ -64,6 +64,14 @@ local startY=0
 
 local MSG={}
 
+setmetatable(MSG,{
+    __call=function(_,icon,str,time)
+        MSG._(icon,str,time)
+    end,
+    __metatable=true,
+})
+---@cast MSG +fun(icon:Zenitha.MessageType|love.Canvas, str:string, time?:number)
+
 ---Add a new icon (and color) for message popup
 ---@param name string
 ---@param backColor Zenitha.Color
@@ -79,7 +87,7 @@ end
 ---@param icon Zenitha.MessageType|love.Canvas
 ---@param str string
 ---@param time? number
-function MSG.new(icon,str,time)
+function MSG._(icon,str,time)
     local backColor=msgStyle.other.backColor
     local textColor=msgStyle.other.textColor
     if type(icon)=='string' then
@@ -104,7 +112,7 @@ function MSG.new(icon,str,time)
         y=-h,
     })
 end
-local _new=MSG.new
+local _new=MSG._
 
 ---Set the y position of message popup
 ---@param y number
@@ -198,14 +206,5 @@ function MSG._draw()
         GC.translate(0,-startY)
     end
 end
-
-setmetatable(MSG,{
-    __call=function(_,icon,str,time)
-        _new(icon,str,time)
-    end,
-    __metatable=true,
-})
-
----@cast MSG +fun(icon:Zenitha.MessageType|love.Canvas, str:string, time?:number)
 
 return MSG

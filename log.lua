@@ -1,4 +1,4 @@
--- use LOG(message) to print & record informations
+-- Use LOG(message) to print & record informations
 
 local floor=math.floor
 local format=string.format
@@ -34,11 +34,9 @@ local logStr={
     '['..AE._R..'ERROR'..AE..']'
 }
 
----Create a log message
----@overload fun(level:Zenitha.logLevel, message:string)
----@overload fun(message:string) -- logLevel default to 3
----@overload fun(level:integer, message:string) -- Will be converted to this
-local LOG=setmetatable({},{
+local LOG={}
+
+setmetatable(LOG,{
     __call=function(_,_1,_2)
         if not _2 then
             -- LOG(str)
@@ -53,6 +51,9 @@ local LOG=setmetatable({},{
     end,
     __metatable=true,
 })
+---@cast LOG + fun(level:Zenitha.logLevel, message:string)
+---@cast LOG + fun(message:string) -- logLevel default to 3
+---@cast LOG + fun(level:integer, message:string) -- Will be converted to this
 
 ---@param l Zenitha.log
 ---@return string
