@@ -45,8 +45,8 @@ function loadlib.pkg(libName)
     if suc and res then
         return res
     else
-        LOG('error',"Cannot load "..libName..": "..res)
-        MSG('error',"Cannot load "..libName..": "..res:match('[ -~]+'))
+        LOG('error',"Cannot load "..libName..":\n"..tostring(res))
+        MSG('error',"Cannot load "..libName..": "..tostring(res):match('[ -~]+'))
     end
 end
 
