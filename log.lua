@@ -59,7 +59,7 @@ setmetatable(LOG,{
 ---@return string
 local function dumpLog(l)
     local lv=floor(l[1]/10)
-    return format("\27[30m %s %s\27[7m%2d\27[0m%s\27[0m %s",os.date("%H:%M:%S",l[2]),logColor[lv],l[1],logStr[lv],l[3])
+    return AE._D(os.date("%H:%M:%S ",l[2]))..logColor[lv](AE.v(l[1]))..logStr[lv].." "..l[3]
 end
 
 ---Create a log message
