@@ -28,10 +28,10 @@ local logLevelNum={
 }
 local logColor={AE._G,AE._B,AE._Y,AE._R}
 local logStr={
-    '['..AE._G..'DEBUG'..AE..']',
-    '['..AE._B..'INFO'..AE..'] ',
-    '['..AE._Y..'WARN'..AE..'] ',
-    '['..AE._R..'ERROR'..AE..']'
+    '['..AE._G'DEBUG'..']',
+    ' ['..AE._B'INFO'..']',
+    ' ['..AE._Y'WARN'..']',
+    '['..AE._R'ERROR'..']',
 }
 
 local LOG={}
@@ -74,9 +74,14 @@ function LOG._(level,message)
 end
 
 ---Set the minimal level of logs to be printed to console
----@param level integer 10~49
+---@param level Zenitha.logLevel|integer 10~49
 function LOG.setShowLevel(level)
-    showLevel=clamp(floor(level),10,49)
+    if type(level)=='string' then
+        showLevel=logLevelNum[level] or 15
+    else
+        ---@cast level integer
+        showLevel=clamp(floor(level),10,49)
+    end
 end
 
 ---Get raw logs data
