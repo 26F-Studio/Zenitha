@@ -207,7 +207,7 @@ local readThread=coroutine.wrap(function()
     end
 end)
 
-local success,err
+local suc,err
 
 while true do-- Running
     while CHN_peek(confCHN) do
@@ -230,10 +230,10 @@ while true do-- Running
     elseif t-lastSendTime>pingInterval then
         _send(9)
     end
-    success,err=pcall(sendThread)
-    if not success or err then break end
-    success,err=pcall(readThread)
-    if not success or err then break end
+    suc,err=pcall(sendThread)
+    if not suc or err then break end
+    suc,err=pcall(readThread)
+    if not suc or err then break end
     sleep(sleepInterval)
 end
 

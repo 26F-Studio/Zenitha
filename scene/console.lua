@@ -701,15 +701,15 @@ function scene.keyDown(key,isRep)
                     setfenv(code,userG)
                     resultColor=COLOR.lG
                 end
-                local success,result=pcall(code)
-                if success then
-                    if result~=nil then
-                        log{resultColor,">> "..tostring(result)}
+                local suc,res=pcall(code)
+                if suc then
+                    if res~=nil then
+                        log{resultColor,">> "..tostring(res)}
                     else
                         log{resultColor,"done"}
                     end
                 else
-                    log{COLOR.R,result}
+                    log{COLOR.R,res}
                 end
             else
                 log{COLOR.R,"[SyntaxErr] ",COLOR.R,err}

@@ -283,9 +283,9 @@ ZENITHA.timer=love.timer or setmetatable({
 
 -- Bit module fallback
 if not bit then
-    local success
-    success,bit=pcall(require,'bit')
-    if not success then bit=require'Zenitha.bit'.bit end
+    local suc
+    suc,bit=pcall(require,'bit')
+    if not suc then bit=require'Zenitha.bit'.bit end
 end
 
 ---@type love.Canvas Empty canvas used as placeholder

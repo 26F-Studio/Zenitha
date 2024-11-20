@@ -709,9 +709,9 @@ do -- function GC.load(L), GC.execute(t)
         gc.push()
             local canvas
             while true do
-                local success
-                success,canvas=pcall(gc.newCanvas,math.min(w,sizeLimit),math.min(h,sizeLimit))
-                if success then
+                local suc
+                suc,canvas=pcall(gc.newCanvas,math.min(w,sizeLimit),math.min(h,sizeLimit))
+                if suc then
                     break
                 else
                     sizeLimit=math.floor(sizeLimit*.8)

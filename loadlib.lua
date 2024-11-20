@@ -41,8 +41,8 @@ function loadlib.pkg(libName)
         end
     end
     -- arg #2: if system is macOS, it's nil, otherwise it's 'libName'
-    local success,res=pcall(_require,(SYSTEM~='macOS' or nil) and libName)
-    if success and res then
+    local suc,res=pcall(_require,(SYSTEM~='macOS' or nil) and libName)
+    if suc and res then
         return res
     else
         LOG('error',"Cannot load "..libName..": "..res)

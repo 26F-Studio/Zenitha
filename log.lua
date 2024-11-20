@@ -19,7 +19,7 @@ local function log(level,message)
     })
 end
 
----@enum (key) Zenitha.logLevel
+---@alias Zenitha.logLevel 'debug'|'info'|'warn'|'error'
 local logLevelNum={
     debug=15, -- 10~19
     info=25,  -- 20~29
