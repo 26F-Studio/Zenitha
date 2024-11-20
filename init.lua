@@ -247,9 +247,9 @@ if SYSTEM=='Web' then
     if love.thread then
         WEB_COMPAT_MODE=not love.thread.newThread('\n'):start()
     else
-        MSG.log('warn','Cannot check web compatible mode')
+        print('Cannot check web compatible mode')
     end
-    LOG('info','WEB_COMPAT_MODE = '..tostring(WEB_COMPAT_MODE))
+    print('WEB_COMPAT_MODE = '..tostring(WEB_COMPAT_MODE))
 end
 ---@type string Editting text, used by inputBox widget
 EDITING=""
@@ -1170,7 +1170,7 @@ function love.errorhandler(msg)
 
         return love.run()
     else
-        ZENITHA.setVisible(true)
+        ZENITHA.mouse.setVisible(true)
 
         local errorMsg
         errorMsg=mainLoopStarted and
