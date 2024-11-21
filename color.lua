@@ -62,6 +62,7 @@ local c={
     Darks=    {{HEX'000000'},{HEX'060606'},{HEX'101010'},{HEX'3C3C3C'},{HEX'7A7A7A'}},
     Lights=   {{HEX'B8B8B8'},{HEX'DBDBDB'},{HEX'FDFDFD'},{HEX'FEFEFE'},{HEX'FFFFFF'}},
     Translucents={{HEX'060606CC'},{HEX'3C3C3CCC'},{HEX'7A7A7ACC'},{HEX'DBDBDBCC'},{HEX'FEFEFECC'}},
+    Xnothing=    {{HEX'00000000'},{HEX'10101000'},{HEX'90909000'},{HEX'FDFDFD00'},{HEX'FFFFFF00'}},
 }
 ---@enum (key) Zenitha.ColorStr
 local COLOR={
@@ -188,6 +189,11 @@ local COLOR={
     T=c.Translucents[3], -- Translucent
     lT=c.Translucents[4], -- lightTranslucent
     LT=c.Translucents[5], -- LightTranslucent
+    DX=c.Xnothing[1], -- DarkXnothing
+    dX=c.Xnothing[2], -- darkXnothing
+    X=c.Xnothing[3], -- Xnothing
+    lX=c.Xnothing[4], -- lightXnothing
+    LX=c.Xnothing[5], -- LightXnothing
 }
 setmetatable(COLOR,{__index=function(_,k)
     assert(type(k)=='string', "COLOR[name]: Need string")
@@ -213,6 +219,7 @@ COLOR.Wines=c.Wines
 COLOR.Darks=c.Darks
 COLOR.Lights=c.Lights
 COLOR.Translucents=c.Translucents
+COLOR.Xnothing=c.Xnothing
 
 for i=1,5 do
     COLOR[i]={
@@ -222,7 +229,7 @@ for i=1,5 do
         Ice=c.Ices[i],       Sea=c.Seas[i],       Blue=c.Blues[i],
         Purple=c.Purples[i], Violet=c.Violets[i], Magenta=c.Magentas[i],
         Wine=c.Wines[i],     Dark=c.Darks[i],     Light=c.Lights[i],
-        Translucent=c.Translucents[i],
+        Translucent=c.Translucents[i],Xnothing=c.Xnothing[i],
     }
 end
 
