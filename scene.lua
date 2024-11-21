@@ -2,33 +2,33 @@
 ---@field widgetList? Zenitha.WidgetArg[] | Zenitha.Widget.base[]
 ---@field scrollHeight? number
 ---
----@field load? fun(fromScene:string | false, ...)  Called when scene loaded (false when loading first scene)
----@field enter? fun(fromScene:string | false, ...) Called when scene swapping finished (false when entering first scene)
----@field leave? fun(toScene:string, ...)   Called when scene swapping started
----@field unload? fun(toScene:string, ...)  Called when scene unloaded
----@field mouseDown? fun(x:number, y:number, k:number, presses:number): boolean? Able to interrupt cursor & widget control
----@field mouseMove? fun(x:number, y:number, dx:number, dy:number)
----@field mouseUp? fun(x:number, y:number, k:number, presses:number)
----@field mouseClick? fun(x:number, y:number, k:number, dist:number, presses:number)
----@field wheelMove? fun(dx:number, dy:number): boolean? Able to interrupt WIDGET._scroll
----@field touchDown? fun(x:number, y:number, id:userdata, pressure?:number)
----@field touchUp? fun(x:number, y:number, id:userdata, pressure?:number)
----@field touchMove? fun(x:number, y:number, dx:number, dy:number, id:userdata, pressure?:number)
----@field touchClick? fun(x:number, y:number, id:userdata, dist:number)
----@field keyDown? fun(key:love.KeyConstant, isRep:boolean, scancode:love.Scancode): boolean? Able to interrupt cursor & widget control
----@field keyUp? fun(key:love.KeyConstant, scancode:love.Scancode)
----@field textInput? fun(texts:string): boolean? Able to interrupt widget control
----@field imeChange? fun(texts:string): boolean? Able to interrupt widget control
----@field gamepadDown? fun(key:love.GamepadButton)
----@field gamepadUp? fun(key:love.GamepadButton)
----@field fileDrop? fun(file:love.DroppedFile)
----@field folderDrop? fun(path:string)
----@field lowMemory? fun()
----@field resize? fun(width:number, height:number)
----@field focus? fun(focus:boolean)
----@field update? fun(dt:number)
----@field draw? fun()
----@field overDraw? fun()
+---@field load?        fun() | fun(fromScene:string | false, ...)  Called when scene loaded (false when loading first scene)
+---@field enter?       fun() | fun(fromScene:string | false, ...) Called when scene swapping finished (false when entering first scene)
+---@field leave?       fun() | fun(toScene:string, ...)   Called when scene swapping started
+---@field unload?      fun() | fun(toScene:string, ...)  Called when scene unloaded
+---@field mouseDown?   fun() | fun(x:number, y:number, k:number, presses:number): boolean? Able to interrupt cursor & widget control
+---@field mouseMove?   fun() | fun(x:number, y:number, dx:number, dy:number)
+---@field mouseUp?     fun() | fun(x:number, y:number, k:number, presses:number)
+---@field mouseClick?  fun() | fun(x:number, y:number, k:number, dist:number, presses:number)
+---@field wheelMove?   fun() | fun(dx:number, dy:number): boolean? Able to interrupt WIDGET._scroll
+---@field touchDown?   fun() | fun(x:number, y:number, id:userdata, pressure?:number)
+---@field touchUp?     fun() | fun(x:number, y:number, id:userdata, pressure?:number)
+---@field touchMove?   fun() | fun(x:number, y:number, dx:number, dy:number, id:userdata, pressure?:number)
+---@field touchClick?  fun() | fun(x:number, y:number, id:userdata, dist:number)
+---@field keyDown?     fun() | fun(key:love.KeyConstant, isRep:boolean, scancode:love.Scancode): boolean? Able to interrupt cursor & widget control
+---@field keyUp?       fun() | fun(key:love.KeyConstant, scancode:love.Scancode)
+---@field textInput?   fun() | fun(texts:string): boolean? Able to interrupt widget control
+---@field imeChange?   fun() | fun(texts:string): boolean? Able to interrupt widget control
+---@field gamepadDown? fun() | fun(key:love.GamepadButton)
+---@field gamepadUp?   fun() | fun(key:love.GamepadButton)
+---@field fileDrop?    fun() | fun(file:love.DroppedFile)
+---@field folderDrop?  fun() | fun(path:string)
+---@field lowMemory?   fun()
+---@field resize?      fun() | fun(width:number, height:number)
+---@field focus?       fun() | fun(focus:boolean)
+---@field update?      fun() | fun(dt:number)
+---@field draw?        fun()
+---@field overDraw?    fun()
 
 ---@class Zenitha.SceneSwap
 ---@field duration number

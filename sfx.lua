@@ -94,10 +94,10 @@ local function loadOne(name,path,lazyLoad)
 end
 
 ---Load SFX name-path pairs
----@overload fun(pathTable:table, lazyLoad?:boolean)
 ---@param name string
 ---@param path string
 ---@param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
+---@overload fun(pathTable:table, lazyLoad?:boolean)
 function SFX.load(name,path,lazyLoad)
     if type(name)=='table' then
         local success=0

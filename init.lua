@@ -323,8 +323,8 @@ function errorf(str,...) error(str:format(...)) end
 function assertf(v,str,...) return v or error(str:format(...)) end
 
 ---Use `local require=requirePath(...)` to require modules in simpler way
----@overload fun(loader:function): unknown
 ---@param path string
+---@overload fun(loader:function): unknown
 function simpRequire(path)
     return type(path)=='function' and
         function(module) return path(module) end or

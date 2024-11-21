@@ -36,9 +36,9 @@ end
 ---@param y number
 ---@param z number
 ---@return number, number, number
+---@nodiscard
 ---@overload fun(x:number): number
 ---@overload fun(x:number, y:number): number, number
----@nodiscard
 function MATH.vecAbs(x,y,z)
     if z then
         return (x*x+y*y+z*z)^.5
@@ -54,9 +54,9 @@ end
 ---@param y number
 ---@param z number
 ---@return number, number, number
+---@nodiscard
 ---@overload fun(x:number): number
 ---@overload fun(x:number, y:number): number, number
----@nodiscard
 function MATH.vecDir(x,y,z)
     if z then
         local r=(x*x+y*y+z*z)^.5
