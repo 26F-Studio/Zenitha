@@ -69,9 +69,9 @@ if suc then
     end
 
     ---A wrapped ffi.load that will try to load FMOD library in different paths with an error handler receiving all error informations
-    ---@param libName string name of the library, 'fmod' for 'fmod.dll'|'libfmod.so'
+    ---@param libName string name of the library, 'fmod' for 'fmod.dll' | 'libfmod.so'
     ---@param handler? fun(errLog:string[]) will call this if loading failed
-    ---@return ffi.namespace*|false
+    ---@return ffi.namespace* | false
     function loadlib.ffi(libName,handler)
         local errLog={}
         for i=1,#ffiPath do

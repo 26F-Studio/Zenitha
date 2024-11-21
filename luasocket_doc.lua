@@ -22,7 +22,7 @@ function socket.bind(address,port,backlog) end
 ---@param port number
 ---@param locaddr? string
 ---@param locport? number
----@param family? 'inet'|'inet6'
+---@param family? 'inet' | 'inet6'
 ---@return LuaSocket.client
 function socket.connect(address,port,locaddr,locport,family) end
 socket.connect4=socket.connect
@@ -94,7 +94,7 @@ function master:dirty() end
 ---@return string
 function master:getsockname() end
 
----@return number bytesRecv, number bytesSent,number secLifetime
+---@return number bytesRecv, number bytesSent, number secLifetime
 function master:getstats() end
 
 ---@return number
@@ -111,7 +111,7 @@ function master:listen(backlog) end
 function master:setstats(received,sent,age) end
 
 ---@param value? number nil or negative means block
----@param mode? 'b'|'t'
+---@param mode? 'b' | 't'
 function master:settimeout(value,mode) end
 
 ---@return string
@@ -150,7 +150,7 @@ function client:setoption(option,value) end
 ---@return string
 function client:getpeername() end
 
----@param pattern? '*l'|'*a'|number
+---@param pattern? '*l' | '*a' | number
 ---@param prefix? string
 function client:receive(pattern,prefix) end
 
@@ -161,5 +161,5 @@ function client:receive(pattern,prefix) end
 function client:send(data,i,j) end
 
 ---Close one side of a full-duplex connection
----@param mode? 'both'|'send'|'receive'
+---@param mode? 'both' | 'send' | 'receive'
 function client:shutdown(mode) end

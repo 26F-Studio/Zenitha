@@ -1,24 +1,24 @@
 ---@class Zenitha.Scene
----@field widgetList? Zenitha.WidgetArg[]|Zenitha.Widget.base[]
----@field scrollHeight? number|nil
+---@field widgetList? Zenitha.WidgetArg[] | Zenitha.Widget.base[]
+---@field scrollHeight? number
 ---
----@field load? fun(fromScene:string|false, ...)  Called when scene loaded (false when loading first scene)
----@field enter? fun(fromScene:string|false, ...) Called when scene swapping finished (false when entering first scene)
+---@field load? fun(fromScene:string | false, ...)  Called when scene loaded (false when loading first scene)
+---@field enter? fun(fromScene:string | false, ...) Called when scene swapping finished (false when entering first scene)
 ---@field leave? fun(toScene:string, ...)   Called when scene swapping started
 ---@field unload? fun(toScene:string, ...)  Called when scene unloaded
----@field mouseDown? fun(x:number, y:number, k:number, presses:number):boolean? Able to interrupt cursor & widget control
+---@field mouseDown? fun(x:number, y:number, k:number, presses:number): boolean? Able to interrupt cursor & widget control
 ---@field mouseMove? fun(x:number, y:number, dx:number, dy:number)
 ---@field mouseUp? fun(x:number, y:number, k:number, presses:number)
 ---@field mouseClick? fun(x:number, y:number, k:number, dist:number, presses:number)
----@field wheelMove? fun(dx:number, dy:number):boolean? Able to interrupt WIDGET._scroll
+---@field wheelMove? fun(dx:number, dy:number): boolean? Able to interrupt WIDGET._scroll
 ---@field touchDown? fun(x:number, y:number, id:userdata, pressure?:number)
 ---@field touchUp? fun(x:number, y:number, id:userdata, pressure?:number)
 ---@field touchMove? fun(x:number, y:number, dx:number, dy:number, id:userdata, pressure?:number)
 ---@field touchClick? fun(x:number, y:number, id:userdata, dist:number)
----@field keyDown? fun(key:love.KeyConstant, isRep:boolean, scancode:love.Scancode):boolean? Able to interrupt cursor & widget control
+---@field keyDown? fun(key:love.KeyConstant, isRep:boolean, scancode:love.Scancode): boolean? Able to interrupt cursor & widget control
 ---@field keyUp? fun(key:love.KeyConstant, scancode:love.Scancode)
----@field textInput? fun(texts:string):boolean? Able to interrupt widget control
----@field imeChange? fun(texts:string):boolean? Able to interrupt widget control
+---@field textInput? fun(texts:string): boolean? Able to interrupt widget control
+---@field imeChange? fun(texts:string): boolean? Able to interrupt widget control
 ---@field gamepadDown? fun(key:love.GamepadButton)
 ---@field gamepadUp? fun(key:love.GamepadButton)
 ---@field fileDrop? fun(file:love.DroppedFile)
@@ -78,7 +78,7 @@ local SCN={
 
 local defaultSwap='fade'
 
----@alias Zenitha.SceneSwapStyle Zenitha._SceneSwapStyle|string
+---@alias Zenitha.SceneSwapStyle Zenitha._SceneSwapStyle | string
 ---@enum (key) Zenitha._SceneSwapStyle
 local swapStyles={
     none={
@@ -155,7 +155,7 @@ function SCN.add(name,scene)
         if k=='widgetList' then
             assertf(type(scene.widgetList)=='table',"SCN.add: scene[%s].widgetList need table",name)
             for kw,w in next,scene.widgetList do
-                assertf(type(w)=='table',"SCN.add: scene[%s].widgetList need list<widgetArgTable|widgetObj>",name)
+                assertf(type(w)=='table',"SCN.add: scene[%s].widgetList need list<widgetArgTable | widgetObj>",name)
                 if not w._widget then
                     scene.widgetList[kw]=WIDGET.new(w)
                 end

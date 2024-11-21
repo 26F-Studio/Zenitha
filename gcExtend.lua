@@ -27,13 +27,13 @@ local GC=TABLE.copyAll(gc,0)
 -- Aligning Draw
 
 ---Printf a string with 'center'
----@param obj string|number
+---@param obj string | number
 ---@param x number
 ---@param y number
 function GC.mStr(obj,x,y) printf(obj,x-1260,y,2520,'center') end
 
 ---Draw an object with x=obj:getWidth()/2
----@param obj love.Texture|love.Drawable
+---@param obj love.Texture | love.Drawable
 ---@param x? number
 ---@param y? number
 ---@param a? number
@@ -41,7 +41,7 @@ function GC.mStr(obj,x,y) printf(obj,x-1260,y,2520,'center') end
 function GC.mDrawX(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end
 
 ---Draw an object with y=obj:getWidth()/2
----@param obj love.Texture|love.Drawable
+---@param obj love.Texture | love.Drawable
 ---@param x? number
 ---@param y? number
 ---@param a? number
@@ -49,7 +49,7 @@ function GC.mDrawX(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end
 function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end
 
 ---Draw an object with both middle X & Y
----@param obj love.Texture|love.Drawable
+---@param obj love.Texture | love.Drawable
 ---@param x? number
 ---@param y? number
 ---@param a? number
@@ -57,7 +57,7 @@ function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end
 function GC.mDraw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
 
 ---Draw an object with both middle X & Y
----@param obj love.Texture|love.Drawable
+---@param obj love.Texture | love.Drawable
 ---@param x? number
 ---@param y? number
 ---@param a? number
@@ -68,7 +68,7 @@ function GC.mDrawQX(obj,quad,x,y,a,k)
 end
 
 ---Draw an object with both middle X & Y
----@param obj love.Texture|love.Drawable
+---@param obj love.Texture | love.Drawable
 ---@param x? number
 ---@param y? number
 ---@param a? number
@@ -79,7 +79,7 @@ function GC.mDrawQY(obj,quad,x,y,a,k)
 end
 
 ---Draw an object with both middle X & Y
----@param obj love.Texture|love.Drawable
+---@param obj love.Texture | love.Drawable
 ---@param x? number
 ---@param y? number
 ---@param a? number
@@ -141,9 +141,9 @@ function GC.safePrintf(...)
 end
 
 ---Draw an offset stroke based on the specified object (extended love.gc.draw)
----@param strokeMode 'side'|'corner'|'full' other values will be treated as 'full'
+---@param strokeMode 'side' | 'corner' | 'full' other values will be treated as 'full'
 ---@param d number
----@param obj love.Texture|love.Drawable
+---@param obj love.Texture | love.Drawable
 ---@param x number
 ---@param y number
 ---@param r? number rotation
@@ -170,7 +170,7 @@ function GC.strokeDraw(strokeMode,d,obj,x,y,r,sx,sy,ox,oy,kx,ky)
 end
 
 ---Print text with stroke (extended love.gc.printf)
----@param strokeMode? 'side'|'corner'|'full' other values will be treated as 'full'
+---@param strokeMode? 'side' | 'corner' | 'full' other values will be treated as 'full'
 ---@param d number
 ---@param strokeColor? Zenitha.Color Stroke color (default to white)
 ---@param textColor? Zenitha.Color Center color (leave nil to disable text)

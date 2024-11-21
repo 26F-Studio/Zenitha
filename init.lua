@@ -237,7 +237,7 @@ NULL=function(...) end
 TRUE=function() return true end
 FALSE=function() return false end
 
----@type 'macOS'|'Windows'|'Linux'|'Android'|'iOS'|'unknown'
+---@type 'macOS' | 'Windows' | 'Linux' | 'Android' | 'iOS' | 'unknown'
 SYSTEM=love.system and love.system.getOS():gsub('OS X','macOS') or 'unknown'
 ---@type boolean (NOT RELIABLE) true if the system is Android or iOS
 MOBILE=SYSTEM=='Android' or SYSTEM=='iOS'
@@ -323,7 +323,7 @@ function errorf(str,...) error(str:format(...)) end
 function assertf(v,str,...) return v or error(str:format(...)) end
 
 ---Use `local require=requirePath(...)` to require modules in simpler way
----@overload fun(loader:function):unknown
+---@overload fun(loader:function): unknown
 ---@param path string
 function simpRequire(path)
     return type(path)=='function' and
@@ -335,7 +335,7 @@ end
 
 -- Inside values
 local mainLoopStarted=false
-local devMode=false ---@type false|1|2|3|4
+local devMode=false ---@type false | 1 | 2 | 3 | 4
 local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastClicks={} ---@type Zenitha.Click[]
 local jsState={} ---@type Zenitha.JoystickState[]
@@ -998,7 +998,7 @@ function love.gamepadaxis(JS,axis,val)
 end
 ---@type love.gamepadpressed
 ---@param JS love.Joystick
----@param key love.GamepadButton|string
+---@param key love.GamepadButton | string
 function love.gamepadpressed(JS,key)
     -- Hide cursor when gamepad pressed
     mouseShow=false
@@ -1038,7 +1038,7 @@ function love.gamepadpressed(JS,key)
 end
 ---@type love.gamepadreleased
 ---@param JS love.Joystick
----@param key love.GamepadButton|string
+---@param key love.GamepadButton | string
 function love.gamepadreleased(JS,key)
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -1442,9 +1442,9 @@ function ZENITHA.getVersionText() return versionText end
 function ZENITHA.getJsState() return jsState end
 
 ---Get the error info
----@param i number|'#' Index of error info, `'#'` for the last one
+---@param i number | '#' Index of error info, `'#'` for the last one
 ---@return Zenitha.Exception
----@overload fun():Zenitha.Exception[]
+---@overload fun(): Zenitha.Exception[]
 function ZENITHA.getErr(i)
     if i=='#' then
         return errData[#errData]
@@ -1468,7 +1468,7 @@ function ZENITHA.setDebugInfo(list)
 end
 
 ---Set the first scene to load, normally this must be used, or you wlil enter the demo scene
----@param name string|any
+---@param name string | any
 function ZENITHA.setFirstScene(name)
     assert(type(name)=='string',"ZENITHA.setFirstScene(name): Need string")
     firstScene=name

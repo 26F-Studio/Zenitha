@@ -82,7 +82,7 @@ local easeTemplates={
 ---@field running boolean
 ---@field duration number default to 1
 ---@field time number used when no timeFunc
----@field loop false|'repeat'|'yoyo'
+---@field loop false | 'repeat' | 'yoyo'
 ---@field loopCount number current loop number (start from 1)
 ---@field totalLoop number the total number of times to loop
 ---@field flipMode boolean true when loop is `'yoyo'`, making time flow back and forth
@@ -90,7 +90,7 @@ local easeTemplates={
 ---@field tags Set<Zenitha.Tween.Tag>
 ---@field unqTag Zenitha.Tween.Tag
 ---@field private doFunc fun(t:number, loopNo:number)
----@field private timeFunc? fun():number custom how time goes
+---@field private timeFunc? fun(): number custom how time goes
 ---@field private onRepeat fun(loopNo:number)
 ---@field private onFinish function
 ---@field private onKill function
@@ -140,7 +140,7 @@ function Tween:setOnKill(func)
 end
 
 ---Set easing mode
----@param ease? Zenitha.Tween.easeTemplate|Zenitha.Tween.basicCurve[] default to 'InOutSin'
+---@param ease? Zenitha.Tween.easeTemplate | Zenitha.Tween.basicCurve[] default to 'InOutSin'
 ---@return Zenitha.Tween
 function Tween:setEase(ease)
     -- assert(not self.running,"[tween]:setEase(ease): Can't set ease when running")
@@ -169,7 +169,7 @@ function Tween:setDuration(duration)
 end
 
 ---Set Looping
----@param loopMode false|'repeat'|'yoyo'
+---@param loopMode false | 'repeat' | 'yoyo'
 ---@param totalLoop? number default to Infinity
 ---@return Zenitha.Tween
 function Tween:setLoop(loopMode,totalLoop)
@@ -214,7 +214,7 @@ end
 ---Start the animation animate with time (again), or custom timeFunc
 ---
 ---Warning: you still have full access to animation after [tween]:run(), but don't touch it unless you know what you're doing
----@param timeFunc? fun():number Custom the timeFunc (return a number in duration)
+---@param timeFunc? fun(): number Custom the timeFunc (return a number in duration)
 function Tween:run(timeFunc)
     if self.running then return end
     assert(timeFunc==nil or type(timeFunc)=='function',"[tween]:run(timeFunc): Need function if exists")
@@ -351,7 +351,7 @@ function TWEEN._update(dt)
 end
 
 ---@param tag Zenitha.Tween.Tag
----@param method 'setEase'|'setTime'|'pause'|'continue'|'skip'|'kill'|'update'
+---@param method 'setEase' | 'setTime' | 'pause' | 'continue' | 'skip' | 'kill' | 'update'
 local function tagAction(tag,method,...)
     assert(type(tag)=='string',"TWEEN.tag_"..method..": tag need string")
     for anim in next,tagAnimSet do

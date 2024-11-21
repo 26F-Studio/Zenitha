@@ -100,9 +100,9 @@ function TABLE.copyAll(org,depth)
 end
 
 ---Get a new table which keys and values are swapped
----@generic K,V
----@param org table<K,V>
----@return table<V,K>
+---@generic K, V
+---@param org table<K, V>
+---@return table<V, K>
 function TABLE.inverse(org)
     local T={}
     for k,v in next,org do
@@ -136,12 +136,12 @@ function TABLE.getValues(org)
 end
 
 ---Set all values to k
----@generic T1,T2
----@param org table<any,T1>
+---@generic T1, T2
+---@param org table<any, T1>
 ---@param val? T2
----@return table<T1,T2>
+---@return table<T1, T2>
 ---@nodiscard
----@overload fun(org:table):table<any,true>
+---@overload fun(org:table): table<any, true>
 function TABLE.getValueSet(org,val)
     if val==nil then val=true end
     local T={}
@@ -152,10 +152,10 @@ function TABLE.getValueSet(org,val)
 end
 
 ---Create a table of two lists connected
----@generic T1,T2
+---@generic T1, T2
 ---@param L1 T1[] list 1
 ---@param L2 T2[] list 2
----@return (T1|T2)[]
+---@return (T1 | T2)[]
 ---@nodiscard
 function TABLE.combine(L1,L2)
     local L={}
@@ -184,7 +184,7 @@ end
 ---Create a rotated copy of a matrix
 ---@generic T
 ---@param matrix Mat<T>
----@param direction 'R'|'L'|'F'|'0' CW, CCW, 180 deg, 0 deg (copy)
+---@param direction 'R' | 'L' | 'F' | '0' CW, CCW, 180 deg, 0 deg (copy)
 ---@return Mat<T>
 ---@nodiscard
 function TABLE.rotate(matrix,direction)
@@ -255,7 +255,7 @@ function TABLE.equalAll(a,b)
 end
 
 ---Connect [1~#] elements of new to the end of org
----@generic T1,T2
+---@generic T1, T2
 ---@param org T1[] original list
 ---@param new T2[] new list
 function TABLE.connect(org,new)
@@ -518,7 +518,7 @@ end
 ---@param t any[]
 ---@param val any
 ---@param start? number
----@return number|nil key
+---@return number? key
 ---@nodiscard
 function TABLE.find(t,val,start)
     for i=start or 1,#t do if t[i]==val then return i end end
@@ -527,10 +527,10 @@ end
 ---TABLE.find for ordered list only, faster (binary search)
 ---@param t any[]
 ---@param val any
----@return number|nil key
+---@return number | nil key
 ---@nodiscard
 function TABLE.findOrdered(t,val)
-    if val<t[1] or val>t[#t] then return end
+    if val<t[1] or val>t[#t] then return nil end
     local i,j=1,#t
     while i<=j do
         local m=floor((i+j)/2)
@@ -545,13 +545,14 @@ function TABLE.findOrdered(t,val)
 end
 
 ---Find value in whole table
----@generic K,V
----@param t table<K,V>
+---@generic K, V
+---@param t table<K, V>
 ---@param val V
----@return K|nil key
+---@return K | nil key
 ---@nodiscard
 function TABLE.findAll(t,val)
     for k,v in next,t do if v==val then return k end end
+    return nil
 end
 
 ---Replace value in [1~#], like string.gsub
@@ -580,9 +581,9 @@ function TABLE.replaceAll(t,v_old,v_new)
 end
 
 ---Find the minimum value (and key) in whole table
----@generic K,V
----@param t table<K,V>
----@return V|nil value, K|nil key
+---@generic K, V
+---@param t table<K, V>
+---@return V | number minVal, K | nil key `minVal` will be inf when empty
 ---@nodiscard
 function TABLE.minAll(t)
     local min,key=MATH.inf,nil
@@ -595,9 +596,9 @@ function TABLE.minAll(t)
 end
 
 ---Find the maximum value (and key) in whole table
----@generic K,V
----@param t table<K,V>
----@return V|nil value, K|nil key
+---@generic K, V
+---@param t table<K, V>
+---@return V | number maxVal, K | nil key `maxVal` will be -inf when empty
 ---@nodiscard
 function TABLE.maxAll(t)
     local max,key=-MATH.inf,nil
@@ -775,14 +776,15 @@ function TABLE.countAll(t,val)
 end
 
 ---Return next value of [1~#] (by value) (like _G.next)
----@generic K,V
----@param t table<K,V>
+---@generic K, V
+---@param t table<K, V>
 ---@param val V
----@return V|nil
+---@return V | nil nextValue nil when not found
 ---@nodiscard
 function TABLE.next(t,val)
     if val==nil then return t[1] end
     for i=1,#t do if t[i]==val then return t[i+1] end end
+    return nil
 end
 
 --------------------------------------------------------------
@@ -820,7 +822,7 @@ end
 ---Return a function that return a value of table
 ---@param t table
 ---@param k any
----@return fun():any
+---@return fun(): any
 ---@nodiscard
 function TABLE.func_getVal(t,k)
     return function() return t[k] end
@@ -890,7 +892,7 @@ do -- function TABLE.newResourceTable(src,loadFunc)
     end
     ---Create a new table with lazy load feature
     ---@param src table resourceID table
-    ---@param loadFunc fun(resID:any):any Will receive resourceID from src table, must return a non-nil value
+    ---@param loadFunc fun(resID:any): any Will receive resourceID from src table, must return a non-nil value
     ---@param lazy? boolean
     ---@return table
     ---@nodiscard

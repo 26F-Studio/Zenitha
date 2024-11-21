@@ -8,7 +8,7 @@ if not love.graphics then
     })
 end
 
----@alias Zenitha.MessageType Zenitha._MessageType|string
+---@alias Zenitha.MessageType Zenitha._MessageType | string
 ---@enum (key) Zenitha._MessageType
 local msgStyle={
     info={
@@ -70,7 +70,7 @@ setmetatable(MSG,{
     end,
     __metatable=true,
 })
----@cast MSG +fun(icon:Zenitha.MessageType|love.Canvas, str:string, time?:number)
+---@cast MSG +fun(icon:Zenitha.MessageType | love.Canvas, str:string, time?:number)
 
 ---Add a new icon (and color) for message popup
 ---@param name string
@@ -84,7 +84,7 @@ function MSG.addCategory(name,backColor,textColor,canvas)
 end
 
 ---Create a new message popup at up-left corner
----@param icon Zenitha.MessageType|love.Canvas
+---@param icon Zenitha.MessageType | love.Canvas
 ---@param str string
 ---@param time? number
 function MSG._(icon,str,time)
@@ -140,7 +140,7 @@ function MSG.clear()
 end
 
 ---Log an info message both in console and with popup, with non ASCII filter
----@param mode 'info'|'warn'|'error'
+---@param mode 'info' | 'warn' | 'error'
 ---@param info string
 ---@param time? number
 function MSG.log(mode,info,time)

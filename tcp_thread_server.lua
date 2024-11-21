@@ -22,7 +22,7 @@ local S_recvBusCHN=love.thread.getChannel("tcp_s_receiveBus")
 local server ---@type LuaSocket.server
 local clients ---@type table<string, Zenitha.TCP.Client>
 local partialDataBuffer ---@type table<Zenitha.TCP.sendID, string>
-local busList={} ---@type table<number|string, Zenitha.TCP.Bus>
+local busList={} ---@type table<number | string, Zenitha.TCP.Bus>
 local maxBusCount=26 ---@type number
 local allowBroadcast=true ---@type boolean
 

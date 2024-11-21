@@ -233,7 +233,7 @@ end
 ---end
 ---```
 ---@param str string
----@param keep? boolean|number `true`: keep some indent based on 1st line; [number] trim specific number of spaces
+---@param keep? boolean | number `true`: keep some indent based on 1st line; [number] trim specific number of spaces
 ---@return string
 ---@nodiscard
 function STRING.trimIndent(str,keep)
@@ -391,7 +391,7 @@ end
 
 ---Warning: don't support number format like .26, must have digits before the dot, like 0.26
 ---@param str string
----@return number|nil, string|nil
+---@return number | nil, string | nil
 ---@nodiscard
 function STRING.cutUnit(str)
     local _s,_e=find(str,'^-?%d+%.?%d*')
@@ -406,7 +406,7 @@ end
 
 ---Get the type of a character
 ---@param c string
----@return 'space'|'word'|'sign'|'other'
+---@return 'space' | 'word' | 'sign' | 'other'
 ---@nodiscard
 function STRING.type(c)
     assert(type(c)=='string' and #c==1,"Need single-charater string")
@@ -674,7 +674,7 @@ end
 
 ---Unpack binary data from string (Zlib+Base64)
 ---@param str string
----@return string|any
+---@return string | any
 ---@nodiscard
 function STRING.unpackBin(str)
     return data.decompress('string','zlib',data.decode('string','base64',str))
@@ -691,7 +691,7 @@ end
 
 ---Unpack text data from string (Gzip+Base64)
 ---@param str string
----@return string|any
+---@return string | any
 ---@nodiscard
 function STRING.unpackText(str)
     return data.decompress('string','gzip',data.decode('string','base64',str))

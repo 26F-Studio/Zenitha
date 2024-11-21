@@ -33,7 +33,7 @@ setmetatable(AE,{
         end
     end,
 })
----@cast AE +fun(params:string):string
+---@cast AE +fun(params:string): string
 ---@cast AE +string
 
 AE._meta={

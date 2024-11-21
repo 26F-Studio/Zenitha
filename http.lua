@@ -11,12 +11,12 @@ local printSend=false
 local printRecv=false
 
 ---@class Zenitha.HttpRequest
----@field body? table|nil|string must be table if given, will be encoded to json
+---@field body? table | string must be table if given, will be encoded to json
 ---@field pool? string default to `'_default'` if not given
----@field method? string|nil default to `'POST'` if body is given, `'GET'` otherwise
----@field headers? table|nil
+---@field method? string default to `'POST'` if body is given, `'GET'` otherwise
+---@field headers? table
 ---@field url? string default to the url set with HTTP.setHost
----@field path? string|nil append to url
+---@field path? string append to url
 ---@field _poolPtr? string internal use only
 ---@field _destroy? true internal use only
 ---@field printSend? true
@@ -193,7 +193,7 @@ function HTTP.getThreadCount()
 end
 
 ---Clear a message pool
----@param pool string|nil pool name
+---@param pool? string pool name
 function HTTP.clearPool(pool)
     if pool==nil then pool='_default' end
     assert(type(pool)=='string',"HTTP.clearPool(pool): Need string|nil")
@@ -211,8 +211,8 @@ function HTTP.deletePool(pool)
 end
 
 ---Poll a message from pool (specified if given)
----@param pool string|nil pool name
----@return table|nil
+---@param pool string | nil pool name
+---@return table?
 function HTTP.pollMsg(pool)
     if pool~=nil and type(pool)~='string' then error("HTTP.pollMsg(pool): Need string|nil") end
     HTTP._update()

@@ -24,7 +24,7 @@ local defaultFont,defaultFallBack
 ---@type table<string, string>
 local fallbackMap={}
 
----@type table<string, {[1]:string,[2]:string}>
+---@type table<string, {[1]:string, [2]:string}>
 local filterMap={}
 
 ---@type love.Font
@@ -75,7 +75,7 @@ end
 FONT.rawset=_rawset
 
 ---Load font(s) from file(s)
----@param name string|string[]|any
+---@param name string | string[] | any
 ---@param path string
 ---@overload fun(map:table<string, string>)
 function FONT.load(name,path)

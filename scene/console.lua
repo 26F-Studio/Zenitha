@@ -571,7 +571,7 @@ local commands={} do
 
     ---Add custom console command
     ---@param name string
-    ---@param cmd function|{code:fun(str:string), description:string, details:string[], builtin:nil}
+    ---@param cmd function | {code:fun(str:string), description:string, details:string[], builtin:nil}
     ---@param hidden? boolean
     function ZENITHA.addConsoleCommand(name,cmd,hidden)
         assert(type(name)=='string',"CMD name need string")

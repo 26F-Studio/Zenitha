@@ -19,7 +19,7 @@ local function log(level,message)
     })
 end
 
----@alias Zenitha.logLevel 'debug'|'info'|'warn'|'error'
+---@alias Zenitha.logLevel 'debug' | 'info' | 'warn' | 'error'
 local logLevelNum={
     debug=15, -- 10~19
     info=25,  -- 20~29
@@ -74,7 +74,7 @@ function LOG._(level,message)
 end
 
 ---Set the minimal level of logs to be printed to console
----@param level Zenitha.logLevel|integer 10~49
+---@param level Zenitha.logLevel | integer 10~49
 function LOG.setShowLevel(level)
     if type(level)=='string' then
         showLevel=logLevelNum[level] or 15

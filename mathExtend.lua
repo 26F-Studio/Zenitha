@@ -25,7 +25,7 @@ end
 
 ---Get a number's sign
 ---@param a number
----@return -1|0|1
+---@return -1 | 0 | 1
 ---@nodiscard
 function MATH.sign(a)
     return a>0 and 1 or a<0 and -1 or 0
@@ -36,8 +36,8 @@ end
 ---@param y number
 ---@param z number
 ---@return number, number, number
----@overload fun(x:number):number
----@overload fun(x:number, y:number):number, number
+---@overload fun(x:number): number
+---@overload fun(x:number, y:number): number, number
 ---@nodiscard
 function MATH.vecAbs(x,y,z)
     if z then
@@ -54,8 +54,8 @@ end
 ---@param y number
 ---@param z number
 ---@return number, number, number
----@overload fun(x:number):number
----@overload fun(x:number, y:number):number, number
+---@overload fun(x:number): number
+---@overload fun(x:number, y:number): number, number
 ---@nodiscard
 function MATH.vecDir(x,y,z)
     if z then
@@ -172,10 +172,10 @@ function MATH.roll(chance)
 end
 
 ---Select random one between a and b (50% - 50%)
----@generic A,B
+---@generic A, B
 ---@param head A
 ---@param tail B
----@return A|B
+---@return A | B
 ---@nodiscard
 function MATH.coin(head,tail)
     if rnd()<.5 then
@@ -451,7 +451,7 @@ function MATH.distance(x1,y1,x2,y2)
 end
 
 ---Get Minkowski distance between two 2D points
----@param p 0|number 0 for Chebyshev distance
+---@param p 0 | number 0 for Chebyshev distance
 ---@param x1 number
 ---@param y1 number
 ---@param x2 number
@@ -466,7 +466,7 @@ function MATH.mDist2(p,x1,y1,x2,y2)
 end
 
 ---Get Minkowski distance between two 3D points
----@param p 0|number 0 for Chebyshev distance
+---@param p 0 | number 0 for Chebyshev distance
 ---@param x1 number
 ---@param y1 number
 ---@param z1 number
@@ -483,7 +483,7 @@ function MATH.mDist3(p,x1,y1,z1,x2,y2,z2)
 end
 
 ---Get Minkowski distance between two vectors
----@param p 0|number 0 for Chebyshev distance
+---@param p 0 | number 0 for Chebyshev distance
 ---@param v1 number[]
 ---@param v2 number[]
 ---@nodiscard

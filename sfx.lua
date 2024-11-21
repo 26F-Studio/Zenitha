@@ -94,7 +94,7 @@ local function loadOne(name,path,lazyLoad)
 end
 
 ---Load SFX name-path pairs
----@overload fun(pathTable:table,lazyLoad?:boolean)
+---@overload fun(pathTable:table, lazyLoad?:boolean)
 ---@param name string
 ---@param path string
 ---@param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
@@ -166,7 +166,7 @@ end
 
 ---Play a sample
 ---@param pack string
----@param ... string|number 0~1 number for volume, big integer and string for tune
+---@param ... string | number 0~1 number for volume, big integer and string for tune
 ---## Example
 ---```lua
 ---SFX.playSample('piano', .7,'C4','E4', .9,'G4')

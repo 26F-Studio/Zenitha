@@ -15,7 +15,7 @@ end
 ---@class Zenitha.BgmObj
 ---@field name string
 ---@field path string
----@field source love.Source|false
+---@field source love.Source | false
 ---@field vol number
 ---@field volChanging boolean
 ---@field pitch number
@@ -44,7 +44,7 @@ local srcLib={}
 ---@type Zenitha.BgmObj[]
 local nowPlay={}
 
----@type false|string|string[]
+---@type false | string | string[]
 local defaultBGM=false
 local maxLoadedCount=3
 local volume=1
@@ -184,7 +184,7 @@ function BGM.getList() return nameList end
 function BGM.getCount() return #nameList end
 
 ---Set the default BGM(s) to play when `BGM.play()` is called without arguments
----@param bgms string|string[]
+---@param bgms string | string[]
 function BGM.setDefault(bgms)
     if type(bgms)=='string' then
         bgms={bgms}
@@ -220,7 +220,7 @@ function BGM.setVol(vol)
 end
 
 ---Load BGM(s) from file(s)
----@param name string|string[]
+---@param name string | string[]
 ---@param path string
 ---@overload fun(map:table<string, string>)
 function BGM.load(name,path)
@@ -237,8 +237,8 @@ end
 
 ---Play BGM(s), stop previous playing BGM(s) if exists
 ---Multi-channel BGMs must be exactly same length, all sources will be set to loop mode
----@param bgms? false|string|string[]
----@param args? string|'-preLoad'|'-noloop'|'-sdin'
+---@param bgms? false | string | string[]
+---@param args? string | '-preLoad' | '-noloop' | '-sdin'
 function BGM.play(bgms,args)
     if not bgms then bgms=defaultBGM end
     if not bgms then return end
@@ -314,7 +314,7 @@ function BGM.play(bgms,args)
 end
 
 ---Stop current playing BGM(s), fade out if time is given
----@param time? nil|number
+---@param time? nil | number
 function BGM.stop(time)
     assert(time==nil or type(time)=='number' and time>=0,"BGM.stop(time): Need >=0")
     if nowPlay[1] then
@@ -335,8 +335,8 @@ function BGM.stop(time)
 end
 
 ---Set (current playing) BGM(s) states
----@param bgms 'all'|string|string[]
----@param mode 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'
+---@param bgms 'all' | string | string[]
+---@param mode 'volume' | 'lowgain' | 'highgain' | 'volume' | 'pitch' | 'seek'
 ---@param ... any
 function BGM.set(bgms,mode,...)
     if type(bgms)=='string' then
@@ -432,7 +432,7 @@ function BGM.isPlaying()
 end
 
 ---Get time of BGM playing now, 0 if not exists
----@return number|0
+---@return number | 0
 function BGM.tell()
     local src=nowPlay[1] and nowPlay[1].source
     if src then
@@ -443,7 +443,7 @@ function BGM.tell()
 end
 
 ---Get duration of BGM playing now, 0 if not exists
----@return number|0
+---@return number | 0
 function BGM.getDuration()
     if nowPlay[1] then
         return nowPlay[1].source:getDuration()

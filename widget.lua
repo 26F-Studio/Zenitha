@@ -1,6 +1,6 @@
 ---@class Zenitha.WidgetArg: table
 ---
----@field type 'text'|'image'|'button'|'button_fill'|'button_invis'|'checkBox'|'switch'|'slider'|'slider_fill'|'slider_progress'|'selector'|'inputBox'|'textBox'|'listBox'|string
+---@field type 'text' | 'image' | 'button' | 'button_fill' | 'button_invis' | 'checkBox' | 'switch' | 'slider' | 'slider_fill' | 'slider_progress' | 'selector' | 'inputBox' | 'textBox' | 'listBox' | string
 ---@field name? string
 ---@field pos? table
 ---
@@ -10,14 +10,14 @@
 ---@field h? number
 ---@field widthLimit? number
 ---
----@field color? Zenitha.ColorStr|Zenitha.Color [text & button & button_fill & checkBox & switch & slider & selector]
----@field text? string|function
+---@field color? Zenitha.ColorStr | Zenitha.Color [text & button & button_fill & checkBox & switch & slider & selector]
+---@field text? string | function
 ---@field fontSize? number
 ---@field fontType? string
----@field image? string|love.Drawable Can use slash-path to read from IMG lib
----@field alignX? 'left'|'right'|'center'
----@field alignY? 'top'|'bottom'|'center'
----@field labelPos? 'left'|'right'|'top'|'bottom' Some widget (like Slider) didn't use 'top'
+---@field image? string | love.Drawable Can use slash-path to read from IMG lib
+---@field alignX? 'left' | 'right' | 'center'
+---@field alignY? 'top' | 'bottom' | 'center'
+---@field labelPos? 'left' | 'right' | 'top' | 'bottom' Some widget (like Slider) didn't use 'top'
 ---@field labelDistance? number
 ---@field disp? function Must return the value that widget should show
 ---@field code? function Called 'When triggered'
@@ -27,11 +27,11 @@
 ---@field lineWidth? number
 ---@field cornerR? number Round corner ratio
 ---
----@field textColor? Zenitha.ColorStr|Zenitha.Color [button & button_fill & slider]
----@field fillColor? Zenitha.ColorStr|Zenitha.Color [switch & slider & slider_progress & inputBox & textBox & listBox]
----@field frameColor? Zenitha.ColorStr|Zenitha.Color [inputBox]
----@field activeColor? Zenitha.ColorStr|Zenitha.Color [textBox & listBox]
----@field idleColor? Zenitha.ColorStr|Zenitha.Color [textBox & listBox]
+---@field textColor? Zenitha.ColorStr | Zenitha.Color [button & button_fill & slider]
+---@field fillColor? Zenitha.ColorStr | Zenitha.Color [switch & slider & slider_progress & inputBox & textBox & listBox]
+---@field frameColor? Zenitha.ColorStr | Zenitha.Color [inputBox]
+---@field activeColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
+---@field idleColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
 ---
 ---@field sound_press? string
 ---@field sound_hover? string
@@ -39,12 +39,12 @@
 ---@field ang? number [image]
 ---@field k? number [image]
 ---
----@field sound_on? string|false [checkBox]
----@field sound_off? string|false [checkBox]
+---@field sound_on? string | false [checkBox]
+---@field sound_off? string | false [checkBox]
 ---
 ---@field axis? {minVal:number, maxVal:number, step?:number} [slider]
 ---@field smooth? boolean Unit point visibility [slider]
----@field valueShow? false|'int'|'float'|'percent'|function Value showing mode or function [called with widgetObj) [slider]
+---@field valueShow? false | 'int' | 'float' | 'percent' | function Value showing mode or function [called with widgetObj) [slider]
 ---@field lineDist? number Outline dist from the bat [slider_fill]
 ---
 ---@field selFontSize? number [selector]
@@ -63,7 +63,7 @@
 ---@field scrollBarPos? number [textBox & listBox]
 ---@field scrollBarWidth? number [textBox & listBox]
 ---@field scrollBarDist? number [textBox & listBox]
----@field scrollBarColor? Zenitha.ColorStr|Zenitha.Color [textBox & listBox]
+---@field scrollBarColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
 ---@field lineHeight? number [textBox & listBox]
 ---
 ---@field yOffset? number [textBox]
@@ -71,7 +71,7 @@
 ---
 ---@field drawFunc? function [listBox]
 ---@field releaseDist? number [listBox]
----@field stencilMode? 'total'|'single'|false [listBox]
+---@field stencilMode? 'total' | 'single' | false [listBox]
 ---@field sound_click? string [listBox]
 ---@field sound_select? string [listBox]
 
@@ -143,29 +143,29 @@ local Widgets={}
 ---@class Zenitha.Widget.base not used by user
 ---@field _widget true
 ---@field type string
----@field name string|false
+---@field name string | false
 ---
----@field color Zenitha.ColorStr|Zenitha.Color
----@field textColor Zenitha.ColorStr|Zenitha.Color
----@field fillColor Zenitha.ColorStr|Zenitha.Color
----@field frameColor Zenitha.ColorStr|Zenitha.Color
----@field activeColor Zenitha.ColorStr|Zenitha.Color
----@field idleColor Zenitha.ColorStr|Zenitha.Color
+---@field color Zenitha.ColorStr | Zenitha.Color
+---@field textColor Zenitha.ColorStr | Zenitha.Color
+---@field fillColor Zenitha.ColorStr | Zenitha.Color
+---@field frameColor Zenitha.ColorStr | Zenitha.Color
+---@field activeColor Zenitha.ColorStr | Zenitha.Color
+---@field idleColor Zenitha.ColorStr | Zenitha.Color
 ---
 ---@field lineWidth number
 ---@field cornerR number
 ---
----@field sound_press string|false
----@field sound_hover string|false
+---@field sound_press string | false
+---@field sound_hover string | false
 ---
----@field _text love.Drawable|false
----@field _image love.Drawable|false
+---@field _text love.Drawable | false
+---@field _image love.Drawable | false
 ---@field _hoverTime number
 ---@field _hoverTimeMax number
 ---@field _pressed boolean
 ---@field _pressTime number
 ---@field _pressTimeMax number
----@field _visible boolean|nil
+---@field _visible boolean | nil
 ---
 ---@field reset function
 ---@field press function
@@ -374,8 +374,8 @@ end
 
 
 ---@class Zenitha.Widget.image: Zenitha.Widget.base
----@field _kx number|false
----@field _ky number|false
+---@field _kx number | false
+---@field _ky number | false
 Widgets.image=setmetatable({
     type='image',
     w=false,h=false,k=false,
@@ -429,7 +429,7 @@ end
 ---@class Zenitha.Widget.button: Zenitha.Widget.base
 ---@field w number
 ---@field h number
----@field sound_trigger string|false
+---@field sound_trigger string | false
 Widgets.button=setmetatable({
     type='button',
     w=40,h=false,
@@ -593,8 +593,8 @@ end
 
 ---@class Zenitha.Widget.checkBox: Zenitha.Widget.base
 ---@field w number
----@field sound_on string|false
----@field sound_off string|false
+---@field sound_on string | false
+---@field sound_off string | false
 Widgets.checkBox=setmetatable({
     type='checkBox',
     w=30,
@@ -802,17 +802,17 @@ end
 
 ---@class Zenitha.Widget.slider: Zenitha.Widget.base
 ---@field w number
----@field valueShow false|'int'|'float'|'percent'|function
+---@field valueShow false | 'int' | 'float' | 'percent' | function
 ---@field numFontSize number
----@field numFontType false|string
----@field sound_drag string|false
+---@field numFontType false | string
+---@field sound_drag string | false
 ---@field soundInterval number
 ---@field soundPitchRange number
 ---@field _showFunc function
 ---@field _pos number
 ---@field _pos0 number
----@field _rangeL number|false
----@field _rangeR number|false
+---@field _rangeL number | false
+---@field _rangeR number | false
 ---@field _rangeWidth number
 ---@field _unit number
 ---@field _smooth boolean
@@ -1284,7 +1284,7 @@ end
 
 ---@class Zenitha.Widget.selector: Zenitha.Widget.base
 ---@field w number
----@field _select number|false
+---@field _select number | false
 ---@field _selText love.Text
 Widgets.selector=setmetatable({
     type='selector',
@@ -1454,10 +1454,10 @@ end
 ---@class Zenitha.Widget.inputBox: Zenitha.Widget.base
 ---@field w number
 ---@field h number
----@field sound_input string|false
----@field sound_bksp string|false
----@field sound_clear string|false
----@field sound_fail string|false
+---@field sound_input string | false
+---@field sound_bksp string | false
+---@field sound_clear string | false
+---@field sound_fail string | false
 Widgets.inputBox=setmetatable({
     type='inputBox',
     keepFocus=true,
@@ -1630,8 +1630,8 @@ end
 ---@class Zenitha.Widget.textBox: Zenitha.Widget.base
 ---@field w number
 ---@field h number
----@field scrollBarColor Zenitha.ColorStr|Zenitha.Color
----@field sound_clear string|false
+---@field scrollBarColor Zenitha.ColorStr | Zenitha.Color
+---@field sound_clear string | false
 ---@field _texts table
 Widgets.textBox=setmetatable({
     type='textBox',
@@ -1827,8 +1827,8 @@ end
 ---@class Zenitha.Widget.listBox: Zenitha.Widget.base
 ---@field w number
 ---@field h number
----@field sound_click string|false
----@field sound_select string|false
+---@field sound_click string | false
+---@field sound_select string | false
 ---@field _list table List of items
 Widgets.listBox=setmetatable({
     type='listBox',
@@ -2089,7 +2089,7 @@ local WIDGET={_prototype=Widgets}
 ---@type Zenitha.Widget.base[]
 WIDGET.active={} -- Table contains all active widgets
 
----@type Zenitha.Widget.base|false
+---@type Zenitha.Widget.base | false
 WIDGET.sel=false -- Selected widget
 
 ---Reset all widgets (called by Zenitha when scene changed and window resized or something)
@@ -2119,13 +2119,13 @@ function WIDGET._setWidgetList(list)
 end
 
 ---Get selected widget
----@return Zenitha.Widget.base|false
+---@return Zenitha.Widget.base | false
 function WIDGET.getSelected()
     return WIDGET.sel
 end
 
----Check if widget W is focused, or check if any widget is focused if given false|nil
----@param W? Zenitha.Widget.base|false
+---Check if widget W is focused, or check if any widget is focused if false or nil were given
+---@param W? Zenitha.Widget.base | false
 ---@return boolean
 function WIDGET.isFocus(W)
     if W then
@@ -2137,7 +2137,7 @@ end
 
 ---Focus widget W
 ---@param W Zenitha.Widget.base
----@param reason? 'init'|'press'|'move'|'release'
+---@param reason? 'init' | 'press' | 'move' | 'release'
 function WIDGET.focus(W,reason)
     if WIDGET.sel==W then return end
     if W.sound_hover then
@@ -2180,7 +2180,7 @@ end
 ---Update widget states with cursor move event (called by Zenitha)
 ---@param x number
 ---@param y number
----@param reason 'init'|'press'|'move'|'release'
+---@param reason 'init' | 'press' | 'move' | 'release'
 function WIDGET._cursorMove(x,y,reason)
     for _,W in next,WIDGET.active do
         if W._visible and W:isAbove(x,y+SCN.curScroll) then
@@ -2196,7 +2196,7 @@ end
 ---Update widget states with press event (called by Zenitha)
 ---@param x number
 ---@param y number
----@param k number|lightuserdata|any
+---@param k number | lightuserdata | any
 function WIDGET._press(x,y,k)
     WIDGET._cursorMove(x,y,'press')
     local W=WIDGET.sel
@@ -2216,7 +2216,7 @@ end
 ---Update widget states with release event (called by Zenitha)
 ---@param x number
 ---@param y number
----@param k number|lightuserdata|any
+---@param k number | lightuserdata | any
 function WIDGET._release(x,y,k)
     if WIDGET.sel then
         WIDGET.sel:release(x,y+SCN.curScroll,k)

@@ -50,7 +50,7 @@ end
 
 ---Get the time remaining of a lock, false if not locked or expired
 ---@param name any
----@return number|false
+---@return number | false
 function TASK.getLock(name)
     local v=locks[name]-timer()
     return v>0 and v

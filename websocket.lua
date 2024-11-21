@@ -28,7 +28,7 @@ local defaultPath='/'
 ---@field sleepInterval? number default to 0.26
 ---@field pingInterval? number default to 6
 
----@alias Zenitha.WebSocket.state 'connecting'|'running'|'dead'
+---@alias Zenitha.WebSocket.state 'connecting' | 'running' | 'dead'
 
 ---@class Zenitha.WebSocket
 ---@field host string
@@ -119,7 +119,7 @@ function WS:connect()
     return true
 end
 
----@param name 'connTimeout'|'pongTimeout'|'sleepInterval'|'pingInterval'
+---@param name 'connTimeout' | 'pongTimeout' | 'sleepInterval' | 'pingInterval'
 ---@param value any
 function WS:conf(name,value)
     assert(type(value)=='number','WS:confTime(name,time): time must be number')

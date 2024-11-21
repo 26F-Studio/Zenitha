@@ -1,4 +1,4 @@
----@type string|false
+---@type string | false
 local defaultLang=false
 local maxLangLoaded=3
 local langLoaded={}
@@ -96,7 +96,7 @@ local textFuncs=setmetatable({},{
 ---
 ---You can use LANG('key') instead of LANG.getTextFunc('key')
 ---@param key string
----@return fun():string
+---@return fun(): string
 function LANG.getTextFunc(key)
     return textFuncs[key]
 end

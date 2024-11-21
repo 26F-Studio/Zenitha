@@ -16,14 +16,14 @@ end
 ---@field k? number
 ---@field kx? number
 ---@field ky? number
----@field align? Zenitha.TextAlignMode|{[1]:number, [2]:number}
+---@field align? Zenitha.TextAlignMode | {[1]:number, [2]:number}
 ---@field r? number
 ---@field g? number
 ---@field b? number
 ---@field a? number
----@field color? number[]|Zenitha.ColorStr
+---@field color? number[] | Zenitha.ColorStr
 ---@field fontSize? number
----@field fontType? string|nil
+---@field fontType? string
 ---@field duration? number
 ---@field inPoint? number
 ---@field outPoint? number
