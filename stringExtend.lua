@@ -233,13 +233,13 @@ end
 ---end
 ---```
 ---@param str string
----@param keep? boolean | number `nil`:all leading spaces  `true`: starting N chars match line#1's leading spaces  `number` number of chars to be trimmed
+---@param keep? boolean | number Max number of leading spaces to be trimmed: `nil`- all  `number` - as you want  `true` - same with line#1
 ---@return string
 ---@nodiscard
 function STRING.trimIndent(str,keep)
     if keep then
         local list=STRING.split(str,'\n')
-        local s=type(keep)=='number' and keep+1 or #list[1]:match('^%s*')+1
+        local s=keep==nil and 1e99 or type(keep)=='number' and keep+1 or #list[1]:match('^%s*')+1
         if s==1 then return str end
 
         for i=1,#list do
