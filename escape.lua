@@ -48,17 +48,36 @@ AE._meta={
     __metatable=true,
 }
 local function wrap(rawStr) return setmetatable({'\27['..rawStr..'m',ae=true},AE._meta) end
-AE.r=wrap'0' -- not necessary tho
-AE.b=wrap'1' -- may be implemented as "colored", not really "bold"
-AE.i=wrap'3'
-AE.u=wrap'4'
-AE.f=wrap'5' -- may not be implemented
-AE.v=wrap'7'
-AE.d=wrap'9'
-AE.bi=wrap'1;3' AE.bu=wrap'1;4' AE.iu=wrap'3;4'
-AE._R=wrap'91' AE._G=wrap'92' AE._Y=wrap'93' AE._B=wrap'94' AE._M=wrap'95' AE._C=wrap'96'
-AE._r=wrap'31' AE._g=wrap'32' AE._y=wrap'33' AE._b=wrap'34' AE._m=wrap'35' AE._c=wrap'36'
-AE._D=wrap'30' AE._d=wrap'90' AE._l=wrap'37' AE._L=wrap'97'
+
+AE.r=wrap'0' -- reset, not necessary tho
+AE.b=wrap'1' -- bold, may be implemented as "colored", not really "bold"
+AE.i=wrap'3' -- italic
+AE.u=wrap'4' -- underline
+AE.f=wrap'5' -- flashing, may not be implemented
+AE.v=wrap'7' -- reverse foreground and background color
+AE.s=wrap'9' -- strikethrough
+AE.bi=wrap'1;3' -- bold and italic
+AE.bu=wrap'1;4' -- bold and underline
+AE.iu=wrap'3;4' -- italic and underline
+
+-- All colors start with _
+
+AE._R=wrap'91' -- Light Red
+AE._G=wrap'92' -- Light Green
+AE._Y=wrap'93' -- Light Yellow
+AE._B=wrap'94' -- Light Blue
+AE._M=wrap'95' -- Light Magenta
+AE._C=wrap'96' -- Light Cyan
+AE._r=wrap'31' -- Red
+AE._g=wrap'32' -- Green
+AE._y=wrap'33' -- Yellow
+AE._b=wrap'34' -- Blue
+AE._m=wrap'35' -- Magenta
+AE._c=wrap'36' -- Cyan
+AE._D=wrap'30' -- Dark (1/4 brightness)
+AE._d=wrap'90' -- dark (2/4 brightness)
+AE._l=wrap'37' -- light (3/4 brightness)
+AE._L=wrap'97' -- Light (4/4 brightness)
 
 local colorNum={
     _R='91',_G='92',_Y='93',_B='94',_M='95',_C='96',
