@@ -29,7 +29,7 @@ setmetatable(AE,{
     -- Shortcut RGB5 color
     __index=function(_,k)
         if type(k)=='number' then
-            return '\27[38;5;'..(16+36*floor(k/100)+6*floor(k/10)%10+k%10)..'m'
+            return '\27[38;5;'..(16+floor(k/100)*36+floor(k/10)%10*6+k%10)..'m'
         end
     end,
 })
