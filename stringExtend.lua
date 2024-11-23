@@ -233,7 +233,7 @@ end
 ---end
 ---```
 ---@param str string
----@param keep? boolean | number `true`: keep some indent based on 1st line; [number] trim specific number of spaces
+---@param keep? boolean | number `nil`:all leading spaces  `true`: starting N chars match line#1's leading spaces  `number` number of chars to be trimmed
 ---@return string
 ---@nodiscard
 function STRING.trimIndent(str,keep)
