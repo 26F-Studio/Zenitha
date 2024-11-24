@@ -1,11 +1,17 @@
 -- Create ANSI escape code easier
 --[[
+Note:
+    There's a Lua feature: calling function with only one string or table argument doesn't need parentheses
+    Therefore, these are equivalent:
+        print("hello")  &  print"hello"
+        table.concat({"tech","mino"})  &  table.concant{"tech","mino"}
+    To make the result code shorter, I'll use this in the example below.
+
 Usage:
-    str..AE -- reset format
+    AE.i"str" -- apply format to a string and reset
+    AE.i.."str"..AE -- apply format then reset
+    AE[520].."str" -- apply custom RGB5 color
     AE'b;i;u;f;d;_R'.."str" -- parse format
-    AE[520].."str" -- custom RGB5 color
-    AE.i.."str" -- apply format
-    AE.i"str" -- apply format and reset
 
 Example:
     print(AE.i"italic (call include reset)")
