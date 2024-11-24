@@ -42,7 +42,35 @@ setmetatable(AE,{
 ---@cast AE +fun(params:string): string
 ---@cast AE +string
 
+-- metatable for cursor control
 AE._meta={
+    __concat=function(a,b) return a.ae and a[1]..b or a..b[1] end,
+    __index=function(self,num) return '\27['..num..self[2] end,
+    __call=function(self,n1,n2)
+        if n2 then
+            return '\27['..n1..","..n2..self[2]
+        else
+            return '\27['..n1..self[2]
+        end
+    end,
+    __metatable=true,
+}
+local function wrap(rawStr) return setmetatable({'\27['..rawStr..'m',rawStr,ae=true},AE._meta) end
+
+AE.U=wrap'A' -- Move cursor <N=1> up
+AE.D=wrap'B' -- Move cursor <N=1> down
+AE.R=wrap'C' -- Move cursor <N=1> right
+AE.L=wrap'D' -- Move cursor <N=1> left
+AE.NL=wrap'E' -- Move cursor to next <N=1> line
+AE.PL=wrap'F' -- Move cursor to previous <N=1> line
+AE.POS=wrap'H' -- Move cursor to position <N1=1>, <N2=1>
+AE.ED=wrap'J' -- Clear screen (<N=0>: 0 = from cursor to end, 1 = from cursor to start, 2 = all, 3 = all and buffer)
+AE.EL=wrap'K' -- Clear line (<N=0>: 0 = to line end, 1 = to line start, 2 = all)
+AE.SAVE=wrap's' -- Save cursor position (may not implemented, private sequences)
+AE.LOAD=wrap'u' -- Load cursor position (may not implemented, private sequences)
+
+-- metatable for rendering
+AE._metaM={
     __concat=function(a,b) return a.ae and a[1]..b or a..b[1] end,
     __call=function(self,str)
         if sub(str,-4)=='\27[0m' then
@@ -53,37 +81,37 @@ AE._meta={
     end,
     __metatable=true,
 }
-local function wrap(rawStr) return setmetatable({'\27['..rawStr..'m',ae=true},AE._meta) end
+local function mWrap(rawStr) return setmetatable({'\27['..rawStr..'m',ae=true},AE._metaM) end
 
-AE.r=wrap'0' -- reset, not necessary tho
-AE.b=wrap'1' -- bold, may be implemented as "colored", not really "bold"
-AE.i=wrap'3' -- italic
-AE.u=wrap'4' -- underline
-AE.f=wrap'5' -- flashing, may not be implemented
-AE.v=wrap'7' -- reverse foreground and background color
-AE.s=wrap'9' -- strikethrough
-AE.bi=wrap'1;3' -- bold and italic
-AE.bu=wrap'1;4' -- bold and underline
-AE.iu=wrap'3;4' -- italic and underline
+AE.r=mWrap'0' -- reset, not necessary tho
+AE.b=mWrap'1' -- bold, may be implemented as "colored", not really "bold"
+AE.i=mWrap'3' -- italic
+AE.u=mWrap'4' -- underline
+AE.f=mWrap'5' -- flashing, may not be implemented
+AE.v=mWrap'7' -- reverse foreground and background color
+AE.s=mWrap'9' -- strikethrough
+AE.bi=mWrap'1;3' -- bold and italic
+AE.bu=mWrap'1;4' -- bold and underline
+AE.iu=mWrap'3;4' -- italic and underline
 
 -- All colors start with _
 
-AE._R=wrap'91' -- Light Red
-AE._G=wrap'92' -- Light Green
-AE._Y=wrap'93' -- Light Yellow
-AE._B=wrap'94' -- Light Blue
-AE._M=wrap'95' -- Light Magenta
-AE._C=wrap'96' -- Light Cyan
-AE._r=wrap'31' -- Red
-AE._g=wrap'32' -- Green
-AE._y=wrap'33' -- Yellow
-AE._b=wrap'34' -- Blue
-AE._m=wrap'35' -- Magenta
-AE._c=wrap'36' -- Cyan
-AE._D=wrap'30' -- Dark (1/4 brightness)
-AE._d=wrap'90' -- dark (2/4 brightness)
-AE._l=wrap'37' -- light (3/4 brightness)
-AE._L=wrap'97' -- Light (4/4 brightness)
+AE._R=mWrap'91' -- Light Red
+AE._G=mWrap'92' -- Light Green
+AE._Y=mWrap'93' -- Light Yellow
+AE._B=mWrap'94' -- Light Blue
+AE._M=mWrap'95' -- Light Magenta
+AE._C=mWrap'96' -- Light Cyan
+AE._r=mWrap'31' -- Red
+AE._g=mWrap'32' -- Green
+AE._y=mWrap'33' -- Yellow
+AE._b=mWrap'34' -- Blue
+AE._m=mWrap'35' -- Magenta
+AE._c=mWrap'36' -- Cyan
+AE._D=mWrap'30' -- Dark (1/4 brightness)
+AE._d=mWrap'90' -- dark (2/4 brightness)
+AE._l=mWrap'37' -- light (3/4 brightness)
+AE._L=mWrap'97' -- Light (4/4 brightness)
 
 local colorNum={
     _R='91',_G='92',_Y='93',_B='94',_M='95',_C='96',
