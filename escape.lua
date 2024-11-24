@@ -21,6 +21,7 @@ Example:
     print(AE'd;_Y'.."reset, delete, yellow")
 ]]
 
+local type=type
 local floor=math.floor
 local find,match=string.find,string.match
 local sub,gsub=string.sub,string.gsub
@@ -44,18 +45,18 @@ setmetatable(AE,{
 
 -- metatable for cursor control
 AE._meta={
-    __concat=function(a,b) return a.ae and a[1]..b or a..b[1] end,
-    __index=function(self,num) return '\27['..num..self[2] end,
+    __concat=function(a,b) return type(a)=='table' and a.ae and a.data..b or a..b.data end,
+    __index=function(self,num) return '\27['..num..self.raw end,
     __call=function(self,n1,n2)
         if n2 then
-            return '\27['..n1..","..n2..self[2]
+            return '\27['..n1..","..n2..self.raw
         else
-            return '\27['..n1..self[2]
+            return '\27['..n1..self.raw
         end
     end,
     __metatable=true,
 }
-local function wrap(rawStr) return setmetatable({'\27['..rawStr..'m',rawStr,ae=true},AE._meta) end
+local function wrap(rawStr) return setmetatable({data='\27['..rawStr,raw=rawStr,ae=true},AE._meta) end
 
 AE.U=wrap'A' -- Move cursor <N=1> up
 AE.D=wrap'B' -- Move cursor <N=1> down
@@ -71,17 +72,17 @@ AE.LOAD=wrap'u' -- Load cursor position (may not implemented, private sequences)
 
 -- metatable for rendering
 AE._metaM={
-    __concat=function(a,b) return a.ae and a[1]..b or a..b[1] end,
+    __concat=function(a,b) return type(a)=='table' and a.ae and a.data..b or a..b.data end,
     __call=function(self,str)
         if sub(str,-4)=='\27[0m' then
-            return self[1]..str
+            return self.data..str
         else
-            return self[1]..str..'\27[0m'
+            return self.data..str..'\27[0m'
         end
     end,
     __metatable=true,
 }
-local function mWrap(rawStr) return setmetatable({'\27['..rawStr..'m',ae=true},AE._metaM) end
+local function mWrap(rawStr) return setmetatable({data='\27['..rawStr..'m',raw=rawStr,ae=true},AE._metaM) end
 
 AE.r=mWrap'0' -- reset, not necessary tho
 AE.b=mWrap'1' -- bold, may be implemented as "colored", not really "bold"
