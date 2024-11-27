@@ -33,6 +33,7 @@ function scene.keyDown(key,isRep)
             MSG('info',backCounter,2.6)
         end
     end
+    return true
 end
 function scene.keyUp(key)
     _push{COLOR.LD,"[keyUp] <"..key..">"}
@@ -44,6 +45,7 @@ end
 function scene.mouseDown(x,y,k)
     SYSFX.rect(2,x-10,y-10,20,20)
     _push(("[mouseDown] <%d: %d, %d>"):format(k,x,y))
+    return true
 end
 function scene.mouseMove(x,y)
     SYSFX.rect(2,x-3,y-3,6,6)
@@ -70,6 +72,7 @@ function scene.touchUp(x,y)
 end
 function scene.wheelMove(dx,dy)
     _push(("[wheelMove] <%d, %d>"):format(dx,dy))
+    return true
 end
 function scene.fileDrop(file)
     _push(("[fileDrop] <%s>"):format(file:getFilename()))
