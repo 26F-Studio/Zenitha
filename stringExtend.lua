@@ -28,8 +28,7 @@ function STRING.install()
     end
 end
 
----Install `str[n]` and `str[n]="c"` syntax.
----The editted string will be stored into STRING._
+---Install `str[n]` and `str[n]="c"` syntax. The editted string will be stored into STRING._
 ---
 ---Notice that `str[n]="ccc"` will removed the n-th character then put "ccc" into it, changing string length
 ---
@@ -51,12 +50,10 @@ function STRING.installIndex()
 end
 
 ---Install stringPath syntax. Warning: conflict with normal auto-tonumber operation
----`\- "script/main.lua"` Get the file name from path
 ---
+---`- "script/main.lua"` Get the file name from path  
 ---`"script" / "main.lua"` Combine folder and file name
----
 ---`"script/main.lua" - n` Get the level n directory name
----
 ---`"script/main.lua" % "lua,js"` Check if the file match the postfix
 function STRING.installPath()
     function STRING.installPath() error("STRING.installPath: Attempt to install stringPath syntax twice") end
@@ -223,7 +220,7 @@ function STRING.count(str,regex)
 end
 
 ---Trim spaces and tabs at the beginning of all lines, useful for inline multi-line strings
----## Example
+---### Example
 ---```lua
 ---do
 ---    local s=STRING.trimIndent[=[
@@ -389,7 +386,7 @@ function STRING.fileSize(s)
     end
 end
 
----Warning: don't support number format like .26, must have digits before the dot, like 0.26
+---**Warning:** don't support number format like .26, must have digits before the dot, like 0.26
 ---@param str string
 ---@return number | nil, string | nil
 ---@nodiscard
@@ -648,7 +645,7 @@ function STRING.readChars(str,n)
 end
 
 ---Shorten a path by cutting off long directory name
----## Example
+---### Example
 ---```lua
 ---STRING.simplifyPath('Documents/Project/xxx.lua') --> 'D/P/xxx.lua'
 ---STRING.simplifyPath('Documents/Project/xxx.lua',3) --> 'Doc/Pro/xxx.lua'

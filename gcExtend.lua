@@ -434,10 +434,8 @@ local gc_stencil,gc_setStencilTest=gc.stencil,gc.setStencilTest
 
 local stc_action,stc_value='replace',1
 
----Reset stencil states, set default stencil states:
----
----draw: 'replace', 1
----
+---Reset stencil states, set default stencil states:  
+---draw: 'replace', 1  
 ---test: 'equal', 1
 function GC.stc_reset()
     stc_action,stc_value='replace',1
@@ -680,7 +678,7 @@ do -- function GC.load(L), GC.execute(t)
     ---
     ---See commands list by going to declaration of this function, then scroll up.
     ---@param t Zenitha.drawingCommand[]
-    ---## Example
+    ---### Example
     ---```lua
     ---GC.execute{
     ---    {'setCL',1,0,0},
@@ -694,7 +692,7 @@ do -- function GC.load(L), GC.execute(t)
     local sizeLimit=gc.getSystemLimits().texturesize
     ---Similar to GC.execute, but draw on a canvas.
     ---@param list {w:number, h:number, [number]:Zenitha.drawingCommand}
-    ---## Example
+    ---### Example
     ---```lua
     ---GC.load{w=100,h=100 -- size of canvas
     ---    {'setCL',1,0,0},

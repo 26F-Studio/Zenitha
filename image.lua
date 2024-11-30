@@ -43,7 +43,7 @@ end
 
 ---Initialize IMG lib (only once)
 ---@param imgTable Map<string | table>
----## Example
+---### Example
 ---```lua
 ---IMG.init{
 ---    image1='.../image1.jpg',

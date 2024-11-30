@@ -92,7 +92,7 @@ local textFuncs=setmetatable({},{
     end,
 })
 
----Get a text-getting function.
+---Get a text-getting function, useful on UI texts i18n
 ---
 ---You can use LANG('key') instead of LANG.getTextFunc('key')
 ---@param key string

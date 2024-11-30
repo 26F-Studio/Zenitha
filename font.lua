@@ -92,7 +92,7 @@ end
 
 ---Get font object with font size, use default font name if not given
 ---
----Warning: any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
+---**Warning:** any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
 ---@param size number
 ---@param name? string
 ---@return love.Font
@@ -121,7 +121,7 @@ FONT.get=_get
 
 ---Set font with font size, use default font name if not given
 ---
----Warning: any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
+---**Warning:** any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
 ---@param size number
 ---@param name? string
 local function _set(size,name)

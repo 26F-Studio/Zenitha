@@ -1484,7 +1484,6 @@ end
 ---Set the updating rate of the application
 ---
 ---Default value is 100(%), all updating will be called every main loop cycle
----
 ---If set to 50(%), all *.update(dt) will be called every 2 main loop cycle
 ---@param rate number in [0,100]
 function ZENITHA.setUpdateFreq(rate)

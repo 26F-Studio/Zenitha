@@ -12,6 +12,9 @@ for k,v in next,table do TABLE[k]=v end
 -- Builder
 
 ---Create a new filled table
+---
+---You can also use `table.new` from luajit:  
+---https://luajit.org/extensions.html
 ---@generic T
 ---@param val T value to fill
 ---@param count number how many elements
@@ -353,6 +356,9 @@ function TABLE.clear(t)
 end
 
 ---Clear all table
+---
+---You can also use `table.clear` from luajit:  
+---https://luajit.org/extensions.html
 ---@param t table
 function TABLE.clearAll(t)
     for k in next,t do
@@ -460,7 +466,7 @@ function TABLE.shuffle(org)
 end
 
 ---Re-index string value as key
----## Example
+---### Example
 ---```lua
 ---local t={a=print,b='a'}
 ---TABLE.reIndex(t)
@@ -476,7 +482,7 @@ function TABLE.reIndex(org)
 end
 
 ---Flatten a nested table to a flat table (no table type value included)
----## Example
+---### Example
 ---```lua
 ---local T={a=1,b={c=2},d={e={f=3}}}
 ---TABLE.flatten(T)

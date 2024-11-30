@@ -30,9 +30,8 @@ function SFX.getTuneHeight(tune)
     end
 end
 
----Get note name with note number (start from 0, like midi)
----
----0 --> ' C1'
+---Get note name with note number (start from 0, like midi)  
+---0 --> ' C1'  
 ---12 --> 'C2'
 ---@param note number Note number, start from 0
 ---@return string Note name, e.g. `'C4'`
@@ -125,7 +124,7 @@ end
 
 ---Load SFX samples from specified directory
 ---@param pack {name:string, path:string, base:string}
----## Example
+---### Example
 ---```lua
 ---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
 ---```
@@ -167,7 +166,7 @@ end
 ---Play a sample
 ---@param pack string
 ---@param ... string | number 0~1 number for volume, big integer and string for tune
----## Example
+---### Example
 ---```lua
 ---SFX.playSample('piano', .7,'C4','E4', .9,'G4')
 ---```

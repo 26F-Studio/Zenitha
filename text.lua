@@ -147,7 +147,7 @@ local alignModes={
 }
 ---Add text to container
 ---@param data Zenitha.TextAnimArg
----## Example
+---### Example
 ---```lua
 ---default={
 ---    text="Example Text",

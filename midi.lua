@@ -53,7 +53,7 @@ local read=STRING.readChars
 ---@param sData string
 ---@param handler fun(event: Zenitha.MIDI.Event)
 ---@return Zenitha.MIDI
----## Example
+---### Example
 ---```lua
 ---MIDI.newSong(FILE.load("music.mid"),function(event)
 ---    if event.name=='NoteStart' then
