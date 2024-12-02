@@ -274,13 +274,13 @@ function Widgets.base:reset(init)
     assert(not self.sound_press or type(self.sound_press)=='string',"[widget].sound_press need string")
     assert(not self.sound_hover or type(self.sound_hover)=='string',"[widget].sound_hover need string")
 
-    self._text=self.text or self.name and ("["..self.name.."]")
-    if self._text then
-        if type(self._text)=='function' then
-            self._text=self._text()
+    local content=self.text or self.name and ("["..self.name.."]")
+    if content then
+        if type(content)=='function' then
+            content=content()
         end
-        assert(type(self._text)=='string',"[widget].text need string|fun():string")
-        self._text=GC.newText(getFont(self.fontSize,self.fontType),self._text)
+        assert(type(content)=='string',"[widget].text need string|fun():string")
+        self._text=GC.newText(getFont(self.fontSize,self.fontType),content)
     else
         self._text=PAPER
     end
@@ -416,7 +416,7 @@ function Widgets.image:reset(init)
 end
 function Widgets.image:setImage(_img)
     self.image=_img
-    self:reset(init)
+    self:reset(false)
 end
 function Widgets.image:draw()
     if self._image then

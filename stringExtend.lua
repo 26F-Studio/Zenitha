@@ -107,7 +107,7 @@ end
 ---Paste new string into original string, won't exceed the length of original string
 ---@param str string
 ---@param str2 string
----@param pos number
+---@param pos integer
 ---@return string
 ---@nodiscard
 function STRING.paste(str,str2,pos)
@@ -155,6 +155,80 @@ local unshiftMap={
 function STRING.unshift(str)
     return unshiftMap[str] or lower(str)
 end
+
+local utf8=require'utf8'
+
+---Simple utf8 coding
+---@param num integer
+---@return string
+---@nodiscard
+function STRING.UTF8(num)
+    assertf(type(num)=='number',"Wrong type (%s)",type(num))
+    assertf(num>=0 and num<2^31,"Out of range (%d)",num)
+    -- if     num<2^7  then return char(num)
+    -- elseif num<2^11 then return char(192+floor(num/2^06),128+num%2^6)
+    -- elseif num<2^16 then return char(224+floor(num/2^12),128+floor(num/2^06)%2^6,128+num%2^6)
+    if num<0x10ffff then return utf8.char(num)
+    elseif num<2^21 then return char(240+floor(num/2^18),128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
+    elseif num<2^26 then return char(248+floor(num/2^24),128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
+    else                 return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
+    end
+end
+
+---Get the (unicode) char count of (part of) a utf8 string
+---@param str string an utf8 string
+---@param i? integer start byte (cannot start from middle of a char)
+---@param j? integer end byte
+---@param lax? boolean
+---@nodiscard
+---@diagnostic disable-next-line
+function STRING.u8len(str,i,j,lax) end
+STRING.u8len=utf8[('len')]
+
+---Get a utf8 string with codepoint numbers
+---@param ... integer
+---@return string
+---@nodiscard
+---@diagnostic disable-next-line
+function STRING.u8char(...) end
+STRING.u8char=utf8[('char')]
+
+---Get the codepoint(s) of a utf8 string
+---@param str string
+---@param i? integer start byte (cannot start from middle of a char)
+---@param j? integer end byte
+---@param lax? boolean
+---@return integer ...
+---@nodiscard
+---@diagnostic disable-next-line
+function STRING.u8byte(str,i,j,lax) end
+STRING.u8byte=utf8[('codepoint')]
+
+---Get the end byte of `n` characters starting from `i` byte
+---@param str string
+---@param n integer char count
+---@param i? integer start byte
+---@return integer p end byte
+---@nodiscard
+---@diagnostic disable-next-line
+function STRING.u8offset(str,n,i) end
+STRING.u8offset=utf8[('offset')]
+
+---Get a char iterator function of a utf8 string, similar to `str:gmatch('.')`
+---
+--- ```lua
+--- for bytePos,codepoint in STRING.u8codes(str) do
+---    -- code here
+--- end
+---@param str string
+---@param lax? boolean
+---@return fun(s:string, p:integer): integer,integer
+---@diagnostic disable-next-line
+function STRING.u8codes(str,lax) end
+STRING.u8codes=utf8[('codes')]
+
+---Matches exactly one UTF-8 byte sequence, assuming that the subject is a valid UTF-8 string
+STRING.u8pattern="[\0-\x7F\xC2-\xFD][\x80-\xBF]*"
 
 local upperData,lowerData,diaData -- Data is filled later in this file
 
@@ -213,7 +287,7 @@ end
 ---Count the number of occurrences of a regex pattern in a string
 ---@param str string
 ---@param regex string
----@return number
+---@return integer
 ---@nodiscard
 function STRING.count(str,regex)
     local _,count=gsub(str,regex,'')
@@ -231,7 +305,7 @@ end
 ---end
 ---```
 ---@param str string
----@param keep? boolean | number Max number of leading spaces to be trimmed: `nil`- all  `number` - as you want  `true` - same with line#1
+---@param keep? boolean | integer Max number of leading spaces to be trimmed: `nil`- all  `number` - as you want  `true` - same with line#1
 ---@return string
 ---@nodiscard
 function STRING.trimIndent(str,keep)
@@ -313,7 +387,7 @@ end
 ---Calculate the edit distance between two strings
 ---@param s1 string
 ---@param s2 string
----@return number
+---@return integer
 ---@nodiscard
 function STRING.editDist(s1,s2) -- By Copilot
     local len1,len2=#s1,#s2
@@ -389,7 +463,7 @@ end
 
 ---**Warning:** don't support number format like .26, must have digits before the dot, like 0.26
 ---@param str string
----@return number | nil, string | nil
+---@return integer | nil, string | nil
 ---@nodiscard
 function STRING.cutUnit(str)
     local _s,_e=find(str,'^-?%d+%.?%d*')
@@ -424,22 +498,6 @@ end
 ---@type string[]
 STRING.base64={} for c in gmatch('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/','.') do
     table.insert(STRING.base64,c)
-end
-
----Simple utf8 coding
----@param num number
----@return string
----@nodiscard
-function STRING.UTF8(num)
-    assertf(type(num)=='number',"Wrong type (%s)",type(num))
-    assertf(num>=0 and num<2^31,"Out of range (%d)",num)
-    if     num<2^7  then return char(num)
-    elseif num<2^11 then return char(192+floor(num/2^06),128+num%2^6)
-    elseif num<2^16 then return char(224+floor(num/2^12),128+floor(num/2^06)%2^6,128+num%2^6)
-    elseif num<2^21 then return char(240+floor(num/2^18),128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
-    elseif num<2^26 then return char(248+floor(num/2^24),128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
-    else                 return char(252+floor(num/2^30),128+floor(num/2^24)%2^6,128+floor(num/2^18)%2^6,128+floor(num/2^12)%2^6,128+floor(num/2^06)%2^6,128+num%2^6)
-    end
 end
 
 ---Parse binary number from string
@@ -484,7 +542,7 @@ end
 
 ---Convert a number to binary string
 ---@param num number
----@param len? number
+---@param len? integer
 ---@return string
 ---@nodiscard
 function STRING.toBin(num,len)
@@ -498,7 +556,7 @@ end
 
 ---Convert a number to octal string
 ---@param num number
----@param len? number
+---@param len? integer
 ---@return string
 ---@nodiscard
 function STRING.toOct(num,len)
@@ -515,7 +573,7 @@ b16[0]='0'
 
 ---Convert an integer to hexadecimal string
 ---@param num number
----@param len? number
+---@param len? integer
 ---@return string
 ---@nodiscard
 function STRING.toHex(num,len)
@@ -587,8 +645,8 @@ end
 
 ---Return 16 byte string. Not powerful hash, just simply protect the original text
 ---@param text string
----@param seedRange? number default to 26
----@param seed? number default to 0
+---@param seedRange? integer default to 26
+---@param seed? integer default to 0
 ---@return string
 ---@nodiscard
 function STRING.digezt(text,seedRange,seed)
@@ -628,7 +686,7 @@ end
 
 ---Cut n bytes off a string
 ---@param str string
----@param n number
+---@param n integer
 ---@return string, string #`n` bytes, and the rest of string
 ---@nodiscard
 function STRING.readChars(str,n)
@@ -642,7 +700,7 @@ end
 ---STRING.simplifyPath('Documents/Project/xxx.lua',3) --> 'Doc/Pro/xxx.lua'
 ---```
 ---@param path string
----@param len? number default to 1
+---@param len? integer default to 1
 ---@return string
 ---@nodiscard
 function STRING.simplifyPath(path,len)

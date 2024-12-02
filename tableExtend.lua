@@ -17,7 +17,7 @@ for k,v in next,table do TABLE[k]=v end
 ---https://luajit.org/extensions.html
 ---@generic T
 ---@param val T value to fill
----@param count number how many elements
+---@param count integer how many elements
 ---@return T[]
 ---@nodiscard
 function TABLE.new(val,count)
@@ -28,11 +28,22 @@ function TABLE.new(val,count)
     return L
 end
 
+---Create a new table with specific size allocated
+---
+---Fallback to `return {}` if failed to require `table.new`
+---@param nArray? integer the size of "list part" of the table
+---@param nHash? integer the size of "hash part" of the table
+---@return table
+---@nodiscard
+---@diagnostic disable-next-line
+function TABLE.newSize(nArray,nHash) return {} end
+pcall(function() TABLE[('newSize')]=require'table.new' end)
+
 ---Create a new filled matrix
 ---@generic T
 ---@param val T value to fill
----@param height number
----@param width number
+---@param height integer
+---@param width integer
 ---@return Mat<T>
 ---@nodiscard
 function TABLE.newMat(val,height,width)
@@ -51,8 +62,8 @@ end
 ---leave `start&stop` as `nil` will simply copy
 ---@generic T
 ---@param org T original table
----@param start? number start pos (default 1)
----@param stop? number end pos (default #org)
+---@param start? integer start pos (default 1)
+---@param stop? integer end pos (default #org)
 ---@return T
 ---@nodiscard
 function TABLE.sub(org,start,stop)
@@ -67,7 +78,7 @@ end
 ---Create a copy of [1~#] elements
 ---@generic T
 ---@param org T original table
----@param depth? number how many layers will be recreate, default to inf
+---@param depth? integer how many layers will be recreate, default to inf
 ---@return T
 ---@nodiscard
 function TABLE.copy(org,depth)
@@ -86,7 +97,7 @@ end
 ---Create a full copy of org, depth = how many layers will be recreate, default to inf
 ---@generic T
 ---@param org T original table
----@param depth? number how many layers will be recreate, default to inf
+---@param depth? integer how many layers will be recreate, default to inf
 ---@return T
 ---@nodiscard
 function TABLE.copyAll(org,depth)
@@ -303,7 +314,7 @@ end
 ---Update old table with new table (recursive when both table type and below specifiled depth)
 ---@param new table
 ---@param old table
----@param depth? number how many layer will be entered, default to inf
+---@param depth? integer how many layer will be entered, default to inf
 function TABLE.update(old,new,depth)
     if not depth then depth=1e99 end
     for k,v in next,new do
@@ -506,7 +517,7 @@ end
 ---]]
 ---```
 ---@param org table
----@param depth? number how many layer will be entered and flattened, default to inf
+---@param depth? integer how many layer will be entered and flattened, default to inf
 function TABLE.flatten(org,depth)
     if not depth then depth=1e99 end
     while depth>0 do
@@ -534,8 +545,8 @@ end
 ---Find value in [1~#], like string.find
 ---@param t any[]
 ---@param val any
----@param start? number
----@return number? key
+---@param start? integer
+---@return integer? key
 ---@nodiscard
 function TABLE.find(t,val,start)
     for i=start or 1,#t do if t[i]==val then return i end end
@@ -544,7 +555,7 @@ end
 ---TABLE.find for ordered list only, faster (binary search)
 ---@param t any[]
 ---@param val any
----@return number | nil key
+---@return integer | nil key
 ---@nodiscard
 function TABLE.findOrdered(t,val)
     if val<t[1] or val>t[#t] then return nil end
@@ -576,7 +587,7 @@ end
 ---@param t any[]
 ---@param v_old any
 ---@param v_new any
----@param start? number
+---@param start? integer
 function TABLE.replace(t,v_old,v_new,start)
     for i=start or 1,#t do
         if t[i]==v_old then
@@ -673,7 +684,7 @@ do -- function TABLE.dumpDeflate(t,depth)
     end
     ---Dump a simple lua table (no whitespaces)
     ---@param t table
-    ---@param depth? number how many layers will be dumped, default to inf
+    ---@param depth? integer how many layers will be dumped, default to inf
     ---@return string
     ---@nodiscard
     function TABLE.dumpDeflate(t,depth)
@@ -740,7 +751,7 @@ do -- function TABLE.dump(t,depth)
     end
     ---Dump a simple lua table
     ---@param t table
-    ---@param depth? number how many layers will be dumped, default to inf
+    ---@param depth? integer how many layers will be dumped, default to inf
     ---@return string
     ---@nodiscard
     function TABLE.dump(t,depth)
@@ -754,7 +765,7 @@ end
 
 ---Get element count of table
 ---@param t table
----@return number
+---@return integer
 ---@nodiscard
 function TABLE.getSize(t)
     local size=0
@@ -765,7 +776,7 @@ end
 ---Count value repeating time in [1~#]
 ---@param t any[]
 ---@param val any
----@return number
+---@return integer
 ---@nodiscard
 function TABLE.count(t,val)
     local count=0
@@ -780,7 +791,7 @@ end
 ---Count value repeating time in whole table
 ---@param t table
 ---@param val any
----@return number
+---@return integer
 ---@nodiscard
 function TABLE.countAll(t,val)
     local count=0
@@ -810,7 +821,7 @@ end
 ---Execute func(table[i],i) in [1~#]
 ---@generic T
 ---@param t T[]
----@param f fun(v:T, i:number)
+---@param f fun(v:T, i:integer)
 ---@param rev? boolean Reverse the order, allow removing elements from list
 function TABLE.foreach(t,f,rev)
     if rev then
@@ -826,7 +837,7 @@ end
 
 ---Execute func(table[k],k) for all elements in table (only allow removing elements with t[k]=nil)
 ---@param t table
----@param f fun(v:any, k:number)
+---@param f fun(v:any, k:any)
 function TABLE.foreachAll(t,f)
     for k,v in next,t do
         f(v,k)
