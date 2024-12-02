@@ -1,7 +1,6 @@
 -- Use LOG(message) to print & record informations
 
 local floor=math.floor
-local format=string.format
 local ins=table.insert
 local clamp=MATH.clamp
 
@@ -52,8 +51,8 @@ setmetatable(LOG,{
     __metatable=true,
 })
 ---@cast LOG + fun(level:Zenitha.logLevel, message:string)
----@cast LOG + fun(message:string) -- logLevel default to 3
----@cast LOG + fun(level:integer, message:string) -- Will be converted to this
+---@cast LOG + fun(message:string) -- logLevel default to 15 (debug)
+---@cast LOG + fun(level:integer, message:string) -- Will finally be converted to this
 
 ---@param l Zenitha.log
 ---@return string

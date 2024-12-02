@@ -1,5 +1,5 @@
 if not love.thread then
-    LOG('debug',"HTTP lib is not loaded (need love.thread)")
+    LOG("HTTP lib is not loaded (need love.thread)")
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use HTTP."..k..", but HTTP lib is not loaded (need love.thread)")

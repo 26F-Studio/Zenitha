@@ -1,5 +1,5 @@
 if not love.graphics then
-    LOG('debug',"WAIT lib is not loaded (need love.graphics)")
+    LOG("WAIT lib is not loaded (need love.graphics)")
     return {
         _update=NULL,
         _draw=NULL,

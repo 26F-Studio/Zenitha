@@ -45,7 +45,7 @@ function SFX.getNoteName(note)
 end
 
 if not (love.filesystem and love.audio and love.sound) then
-    LOG('debug',"SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
+    LOG("SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
     function SFX.init()
         error("attempt to use SFX.init, but SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
     end

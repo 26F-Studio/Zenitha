@@ -1,5 +1,5 @@
 if not love.graphics then
-    LOG('debug',"MSG lib is not loaded (need love.graphics)")
+    LOG("MSG lib is not loaded (need love.graphics)")
     return setmetatable({},{
         __index=function(t,k)
             t[k]=NULL

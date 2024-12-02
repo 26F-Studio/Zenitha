@@ -1,5 +1,5 @@
 if not love.thread then
-    LOG('debug',"WS lib is not loaded (need love.thread)")
+    LOG("WS lib is not loaded (need love.thread)")
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use WS."..k..", but WS lib is not loaded (need love.thread)")
