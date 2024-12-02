@@ -6,6 +6,7 @@ local connTimeout,pongTimeout=16,2.6
 local sleepInterval,pingInterval=6,0.26
 local lastRecvTime,lastSendTime
 
+local buffer=require'string.buffer'
 local timer=require'love.timer'.getTime
 local sleep=require'love.timer'.sleep
 local CHN_demand,CHN_getCount=confCHN.demand,confCHN.getCount
@@ -129,20 +130,20 @@ end)
 
 local function _receive(sock,len)
     lastRecvTime=timer()
-    local buffer=""
+    local buf=buffer.new(len)
     while true do
         local r,e,p=sock:receive(len)
         if r then
-            buffer=buffer..r
+            buf:put(r)
             len=len-#r
         elseif p then
-            buffer=buffer..p
+            buf:put(p)
             len=len-#p
         elseif e then
             return nil,e
         end
         if len==0 then
-            return buffer
+            return buf:get()
         end
         yield()
     end

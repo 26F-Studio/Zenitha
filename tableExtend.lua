@@ -347,18 +347,21 @@ end
 --------------------------------------------------------------
 -- Editing
 
----Clear [1~#] of a table
+---`table.clear` from luajit extension, clear the whole table but preserve the allocated array/hash sizes
+---
+---Fallback to `TABLE.clearAll` if failed to require `table.clear`
+---
 ---@param t table
 function TABLE.clear(t)
-    for i=1,#t do
-        t[i]=nil
+    for k in next,t do
+        t[k]=nil
     end
 end
+pcall(function() TABLE[('clear')]=require'table.clear' end)
 
----Clear all table
+---Clear whole table (pure lua implementation)
 ---
----You can also use `table.clear` from luajit:  
----https://luajit.org/extensions.html
+---Recommend to use `TABLE.clear` instead
 ---@param t table
 function TABLE.clearAll(t)
     for k in next,t do
@@ -366,7 +369,15 @@ function TABLE.clearAll(t)
     end
 end
 
----Remove value of [1~#]
+---Clear [1~#] of a table (pure lua implementation)
+---@param t table
+function TABLE.clearList(t)
+    for i=1,#t do
+        t[i]=nil
+    end
+end
+
+---Remove a specific value of [1~#]
 ---@param org any[]
 function TABLE.delete(org,value)
     for i=#org,1,-1 do
@@ -376,7 +387,7 @@ function TABLE.delete(org,value)
     end
 end
 
----Remove value in whole table
+---Remove a specific value in whole table
 ---@param org table
 function TABLE.deleteAll(org,value)
     for k,v in next,org do

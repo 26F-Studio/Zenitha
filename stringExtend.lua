@@ -13,6 +13,7 @@ local match,gmatch=string.match,string.gmatch
 local rep,rev=string.rep,string.reverse
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
+local buffer=require'string.buffer'
 
 ---@class Zenitha.StringExt
 local STRING={}
@@ -321,7 +322,7 @@ function STRING.editDist(s1,s2) -- By Copilot
     for i=1,len2 do t2[i]=s2:sub(i,i) end
 
     local dp={}
-    for i=0,len1 do dp[i]=TABLE.new(0,len2) end
+    for i=0,len1 do dp[i]={} for j=0,len2 do dp[i][j]=0 end end
     dp[0][0]=0
     for i=1,len1 do dp[i][0]=i end
     for i=1,len2 do dp[0][i]=i end
@@ -563,16 +564,11 @@ end
 ---@nodiscard
 function STRING.vcsEncrypt(text,key)
     local keyLen=#key
-    local result=''
-    local buffer=''
-    for i=0,#text-1 do
-        buffer=buffer..char((byte(text,i+1)-32+byte(key,i%keyLen+1))%95+32)
-        if #buffer==26 then
-            result=result..buffer
-            buffer=''
-        end
+    local buf=buffer.new(#text)
+    for i=1,#text do
+        buf:put(char((byte(text,i)-32+byte(key,(i-1)%keyLen+1))%95+32))
     end
-    return result..buffer
+    return buf:get()
 end
 
 ---Simple vcs decryption
@@ -582,16 +578,11 @@ end
 ---@nodiscard
 function STRING.vcsDecrypt(text,key)
     local keyLen=#key
-    local result=''
-    local buffer=''
-    for i=0,#text-1 do
-        buffer=buffer..char((byte(text,i+1)-32-byte(key,i%keyLen+1))%95+32)
-        if #buffer==26 then
-            result=result..buffer
-            buffer=''
-        end
+    local buf=buffer.new(#text)
+    for i=1,#text do
+        buf:put(char((byte(text,i)-32-byte(key,(i-1)%keyLen+1))%95+32))
     end
-    return result..buffer
+    return buf:get()
 end
 
 ---Return 16 byte string. Not powerful hash, just simply protect the original text
@@ -617,9 +608,9 @@ function STRING.digezt(text,seedRange,seed)
             pos=(pos+step)%16
         end
     end
-    local result=''
-    for i=1,16 do result=result..char(out[i]) end
-    return result
+    local result=buffer.new(16)
+    for i=1,16 do result:put(char(out[i])) end
+    return result:get()
 end
 
 ---Cut a line off a string
@@ -709,6 +700,19 @@ end
 function STRING.unpackTable(str)
     return JSON.decode(STRING.unpackText(str))
 end
+
+--------------------------------------------------------------
+-- LuaJIT Extension
+
+xpcall(function()
+    STRING.newBuf=buffer.new
+    STRING.encBuf=buffer.encode
+    STRING.decBuf=buffer.decode
+end,function()
+    STRING[('newBuf')]=function() error("string.buffer.new is not available") end
+    STRING[('encBuf')]=function() error("string.buffer.encode is not available") end
+    STRING[('decBuf')]=function() error("string.buffer.decode is not available") end
+end)
 
 do
     local split=STRING.split

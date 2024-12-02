@@ -167,7 +167,7 @@ function HTTP.reset()
         threads[i]:release()
         threads[i]=false
     end
-    TABLE.clearAll(msgPool)
+    TABLE.clear(msgPool)
     sendCHN:clear()
     recvCHN:clear()
     addThread(threadCount)
