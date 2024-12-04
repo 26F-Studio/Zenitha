@@ -6,13 +6,23 @@ local loadTimeList,lastTimeStamp={},ZENITHA.timer.getTime()
 ---then use `DEBUG.logLoadTime()` to log the times
 ---@param msg string
 function DEBUG.checkLoadTime(msg)
-    table.insert(loadTimeList,("%-26s \t%.3fs"):format(tostring(msg)..":",ZENITHA.timer.getTime()-lastTimeStamp))
-    lastTimeStamp=ZENITHA.timer.getTime()
+    local t=ZENITHA.timer.getTime()
+    table.insert(loadTimeList,{msg=tostring(msg),time=t-lastTimeStamp})
+    lastTimeStamp=t
 end
 
 ---Log the times marked by `DEBUG.checkLoadTime()`
 function DEBUG.logLoadTime()
-    for i=1,#loadTimeList do LOG('info',loadTimeList[i]) end
+    local maxLen=0
+    for i=1,#loadTimeList do maxLen=math.max(maxLen,#loadTimeList[i].msg) end
+    for i=1,#loadTimeList do
+        local m=loadTimeList[i]
+        LOG('info',
+            m.msg..": "..
+            (" "):rep(maxLen-#m.msg)..
+            ("%d"):format(m.time*1000).." ms"
+        )
+    end
 end
 
 ---Set metatable for _G, print messages when a new variable is created
