@@ -11,13 +11,14 @@ if not love.graphics then
 end
 
 local gc=ZENITHA.graphics
-local getColor,setColor,prints,printf,draw,drawL=gc.getColor,gc.setColor,gc.print,gc.printf,gc.draw,gc.drawLayer
+local getColor,setColor,setShader,getShader=gc.getColor,gc.setColor,gc.setShader,gc.getShader
+local prints,printf,draw,drawL=gc.print,gc.printf,gc.draw,gc.drawLayer
 local newText=gc.newText
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
 local rectangle,circle=gc.rectangle,gc.circle
 local applyTransform=gc.applyTransform
 local sin,cos=math.sin,math.cos
-local pcall=pcall
+local type,pcall=type,pcall
 local lerp=MATH.lerp
 local NULL=NULL
 
@@ -305,6 +306,32 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
     else
         error("GC.regRoundPolygon(mode,...): Draw mode should be 'line' or 'fill'")
     end
+end
+
+local fillShader=gc.newShader[[
+    extern float fill=0; // 0~.5
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        float dist = length(texCoord.xy - .5);
+        color.a *= smoothstep(.5, fill, dist);
+        return color;
+    }
+]]
+---(Shader Implementation) Draw a filled circle with blurring edge
+---@param solid? number .5=sharp, .5-1/r=natural, 0=light, nil=last value
+---@param x number
+---@param y number
+---@param r number
+function GC.blurCircle(solid,x,y,r)
+    if solid then
+        fillShader:send('fill',solid)
+    end
+    -- local sd=getShader()
+    -- setShader(fillShader)
+    -- draw(PAPER,x,y,nil,r*2,nil,.5,.5)
+    -- setShader(sd)
+    setShader(fillShader)
+    draw(PAPER,x,y,nil,r*2,nil,.5,.5)
+    setShader()
 end
 
 do -- function GC.getScreenShot(table,key) -- Save screenshot as image object to a table
@@ -596,9 +623,9 @@ end
 --------------------------------------------------------------
 
 do -- function GC.load(L), GC.execute(t)
-    ---@alias Zenitha.drawingCommand {[1]:Zenitha.drawingCommandType, [number]:any}
+    ---@alias Zenitha.drawingCommand {[1]:Zenitha.Graphics.drawingCommandType, [number]:any}
 
-    ---@enum (key) Zenitha.drawingCommandType
+    ---@enum (key) Zenitha.Graphics.drawingCommandType
     local cmds={
         push=     'push',
         pop=      'pop',
