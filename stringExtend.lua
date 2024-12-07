@@ -294,14 +294,15 @@ function STRING.count(str,regex)
     return count
 end
 
----Trim spaces and tabs at the beginning of all lines, useful for inline multi-line strings
+---Trim spaces and tabs at the beginning of all lines, useful for inline multi-line strings  
+---(Will remove ending \n)
 ---### Example
 ---```lua
 ---do
 ---    local s=STRING.trimIndent[=[
 ---        Hello
 ---        World
----    ]=] --> "Hello\nWorld\n", not "        Hello\n        World\n    "
+---    ]=] --> "Hello\nWorld"
 ---end
 ---```
 ---@param str string
