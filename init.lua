@@ -325,6 +325,7 @@ function assertf(v,str,...) return v or error(str:format(...)) end
 ---Use `local require=requirePath(...)` to require modules in simpler way
 ---@param path string
 ---@overload fun(loader:function): unknown
+---@diagnostic disable-next-line
 function simpRequire(path)
     return type(path)=='function' and
         function(module) return path(module) end or

@@ -763,15 +763,12 @@ end
 --------------------------------------------------------------
 -- LuaJIT Extension
 
-xpcall(function()
-    STRING.newBuf=buffer.new
-    STRING.encBuf=buffer.encode
-    STRING.decBuf=buffer.decode
-end,function()
-    STRING[('newBuf')]=function() error("string.buffer.new is not available") end
-    STRING[('encBuf')]=function() error("string.buffer.encode is not available") end
-    STRING[('decBuf')]=function() error("string.buffer.decode is not available") end
-end)
+STRING.newBuf=buffer.new
+STRING.encBuf=buffer.encode
+STRING.decBuf=buffer.decode
+
+--------------------------------------------------------------
+-- Load data for .upperUTF8 .lowerUTF8 .remDiacritics
 
 do
     local split=STRING.split
