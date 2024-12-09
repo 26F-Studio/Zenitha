@@ -65,7 +65,7 @@ end
 function MIDI.newSong(sData,handler)
     assert(type(sData)=='string',"MIDI.newSong(songData,handler): songData need string")
     local songBuf=STRING.newBuf()
-    songBuf:set(sData)
+    songBuf:put(sData)
     assert(type(handler)=='function',"MIDI.newSong(songData,handler): handler need function")
     local Song={
         playing=true,
@@ -103,7 +103,7 @@ function MIDI.newSong(sData,handler)
         buf=songBuf:get(4)
         local trackDataLen=STRING.binNum(buf)
         local trackBuf=STRING.newBuf()
-        trackBuf:set(songBuf:get(trackDataLen))
+        trackBuf:put(songBuf:get(trackDataLen))
 
         local tick=0
         local prevType
