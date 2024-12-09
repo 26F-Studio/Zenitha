@@ -728,7 +728,7 @@ STRING.u8char=utf8[('char')]
 function STRING.u8byte(str,i,j,lax) end
 STRING.u8byte=utf8[('codepoint')]
 
----Get the end byte of `n` characters starting from `i` byte
+---Starting from `i` byte, get the start byte of `n` utf8 characters
 ---@param str string
 ---@param n integer char count
 ---@param i? integer start byte
