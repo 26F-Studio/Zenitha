@@ -607,6 +607,22 @@ function TABLE.replaceAll(t,v_old,v_new)
     end
 end
 
+---Find the minimum value (and key)  
+---if you don't need the key and the list is short, use `math.min(unpack(t))` for better performance
+---@generic T
+---@param t T[]
+---@return T | number minVal, integer | nil key `minVal` will be inf when empty
+---@nodiscard
+function TABLE.min(t)
+    local min,key=MATH.inf,nil
+    for i=1,#t do
+        if t[i]<min then
+            min,key=t[i],i
+        end
+    end
+    return min,key
+end
+
 ---Find the minimum value (and key) in whole table
 ---@generic K, V
 ---@param t table<K, V>
@@ -620,6 +636,22 @@ function TABLE.minAll(t)
         end
     end
     return min,key
+end
+
+---Find the maximum value (and key)  
+---if you don't need the key and the list is short, use `math.max(unpack(t))` for better performance
+---@generic T
+---@param t T[]
+---@return T | number maxVal, integer | nil key `maxVal` will be -inf when empty
+---@nodiscard
+function TABLE.max(t)
+    local max,key=-MATH.inf,nil
+    for i=1,#t do
+        if t[i]>max then
+            max,key=t[i],i
+        end
+    end
+    return max,key
 end
 
 ---Find the maximum value (and key) in whole table
