@@ -33,23 +33,24 @@ MIDI.__index=MIDI
 
 -- local r={0}
 -- for i=1,12 do r[i+1]=r[i]+2^(7*i) end -- Offset value of N-byte VLQ
-local byte=string.byte
-local function VLQ(str)
-    local e=1
-    while byte(str,e)>127 do e=e+1 end
-    if e==1 then
-        return byte(str),str:sub(2)
+---@param buf string.buffer
+local function VLQ(buf)
+    local ptr=buf:ref()
+    if ptr[0]<=127 then
+        buf:skip(1)
+        return ptr[0]
     else
+        local endOffset=1 while ptr[endOffset]>127 do endOffset=endOffset+1 end
         local sum=0
-        for i=1,e do
-            sum=sum*2^7+byte(str,i)%128
+        for offset=0,endOffset do
+            sum=sum*2^7+ptr[offset]%128
         end
-        return sum,str:sub(e+1)
-        -- return sum+r[e],str:sub(e+1) -- why mid doesn't use real VLQ with offset
+        buf:skip(endOffset+1)
+        return sum
+        -- return sum+r[e-1] -- why MID doesn't use real VLQ with offset
     end
 end
 
-local read=STRING.readChars
 ---@param sData string
 ---@param handler fun(event: Zenitha.MIDI.Event)
 ---@return Zenitha.MIDI
@@ -63,6 +64,8 @@ local read=STRING.readChars
 ---```
 function MIDI.newSong(sData,handler)
     assert(type(sData)=='string',"MIDI.newSong(songData,handler): songData need string")
+    local songBuf=STRING.newBuf()
+    songBuf:set(sData)
     assert(type(handler)=='function',"MIDI.newSong(songData,handler): handler need function")
     local Song={
         playing=true,
@@ -72,42 +75,41 @@ function MIDI.newSong(sData,handler)
 
     local bpmEvents={}
 
-    local sec
-    assert(type(sData)=='string',"file not found")
+    local buf
 
-    sec,sData=read(sData,8)
-    assert(sec=='MThd\0\0\0\6',"File head missing")
+    buf=songBuf:get(8)
+    assert(buf=='MThd\0\0\0\6',"File head missing")
 
-    sec,sData=read(sData,2)
-    Song.midFormat=STRING.binNum(sec)
+    buf=songBuf:get(2)
+    Song.midFormat=STRING.binNum(buf)
     if printMeta then printf("Format: %d",Song.midFormat) end
 
-    sec,sData=read(sData,2)
-    Song.trackCount=STRING.binNum(sec)
+    buf=songBuf:get(2)
+    Song.trackCount=STRING.binNum(buf)
     Song.trackHeads=TABLE.new(1,Song.trackCount)
     if printMeta then printf("Track count: %d",Song.trackCount) end
 
-    sec,sData=read(sData,2)
-    Song.tickPerQuarterNote=STRING.binNum(sec)
+    buf=songBuf:get(2)
+    Song.tickPerQuarterNote=STRING.binNum(buf)
     if printMeta then printf("TPQN: %d",Song.tickPerQuarterNote) end
 
     Song.tracks={}
     for t=1,Song.trackCount do
         if printMeta then print("TRACK "..t) end
         local track={}
-        sec,sData=read(sData,4)
-        assert(sec=='MTrk',"Track head missing")
+        buf=songBuf:get(4)
+        assert(buf=='MTrk',"Track head missing")
 
-        sec,sData=read(sData,4)
-        local trackDataLen=STRING.binNum(sec)
-        local tData
-        tData,sData=read(sData,trackDataLen)
+        buf=songBuf:get(4)
+        local trackDataLen=STRING.binNum(buf)
+        local trackBuf=STRING.newBuf()
+        trackBuf:set(songBuf:get(trackDataLen))
 
         local tick=0
         local prevType
         repeat
             local dTick
-            dTick,tData=VLQ(tData)
+            dTick=VLQ(trackBuf)
             if dTick>printBigDT then print("D "..dTick) end
             tick=tick+dTick
 
@@ -115,67 +117,67 @@ function MIDI.newSong(sData,handler)
             ---@diagnostic disable-next-line
             local event={}
 
-            event.type=tData:byte()
+            event.type=trackBuf:ref()[0]
             if event.type<0x80 then
                 if prevType then
                     event.type=prevType
                 else
                     event.name='Unknown'
-                    event.data,tData=read(tData,1)
+                    event.data=trackBuf:get(1)
                     if printUnk then printf("Unknown event: %02X",event.type) end
-                    tData=tData:sub(2)
+                    trackBuf:skip(1)
                 end
             else
                 prevType=event.type
-                tData=tData:sub(2)
+                trackBuf:skip(1)
             end
 
             if event.type>=0x80 and event.type<=0x8F then
                 event.name='NoteEnd'
                 event.channel=event.type%0x10
-                sec,tData=read(tData,2)
-                event.note=sec:byte(1)
-                event.velocity=sec:byte(2)
+                buf=trackBuf:get(2)
+                event.note=buf:byte(1)
+                event.velocity=buf:byte(2)
             elseif event.type>=0x90 and event.type<=0x9F then
                 event.name='NoteStart'
                 event.channel=event.type%0x10
-                sec,tData=read(tData,2)
-                event.note=sec:byte(1)
-                event.velocity=sec:byte(2)
+                buf=trackBuf:get(2)
+                event.note=buf:byte(1)
+                event.velocity=buf:byte(2)
             elseif event.type>=0xA0 and event.type<=0xAF then
                 event.name='KeyPressure'
                 event.channel=event.type%0x10
-                sec,tData=read(tData,2)
-                event.note=sec:byte(1)
-                event.velocity=sec:byte(2)
+                buf=trackBuf:get(2)
+                event.note=buf:byte(1)
+                event.velocity=buf:byte(2)
             elseif event.type>=0xB0 and event.type<=0xBF then
                 event.name='ControlChange'
                 event.channel=event.type%0x10
-                sec,tData=read(tData,2)
-                event.control=sec:byte(1)
-                event.value=sec:byte(2)
+                buf=trackBuf:get(2)
+                event.control=buf:byte(1)
+                event.value=buf:byte(2)
             elseif event.type>=0xC0 and event.type<=0xCF then
                 event.name='ProgramChange'
                 event.channel=event.type%0x10
-                sec,tData=read(tData,1)
-                event.value=sec:byte()
+                buf=trackBuf:get(1)
+                event.value=buf:byte()
             elseif event.type>=0xD0 and event.type<=0xDF then
                 event.name='ChannelPressure'
                 event.channel=event.type%0x10
-                sec,tData=read(tData,1)
-                event.velocity=sec:byte()
+                buf=trackBuf:get(1)
+                event.velocity=buf:byte()
             elseif event.type>=0xE0 and event.type<=0xEF then
                 event.name='PitchBend'
                 event.channel=event.type%0x10
-                sec,tData=read(tData,2)
-                event.value=STRING.binNum(sec)
+                buf=trackBuf:get(2)
+                event.value=STRING.binNum(buf)
             elseif event.type==0xFF then -- MetaEvent
                 prevType=nil
                 event.name='MetaEvent'
-                event.subType,tData=VLQ(tData)
+                event.subType=VLQ(trackBuf)
                 local len
-                len,tData=VLQ(tData)
-                event.data,tData=read(tData,len)
+                len=VLQ(trackBuf)
+                event.data=trackBuf:get(len)
                 if event.subType<=0x07 then -- Texts
                     event.subName=
                         event.subType==0x01 and '' or
@@ -220,14 +222,19 @@ function MIDI.newSong(sData,handler)
                 event.name='SysMes'
                 if event.type==0xF0 then -- SysEx
                     event.subName='SysEx'
-                    event.data,tData=read(tData,(assert((tData:find('\xF7')))))
-                    event.data=event.data:sub(1,-2)
+                    event.data=''
+                    while true do
+                        local c=trackBuf:get(1)
+                        if c=='\xF7' then break end
+                        assert(c~='',"SysEx not closed")
+                        event.data=event.data..c
+                    end
                 elseif event.type==0xF2 then -- Song Position Pointer
                     event.subName='SongPositionPointer'
-                    event.data,tData=read(tData,2)
+                    event.data=trackBuf:get(2)
                 elseif event.type==0xF3 then -- Song Select
                     event.subName='SongSelect'
-                    event.data,tData=read(tData,1)
+                    event.data=trackBuf:get(1)
                 elseif event.type==0xF6 then event.subName='TuneRequest'
                 elseif event.type==0xF8 then event.subName='TimingClock'
                 elseif event.type==0xFA then event.subName='Start'
@@ -250,11 +257,11 @@ function MIDI.newSong(sData,handler)
                 end
                 table.insert(track,event)
             end
-        until #tData==0
+        until #trackBuf==0
         table.insert(Song.tracks,track)
     end
     assert(#Song.tracks==Song.trackCount,"Track count doesn't match")
-    assert(#sData==0,"Redundancy data")
+    assert(#songBuf==0,"Redundancy data")
 
     -- Calculate time of each event
     for i=1,Song.trackCount do
