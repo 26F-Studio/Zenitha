@@ -115,7 +115,7 @@ function MIDI.newSong(sData,handler)
 
             ---@type Zenitha.MIDI.Event
             ---@diagnostic disable-next-line
-            local event={}
+            local event={tick=tick}
 
             event.type=trackBuf:ref()[0]
             if event.type<0x80 then
