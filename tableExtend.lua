@@ -164,7 +164,8 @@ function TABLE.getValueSet(org,val)
     return T
 end
 
----Create a table of two lists connected
+---**Create** a table of two lists combined  
+---For **Appending** a table, use `TABLE.append`
 ---@generic T1, T2
 ---@param L1 T1[] list 1
 ---@param L2 T2[] list 2
@@ -267,11 +268,12 @@ function TABLE.equalAll(a,b)
     return true
 end
 
----Connect [1~#] elements of new to the end of org
+---**Append** [1~#] elements of new to the end of org  
+---For **Creating** a new table, use `TABLE.combine`
 ---@generic T1, T2
 ---@param org T1[] original list
 ---@param new T2[] new list
-function TABLE.connect(org,new)
+function TABLE.append(org,new)
     local l0=#org
     for i=1,#new do
         org[l0+i]=new[i]
