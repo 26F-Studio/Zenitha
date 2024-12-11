@@ -1,5 +1,5 @@
 local rnd,floor=math.random,math.floor
-local find,gsub,gmatch=string.find,string.gsub,string.gmatch
+local find,gsub,match,gmatch=string.find,string.gsub,string.match,string.gmatch
 local rem=table.remove
 local next,type,select=next,type,select
 
@@ -689,7 +689,7 @@ do -- function TABLE.dumpDeflate(t,depth)
                     k='['..k..']='
                 end
             elseif T=='string' then
-                if find(k,'[^0-9a-zA-Z_]') then
+                if match(k,'^[^a-zA-Z_]') then
                     k='["'..gsub(k,'"','\\"')..'"]='
                 else
                     k=k..'='
@@ -756,7 +756,7 @@ do -- function TABLE.dump(t,depth)
                     k='['..k..']='
                 end
             elseif T=='string' then
-                if find(k,'[^0-9a-zA-Z_]') then
+                if match(k,'^[^a-zA-Z_]') then
                     k='["'..gsub(k,'"','\\"')..'"]='
                 else
                     k=k..'='
