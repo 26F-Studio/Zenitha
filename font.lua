@@ -1,5 +1,5 @@
-if not love.graphics then
-    LOG("FONT lib is not loaded (need love.graphics)")
+if not (love.graphics and love.font) then
+    LOG("FONT lib is not loaded (need love.graphics & love.font)")
     return {
         setDefaultFont=NULL,
         setDefaultFallback=NULL,
