@@ -341,6 +341,7 @@ local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastClicks={} ---@type Zenitha.Click[]
 local jsState={} ---@type Zenitha.JoystickState[]
 local errData={} ---@type Zenitha.Exception[]
+---@type Map<love.Canvas>
 local bigCanvases=setmetatable({},{
     __index=function(self,k)
         self[k]=gc.newCanvas(nil,nil,love.window and {msaa=select(3,love.window.getMode()).msaa} or nil)
@@ -1095,7 +1096,7 @@ function love.resize(w,h)
     SCR._resize(w,h)
     for k in next,bigCanvases do
         bigCanvases[k]:release()
-        bigCanvases[k]=gc.newCanvas()
+        bigCanvases[k]=gc.newCanvas(nil,nil,love.window and {msaa=select(3,love.window.getMode()).msaa} or nil)
     end
     BG._resize(w,h)
 
@@ -1527,13 +1528,6 @@ function ZENITHA.setMaxErrorCount(n)
     maxErrorCount=n
 end
 
----Get a big canvas which is as big as the screen
----@param id string Canvas ID
----@return love.Canvas
-function ZENITHA.getBigCanvas(id)
-    return bigCanvases[id]
-end
-
 ---Set cursor invisible
 function ZENITHA.hideCursor() mouseShow=false end
 
@@ -1546,6 +1540,8 @@ ZENITHA.globalEvent=setmetatable(globalEvent,{
     end,
     __metatable=true,
 })
+
+ZENITHA.bigCanvas=bigCanvases
 
 --------------------------------------------------------------
 
