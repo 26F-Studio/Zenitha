@@ -348,8 +348,11 @@ do -- function GC.getScreenShot(table,key) -- Save screenshot as image object to
 end
 
 ---@param canvas love.Canvas
-function GC.saveCanvas(canvas,fileName,format)
-    canvas:newImageData():encode(format or 'png',fileName)
+---@param fileName string
+---@param format? love.ImageFormat
+---@param ... number param for canvas:newImageData, normally `x,y,w,h`
+function GC.saveCanvas(canvas,fileName,format,...)
+    canvas:newImageData(...):encode(format or 'png',fileName)
 end
 
 --------------------------------------------------------------
