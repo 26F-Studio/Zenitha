@@ -347,6 +347,11 @@ do -- function GC.getScreenShot(table,key) -- Save screenshot as image object to
     end
 end
 
+---@param canvas love.Canvas
+function GC.saveCanvas(canvas,fileName,format)
+    canvas:newImageData():encode(format or 'png',fileName)
+end
+
 --------------------------------------------------------------
 -- Beziers
 
