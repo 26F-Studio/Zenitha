@@ -33,7 +33,7 @@
 ---@class Zenitha.SceneSwap
 ---@field duration number
 ---@field timeChange number
----@field draw function Called with timeRemain(duration~0)
+---@field draw fun(timeRemain:number)
 
 ---@type Map<Zenitha.Scene>
 local scenes={}
