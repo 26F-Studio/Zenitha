@@ -31,7 +31,6 @@
 ---@field fillColor? Zenitha.ColorStr | Zenitha.Color [switch & slider & slider_progress & inputBox & textBox & listBox]
 ---@field frameColor? Zenitha.ColorStr | Zenitha.Color [inputBox]
 ---@field activeColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
----@field idleColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
 ---
 ---@field sound_press? string
 ---@field sound_hover? string
@@ -67,7 +66,7 @@
 ---@field lineHeight? number [textBox & listBox]
 ---
 ---@field yOffset? number [textBox]
----@field fixContent? boolean [textBox]
+---@field editable? boolean [textBox]
 ---
 ---@field drawFunc? function [listBox]
 ---@field releaseDist? number [listBox]
@@ -150,7 +149,7 @@ local Widgets={}
 ---@field fillColor Zenitha.ColorStr | Zenitha.Color
 ---@field frameColor Zenitha.ColorStr | Zenitha.Color
 ---@field activeColor Zenitha.ColorStr | Zenitha.Color
----@field idleColor Zenitha.ColorStr | Zenitha.Color
+---@field scrollBarColor Zenitha.ColorStr | Zenitha.Color
 ---
 ---@field lineWidth number
 ---@field cornerR number
@@ -194,7 +193,7 @@ Widgets.base={
     fillColor='L',
     frameColor='L',
     activeColor='LY',
-    idleColor='L',
+    scrollBarColor='L',
     pos=false,
     lineWidth=4,cornerR=3,
     fontSize=30,fontType=false,
@@ -241,8 +240,8 @@ function Widgets.base:reset(init)
     assert(type(self.frameColor)=='table',"[widget].frameColor need table")
     if type(self.activeColor)=='string' then self.activeColor=COLOR[self.activeColor] end
     assert(type(self.activeColor)=='table',"[widget].activeColor need table")
-    if type(self.idleColor)=='string' then self.idleColor=COLOR[self.idleColor] end
-    assert(type(self.idleColor)=='table',"[widget].idleColor need table")
+    if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
+    assert(type(self.scrollBarColor)=='table',"[widget].scrollBarColor need table")
 
     assert(type(self.lineWidth)=='number',"[widget].lineWidth need number")
     assert(type(self.cornerR)=='number',"[widget].cornerR need number")
@@ -351,11 +350,11 @@ Widgets.text=setmetatable({
         'name',
         'pos',
         'x','y',
-
-        'color','text',
-        'fontSize','fontType',
-
         'alignX','alignY',
+
+        'color','textColor',
+        'text','fontSize','fontType',
+
         'widthLimit',
 
         'visibleFunc',
@@ -363,11 +362,14 @@ Widgets.text=setmetatable({
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.text:reset(init)
+    if self.color then
+        self.textColor=self.color
+    end
     Widgets.base.reset(self,init)
 end
 function Widgets.text:draw()
     if self._text then
-        gc_setColor(self.color)
+        gc_setColor(self.textColor)
         alignDraw(self,self._text,self._x,self._y)
     end
 end
@@ -389,10 +391,10 @@ Widgets.image=setmetatable({
         'pos',
         'x','y',
         'k','w','h', -- Not compatible
+        'alignX','alignY',
 
         'ang',
         'image',
-        'alignX','alignY',
 
         'visibleFunc',
         'visibleTick',
@@ -438,7 +440,6 @@ Widgets.button=setmetatable({
     image=false,
     cornerR=10,
     sound_trigger=false,
-    textColor=false,
 
     code=NULL,
 
@@ -446,12 +447,11 @@ Widgets.button=setmetatable({
         'name',
         'pos',
         'x','y','w','h',
+        'alignX','alignY',
         'lineWidth','cornerR',
 
-        'alignX','alignY',
-        'text','image',
-        'color','textColor',
-        'fontSize','fontType',
+        'color','fillColor','frameColor','textColor',
+        'text','fontSize','fontType','image',
         'sound_trigger',
         'sound_press','sound_hover',
 
@@ -461,7 +461,9 @@ Widgets.button=setmetatable({
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.button:reset(init)
-    if self.textColor==false then self.textColor=self.color end
+    self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
+    self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
+    self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,init)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number',"[button].w need number")
@@ -501,15 +503,16 @@ function Widgets.button:draw()
     end
     local w,h=self.w,self.h
 
-    local c=self.color
+    local fillC=self.fillColor
+    local frameC=self.frameColor
 
     -- Background
-    gc_setColor(c[1],c[2],c[3],.1+.2*self._hoverTime/self._hoverTimeMax)
+    gc_setColor(fillC[1],fillC[2],fillC[3],.1+.2*self._hoverTime/self._hoverTimeMax)
     gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
-    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.95)
+    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,.95)
     gc_mRect('line',0,0,w,h,self.cornerR)
 
     -- Drawable
@@ -528,7 +531,6 @@ end
 Widgets.button_fill=setmetatable({
     type='button_fill',
     textColor='D',
-    buildArgs=TABLE.combine(Widgets.button.buildArgs,{'textColor'}),
 },{__index=Widgets.button,__metatable=true})
 function Widgets.button_fill:draw()
     gc_push('transform')
@@ -541,7 +543,7 @@ function Widgets.button_fill:draw()
     local w,h=self.w,self.h
     local HOV=self._hoverTime/self._hoverTimeMax
 
-    local c=self.color
+    local c=self.fillColor
     local r,g,b=c[1],c[2],c[3]
 
     -- Rectangle
@@ -572,10 +574,10 @@ function Widgets.button_invis:draw()
     local w,h=self.w,self.h
     local HOV=self._hoverTime/self._hoverTimeMax
 
-    local c=self.color
+    local fillC=self.fillColor
 
     -- Rectangle
-    gc_setColor(c[1],c[2],c[3],HOV*.16)
+    gc_setColor(fillC[1],fillC[2],fillC[3],HOV*.16)
     gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Drawable
@@ -584,7 +586,7 @@ function Widgets.button_invis:draw()
         alignDraw(self,self._image)
     end
     if self._text then
-        gc_setColor(c)
+        gc_setColor(self.textColor)
         alignDraw(self,self._text)
     end
     gc_pop()
@@ -615,8 +617,8 @@ Widgets.checkBox=setmetatable({
 
         'labelPos',
         'labelDistance',
-        'color','text',
-        'fontSize','fontType',
+        'color','fillColor','frameColor','textColor',
+        'text','fontSize','fontType',
         'widthLimit',
         'sound_on','sound_off',
         'sound_press','sound_hover',
@@ -627,6 +629,9 @@ Widgets.checkBox=setmetatable({
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.checkBox:reset(init)
+    self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
+    self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
+    self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,init)
 
     assert(type(self.disp)=='function',"[checkBox].disp need function")
@@ -659,15 +664,16 @@ function Widgets.checkBox:draw()
     local w=self.w
     local HOV=self._hoverTime/self._hoverTimeMax
 
-    local c=self.color
+    local fillC=self.fillColor
+    local frameC=self.frameColor
 
     -- Background
-    gc_setColor(c[1],c[2],c[3],.3*HOV)
+    gc_setColor(fillC[1],fillC[2],fillC[3],.3*HOV)
     gc_mRect('fill',0,0,w,w,self.cornerR)
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
-    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8)
+    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8)
     gc_mRect('line',0,0,w,w,self.cornerR)
     if self.disp() then
         gc_scale(.5*w)
@@ -692,7 +698,7 @@ function Widgets.checkBox:draw()
         alignDraw(self,self._image,x2,y2)
     end
     if self._text then
-        gc_setColor(c)
+        gc_setColor(self.textColor)
         alignDraw(self,self._text,x2,y2)
     end
     gc_pop()
@@ -705,7 +711,7 @@ Widgets.switch=setmetatable({
     type='switch',
     h=30,
 
-    fillColor='lS',
+    fillColor='I',
     text=false,
     image=false,
     labelDistance=20,
@@ -722,7 +728,7 @@ Widgets.switch=setmetatable({
 
         'labelPos',
         'labelDistance',
-        'color','fillColor',
+        'color','fillColor','frameColor','textColor',
         'text','fontSize','fontType',
         'lineWidth','widthLimit',
         'sound_on','sound_off',
@@ -734,6 +740,9 @@ Widgets.switch=setmetatable({
     },
 },{__index=Widgets.checkBox,__metatable=true})
 function Widgets.switch:reset(init)
+    self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
+    self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
+    self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,init)
 
     assert(type(self.disp)=='function',"[switch].disp need function")
@@ -762,15 +771,16 @@ function Widgets.switch:draw()
     local h=self.h
     local HOV=self._hoverTime/self._hoverTimeMax
 
-    local c=self.color
+    local fillC=self.fillColor
+    local frameC=self.frameColor
 
     -- Background
-    gc_setColor(self.fillColor[1],self.fillColor[2],self.fillColor[3],self._slideTime/self._hoverTimeMax+.5)
+    gc_setColor(fillC[1],fillC[2],fillC[3],self._slideTime/self._hoverTimeMax+.5)
     gc_mRect('fill',0,0,h*2,h,h*.5)
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
-    gc_setColor(.2+c[1]*.8,.2+c[2]*.8,.2+c[3]*.8,.8+.2*HOV)
+    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,.8+.2*HOV)
     gc_mRect('line',0,0,h*2,h,h*.5)
 
     -- Axis
@@ -793,7 +803,7 @@ function Widgets.switch:draw()
         alignDraw(self,self._image,x2,y2)
     end
     if self._text then
-        gc_setColor(c)
+        gc_setColor(self.textColor)
         alignDraw(self,self._text,x2,y2)
     end
     gc_pop()
@@ -811,8 +821,8 @@ end
 ---@field _showFunc function
 ---@field _pos number
 ---@field _pos0 number
----@field _rangeL number | false
----@field _rangeR number | false
+---@field _rangeL number
+---@field _rangeR number
 ---@field _rangeWidth number
 ---@field _unit number
 ---@field _smooth boolean
@@ -824,6 +834,7 @@ Widgets.slider=setmetatable({
     axis={0,1},
     smooth=false,
 
+    frameColor='DL',
     text=false,
     image=false,
     labelDistance=20,
@@ -859,9 +870,8 @@ Widgets.slider=setmetatable({
         'axis','smooth',
         'labelPos',
         'labelDistance',
-        'color','textColor','fillColor',
-        'text',
-        'fontSize','fontType',
+        'color','fillColor','frameColor','textColor',
+        'text','fontSize','fontType',
         'numFontSize','numFontType',
         'widthLimit',
         'textAlwaysShow',
@@ -890,6 +900,9 @@ local sliderShowFunc={
     end,
 }
 function Widgets.slider:reset(init)
+    self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
+    self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
+    self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,init)
 
     assert(self.w and type(self.w)=='number',"[slider].w need number")
@@ -969,14 +982,12 @@ function Widgets.slider:draw()
     local x2=x+self.w
     local rangeL,rangeR=self._rangeL,self._rangeR
 
-    local c=self.color
-    local fc=self.fillColor
-    local r,g,b=c[1],c[2],c[3]
-    local fr,fg,fb=fc[1],fc[2],fc[3]
-    gc_setColor(r,g,b,.5+HOV*.36)
+    local fillC=self.fillColor
+    local frameC=self.frameColor
 
-    -- Units
+    -- Axis Units
     if not self._smooth and self._unit then
+        gc_setColor(frameC[1],frameC[2],frameC[3],.26)
         gc_setLineWidth(self.lineWidth)
         for p=rangeL,rangeR,self._unit do
             local X=x+self.w*(p-rangeL)/self._rangeWidth
@@ -984,7 +995,8 @@ function Widgets.slider:draw()
         end
     end
 
-    -- Axis
+    -- Axis Line
+    gc_setColor(frameC[1],frameC[2],frameC[3],.5+HOV*.26)
     gc_setLineWidth(self.lineWidth*2)
     gc_line(x,y,x2,y)
 
@@ -993,20 +1005,20 @@ function Widgets.slider:draw()
     local cx=x+self.w*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
-    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or self.fillColor)
+    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or fillC)
     gc_rectangle('fill',bx,by,bw,bh,self.cornerR)
 
     -- Glow
     if HOV>0 then
         gc_setLineWidth(self.lineWidth*.5)
-        gc_setColor(r,g,b,HOV*.8)
+        gc_setColor(frameC[1],frameC[2],frameC[3],HOV*.8)
         gc_rectangle('line',bx+1,by+1,bw-2,bh-2,self.cornerR)
     end
 
     -- Float text
     if self._textShowTime>0 then
         setFont(self.numFontSize,self.numFontType)
-        gc_setColor(fr,fg,fb,min(self._textShowTime/2,1))
+        gc_setColor(fillC[1],fillC[2],fillC[3],min(self._textShowTime/2,1))
         gc_mStr(self:_showFunc(),cx,by-self.numFontSize-10)
     end
 
@@ -1140,26 +1152,31 @@ function Widgets.slider_fill:draw()
     local rate=(self._pos-self._rangeL)/self._rangeWidth
     local num=floor((self._pos0-self._rangeL)/self._rangeWidth*100+.5)..'%'
 
+    local fillC=self.fillColor
+    local frameC=self.frameColor
+
     -- Capsule
-    gc_setColor(1,1,1,.6+HOV*.26)
+    gc_setColor(frameC[1],frameC[2],frameC[3],.6+HOV*.26)
     gc_setLineWidth(self.lineWidth+HOV)
     gc_mRect('line',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     if HOV>0 then
-        gc_setColor(1,1,1,HOV*.12)
+        gc_setColor(fillC[1],fillC[2],fillC[3],HOV*.12)
         gc_mRect('fill',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     end
 
-    -- Stenciled capsule and text
+    -- Stenciled capsule
     gc_stc_reset()
     gc_stc_rect(x+r,y-r,w-h,h)
     gc_stc_circ(x+r,y,r)
     gc_stc_circ(x+w-r,y,r)
 
+    -- Text 1
     setFont(self.numFontSize,self.numFontType)
     gc_setColor(1,1,1,.75+HOV*.26)
     gc_mStr(num,x+w*.5,y-self.numFontSize*.7)
     gc_rectangle('fill',x,y-r,w*rate,h)
 
+    -- Text 2
     gc_stc_reset()
     gc_stc_rect(x,y-r,w*rate,h)
     gc_setColor(0,0,0,.9)
@@ -1168,7 +1185,7 @@ function Widgets.slider_fill:draw()
 
     -- Drawable
     if self._text then
-        gc_setColor(COLOR.L)
+        gc_setColor(self.textColor)
         local x2,y2
         if self.labelPos=='left' then
             x2,y2=x-self.labelDistance,y
@@ -1188,6 +1205,7 @@ end
 Widgets.slider_progress=setmetatable({
     type='slider_progress',
     w=100,h=10,
+    frameColor='LD',
     fillColor='L',
 
     text=false,
@@ -1202,7 +1220,7 @@ Widgets.slider_progress=setmetatable({
         'name',
         'pos',
         'x','y','w','h',
-        'fillColor',
+        'frameColor','fillColor',
 
         'labelPos',
         'labelDistance',
@@ -1258,11 +1276,14 @@ function Widgets.slider_progress:draw()
     local w,h=self.w,self.h
     local HOV=self._hoverTime/self._hoverTimeMax
 
+    local fillC=self.fillColor
+    local frameC=self.frameColor
+
     h=h*(1+HOV)
 
-    gc_setColor(.5,.5,.5,.4+.1*HOV)
+    gc_setColor(frameC[1],frameC[2],frameC[3],.4+.1*HOV)
     gc_rectangle('fill',x,y-h*.5,w,h,h*.5)
-    gc_setColor(self.fillColor)
+    gc_setColor(fillC)
     if w*self._pos>=1 then
         gc_rectangle('fill',x,y-h*.5,w*self._pos,h,h*.5)
     end
@@ -1307,8 +1328,8 @@ Widgets.selector=setmetatable({
         'pos',
         'x','y','w',
 
-        'color','text',
-        'fontSize','fontType',
+        'color','frameColor','textColor',
+        'text','fontSize','fontType',
         'selFontSize','selFontType',
         'widthLimit',
 
@@ -1323,6 +1344,8 @@ Widgets.selector=setmetatable({
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.selector:reset(init)
+    self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
+    self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,init)
 
     assert(self.w and type(self.w)=='number',"[selector].w need number")
@@ -1360,29 +1383,30 @@ function Widgets.selector:draw()
     local w=self.w
     local HOV=self._hoverTime/self._hoverTimeMax
 
+    local frameC=self.frameColor
+
     -- Arrow
     if self._select then
-        gc_setColor(1,1,1,.6+HOV*.26)
+        gc_setColor(frameC[1],frameC[2],frameC[3],.6+HOV*.26)
         local t=(timer()%.5)^.5
         if self._select>1 then
             gc_draw(leftAngle,x-w*.5,y-10)
             if HOV>0 then
-                gc_setColor(1,1,1,HOV*1.5*(.5-t))
+                gc_setColor(frameC[1],frameC[2],frameC[3],HOV*1.5*(.5-t))
                 gc_draw(leftAngle,x-w*.5-t*40,y-10)
-                gc_setColor(1,1,1,.6+HOV*.26)
+                gc_setColor(frameC[1],frameC[2],frameC[3],.6+HOV*.26)
             end
         end
         if self._select<#self.list then
             gc_draw(rightAngle,x+w*.5-20,y-10)
             if HOV>0 then
-                gc_setColor(1,1,1,HOV*1.5*(.5-t))
+                gc_setColor(frameC[1],frameC[2],frameC[3],HOV*1.5*(.5-t))
                 gc_draw(rightAngle,x+w*.5-20+t*40,y-10)
             end
         end
     end
 
     -- Drawable
-    gc_setColor(COLOR.L)
     local x2,y2
     if self.labelPos=='left' then
         x2,y2=x-w*.5-self.labelDistance,y
@@ -1398,10 +1422,11 @@ function Widgets.selector:draw()
         alignDraw(self,self._image,x2,y2)
     end
     if self._text then
-        gc_setColor(self.color)
+        gc_setColor(self.textColor)
         alignDraw(self,self._text,x2,y2)
     end
     if self._selText then
+        gc_setColor(self.textColor)
         GC.mDraw(self._selText,x,y)
     end
 end
@@ -1463,7 +1488,6 @@ Widgets.inputBox=setmetatable({
     keepFocus=true,
     w=100,h=40,
 
-    frameColor='L',
     fillColor={0,0,0,.3},
     secret=false,
     regex=false,
@@ -1479,8 +1503,8 @@ Widgets.inputBox=setmetatable({
         'pos',
         'x','y','w','h',
         'lineWidth','cornerR',
-        'frameColor','fillColor',
 
+        'fillColor','frameColor','textColor','activeColor',
         'text','fontSize','fontType',
         'secret',
         'regex',
@@ -1554,12 +1578,14 @@ function Widgets.inputBox:draw()
     local x,y,w,h=self._x,self._y,self.w,self.h
     local HOV=self._hoverTime/self._hoverTimeMax
 
+    local actColor=self.activeColor
+
     -- Background
     gc_setColor(self.fillColor)
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Highlight
-    gc_setColor(1,1,1,HOV*.2*(math.sin(timer()*6.26)*.25+.75))
+    gc_setColor(actColor[1],actColor[2],actColor[3],HOV*.2*(math.sin(timer()*6.26)*.25+.75))
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
@@ -1569,7 +1595,7 @@ function Widgets.inputBox:draw()
 
     -- Drawable
     if self._text then
-        gc_setColor(COLOR.L)
+        gc_setColor(self.textColor)
         local x2,y2
         if self.labelPos=='left' then
             x2,y2=x-8,y+self.h*.5
@@ -1635,19 +1661,15 @@ end
 ---@field _texts table
 Widgets.textBox=setmetatable({
     type='textBox',
-    keepFocus=true,
     w=100,h=40,
 
     fillColor={0,0,0,.3},
     scrollBarPos='left',
     scrollBarWidth=8,
     scrollBarDist=3,
-    scrollBarColor='L',
     lineHeight=30,
     yOffset=-2,
-    activeColor='LY',
-    idleColor='L',
-    fixContent=true,
+    editable=true,
     sound_clear=false,
 
     _floatWheel=0,
@@ -1662,13 +1684,12 @@ Widgets.textBox=setmetatable({
         'x','y','w','h',
         'lineWidth','cornerR',
 
-        'fillColor',
+        'fillColor','frameColor','textColor','activeColor',
         'fontSize','fontType',
         'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
         'lineHeight',
         'yOffset',
-        'activeColor','idleColor',
-        'fixContent',
+        'editable',
         'sound_clear',
 
         'visibleFunc',
@@ -1677,15 +1698,9 @@ Widgets.textBox=setmetatable({
 },{__index=Widgets.base,__metatable=true})
 function Widgets.textBox:reset(init)
     Widgets.base.reset(self,init)
-    if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
-    assert(type(self.scrollBarColor)=='table',"[textBox].scrollBarColor need table")
     assert(self.w and type(self.w)=='number',"[textBox].w need number")
     assert(self.h and type(self.h)=='number',"[textBox].h need number")
     assert(not self.sound_clear or type(self.sound_clear)=='string',"[textBox].sound_clear need string")
-    for _,v in next,{'activeColor','idleColor'} do
-        if type(self[v])=='string' then self[v]=COLOR[self[v]] end
-        assertf(type(self[v])=='table',"[textBox].%s need table",v)
-    end
 
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos need 'left' or 'right'")
     assert(type(self.yOffset)=='number',"[textBox].yOffset need number")
@@ -1727,7 +1742,7 @@ end
 function Widgets.textBox:press(x,y)
     if not (x and y) then return end
     self:drag(0,0,0,0)
-    if not self.fixContent and x>self._x+self.w-40 and y<self._y+40 then
+    if self.editable and x>self._x+self.w-40 and y<self._y+40 then
         if self._sure>0 then
             self:clear()
             self._sure=0
@@ -1766,12 +1781,14 @@ function Widgets.textBox:draw()
     local H=#list*lineH
     local scroll=self._scrollPos1
 
+    local frameC=WIDGET.sel==self and self.activeColor or self.frameColor
+
     -- Background
     gc_setColor(self.fillColor)
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
-    gc_setColor(WIDGET.sel==self and self.activeColor or self.idleColor)
+    gc_setColor(frameC)
     local lw=self.lineWidth
     gc_setLineWidth(lw)
     gc_rectangle('line',x-lw*.5,y-lw*.5,w+lw,h+lw,self.cornerR)
@@ -1791,10 +1808,10 @@ function Widgets.textBox:draw()
             end
         end
 
-        gc_setColor(COLOR.L)
+        gc_setColor(frameC)
 
         -- Clear button
-        if not self.fixContent then
+        if self.editable then
             gc_rectangle('line',w-40,0,40,40,self.cornerR)
             if self._sure==0 then
                 gc_rectangle('fill',w-40+16,5,8,3)
@@ -1807,6 +1824,7 @@ function Widgets.textBox:draw()
         end
 
         -- Texts
+        gc_setColor(self.textColor)
         setFont(self.fontSize,self.fontType)
         gc_stc_reset()
         gc_stc_rect(0,0,w,h)
@@ -1838,10 +1856,7 @@ Widgets.listBox=setmetatable({
     scrollBarPos='left',
     scrollBarWidth=8,
     scrollBarDist=3,
-    scrollBarColor='L',
     lineHeight=30,
-    activeColor='LI',
-    idleColor='L',
     drawFunc=false, -- function that draw items. Input: item,id,isSelect
     releaseDist=10,
     stencilMode='total',
@@ -1863,10 +1878,9 @@ Widgets.listBox=setmetatable({
         'x','y','w','h',
         'lineWidth','cornerR',
 
-        'fillColor',
+        'fillColor','frameColor','activeColor',
         'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
         'lineHeight',
-        'activeColor','idleColor',
         'drawFunc',
         'releaseDist',
         'stencilMode',
@@ -1878,16 +1892,10 @@ Widgets.listBox=setmetatable({
 },{__index=Widgets.base,__metatable=true})
 function Widgets.listBox:reset(init)
     Widgets.base.reset(self,init)
-    if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
-    assert(type(self.scrollBarColor)=='table',"[listBox].scrollBarColor need table")
     assert(not self.sound_click or type(self.sound_click)=='string',"[listBox].sound_click need string")
     assert(not self.sound_select or type(self.sound_select)=='string',"[listBox].sound_select need string")
     assert(self.w and type(self.w)=='number',"[listBox].w need number")
     assert(self.h and type(self.h)=='number',"[listBox].h need number")
-    for _,v in next,{'activeColor','idleColor'} do
-        if type(self[v])=='string' then self[v]=COLOR[self[v]] end
-        assert(type(self[v])=='table',"[listBox].%s need table",v)
-    end
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[listBox].scrollBarPos need 'left' or 'right'")
 
     assert(type(self.drawFunc)=='function',"[listBox].drawFunc need function")
@@ -2023,7 +2031,7 @@ function Widgets.listBox:draw()
         gc_rectangle('fill',0,0,w,h,self.cornerR)
 
         -- Frame
-        gc_setColor(WIDGET.sel==self and self.activeColor or self.idleColor)
+        gc_setColor(WIDGET.sel==self and self.activeColor or self.frameColor)
         local lw=self.lineWidth
         gc_setLineWidth(lw)
         gc_mRect('line',w*.5,h*.5,w+lw,h+lw,self.cornerR)

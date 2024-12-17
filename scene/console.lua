@@ -655,7 +655,7 @@ local scene={}
 
 function scene.load()
     if not outputBox then
-        outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25,fixContent=true}
+        outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25}
         inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
         log{COLOR.lP,"Zenitha Console"}
         log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
