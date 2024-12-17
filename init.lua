@@ -452,8 +452,8 @@ local globalEvent={
 
     -- Cursor drawing function  
     -- **Graphic states (like color) are uncertain**
-    ---@type fun(time:number,x:number,y:number)
-    drawCursor=function(_,x,y)
+    ---@type fun(x:number, y:number, time:number)
+    drawCursor=function(x,y)
         gc_setColor(1,1,1)
         gc.setLineWidth(2)
         gc_circle(MSisDown(1) and 'fill' or 'line',x,y,6)
@@ -1324,7 +1324,7 @@ function love.run()
                 gc_replaceTransform(xOy)
                     SYSFX._draw()
                     TEXT.draw(TEXT)
-                    if mouseShow then globalEvent.drawCursor(time,mx,my) end
+                    if mouseShow then globalEvent.drawCursor(mx,my,time) end
                 gc_replaceTransform(SCR.xOy_ul)
                     globalEvent.drawSysInfo()
                 gc_replaceTransform(xOy)
