@@ -46,8 +46,8 @@ end
 
 if not (love.filesystem and love.audio and love.sound) then
     LOG("SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
-    function SFX.init()
-        error("attempt to use SFX.init, but SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
+    function SFX.load()
+        error("attempt to use SFX.load, but SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
     end
     return setmetatable(SFX,{
         __index=function(t,k)

@@ -1,8 +1,8 @@
 if not (love.audio and love.sound) then
     LOG("BGM lib is not loaded (need love.audio & love.sound)")
     return setmetatable({
-        init=function()
-            error("attempt to use BGM.init, but BGM lib is not loaded (need love.audio & love.sound)")
+        load=function()
+            error("attempt to use BGM.load, but BGM lib is not loaded (need love.audio & love.sound)")
         end
     },{
         __index=function(t,k)
