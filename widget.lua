@@ -1,6 +1,6 @@
 ---@class Zenitha.WidgetArg: table
 ---
----@field type 'text' | 'image' | 'button' | 'button_fill' | 'button_invis' | 'checkBox' | 'switch' | 'slider' | 'slider_fill' | 'slider_progress' | 'selector' | 'inputBox' | 'textBox' | 'listBox' | string
+---@field type 'text' | 'image' | 'button' | 'button_invis' | 'checkBox' | 'switch' | 'slider' | 'slider_fill' | 'slider_progress' | 'selector' | 'inputBox' | 'textBox' | 'listBox' | string
 ---@field name? string
 ---@field pos? table
 ---
@@ -10,7 +10,7 @@
 ---@field h? number
 ---@field widthLimit? number
 ---
----@field color? Zenitha.ColorStr | Zenitha.Color [text & button & button_fill & checkBox & switch & slider & selector]
+---@field color? Zenitha.ColorStr | Zenitha.Color [text & button & checkBox & switch & slider & selector]
 ---@field text? string | function
 ---@field fontSize? number
 ---@field fontType? string
@@ -27,7 +27,7 @@
 ---@field lineWidth? number
 ---@field cornerR? number Round corner ratio
 ---
----@field textColor? Zenitha.ColorStr | Zenitha.Color [button & button_fill & slider]
+---@field textColor? Zenitha.ColorStr | Zenitha.Color [button & slider]
 ---@field fillColor? Zenitha.ColorStr | Zenitha.Color [switch & slider & slider_progress & inputBox & textBox & listBox]
 ---@field frameColor? Zenitha.ColorStr | Zenitha.Color [inputBox]
 ---@field activeColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
@@ -514,41 +514,6 @@ function Widgets.button:draw()
     gc_setLineWidth(self.lineWidth)
     gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,.95)
     gc_mRect('line',0,0,w,h,self.cornerR)
-
-    -- Drawable
-    if self._image then
-        gc_setColor(1,1,1)
-        alignDraw(self,self._image)
-    end
-    if self._text then
-        gc_setColor(self.textColor)
-        alignDraw(self,self._text)
-    end
-    gc_pop()
-end
-
----@class Zenitha.Widget.button_fill: Zenitha.Widget.button
-Widgets.button_fill=setmetatable({
-    type='button_fill',
-    textColor='D',
-},{__index=Widgets.button,__metatable=true})
-function Widgets.button_fill:draw()
-    gc_push('transform')
-    gc_translate(self._x,self._y)
-
-    if self._pressTime>0 then
-        gc_scale(1-self._pressTime/self._pressTimeMax*.0626)
-    end
-
-    local w,h=self.w,self.h
-    local HOV=self._hoverTime/self._hoverTimeMax
-
-    local c=self.fillColor
-    local r,g,b=c[1],c[2],c[3]
-
-    -- Rectangle
-    gc_setColor(.15+r*.7*(1-HOV*.26),.15+g*.7*(1-HOV*.26),.15+b*.7*(1-HOV*.26),.9)
-    gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
