@@ -450,7 +450,9 @@ local globalEvent={
     -- System info function (like time and battery power) drawing function (default transform is SCR.xOy_ul)
     drawSysInfo=NULL,
 
-    -- Cursor drawing function (pass time,x,y as arguments) (Color and line width is uncertain)
+    -- Cursor drawing function  
+    -- **Graphic states (like color) are uncertain**
+    ---@type fun(time:number,x:number,y:number)
     drawCursor=function(_,x,y)
         gc_setColor(1,1,1)
         gc.setLineWidth(2)
@@ -458,6 +460,7 @@ local globalEvent={
     end,
 
     -- Called when "Click Event" triggered
+    ---@type fun(x:number,y:number,k:number)
     clickFX=function(x,y,_) SYSFX.tap(.26,x,y) end,
 
     -- Called when request quiting with ZENITHA._quit()
