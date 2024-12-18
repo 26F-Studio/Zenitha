@@ -1,50 +1,50 @@
 ---@class Zenitha.WidgetArg: table
 ---
----@field type 'text' | 'image' | 'button' | 'button_invis' | 'checkBox' | 'switch' | 'slider' | 'slider_fill' | 'slider_progress' | 'selector' | 'inputBox' | 'textBox' | 'listBox' | string
----@field name? string
----@field pos? table
+---@field type 'text' | 'image' | 'button' | 'checkBox' | 'switch' | 'slider' | 'slider_fill' | 'slider_progress' | 'selector' | 'inputBox' | 'textBox' | 'listBox' | string
+---@field name? string [All]
+---@field pos? table [All]
 ---
----@field x? number
----@field y? number
----@field w? number
----@field h? number
----@field widthLimit? number
+---@field x? number [All]
+---@field y? number [All]
+---@field w? number [EXCEPT text & switch]
+---@field h? number [EXCEPT text & checkBox & slider & selector]
+---@field widthLimit? number [EXCEPT image & button & input/text/listBox]
 ---
----@field color? Zenitha.ColorStr | Zenitha.Color [text & button & checkBox & switch & slider & selector]
----@field text? string | function
----@field fontSize? number
----@field fontType? string
----@field image? string | love.Drawable Can use slash-path to read from IMG lib
----@field alignX? 'left' | 'right' | 'center'
----@field alignY? 'top' | 'bottom' | 'center'
----@field labelPos? 'left' | 'right' | 'top' | 'bottom' Some widget (like Slider) didn't use 'top'
----@field labelDistance? number
----@field disp? function Must return the value that widget should show
----@field code? function Called 'When triggered'
----@field visibleFunc? function Used to change widget's visibility when scene changed
----@field visibleTick? function Used to update widget's visibility every frame
+---@field color? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & input/text/listBox]
+---@field text? string | function [EXCEPT image & text/listBox]
+---@field fontSize? number [EXCEPT image & listBox]
+---@field fontType? string [EXCEPT image & listBox]
+---@field image? string | love.Drawable [image & button] Can use slash-path to read from IMG lib
+---@field alignX? 'left' | 'right' | 'center' [text & image & button]
+---@field alignY? 'top' | 'bottom' | 'center' [text & image & button]
+---@field labelPos? 'left' | 'right' | 'top' | 'bottom' [EXCEPT text & image & button & text/listBox] Some widget (like Slider) didn't use 'top'
+---@field labelDistance? number [EXCEPT text & image & button & text/listBox]
+---@field disp? function [checkBox & switch & sliders & selector] Must return the value that widget should show
+---@field code? function [EXCEPT text & image & input/textBox] Called 'When triggered'
+---@field visibleFunc? function [All] Used to change widget's visibility when scene changed
+---@field visibleTick? function [All] Used to update widget's visibility every frame
 ---
----@field lineWidth? number
----@field cornerR? number Round corner ratio
+---@field lineWidth? number [EXCEPT text & image selector]
+---@field cornerR? number [button & checkBox & slider &input/text/listBox] Round corner ratio
 ---
----@field textColor? Zenitha.ColorStr | Zenitha.Color [button & slider]
----@field fillColor? Zenitha.ColorStr | Zenitha.Color [switch & slider & slider_progress & inputBox & textBox & listBox]
----@field frameColor? Zenitha.ColorStr | Zenitha.Color [inputBox]
----@field activeColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
+---@field textColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & slider_progress & listBox]
+---@field fillColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image selector]
+---@field frameColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image]
+---@field activeColor? Zenitha.ColorStr | Zenitha.Color [input/text/listBox]
 ---
----@field sound_press? string
----@field sound_hover? string
+---@field sound_press? string [button & checkBox & switch & selector & inputBox]
+---@field sound_hover? string [button & checkBox & switch & selector & inputBox]
 ---
 ---@field ang? number [image]
 ---@field k? number [image]
 ---
----@field sound_on? string | false [checkBox]
----@field sound_off? string | false [checkBox]
+---@field sound_on? string | false [checkBox & switch]
+---@field sound_off? string | false [checkBox & switch]
 ---
----@field axis? {minVal:number, maxVal:number, step?:number} [slider]
----@field smooth? boolean Unit point visibility [slider]
----@field valueShow? false | 'int' | 'float' | 'percent' | function Value showing mode or function [called with widgetObj) [slider]
----@field lineDist? number Outline dist from the bat [slider_fill]
+---@field axis? {minVal:number, maxVal:number, step?:number} [slider & slider_fill]
+---@field smooth? boolean [slider] Unit point visibility
+---@field valueShow? false | 'int' | 'float' | 'percent' | function [slider] Value showing mode or function [called with widgetObj)
+---@field lineDist? number [slider_fill] Outline dist from the bat
 ---
 ---@field selFontSize? number [selector]
 ---@field selFontType? string [selector]
@@ -56,10 +56,10 @@
 ---@field maxInputLength? number [inputBox]
 ---@field sound_input? string [inputBox]
 ---@field sound_bksp? string [inputBox]
----@field sound_clear? string [inputBox]
+---@field sound_clear? string [input/textBox]
 ---@field sound_fail? string [inputBox]
 ---
----@field scrollBarPos? number [textBox & listBox]
+---@field scrollBarPos? 'left'|'right' [textBox & listBox]
 ---@field scrollBarWidth? number [textBox & listBox]
 ---@field scrollBarDist? number [textBox & listBox]
 ---@field scrollBarColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
@@ -88,7 +88,7 @@ local gc_mRect=GC.mRect
 local kb=ZENITHA.keyboard
 local timer=ZENITHA.timer.getTime
 
-local assert,next=assert,next
+local type,assert,next,rawget=type,assert,next,rawget
 local floor,ceil=math.floor,math.ceil
 local max,min=math.max,math.min
 local abs,clamp=math.abs,MATH.clamp
@@ -514,36 +514,6 @@ function Widgets.button:draw()
     gc_setLineWidth(self.lineWidth)
     gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,.95)
     gc_mRect('line',0,0,w,h,self.cornerR)
-
-    -- Drawable
-    if self._image then
-        gc_setColor(1,1,1)
-        alignDraw(self,self._image)
-    end
-    if self._text then
-        gc_setColor(self.textColor)
-        alignDraw(self,self._text)
-    end
-    gc_pop()
-end
-
----@class Zenitha.Widget.button_invis: Zenitha.Widget.button
-Widgets.button_invis=setmetatable({
-    type='button_invis',
-    sound_trigger=false,
-},{__index=Widgets.button,__metatable=true})
-function Widgets.button_invis:draw()
-    gc_push('transform')
-    gc_translate(self._x,self._y)
-
-    local w,h=self.w,self.h
-    local HOV=self._hoverTime/self._hoverTimeMax
-
-    local fillC=self.fillColor
-
-    -- Rectangle
-    gc_setColor(fillC[1],fillC[2],fillC[3],HOV*.16)
-    gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Drawable
     if self._image then
@@ -1063,6 +1033,7 @@ Widgets.slider_fill=setmetatable({
         'labelPos',
         'labelDistance',
         'lineWidth','lineDist',
+        'color','fillColor','frameColor','textColor',
         'text','fontSize','fontType',
         'widthLimit',
         'sound_drag',
@@ -1075,6 +1046,7 @@ Widgets.slider_fill=setmetatable({
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_fill:reset(init)
+    self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     Widgets.base.reset(self,init)
 
     assert(self.w and type(self.w)=='number',"[slider_fill].w need number")
@@ -1185,7 +1157,7 @@ Widgets.slider_progress=setmetatable({
         'name',
         'pos',
         'x','y','w','h',
-        'frameColor','fillColor',
+        'color','frameColor','fillColor',
 
         'labelPos',
         'labelDistance',
@@ -1202,6 +1174,7 @@ Widgets.slider_progress=setmetatable({
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_progress:reset(init)
+    self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     Widgets.base.reset(self,init)
 
     assert(self.w and type(self.w)=='number',"[slider_progress].w need number")
@@ -1479,7 +1452,6 @@ Widgets.inputBox=setmetatable({
         'sound_input','sound_bksp','sound_clear','sound_fail',
         'sound_press','sound_hover',
 
-        'disp','code',
         'visibleFunc',
         'visibleTick',
     },
