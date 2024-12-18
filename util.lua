@@ -60,4 +60,14 @@ function UTIL.trace()
     print(debug.traceback("DEBUG",2))
 end
 
+---Try to open the console
+---@return boolean success
+function UTIL.openConsole()
+    if love['_openConsole'] then
+        love['_openConsole']()
+        return true
+    end
+    return false
+end
+
 return UTIL

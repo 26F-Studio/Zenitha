@@ -398,8 +398,11 @@ local globalEvent={
                 local info="Scene stack:"..table.concat(SCN.stack,"->")
                 MSG.log('info',info); return true
             elseif key=='f7'  then -- Open console
-                if love['_openConsole'] then love['_openConsole']() end
-                MSG('info',"Console opened")
+                if UTIL.openConsole() then
+                    MSG('info',"Console opened")
+                else
+                    MSG('warn',"Failed to open Console")
+                end
             elseif key=='f8'  then devMode=false MSG('info',"DEBUG OFF",.2);      return true
             elseif key=='f9'  then devMode=1     MSG('info',"DEBUG 1 (Basic)");   return true
             elseif key=='f10' then devMode=2     MSG('info',"DEBUG 2 (Widget)");  return true
