@@ -3,45 +3,33 @@ local SFX={}
 local sub=string.sub
 local floor=math.floor
 
-local noteVal={
-    C=0,c=0,
-    D=2,d=2,
-    E=4,e=4,
-    F=5,f=5,
-    G=7,g=7,
-    A=9,a=9,
-    B=11,b=11,
-}
+local noteVal={C=0,c=0,D=2,d=2,E=4,e=4,F=5,f=5,G=7,g=7,A=9,a=9,B=11,b=11}
 local noteName={'C','C#','D','D#','E','F','F#','G','G#','A','A#','B'}
+
+---Convert note name to note number (C4=60, same as MIDI)
+---@param tune string Note name, like 'C4'
+---@return number #Note number, -1 if invalid
 function SFX.getTuneHeight(tune)
     local octave=tonumber(tune:sub(-1,-1))
-    if octave then
-        local tuneHeight=noteVal[sub(tune,1,1)]
-        if tuneHeight then
-            tuneHeight=tuneHeight+(octave-1)*12
-            local s=sub(tune,2,2)
-            if s=='s' or s=='#' then
-                tuneHeight=tuneHeight+1
-            elseif s=='f' or s=='b' then
-                tuneHeight=tuneHeight-1
-            end
-            return tuneHeight
-        end
+    if not octave then return -1 end
+    local tuneHeight=noteVal[sub(tune,1,1)]
+    if not tuneHeight then return -1 end
+    tuneHeight=tuneHeight+(octave+1)*12
+    local s=sub(tune,2,2)
+    if s=='s' or s=='#' then
+        tuneHeight=tuneHeight+1
+    elseif s=='f' or s=='b' then
+        tuneHeight=tuneHeight-1
     end
+    return tuneHeight
 end
 
----Get note name with note number (start from 0, like midi)  
----0 --> ' C1'  
----12 --> 'C2'
----@param note number Note number, start from 0
----@return string Note name, e.g. `'C4'`
+---Get note name with note number (60=C4, same as MIDI)
+---@param note number Note number, must > 0
+---@return string #Note name, '--' if invalid
 function SFX.getNoteName(note)
-    if note<0 then
-        return '---'
-    else
-        local octave=floor(note/12)+1
-        return noteName[note%12+1]..octave
-    end
+    if note<0 then return '--' end
+    return noteName[note%12+1]..(floor(note/12)-1)
 end
 
 if not (love.filesystem and love.audio and love.sound) then
@@ -141,7 +129,6 @@ function SFX.loadSample(pack)
             decoder:getDuration()*
             decoder:getBitDepth()*
             decoder:getChannelCount()/8
-        print(soundDataSize)
         decoder=love.sound.newDecoder(pack.path,soundDataSize/pack.count)
         for n=1,pack.count do
             srcMap[pack.name..n]={love.audio.newSource(decoder:decode())}
