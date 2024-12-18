@@ -123,24 +123,42 @@ function SFX.load(name,path,lazyLoad)
 end
 
 ---Load SFX samples from specified directory
----@param pack {name:string, path:string, base:string}
+---@param pack {name:string, path:string, base:string, count:number}
 ---### Example
 ---```lua
 ---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
 ---```
 function SFX.loadSample(pack)
     assert(type(pack)=='table',"Usage: SFX.loadsample(table)")
-    assert(pack.name,"No field: name")
-    assert(pack.path,"No field: path")
-    local num=1
-    while love.filesystem.getInfo(pack.path..'/'..num..'.ogg') do
-        srcMap[pack.name..num]={love.audio.newSource(pack.path..'/'..num..'.ogg','static')}
-        num=num+1
-    end
+    assert(pack.name,"SFX.loadSample: need field 'name'")
+    assert(pack.path,"SFX.loadSample: need field 'path'")
     local base=(SFX.getTuneHeight(pack.base) or 37)-1
-    local top=base+num-1
-    packSetting[pack.name]={base=base,top=top}
-    LOG('info',(num-1).." "..pack.name.." samples loaded")
+    if pack.path:match('%.[a-z]+$') then
+        -- Single file mode
+        local decoder=love.sound.newDecoder(pack.path)
+        local soundDataSize=
+            decoder:getSampleRate()*
+            decoder:getDuration()*
+            decoder:getBitDepth()*
+            decoder:getChannelCount()/8
+        print(soundDataSize)
+        decoder=love.sound.newDecoder(pack.path,soundDataSize/pack.count)
+        for n=1,pack.count do
+            srcMap[pack.name..n]={love.audio.newSource(decoder:decode())}
+        end
+        packSetting[pack.name]={base=base,top=base+pack.count-1}
+        LOG('info',pack.count.." "..pack.name.." samples loaded")
+    else
+        -- path/1.ogg mode
+        local num=1
+        while love.filesystem.getInfo(pack.path..'/'..num..'.ogg') do
+            srcMap[pack.name..num]={love.audio.newSource(pack.path..'/'..num..'.ogg','static')}
+            num=num+1
+        end
+        local top=base+num-1
+        packSetting[pack.name]={base=base,top=top}
+        LOG('info',(num-1).." "..pack.name.." samples loaded")
+    end
 end
 
 ---Get the number of SFX files loaded (not include SFX samples)
