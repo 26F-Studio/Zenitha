@@ -13,7 +13,9 @@ local rep,rev=string.rep,string.reverse
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
 
----@class Zenitha.StringExt: string
+---If you are sure that you won't need STRING.install() to use things like `str:trim()`,  
+---you can delete the next line (---@class stringlib) to prevent this strEx lib extending the methods for class string
+---@class stringlib
 local STRING={}
 
 for k,v in next,string do STRING[k]=v end
