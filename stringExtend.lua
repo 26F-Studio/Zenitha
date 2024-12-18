@@ -121,13 +121,16 @@ function STRING.time(t)
 end
 
 local byteUnits={[0]=" B"," KB"," MB"," GB"," TB"," PB"," EB"," ZB"," YB"}
+---Convert a file size number to readable string  
+---input `2^26` --> `"64 MB"`
+---@param s number number in byte
 ---@nodiscard
 function STRING.fileSize(s)
     if s<=0 then
         return "0 B"
     else
         local u=floor(log(s,1024)+1e-6)
-        local n=10^(3*u)
+        local n=1024^u
         local digits=floor(lg(s/n))+1
         return format('%g%s',floor(s/n*10^(3-digits))/10^(3-digits),byteUnits[u])
     end
