@@ -14,14 +14,12 @@ function SFX.getTuneHeight(tune)
     if not octave then return -1 end
     local tuneHeight=noteVal[sub(tune,1,1)]
     if not tuneHeight then return -1 end
-    tuneHeight=tuneHeight+(octave+1)*12
     local s=sub(tune,2,2)
-    if s=='s' or s=='#' then
-        tuneHeight=tuneHeight+1
-    elseif s=='f' or s=='b' then
-        tuneHeight=tuneHeight-1
-    end
-    return tuneHeight
+    return tuneHeight+(octave+1)*12+(
+        (s=='s' or s=='#') and  1 or
+        (s=='f' or s=='b') and -1 or
+        0
+    )
 end
 
 ---Get note name with note number (60=C4, same as MIDI)
