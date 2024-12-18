@@ -1,5 +1,10 @@
 local UTIL={}
 
+local function timeUnit(t)
+    return t<10 and
+    ("%7.2f ms"):format(t*1000) or
+    ("%7.2f s"):format(t)
+end
 local timeList,lastTime={},love.timer.getTime()
 ---`UTIL.time()` to start a timer (and clear the log)  
 ---`UTIL.time(msg)` to print a message plus time since previous call  
@@ -13,7 +18,7 @@ function UTIL.time(msg,log)
         if log then
             timeList[#timeList+1]={msg=msg,time=love.timer.getTime()-lastTime}
         else
-            LOG('info',("%s : %dms"):format(msg,(love.timer.getTime()-lastTime)*1000))
+            LOG('debug',("%s : %s"):format(msg,timeUnit(love.timer.getTime()-lastTime)))
         end
     end
     lastTime=love.timer.getTime()
@@ -24,10 +29,10 @@ function UTIL.showTimeLog()
     for i=1,#timeList do maxLen=math.max(maxLen,#timeList[i].msg) end
     for i=1,#timeList do
         local m=timeList[i]
-        LOG('info',("%s : %s%d ms"):format(
+        LOG('debug',("%s : %s%s"):format(
             m.msg,
             (" "):rep(maxLen-#m.msg),
-            m.time*1000
+            timeUnit(m.time)
         ))
     end
 end
