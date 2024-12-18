@@ -49,7 +49,7 @@ local rnd,clamp=math.random,MATH.clamp
 
 ---@type string[]
 local nameList={}
----@type table<string, love.Source[]>
+---@type table<string, (string|love.Source)[]>
 local srcMap={}
 ---@type table<string, {base:number, top:number}>
 local packSetting={}
@@ -67,7 +67,7 @@ local function loadOne(name,path,lazyLoad)
         if srcMap[name] then
             rem(nameList,TABLE.find(nameList,name))
             for _,src in next,srcMap[name] do
-                if type(src)=='userdata' then
+                if type(src)~='string' then
                     src:release()
                 end
             end
@@ -85,10 +85,11 @@ end
 ---@overload fun(pathTable:table, lazyLoad?:boolean)
 function SFX.load(name,path,lazyLoad)
     if type(name)=='table' then
+        ---@cast name +{name:string, path:string}
         local success=0
         local fail=0
         for k,v in next,name do
-            if loadOne(k,v,path) then
+            if loadOne(k,v) then
                 success=success+1
             else
                 fail=fail+1
@@ -215,6 +216,8 @@ function SFX.play(name,vol,pos,pitch)
         S[1]=src
     end
 
+    ---@cast S love.Source[]
+
     local n=1
     while S[n]:isPlaying() do
         n=n+1
@@ -243,6 +246,7 @@ end
 function SFX.releaseFree()
     for _,L in next,srcMap do
         for i,src in next,L do
+            ---@cast src love.Source
             if not src:isPlaying() then
                 src:release()
                 rem(L,i)
