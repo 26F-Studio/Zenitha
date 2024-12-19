@@ -1,5 +1,5 @@
 local rnd,floor=math.random,math.floor
-local find,gsub,match,gmatch=string.find,string.gsub,string.match,string.gmatch
+local gsub,match,gmatch=string.gsub,string.match,string.gmatch
 local rem=table.remove
 local next,type,select=next,type,select
 
@@ -690,7 +690,7 @@ do -- function TABLE.dumpDeflate(t,depth)
                 end
             elseif T=='string' then
                 if match(k,'^[^a-zA-Z_]') then
-                    k='["'..gsub(k,'"','\\"')..'"]='
+                    k='["'..gsub(k,'"',[[\"]])..'"]='
                 else
                     k=k..'='
                 end
@@ -705,7 +705,7 @@ do -- function TABLE.dumpDeflate(t,depth)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
             elseif T=='string' then
-                v='"'..gsub(v,'"','\\"')..'"'
+                v='"'..gsub(v,'"',[[\"]])..'"'
             elseif T=='table' then
                 if t>=lim then v=tostring(v) else v=dump(v,t+1,lim) end
             else
@@ -757,7 +757,7 @@ do -- function TABLE.dump(t,depth)
                 end
             elseif T=='string' then
                 if match(k,'^[^a-zA-Z_]') then
-                    k='["'..gsub(k,'"','\\"')..'"]='
+                    k='["'..gsub(k,'"',[[\"]])..'"]='
                 else
                     k=k..'='
                 end
@@ -772,7 +772,7 @@ do -- function TABLE.dump(t,depth)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
             elseif T=='string' then
-                v='"'..gsub(v,'"','\\"')..'"'
+                v='"'..gsub(v,'"',[[\"]])..'"'
             elseif T=='table' then
                 if t>=lim then v=tostring(v) else v=dump(v,t+1,lim) end
             else
