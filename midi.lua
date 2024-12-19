@@ -23,7 +23,7 @@ local printUnk=false
 ---@field tickPerQuarterNote number
 ---@field beatPerMinute string for storing multiple-tempo like "100,120"
 ---@field handler function
----@field playing boolean
+---@field eof boolean
 ---
 ---@field tracks Zenitha.MIDI.Event[]
 ---@field trackHeads (number | false)[]
@@ -68,7 +68,7 @@ function MIDI.newSong(sData,handler)
     songBuf:put(sData)
     assert(type(handler)=='function',"MIDI.newSong(songData,handler): handler need function")
     local Song={
-        playing=true,
+        eof=false,
         time=0,
         handler=handler,
     }
@@ -301,26 +301,31 @@ function MIDI.newSong(sData,handler)
     return setmetatable(Song,MIDI)
 end
 
+---Seek in seconds (WIP)
 ---@param t number
 function MIDI:seek(t)
-    self.playing=true
+    self.eof=false
     self.time=t
     for i=1,#self.trackHeads do
         local p=1
         self.trackHeads[i]=p
+        -- TODO
     end
 end
 
+---Seek to 0
 function MIDI:reset()
-    self.playing=true
+    self.eof=false
     self.time=0
     for i=1,#self.trackHeads do
         self.trackHeads[i]=1
     end
 end
 
+---Update the song to next note, with optional minimum delta time
+---@param minDT? number
 function MIDI:step(minDT)
-    if not self.playing then return end
+    if self.eof then return end
     local heads=self.trackHeads
     local nearestTime=1e99
     for i=1,self.trackCount do
@@ -329,12 +334,13 @@ function MIDI:step(minDT)
             nearestTime=math.min(nearestTime,event.time)
         end
     end
-    nearestTime=math.max(nearestTime,minDT)
-    self:update()
+    self:update(math.max(nearestTime,minDT or 0)-self.time+2^-40)
 end
 
+---Update the song, trigger the events if need
+---@param dt number
 function MIDI:update(dt)
-    if not self.playing then return end
+    if self.eof then return end
     if dt then self.time=self.time+dt end
     local heads=self.trackHeads
     local dead=true
@@ -355,16 +361,15 @@ function MIDI:update(dt)
         end
     end
     if dead then
-        self.playing=false
+        self.eof=true
     end
 end
 
----Play the song with TASK.new
+---Play the song (creating a global TASK running `self:update(dt)`)
 function MIDI:play()
-    local upd=MIDI.update
-    local yield=coroutine.yield
     TASK.new(function()
-        while self.playing do
+        local yield,upd=coroutine.yield,MIDI.update
+        while not self.eof do
             upd(self,yield())
         end
     end)
