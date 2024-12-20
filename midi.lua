@@ -307,9 +307,12 @@ function MIDI:seek(t)
     self.eof=false
     self.time=t
     for i=1,#self.trackHeads do
-        local p=1
-        self.trackHeads[i]=p
-        -- TODO
+        local s,e=1,#self.tracks[i]
+        while e>s do
+            local m=math.floor((s+e)/2)
+            if self.tracks[i][m].time<t then s=m+1 else e=m end
+        end
+        self.trackHeads[i]=s
     end
 end
 
