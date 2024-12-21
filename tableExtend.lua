@@ -836,7 +836,8 @@ function TABLE.countAll(t,val)
     return count
 end
 
----Return next value of [1~#] (by value) (like _G.next)
+---Return next value of [1~#] (by value), like _G.next  
+---Return t[1] if val is nil
 ---@generic K, V
 ---@param t table<K, V>
 ---@param val V
@@ -845,6 +846,19 @@ end
 function TABLE.next(t,val)
     if val==nil then return t[1] end
     for i=1,#t do if t[i]==val then return t[i+1] end end
+    return nil
+end
+
+---Return previous value of [1~#] (by value), like TABLE.next but reversed  
+---Return t[#t] if val is nil
+---@generic K, V
+---@param t table<K, V>
+---@param val V
+---@return V | nil prevValue nil when not found
+---@nodiscard
+function TABLE.prev(t,val)
+    if val==nil then return t[#t] end
+    for i=#t,1,-1 do if t[i]==val then return t[i-1] end end
     return nil
 end
 
