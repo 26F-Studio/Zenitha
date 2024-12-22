@@ -480,22 +480,22 @@ local globalEvent={
 
 local require=simpRequire((...)..'.')
 
--- Extended lua basic libraries
-MATH=       require'mathExtend'
-STRING=     require'stringExtend'
-TABLE=      require'tableExtend'
-
 -- Pure lua modules (simple)
 COLOR=      require'color'
 AE=         require'escape'
+LOG=        require'log'
 RGB9={}     --[[Get color literal with `RGB9[960]`(Red)   ]] for r=0,9 do for g=0,9 do for b=0,9 do RGB9[100*r+10*g+b]={r/9,g/9,b/9} end end end
 RGBA9={}    --[[Get color literal with `RGBA9[9609]`(Red) ]] for r=0,9 do for g=0,9 do for b=0,9 do for a=0,9 do RGBA9[1000*r+100*g+10*b+a]={r/9,g/9,b/9,a/9} end end end end
 RGB5={}     --[[Get color literal with `RGB5[520]`(Red)   ]] for r=0,5 do for g=0,5 do for b=0,5 do RGB5[100*r+10*g+b]={r/5,g/5,b/5} end end end
 RGBA5={}    --[[Get color literal with `RGBA5[5205]`(Red) ]] for r=0,5 do for g=0,5 do for b=0,5 do for a=0,5 do RGBA5[1000*r+100*g+10*b+a]={r/5,g/5,b/5,a/5} end end end end
 RGB2={}     --[[Get color literal with `RGB2[210]`(Red)   ]] for r=0,2 do for g=0,2 do for b=0,2 do RGB2[100*r+10*g+b]={r/2,g/2,b/2} end end end
 UTIL=       require'util'
-LOG=        require'log'
 JSON=       require'json'
+
+-- Extended lua basic libraries
+MATH=       require'mathExtend'
+STRING=     require'stringExtend'
+TABLE=      require'tableExtend'
 
 -- Pure lua modules (complex, with update/draw)
 LANG=       require'languages'

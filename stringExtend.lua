@@ -24,7 +24,10 @@ for k,v in next,string do STRING[k]=v end
 -- LuaJIT extension wrapper
 
 local suc,buffer=pcall(require,'string.buffer')
-if not suc then buffer=({require})[1]'Zenitha.altBuffer' end
+if suc then
+    LOG('warn','Failed to load string.buffer module, using altBuffer')
+    buffer=({require})[1]'Zenitha.altBuffer'
+end
 
 local buffer_new=buffer.new
 local buf_put,buf_get do
@@ -766,7 +769,7 @@ STRING.u8pattern="[\0-\x7F\xC2-\xFD][\x80-\xBF]*"
 
 local upperData,lowerData,diaData do
     local split=STRING.split
-    local function parseFile(fname)
+    local function parseStrPair(fname)
         local d
         if love and love.filesystem and type(love.filesystem.read)=='function' then
             d=love.filesystem.read(fname)
@@ -783,15 +786,16 @@ local upperData,lowerData,diaData do
             return {}
         end
         d=split(gsub(d,'\n',','),',')
+        ---@cast d any
         for i=1,#d do
             d[i]=split(d[i],'=')
         end
         return d
     end
     local zPath=(...):match('.+%.'):gsub('%.','/')
-    upperData=parseFile(zPath..'upcaser.txt')
-    lowerData=parseFile(zPath..'lowcaser.txt')
-    diaData=parseFile(zPath..'diacritics.txt')
+    upperData=parseStrPair(zPath..'upcaser.txt')
+    lowerData=parseStrPair(zPath..'lowcaser.txt')
+    diaData=parseStrPair(zPath..'diacritics.txt')
 end
 
 ---string.upper with utf8 support, warning: very low performance, 

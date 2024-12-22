@@ -2,7 +2,7 @@
 
 local floor=math.floor
 local ins=table.insert
-local clamp=MATH.clamp
+local function clamp(v,low,high) return v<=low and low or v>=high and high or v end
 
 local startTime=os.time()
 local showLevel=10
@@ -94,11 +94,12 @@ end
 function LOG.getString()
     local L={}
     for i=1,#logs do L[i]=dumpLog(logs[i]) end
-    return STRING.repD("$1 $2  logs  $3\n",
+    return ("%s %s  logs  %s\n%s"):format(
         ZENITHA.getAppName(),
         ZENITHA.getVersionText(),
-        os.date("%Y/%m/%d %A",startTime)
-    )..table.concat(L,"\n")
+        os.date("%Y/%m/%d %A",startTime),
+        table.concat(L,"\n")
+    )
 end
 
 return LOG

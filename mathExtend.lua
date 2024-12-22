@@ -291,13 +291,7 @@ end
 ---@return number
 ---@nodiscard
 function MATH.clamp(v,low,high)
-    if v<=low then
-        return low
-    elseif v>=high then
-        return high
-    else
-        return v
-    end
+    return v<=low and low or v>=high and high or v
 end
 
 ---Check if a number is in a range
