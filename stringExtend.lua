@@ -23,14 +23,16 @@ for k,v in next,string do STRING[k]=v end
 --------------------------------------------------------------
 -- LuaJIT extension wrapper
 
-local buffer=require'string.buffer'
+local suc,buffer=pcall(require,'string.buffer')
+if not suc then buffer=({require})[1]'Zenitha.altBuffer' end
+
 local buffer_new=buffer.new
 local buf_put,buf_get do
     local buf=buffer_new()
     buf_put,buf_get=buf.put,buf.get
 end
 
-STRING.newBuf=buffer_new
+STRING.newBuf=buffer.new
 STRING.encBuf=buffer.encode
 STRING.decBuf=buffer.decode
 
