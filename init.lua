@@ -230,12 +230,21 @@ _G.ZENITHA=ZENITHA
 --------------------------------------------------------------
 
 -- Useful global constants & functions
----@type table Empty table used as placeholder
+
+---Just `{}`  
+---Empty table used as placeholder
+---@type table
 NONE=setmetatable({},{__newindex=function() error("NONE: Attempt to modify constant table") end,__metatable=true})
----@type function Empty function used as placeholder
-NULL=function(...) end
-TRUE=function() return true end
-FALSE=function() return false end
+
+---Just `function() end`  
+---Empty function used as placeholder
+function NULL(...) end
+
+---Just `function() return true end`
+function TRUE() return true end
+
+---Just `function() return false end`
+function FALSE() return false end
 
 ---@type 'macOS' | 'Windows' | 'Linux' | 'Android' | 'iOS' | 'unknown'
 SYSTEM=love.system and love.system.getOS():gsub('OS X','macOS') or 'unknown'
