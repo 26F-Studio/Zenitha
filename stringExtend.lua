@@ -24,7 +24,7 @@ for k,v in next,string do STRING[k]=v end
 -- LuaJIT extension wrapper
 
 local suc,buffer=pcall(require,'string.buffer')
-if suc then
+if not suc then
     LOG('warn','Failed to load string.buffer module, using altBuffer')
     buffer=({require})[1]'Zenitha.altBuffer'
 end
