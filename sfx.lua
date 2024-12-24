@@ -49,7 +49,7 @@ local rnd,clamp=math.random,MATH.clamp
 
 ---@type string[]
 local nameList={}
----@type table<string, (string|love.Source)[]>
+---@type table<string, (string | love.Source)[]>
 local srcMap={}
 ---@type table<string, {base:number, top:number}>
 local packSetting={}

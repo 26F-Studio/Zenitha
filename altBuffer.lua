@@ -53,7 +53,7 @@ function altBuffer.new()
     return setmetatable({[0]=""},altBuffer)
 end
 
----@param c string|Zenitha.AltBufferRef
+---@param c string | Zenitha.AltBufferRef
 function altBuffer:put(c)
     if type(c)=='string' then
         if #c>0 then

@@ -59,7 +59,7 @@
 ---@field sound_clear? string [input/textBox]
 ---@field sound_fail? string [inputBox]
 ---
----@field scrollBarPos? 'left'|'right' [textBox & listBox]
+---@field scrollBarPos? 'left' | 'right' [textBox & listBox]
 ---@field scrollBarWidth? number [textBox & listBox]
 ---@field scrollBarDist? number [textBox & listBox]
 ---@field scrollBarColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
