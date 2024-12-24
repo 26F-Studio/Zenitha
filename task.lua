@@ -87,9 +87,10 @@ function TASK._update(dt)
     end
 end
 
----Create a new task
+---Wrap a function into coroutine then Zenitha will resume it automatically.  
+---Immediately resume when `TASK.new()`, then trigger by time with `dt` passed to it through `coroutine.yield` inside
 ---@param code function
----@param ... any Arguments passed to the function
+---@param ... any First-call arguments when `TASK.new()`
 function TASK.new(code,...)
     local thread=coroutine.create(code)
     assert(resume(thread,...))
