@@ -98,12 +98,12 @@ function SFX.load(name,path,lazyLoad)
         if fail>0 then
             LOG(fail.." SFX files missing")
         end
-        LOG('info',("%d SFX files added, total %d"):format(success,#nameList))
+        LOG(("%d SFX files added, total %d"):format(success,#nameList))
     else
         if loadOne(name,path,lazyLoad) then
-            LOG('info',"SFX loaded: "..name)
+            LOG("SFX loaded: "..name)
         else
-            LOG('info',"No SFX: "..path)
+            LOG("No SFX: "..path)
         end
     end
     table.sort(nameList)
@@ -133,7 +133,7 @@ function SFX.loadSample(pack)
             srcMap[pack.name..n]={love.audio.newSource(decoder:decode())}
         end
         packSetting[pack.name]={base=base,top=base+pack.count-1}
-        LOG('info',pack.count.." "..pack.name.." samples loaded")
+        LOG(pack.count.." "..pack.name.." samples loaded")
     else
         -- path/1.ogg mode
         local num=1
@@ -143,7 +143,7 @@ function SFX.loadSample(pack)
         end
         local top=base+num-1
         packSetting[pack.name]={base=base,top=top}
-        LOG('info',(num-1).." "..pack.name.." samples loaded")
+        LOG((num-1).." "..pack.name.." samples loaded")
     end
 end
 
