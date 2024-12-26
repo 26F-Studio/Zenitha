@@ -1,11 +1,16 @@
 local kb=ZENITHA.keyboard
 local ins,rem=table.insert,table.remove
 
-local outputBox,inputBox
+local outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25}
+local inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
 
 -- Console Log
 local function log(str) outputBox:push(str) end
 _CL=log
+
+log{COLOR.lP,"Zenitha Console"}
+log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
+log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
 
 local history,hisPtr={"?"},false
 local sumode=false
@@ -94,15 +99,17 @@ local commands={} do
             "Usage: echo [message]",
         },
     }
-    commands.cls={
+    commands.clear={
         code=function() outputBox:clear() end,
-        description="Clear the window",
+        description="Clear the screen",
         details={
             "Clear the log output.",
             "",
-            "Usage: cls",
+            "Aliases: clear cls",
+            "",
+            "Usage: clear",
         },
-    }
+    }commands.cls=commands.clear
 
     -- File
     commands.explorer={
@@ -291,7 +298,7 @@ local commands={} do
             "Usage: mv [oldfilename] [newfilename]",
         },
     }commands.ren="mv"
-    commands.read={
+    commands.cat={
         code=function(name)
             if name~='' then
                 local info=love.filesystem.getInfo(name)
@@ -309,14 +316,14 @@ local commands={} do
                     log{COLOR.R,("No file named '%s'"):format(name)}
                 end
             else
-                log{COLOR.I,"Usage: read [filename]"}
+                log{COLOR.I,"Usage: cat [filename]"}
             end
         end,
         description="Read file content",
         details={
             "Print the file content to this window.",
             "",
-            "Usage: read [filename]",
+            "Usage: cat [filename]",
         },
     }
     commands.resetall={
@@ -332,7 +339,7 @@ local commands={} do
                 WIDGET.unFocus(true)
                 inputBox:setVisible(false)
                 table.remove(WIDGET.active,TABLE.find(WIDGET.active,inputBox))
-                commands.cls.code()
+                commands.clear.code()
                 outputBox:clear()
                 outputBox.h=SCR.h0-140
                 local button=WIDGET.new{type='button',name='bye',text=ZENITHA.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,code=function()
@@ -654,16 +661,6 @@ setmetatable(userG.os,dangerousLibMeta)
 local scene={}
 
 function scene.load()
-    if not outputBox then
-        outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25}
-        inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
-        log{COLOR.lP,"Zenitha Console"}
-        log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
-        log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
-        ins(scene.widgetList,outputBox)
-        ins(scene.widgetList,inputBox)
-    end
-
     outputBox.w,outputBox.h=SCR.w0-40,math.max(SCR.h0-120,20)
     inputBox.y,inputBox.w=math.max(SCR.h0-120,20)+20,SCR.w0-40
     outputBox:reset()
@@ -802,8 +799,8 @@ scene.widgetList={
     WIDGET.new{type='button',name='up',   pos={1,1},w=80,x=-60,y=-360,color='lG',fontSize=20,text="UP",    code=function() scene.keyDown('up') end},
     WIDGET.new{type='button',name='down', pos={1,1},w=80,x=-60,y=-260,color='lY',fontSize=20,text="DOWN",  code=function() scene.keyDown('down') end},
     WIDGET.new{type='button',name='paste',pos={1,1},w=80,x=-60,y=-160,color='lC',fontSize=20,text="PASTE", code=function() inputBox:addText(love.system.getClipboardText() or "") end},
-    outputBox,-- nil, actually added in scene.load
-    inputBox,-- nil, actually added in scene.load
+    outputBox,
+    inputBox,
 }
 
 return scene
