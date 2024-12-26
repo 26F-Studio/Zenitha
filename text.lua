@@ -117,7 +117,7 @@ end,
 score=function(T)
     setColor(T.r,T.g,T.b,T.a*min(T._t/T.inPoint,1)*min((1-T._t)/T.outPoint,1))
     draw(
-        T.text,T.x,T.y-0-T._t^.2*(T.arg or 30),
+        T.text,T.x,T.y-T._t^.2*(T.arg or 30),
         nil,
         T.kx,T.ky,
         T._ox,T._oy
