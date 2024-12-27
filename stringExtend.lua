@@ -250,7 +250,7 @@ function STRING.split(str,sep,regex)
 end
 
 ---Split a string into single-byte strings
----@return string[]
+---@return char[]
 ---@nodiscard
 function STRING.atomize(str)
     local l={}
@@ -308,7 +308,7 @@ local shiftMap={
     [',']='<',['.']='>',['/']='?',
 }
 ---Single-byte string.upper, but can also shift numbers to signs
----@param str string
+---@param str char
 ---@return string
 ---@nodiscard
 function STRING.shift(str)
@@ -324,7 +324,7 @@ local unshiftMap={
     ['<']=',',['>']='.',['?']='/',
 }
 ---Single-byte string.lower, but can also unshift signs to numbers
----@param str string
+---@param str char
 ---@return string
 ---@nodiscard
 function STRING.unshift(str)

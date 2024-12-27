@@ -204,9 +204,10 @@ _G.ZENITHA=ZENITHA
 
 -- typedef (you need Lua language server extension to make all these "---@xxx" things work) (Recommend extension: "Lua" by sumneko)
 
----@class Set<T>: { [T]:any }
----@class Map<T>: { [any]:T }
----@class Mat<T>: { [integer]:{ [integer]:T } }
+---@class char:string Single-byte string
+---@class Set<V>: { [V]:any }
+---@class Map<V>: { [any]:V }
+---@class Mat<V>: { [integer]:{ [integer]:V } }
 
 ---@class Zenitha.Click
 ---@field x number

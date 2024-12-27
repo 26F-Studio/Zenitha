@@ -13,12 +13,12 @@ for k,v in next,table do TABLE[k]=v end
 
 ---Create a new filled table
 ---
----You can also use `table.new` from luajit:  
+---You can also use `TABLE.newSize`, which is alias of `table.new` from luajit:  
 ---https://luajit.org/extensions.html
----@generic T
----@param val T value to fill
+---@generic V
+---@param val V value to fill
 ---@param count integer how many elements
----@return T[]
+---@return V[]
 ---@nodiscard
 function TABLE.new(val,count)
     local L={}
@@ -28,7 +28,7 @@ function TABLE.new(val,count)
     return L
 end
 
----Create a new table with specific size allocated
+---Create a new table with specific size allocated (from luajit)
 ---
 ---Fallback to `return {}` if failed to require `table.new`
 ---@param nArray? integer the size of "list part" of the table
@@ -40,11 +40,11 @@ function TABLE.newSize(nArray,nHash) return {} end
 pcall(function() TABLE[('newSize')]=require'table.new' end)
 
 ---Create a new filled matrix
----@generic T
----@param val T value to fill
+---@generic V
+---@param val V value to fill
 ---@param height integer
 ---@param width integer
----@return Mat<T>
+---@return Mat<V>
 ---@nodiscard
 function TABLE.newMat(val,height,width)
     local L={}
@@ -60,11 +60,11 @@ end
 ---Create the subset list of a list, like string.sub
 ---
 ---leave `start&stop` as `nil` will simply copy
----@generic T
----@param org T original table
+---@generic K, V
+---@param org {[K]:V} original table
 ---@param start? integer start pos (default 1)
 ---@param stop? integer end pos (default #org)
----@return T
+---@return {[K]:V}
 ---@nodiscard
 function TABLE.sub(org,start,stop)
     if not start then start=1 end
@@ -76,10 +76,10 @@ function TABLE.sub(org,start,stop)
 end
 
 ---Create a copy of [1~#] elements
----@generic T
----@param org T original table
+---@generic V
+---@param org V[] original table
 ---@param depth? integer how many layers will be recreate, default to inf
----@return T
+---@return V[]
 ---@nodiscard
 function TABLE.copy(org,depth)
     if not depth then depth=1e99 end
@@ -95,10 +95,10 @@ function TABLE.copy(org,depth)
 end
 
 ---Create a full copy of org, depth = how many layers will be recreate, default to inf
----@generic T
----@param org T original table
+---@generic K, V
+---@param org {[K]:V} original table
 ---@param depth? integer how many layers will be recreate, default to inf
----@return T
+---@return {[K]:V}
 ---@nodiscard
 function TABLE.copyAll(org,depth)
     if not depth then depth=1e99 end
@@ -115,8 +115,8 @@ end
 
 ---Get a new table which keys and values are swapped
 ---@generic K, V
----@param org table<K, V>
----@return table<V, K>
+---@param org {[K]:V}
+---@return {[V]:K}
 function TABLE.inverse(org)
     local T={}
     for k,v in next,org do
@@ -126,7 +126,10 @@ function TABLE.inverse(org)
 end
 
 ---Get keys of a table as a list
----@param org table
+---@generic K
+---@param org {[K]:any}
+---@return K[]
+---@nodiscard
 function TABLE.getKeys(org)
     local L={}
     local n=0
@@ -138,7 +141,10 @@ function TABLE.getKeys(org)
 end
 
 ---Get values of a table as a list
----@param org table
+---@generic V
+---@param org {[any]:V}
+---@return V[]
+---@nodiscard
 function TABLE.getValues(org)
     local L={}
     local n=0
@@ -151,9 +157,9 @@ end
 
 ---Set all values to k
 ---@generic T1, T2
----@param org table<any, T1>
+---@param org {[any]:T1}
 ---@param val? T2 default to `true`
----@return table<T1, T2>
+---@return {[T1]:T2}
 ---@nodiscard
 function TABLE.getValueSet(org,val)
     if val==nil then val=true end
@@ -179,12 +185,38 @@ function TABLE.combine(L1,L2)
     return L
 end
 
----Create a transposed copy of a matrix
----@generic T
----@param matrix T
----@return T
----@nodiscard
+---Transpose a matrix
+---@generic V
+---@param matrix Mat<V>
+---@return Mat<V>
 function TABLE.transpose(matrix)
+    if #matrix==0 then return matrix end
+    local w,h=#matrix[1],#matrix
+    if w>h then
+        for y=h+1,w do matrix[y]={} end
+        for y=2,w do
+            for x=1,y-1 do
+                matrix[y][x],matrix[x][y]=matrix[x][y],matrix[y][x]
+            end
+        end
+    else
+        for y=2,h do
+            for x=1,y-1 do
+                matrix[y][x],matrix[x][y]=matrix[x][y],matrix[y][x]
+            end
+        end
+        for y=h+1,w do matrix[y]=nil end
+    end
+    return matrix
+end
+
+---Create a transposed copy of a matrix  
+---This one is faster then `TABLE.transpose` but creates new table
+---@generic V
+---@param matrix Mat<V>
+---@return Mat<V>
+---@nodiscard
+function TABLE.transposeNew(matrix)
     local newMat={}
     for y=1,#matrix[1] do
         newMat[y]={}
@@ -196,46 +228,47 @@ function TABLE.transpose(matrix)
 end
 
 ---Create a rotated copy of a matrix
----@generic T
----@param matrix Mat<T>
+---@generic V
+---@param matrix Mat<V>
 ---@param direction 'R' | 'L' | 'F' | '0' CW, CCW, 180 deg, 0 deg (copy)
----@return Mat<T>
+---@return Mat<V>
 ---@nodiscard
-function TABLE.rotate(matrix,direction)
-    local icb={}
+function TABLE.rotateNew(matrix,direction)
+    local iMat={}
     if direction=='R' then -- Rotate CW
         for y=1,#matrix[1] do
-            icb[y]={}
+            iMat[y]={}
             for x=1,#matrix do
-                icb[y][x]=matrix[x][#matrix[1]-y+1]
+                iMat[y][x]=matrix[x][#matrix[1]-y+1]
             end
         end
     elseif direction=='L' then -- Rotate CCW
         for y=1,#matrix[1] do
-            icb[y]={}
+            iMat[y]={}
             for x=1,#matrix do
-                icb[y][x]=matrix[#matrix-x+1][y]
+                iMat[y][x]=matrix[#matrix-x+1][y]
             end
         end
     elseif direction=='F' then -- Rotate 180 degree
         for y=1,#matrix do
-            icb[y]={}
+            iMat[y]={}
             for x=1,#matrix[1] do
-                icb[y][x]=matrix[#matrix-y+1][#matrix[1]-x+1]
+                iMat[y][x]=matrix[#matrix-y+1][#matrix[1]-x+1]
             end
         end
     elseif direction=='0' then -- No rotation, just copy
         for y=1,#matrix do
-            icb[y]={}
+            iMat[y]={}
             for x=1,#matrix[1] do
-                icb[y][x]=matrix[y][x]
+                iMat[y][x]=matrix[y][x]
             end
         end
     else
-        errorf("TABLE.rotate(matrix,dir): Invalid rotate direction '%s'",direction)
+        errorf("TABLE.rotateNew: Invalid rotate direction '%s'",direction)
     end
-    return icb
+    return iMat
 end
+TABLE.rotate=TABLE.rotateNew
 
 --------------------------------------------------------------
 -- Set operation
@@ -254,7 +287,8 @@ function TABLE.equal(a,b)
     return true
 end
 
----Check if two whole table have same elements
+---Check if two whole table have same elements  
+---**Warning**: won't check whether two table have same keys of hash part
 ---@param a table
 ---@param b table
 ---@return boolean
@@ -273,17 +307,20 @@ end
 ---@generic T1, T2
 ---@param org T1[] original list
 ---@param new T2[] new list
+---@return (T1 | T2)[]
 function TABLE.append(org,new)
     local l0=#org
     for i=1,#new do
         org[l0+i]=new[i]
     end
+    return org
 end
 
 ---Delete items in [1~#] of org which also in [1~#] of sub
----@generic T
----@param org T[]
----@param sub T[]
+---@generic V
+---@param org V[]
+---@param sub table
+---@return V[]
 function TABLE.subtract(org,sub)
     for i=#org,1,-1 do
         for j=#sub,1,-1 do
@@ -293,12 +330,14 @@ function TABLE.subtract(org,sub)
             end
         end
     end
+    return org
 end
 
 ---Delete all items in org which also in sub
----@generic T
----@param org Map<T>
----@param sub Map<T>
+---@generic K, V
+---@param org {[K]:V}
+---@param sub table
+---@return {[K]:V}
 function TABLE.subtractAll(org,sub)
     for _,v in next,sub do
         while true do
@@ -310,12 +349,15 @@ function TABLE.subtractAll(org,sub)
             end
         end
     end
+    return org
 end
 
 ---Update old table with new table (recursive when both table type and below specifiled depth)
----@param new table
+---@generic T
+---@param new T
 ---@param old table
 ---@param depth? integer how many layer will be entered, default to inf
+---@return T
 function TABLE.update(old,new,depth)
     if not depth then depth=1e99 end
     for k,v in next,new do
@@ -325,11 +367,14 @@ function TABLE.update(old,new,depth)
             old[k]=v
         end
     end
+    return old
 end
 
 ---Update old table with new table when same type (recursive)
----@param old table
+---@generic T
+---@param old T
 ---@param new table
+---@return T
 function TABLE.updateType(old,new)
     for k,v in next,new do
         if type(v)==type(old[k]) then
@@ -340,11 +385,14 @@ function TABLE.updateType(old,new)
             end
         end
     end
+    return old
 end
 
 ---Update old table with new table when no value (recursive)
----@param old table
+---@generic T
+---@param old T
 ---@param new table
+---@return T
 function TABLE.updateMissing(old,new)
     for k,v in next,new do
         if type(v)=='table' then
@@ -354,6 +402,7 @@ function TABLE.updateMissing(old,new)
             old[k]=v
         end
     end
+    return old
 end
 
 --------------------------------------------------------------
@@ -374,84 +423,105 @@ pcall(function() TABLE[('clear')]=require'table.clear' end)
 ---Clear whole table (pure lua implementation)
 ---
 ---Recommend to use `TABLE.clear` instead
----@param t table
+---@generic K, V
+---@param t {[K]:V}
+---@return {[K]:V}
 function TABLE.clearAll(t)
     for k in next,t do
         t[k]=nil
     end
+    return t
 end
 
 ---Clear [1~#] of a table (pure lua implementation)
----@param t table
+---@generic V
+---@param t V[]
+---@return V[]
 function TABLE.clearList(t)
     for i=1,#t do
         t[i]=nil
     end
+    return t
 end
 
 ---Remove a specific value of [1~#]
----@param org any[]
+---@generic V
+---@param org V[]
+---@return V[]
 function TABLE.delete(org,value)
     for i=#org,1,-1 do
         if org[i]==value then
             rem(org,i)
         end
     end
+    return org
 end
 
 ---Remove a specific value in whole table
----@param org table
+---@generic K, V
+---@param org {[K]:V}
+---@return {[K]:V}
 function TABLE.deleteAll(org,value)
     for k,v in next,org do
         if v==value then
             org[k]=nil
         end
     end
+    return org
 end
 
 ---Remove duplicated value of [1~#]
----@param org any[]
-function TABLE.removeDuplicate(org)
+---@generic V
+---@param t V[]
+---@return V[]
+function TABLE.removeDuplicate(t)
     local cache={}
-    local len=#org
+    local len=#t
     local i=1
     while i<=len do
-        if cache[org[i]] then
-            rem(org,i)
+        if cache[t[i]] then
+            rem(t,i)
             len=len-1
         else
-            cache[org[i]]=true
+            cache[t[i]]=true
             i=i+1
         end
     end
+    return t
 end
 
 ---Remove duplicated value in whole table
----@param org table
-function TABLE.removeDuplicateAll(org)
+---@generic K, V
+---@param t {[K]:V}
+---@return {[K]:V}
+function TABLE.removeDuplicateAll(t)
     local cache={}
-    for k,v in next,org do
+    for k,v in next,t do
         if cache[v] then
-            org[k]=nil
+            t[k]=nil
         else
             cache[v]=true
         end
     end
+    return t
 end
 
 ---Reverse [1~#]
----@param org any[]
+---@generic V
+---@param org V[]
+---@return V[]
 function TABLE.reverse(org)
     local l=#org
     for i=1,floor(l/2) do
         org[i],org[l+1-i]=org[l+1-i],org[i]
     end
+    return org
 end
 
 ---Get random [1~#] of table
----@generic T
----@param t T[]
----@return T
+---@generic V
+---@param t V[]
+---@return V
 ---@nodiscard
 function TABLE.getRandom(t)
     local l=#t
@@ -463,9 +533,9 @@ function TABLE.getRandom(t)
 end
 
 ---Remove & return random [1~#] of table (not really "pop"!)
----@generic T
----@param t T[]
----@return T
+---@generic V
+---@param t V[]
+---@return V
 ---@nodiscard
 function TABLE.popRandom(t)
     local l=#t
@@ -480,12 +550,15 @@ function TABLE.popRandom(t)
 end
 
 ---Shuffle [1~#]
----@param org any[]
+---@generic V
+---@param org V[]
+---@return V[]
 function TABLE.shuffle(org)
     for i=#org,2,-1 do
         local r=rnd(i)
         org[i],org[r]=org[r],org[i]
     end
+    return org
 end
 
 ---Re-index string value as key
@@ -495,13 +568,16 @@ end
 ---TABLE.reIndex(t)
 ---t.b('Hello Zenitha')
 ---```
----@param org table
+---@generic T
+---@param org T
+---@return T
 function TABLE.reIndex(org)
     for k,v in next,org do
         if type(v)=='string' then
             org[k]=org[v]
         end
     end
+    return org
 end
 
 ---Flatten a nested table to a flat table (no table type value included)
@@ -509,7 +585,7 @@ end
 ---```lua
 ---local T={a=1,b={c=2},d={e={f=3}}}
 ---TABLE.flatten(T)
------[[ Current state of T:
+-----[[ Now T is
 ---{
 ---    ['a']=1,
 ---    ['b/c']=2
@@ -519,6 +595,7 @@ end
 ---```
 ---@param org table
 ---@param depth? integer how many layer will be entered and flattened, default to inf
+---@return table
 function TABLE.flatten(org,depth)
     if not depth then depth=1e99 end
     while depth>0 do
@@ -528,7 +605,7 @@ function TABLE.flatten(org,depth)
                 table.insert(tKeyList,k)
             end
         end
-        if #tKeyList==0 then return end
+        if #tKeyList==0 then return org end
         for i=1,#tKeyList do
             local key=tKeyList[i]
             for k,v in next,org[key] do
@@ -538,6 +615,7 @@ function TABLE.flatten(org,depth)
         end
         depth=depth-1
     end
+    return org
 end
 
 --------------------------------------------------------------
@@ -575,7 +653,7 @@ end
 
 ---Find value in whole table
 ---@generic K, V
----@param t table<K, V>
+---@param t {[K]:V}
 ---@param val V
 ---@return K | nil key
 ---@nodiscard
@@ -585,10 +663,12 @@ function TABLE.findAll(t,val)
 end
 
 ---Replace value in [1~#], like string.gsub
----@param t any[]
----@param v_old any
----@param v_new any
+---@generic T1, T2
+---@param t T1[]
+---@param v_old T1
+---@param v_new T2
 ---@param start? integer
+---@return (T1 | T2)[]
 function TABLE.replace(t,v_old,v_new,start)
     for i=start or 1,#t do
         if t[i]==v_old then
@@ -598,9 +678,11 @@ function TABLE.replace(t,v_old,v_new,start)
 end
 
 ---Replace value in whole table
----@param t table
----@param v_old any
----@param v_new any
+---@generic K, V1, V2
+---@param t {[K]:V1}
+---@param v_old V1
+---@param v_new V2
+---@return {[K]:V1|V2}
 function TABLE.replaceAll(t,v_old,v_new)
     for k,v in next,t do
         if v==v_old then
@@ -611,9 +693,9 @@ end
 
 ---Find the minimum value (and key)  
 ---if you don't need the key and the list is short, use `math.min(unpack(t))` for better performance
----@generic T
----@param t T[]
----@return T | number minVal, integer | nil key `minVal` will be inf when empty
+---@generic V
+---@param t V[]
+---@return V | number minVal, integer | nil key `minVal` will be inf when empty
 ---@nodiscard
 function TABLE.min(t)
     local min,key=MATH.inf,nil
@@ -627,7 +709,7 @@ end
 
 ---Find the minimum value (and key) in whole table
 ---@generic K, V
----@param t table<K, V>
+---@param t {[K]:V}
 ---@return V | number minVal, K | nil key `minVal` will be inf when empty
 ---@nodiscard
 function TABLE.minAll(t)
@@ -642,9 +724,9 @@ end
 
 ---Find the maximum value (and key)  
 ---if you don't need the key and the list is short, use `math.max(unpack(t))` for better performance
----@generic T
----@param t T[]
----@return T | number maxVal, integer | nil key `maxVal` will be -inf when empty
+---@generic V
+---@param t V[]
+---@return V | number maxVal, integer | nil key `maxVal` will be -inf when empty
 ---@nodiscard
 function TABLE.max(t)
     local max,key=-MATH.inf,nil
@@ -658,7 +740,7 @@ end
 
 ---Find the maximum value (and key) in whole table
 ---@generic K, V
----@param t table<K, V>
+---@param t {[K]:V}
 ---@return V | number maxVal, K | nil key `maxVal` will be -inf when empty
 ---@nodiscard
 function TABLE.maxAll(t)
@@ -839,7 +921,7 @@ end
 ---Return next value of [1~#] (by value), like _G.next  
 ---Return t[1] if val is nil
 ---@generic K, V
----@param t table<K, V>
+---@param t {[K]:V}
 ---@param val V
 ---@return V | nil nextValue nil when not found
 ---@nodiscard
@@ -852,7 +934,7 @@ end
 ---Return previous value of [1~#] (by value), like TABLE.next but reversed  
 ---Return t[#t] if val is nil
 ---@generic K, V
----@param t table<K, V>
+---@param t {[K]:V}
 ---@param val V
 ---@return V | nil prevValue nil when not found
 ---@nodiscard
@@ -865,30 +947,77 @@ end
 --------------------------------------------------------------
 -- (Utility) Foreach
 
----Execute func(table[i],i) in [1~#]
----@generic T
----@param t T[]
----@param f fun(v:T, i:integer)
----@param rev? boolean Reverse the order, allow removing elements from list
+---Execute func(table[i],i) in [1~#], and optional element removing
+---@generic V
+---@param t V[]
+---@param f fun(v:V, i:integer): boolean return `true` to remove element (do this in reverse mode for better performance)
+---@param rev? boolean Reverse the iterating order
+---@return V[]
 function TABLE.foreach(t,f,rev)
     if rev then
         for i=#t,1,-1 do
-            f(t[i],i)
+            if f(t[i],i) then
+                rem(t,i)
+            end
         end
     else
+        local remCount=0
         for i=1,#t do
-            f(t[i],i)
+            if f(t[i-remCount],i) then
+                rem(t,i-remCount)
+                remCount=remCount+1
+            end
         end
     end
+    return t
 end
 
----Execute func(table[k],k) for all elements in table (only allow removing elements with t[k]=nil)
----@param t table
----@param f fun(v:any, k:any)
+---Execute func(table[k],k) in whole table, and optional element removing
+---@generic K, V
+---@param t {[K]:V}
+---@param f fun(v:V, k:K): boolean return `true` to remove element (**Warning**: Won't shrink the list part when removing list element)
+---@return {[K]:V}
 function TABLE.foreachAll(t,f)
     for k,v in next,t do
-        f(v,k)
+        if f(v,k) then t[k]=nil end
     end
+    return t
+end
+
+---Apply a function to value in [1~#]
+---@generic V1, V2
+---@param t V1[]
+---@param f fun(v:V1): V2
+---@return V2[]
+function TABLE.applyeach(t,f)
+    for i=1,#t do
+        t[i]=f(t[i])
+    end
+    return t
+end
+
+---Apply a function to value in whole table
+---@generic K, V1, V2
+---@param t {[K]:V1}
+---@param f fun(V1): V2
+---@return {[K]:V2}
+function TABLE.applyeachAll(t,f)
+    for k,v in next,t do
+        t[k]=f(v)
+    end
+    return t
+end
+
+---Apply a function to value in matrix
+---@generic V1, V2
+---@param t Mat<V1>
+---@param f fun(V1): V2
+---@return Mat<V2>
+function TABLE.applyeachMat(t,f)
+    for y=1,#t do for x=1,#t[y] do
+        t[y][x]=f(t[y][x])
+    end end
+    return t
 end
 
 --------------------------------------------------------------
@@ -925,10 +1054,12 @@ end
 -- (Utility) Lazy loading
 
 ---Make a table to be able to auto filled from a source
----@param t table
+---@generic T
+---@param t T
 ---@param source table
+---@return T
 function TABLE.setAutoFill(t,source)
-    setmetatable(t,{
+    return setmetatable(t,{
         __index=function(self,k)
             self[k]=source[k]
             return source[k]
@@ -985,7 +1116,9 @@ end
 -- (Utility) Get value
 
 ---Get first non-nil value in all arguments
----@param ... any
+---@generic V
+---@param ... V
+---@return V?
 function TABLE.getFirstValue(...)
     local t={...}
     for i=1,select('#',...) do
@@ -996,6 +1129,9 @@ function TABLE.getFirstValue(...)
 end
 
 ---Get last non-nil value in all arguments
+---@generic V
+---@param ... V
+---@return V?
 function TABLE.getlastValue(...)
     local t={...}
     for i=select('#',...),1,-1 do
@@ -1011,7 +1147,9 @@ end
 ---Get value in a table by a path-like string
 ---@param t table
 ---@param str string
----@param sep? string Single-byte separator string, default to '.'
+---@param sep? char Single-byte separator string (no need to consider escape), default to '.'
+---@return any
+---@nodiscard
 function TABLE.pathIndex(t,str,sep)
     local pattern=sep and '[^%'..sep..']+' or '[^%.]+'
     for k in gmatch(str,pattern) do
