@@ -1,9 +1,10 @@
 if not love.graphics then
     LOG("WAIT lib is not loaded (need love.graphics)")
-    return {
-        _update=NULL,
-        _draw=NULL,
-    }
+    return setmetatable({},{
+        __index=function(_,k)
+            error("attempt to use WAIT."..k..", but WAIT lib is not loaded (need love.graphics)")
+        end
+    })
 end
 
 ---@class Zenitha.WaitEvent

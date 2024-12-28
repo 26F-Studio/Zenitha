@@ -1,16 +1,11 @@
 if not (love.graphics and love.font) then
     LOG("FONT lib is not loaded (need love.graphics & love.font)")
-    return {
-        setDefaultFont=NULL,
-        setDefaultFallback=NULL,
-        setFallback=NULL,
-        setFilter=NULL,
-        load=NULL,
-        rawget=NULL,
-        rawset=NULL,
-        get=NULL,
-        set=NULL,
-    }
+    return setmetatable({},{
+        __index=function(t,k)
+            t[k]=NULL
+            return t[k]
+        end
+    })
 end
 
 local set=ZENITHA.graphics.setFont

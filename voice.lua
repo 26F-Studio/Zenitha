@@ -5,9 +5,8 @@ if not (love.audio and love.sound) then
             error("attempt to use VOC.init, but VOC lib is not loaded (need love.audio & love.sound)")
         end
     },{
-        __index=function(t,k)
-            t[k]=NULL
-            return t[k]
+        __index=function(_,k)
+            error("attempt to use VOC."..k..", but VOC lib is not loaded (need love.audio & love.sound)")
         end
     })
 end

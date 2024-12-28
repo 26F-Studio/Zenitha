@@ -1,9 +1,11 @@
 if not love.graphics then
     LOG("SYSFS lib is not loaded (need love.graphics)")
-    return {
-        _update=NULL,
-        _draw=NULL,
-    }
+    return setmetatable({},{
+        __index=function(t,k)
+            t[k]=NULL
+            return t[k]
+        end
+    })
 end
 
 ---@alias Zenitha.SYSFXType

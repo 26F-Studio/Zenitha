@@ -1,12 +1,10 @@
 if not love.graphics then
     LOG("TEXT lib is not loaded (need love.graphics)")
-    return {
-        clear=NULL,
-        add=NULL,
-        update=NULL,
-        draw=NULL,
-        new=NULL,
-    }
+    return setmetatable({},{
+        __index=function(_,k)
+            error("attempt to use TEXT."..k..", but TEXT lib is not loaded (need love.graphics)")
+        end
+    })
 end
 
 ---@class Zenitha.TextAnimArg
