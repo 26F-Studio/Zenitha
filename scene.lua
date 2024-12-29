@@ -1,5 +1,5 @@
 ---@class Zenitha.Scene
----@field widgetList? Zenitha.WidgetArg[] | Zenitha.Widget.base[]
+---@field widgetList? Map<Zenitha.WidgetArg | Zenitha.Widget.base>
 ---@field scrollHeight? number
 ---
 ---@field load?        fun() | fun(fromScene:string | false, ...)  Called when scene loaded (false when loading first scene)
