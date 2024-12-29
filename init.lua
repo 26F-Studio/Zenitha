@@ -1474,12 +1474,12 @@ function ZENITHA.getErr(i)
 end
 
 ---Set the debug info list
----@param list {[1]:string, [2]:function}[]
+---@param list {[1]:string, [2]:fun(): any}[]
 function ZENITHA.setDebugInfo(list)
     assert(type(list)=='table',"ZENITHA.setDebugInfo(list): Need table")
     for i=1,#list do
-        assert(type(list[i][1])=='string',"ZENITHA.setDebugInfo(list): list[i][1] need string")
-        assert(type(list[i][2])=='function',"ZENITHA.setDebugInfo(list): list[i][2] need function")
+        assert(type(list[i][1])=='string',"ZENITHA.setDebugInfo: need {str,function}[]")
+        assert(type(list[i][2])=='function',"ZENITHA.setDebugInfo: need {str,function}[]")
     end
     debugInfos=TABLE.copy(list)
     TABLE.reverse(debugInfos)
@@ -1493,10 +1493,10 @@ function ZENITHA.setFirstScene(name)
 end
 
 ---Set whether to discard canvas buffer after drawing each frame
----@param b boolean
-function ZENITHA.setCleanCanvas(b)
-    assert(type(b)=='boolean',"ZENITHA.setCleanCanvas(b): Need boolean")
-    discardCanvas=b
+---@param bool boolean
+function ZENITHA.setCleanCanvas(bool)
+    assert(type(bool)=='boolean',"ZENITHA.setCleanCanvas(b): Need boolean")
+    discardCanvas=bool
 end
 
 ---Set the max update rate of main loop cycle
@@ -1524,10 +1524,10 @@ function ZENITHA.setRenderRate(rate)
 end
 
 ---Set whether to show FPS at left-down corner
----@param b boolean
-function ZENITHA.setShowFPS(b)
-    assert(type(b)=='boolean',"ZENITHA.setShowFPS(b): Need boolean")
-    showFPS=b
+---@param bool boolean
+function ZENITHA.setShowFPS(bool)
+    assert(type(bool)=='boolean',"ZENITHA.setShowFPS(b): Need boolean")
+    showFPS=bool
 end
 
 ---Set click distance threshold
