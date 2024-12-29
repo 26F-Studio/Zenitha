@@ -412,10 +412,10 @@ end
 ---
 ---Fallback to `TABLE.clearAll` if failed to require `table.clear`
 ---
----@param t table
-function TABLE.clear(t)
-    for k in next,t do
-        t[k]=nil
+---@param org table
+function TABLE.clear(org)
+    for k in next,org do
+        org[k]=nil
     end
 end
 pcall(function() TABLE[('clear')]=require'table.clear' end)
@@ -424,24 +424,24 @@ pcall(function() TABLE[('clear')]=require'table.clear' end)
 ---
 ---Recommend to use `TABLE.clear` instead
 ---@generic K, V
----@param t {[K]:V}
+---@param org {[K]:V}
 ---@return {[K]:V}
-function TABLE.clearAll(t)
-    for k in next,t do
-        t[k]=nil
+function TABLE.clearAll(org)
+    for k in next,org do
+        org[k]=nil
     end
-    return t
+    return org
 end
 
 ---Clear [1~#] of a table (pure lua implementation)
 ---@generic V
----@param t V[]
+---@param org V[]
 ---@return V[]
-function TABLE.clearList(t)
-    for i=1,#t do
-        t[i]=nil
+function TABLE.clearList(org)
+    for i=1,#org do
+        org[i]=nil
     end
-    return t
+    return org
 end
 
 ---Remove a specific value of [1~#]
@@ -472,38 +472,38 @@ end
 
 ---Remove duplicated value of [1~#]
 ---@generic V
----@param t V[]
+---@param org V[]
 ---@return V[]
-function TABLE.removeDuplicate(t)
+function TABLE.removeDuplicate(org)
     local cache={}
-    local len=#t
+    local len=#org
     local i=1
     while i<=len do
-        if cache[t[i]] then
-            rem(t,i)
+        if cache[org[i]] then
+            rem(org,i)
             len=len-1
         else
-            cache[t[i]]=true
+            cache[org[i]]=true
             i=i+1
         end
     end
-    return t
+    return org
 end
 
 ---Remove duplicated value in whole table
 ---@generic K, V
----@param t {[K]:V}
+---@param org {[K]:V}
 ---@return {[K]:V}
-function TABLE.removeDuplicateAll(t)
+function TABLE.removeDuplicateAll(org)
     local cache={}
-    for k,v in next,t do
+    for k,v in next,org do
         if cache[v] then
-            t[k]=nil
+            org[k]=nil
         else
             cache[v]=true
         end
     end
-    return t
+    return org
 end
 
 ---Reverse [1~#]
@@ -520,32 +520,32 @@ end
 
 ---Get random [1~#] of table
 ---@generic V
----@param t V[]
+---@param org V[]
 ---@return V
 ---@nodiscard
-function TABLE.getRandom(t)
-    local l=#t
+function TABLE.getRandom(org)
+    local l=#org
     if l>0 then
-        return t[rnd(l)]
+        return org[rnd(l)]
     else
-        error("TABLE.popRandom(t): Table is empty")
+        error("TABLE.popRandom(org): Table is empty")
     end
 end
 
 ---Remove & return random [1~#] of table (not really "pop"!)
 ---@generic V
----@param t V[]
+---@param org V[]
 ---@return V
 ---@nodiscard
-function TABLE.popRandom(t)
-    local l=#t
+function TABLE.popRandom(org)
+    local l=#org
     if l>0 then
         local r=rnd(l)
-        r,t[r]=t[r],t[l]
-        t[l]=nil
+        r,org[r]=org[r],org[l]
+        org[l]=nil
         return r
     else
-        error("TABLE.popRandom(t): Table is empty")
+        error("TABLE.popRandom(org): Table is empty")
     end
 end
 
@@ -622,28 +622,28 @@ end
 -- Find & Replace
 
 ---Find value in [1~#], like string.find
----@param t any[]
+---@param org any[]
 ---@param val any
 ---@param start? integer
 ---@return integer? key
 ---@nodiscard
-function TABLE.find(t,val,start)
-    for i=start or 1,#t do if t[i]==val then return i end end
+function TABLE.find(org,val,start)
+    for i=start or 1,#org do if org[i]==val then return i end end
 end
 
 ---TABLE.find for ordered list only, faster (binary search)
----@param t any[]
+---@param org any[]
 ---@param val any
 ---@return integer | nil key
 ---@nodiscard
-function TABLE.findOrdered(t,val)
-    if val<t[1] or val>t[#t] then return nil end
-    local i,j=1,#t
+function TABLE.findOrdered(org,val)
+    if val<org[1] or val>org[#org] then return nil end
+    local i,j=1,#org
     while i<=j do
         local m=floor((i+j)/2)
-        if t[m]>val then
+        if org[m]>val then
             j=m-1
-        elseif t[m]<val then
+        elseif org[m]<val then
             i=m+1
         else
             return m
@@ -653,55 +653,57 @@ end
 
 ---Find value in whole table
 ---@generic K, V
----@param t {[K]:V}
+---@param org {[K]:V}
 ---@param val V
 ---@return K | nil key
 ---@nodiscard
-function TABLE.findAll(t,val)
-    for k,v in next,t do if v==val then return k end end
+function TABLE.findAll(org,val)
+    for k,v in next,org do if v==val then return k end end
     return nil
 end
 
 ---Replace value in [1~#], like string.gsub
 ---@generic T1, T2
----@param t T1[]
+---@param org T1[]
 ---@param v_old T1
 ---@param v_new T2
 ---@param start? integer
 ---@return (T1 | T2)[]
-function TABLE.replace(t,v_old,v_new,start)
-    for i=start or 1,#t do
-        if t[i]==v_old then
-            t[i]=v_new
+function TABLE.replace(org,v_old,v_new,start)
+    for i=start or 1,#org do
+        if org[i]==v_old then
+            org[i]=v_new
         end
     end
+    return org
 end
 
 ---Replace value in whole table
 ---@generic K, V1, V2
----@param t {[K]:V1}
+---@param org {[K]:V1}
 ---@param v_old V1
 ---@param v_new V2
 ---@return {[K]:V1|V2}
-function TABLE.replaceAll(t,v_old,v_new)
-    for k,v in next,t do
+function TABLE.replaceAll(org,v_old,v_new)
+    for k,v in next,org do
         if v==v_old then
-            t[k]=v_new
+            org[k]=v_new
         end
     end
+    return org
 end
 
 ---Find the minimum value (and key)  
 ---if you don't need the key and the list is short, use `math.min(unpack(t))` for better performance
 ---@generic V
----@param t V[]
+---@param org V[]
 ---@return V | number minVal, integer | nil key `minVal` will be inf when empty
 ---@nodiscard
-function TABLE.min(t)
+function TABLE.min(org)
     local min,key=MATH.inf,nil
-    for i=1,#t do
-        if t[i]<min then
-            min,key=t[i],i
+    for i=1,#org do
+        if org[i]<min then
+            min,key=org[i],i
         end
     end
     return min,key
@@ -709,12 +711,12 @@ end
 
 ---Find the minimum value (and key) in whole table
 ---@generic K, V
----@param t {[K]:V}
+---@param org {[K]:V}
 ---@return V | number minVal, K | nil key `minVal` will be inf when empty
 ---@nodiscard
-function TABLE.minAll(t)
+function TABLE.minAll(org)
     local min,key=MATH.inf,nil
-    for k,v in next,t do
+    for k,v in next,org do
         if v<min then
             min,key=v,k
         end
@@ -725,14 +727,14 @@ end
 ---Find the maximum value (and key)  
 ---if you don't need the key and the list is short, use `math.max(unpack(t))` for better performance
 ---@generic V
----@param t V[]
+---@param org V[]
 ---@return V | number maxVal, integer | nil key `maxVal` will be -inf when empty
 ---@nodiscard
-function TABLE.max(t)
+function TABLE.max(org)
     local max,key=-MATH.inf,nil
-    for i=1,#t do
-        if t[i]>max then
-            max,key=t[i],i
+    for i=1,#org do
+        if org[i]>max then
+            max,key=org[i],i
         end
     end
     return max,key
@@ -740,12 +742,12 @@ end
 
 ---Find the maximum value (and key) in whole table
 ---@generic K, V
----@param t {[K]:V}
+---@param org {[K]:V}
 ---@return V | number maxVal, K | nil key `maxVal` will be -inf when empty
 ---@nodiscard
-function TABLE.maxAll(t)
+function TABLE.maxAll(org)
     local max,key=-MATH.inf,nil
-    for k,v in next,t do
+    for k,v in next,org do
         if v>max then
             max,key=v,k
         end
@@ -756,7 +758,7 @@ end
 --------------------------------------------------------------
 -- Dump
 
-do -- function TABLE.dumpDeflate(t,depth)
+do -- function TABLE.dumpDeflate(org,depth)
     local function dump(L,t,lim)
         local s='{'
         local count=1
@@ -798,20 +800,20 @@ do -- function TABLE.dumpDeflate(t,depth)
         return s..'}'
     end
     ---Dump a simple lua table (no whitespaces)
-    ---@param t table
+    ---@param org table
     ---@param depth? integer how many layers will be dumped, default to inf
     ---@return string
     ---@nodiscard
-    function TABLE.dumpDeflate(t,depth)
-        assert(type(t)=='table',"Only table can be dumped")
-        return dump(t,1,depth or 1e99)
+    function TABLE.dumpDeflate(org,depth)
+        assert(type(org)=='table',"Only table can be dumped")
+        return dump(org,1,depth or 1e99)
     end
 end
 
-do -- function TABLE.dump(t,depth)
+do -- function TABLE.dump(org,depth)
     local tabs=setmetatable({[0]='','\t'},{
         __index=function(self,k)
-            if k>=260 then error("TABLE.dump(t,depth): Table depth over 260") end
+            if k>=260 then error("TABLE.dump(org,depth): Table depth over 260") end
             for i=#self+1,k do
                 self[i]=self[i-1]..'\t'
             end
@@ -865,13 +867,13 @@ do -- function TABLE.dump(t,depth)
         return s..tabs[t-1]..'}'
     end
     ---Dump a simple lua table
-    ---@param t table
+    ---@param org table
     ---@param depth? integer how many layers will be dumped, default to inf
     ---@return string
     ---@nodiscard
-    function TABLE.dump(t,depth)
-        assert(type(t)=='table',"Only table can be dumped")
-        return dump(t,1,depth or 1e99)
+    function TABLE.dump(org,depth)
+        assert(type(org)=='table',"Only table can be dumped")
+        return dump(org,1,depth or 1e99)
     end
 end
 
@@ -879,24 +881,24 @@ end
 -- Information
 
 ---Get element count of table
----@param t table
+---@param org table
 ---@return integer
 ---@nodiscard
-function TABLE.getSize(t)
+function TABLE.getSize(org)
     local size=0
-    for _ in next,t do size=size+1 end
+    for _ in next,org do size=size+1 end
     return size
 end
 
 ---Count value repeating time in [1~#]
----@param t any[]
+---@param org any[]
 ---@param val any
 ---@return integer
 ---@nodiscard
-function TABLE.count(t,val)
+function TABLE.count(org,val)
     local count=0
-    for i=1,#t do
-        if t[i]==val then
+    for i=1,#org do
+        if org[i]==val then
             count=count+1
         end
     end
@@ -904,13 +906,13 @@ function TABLE.count(t,val)
 end
 
 ---Count value repeating time in whole table
----@param t table
+---@param org table
 ---@param val any
 ---@return integer
 ---@nodiscard
-function TABLE.countAll(t,val)
+function TABLE.countAll(org,val)
     local count=0
-    for _,v in next,t do
+    for _,v in next,org do
         if v==val then
             count=count+1
         end
@@ -921,26 +923,26 @@ end
 ---Return next value of [1~#] (by value), like _G.next  
 ---Return t[1] if val is nil
 ---@generic K, V
----@param t {[K]:V}
+---@param org {[K]:V}
 ---@param val V
 ---@return V | nil nextValue nil when not found
 ---@nodiscard
-function TABLE.next(t,val)
-    if val==nil then return t[1] end
-    for i=1,#t do if t[i]==val then return t[i+1] end end
+function TABLE.next(org,val)
+    if val==nil then return org[1] end
+    for i=1,#org do if org[i]==val then return org[i+1] end end
     return nil
 end
 
 ---Return previous value of [1~#] (by value), like TABLE.next but reversed  
 ---Return t[#t] if val is nil
 ---@generic K, V
----@param t {[K]:V}
+---@param org {[K]:V}
 ---@param val V
 ---@return V | nil prevValue nil when not found
 ---@nodiscard
-function TABLE.prev(t,val)
-    if val==nil then return t[#t] end
-    for i=#t,1,-1 do if t[i]==val then return t[i-1] end end
+function TABLE.prev(org,val)
+    if val==nil then return org[#org] end
+    for i=#org,1,-1 do if org[i]==val then return org[i-1] end end
     return nil
 end
 
@@ -949,105 +951,105 @@ end
 
 ---Execute func(table[i],i) in [1~#], and optional element removing
 ---@generic V
----@param t V[]
+---@param org V[]
 ---@param f fun(v:V, i:integer): boolean return `true` to remove element (do this in reverse mode for better performance)
 ---@param rev? boolean Reverse the iterating order
 ---@return V[]
-function TABLE.foreach(t,f,rev)
+function TABLE.foreach(org,f,rev)
     if rev then
-        for i=#t,1,-1 do
-            if f(t[i],i) then
-                rem(t,i)
+        for i=#org,1,-1 do
+            if f(org[i],i) then
+                rem(org,i)
             end
         end
     else
         local remCount=0
-        for i=1,#t do
-            if f(t[i-remCount],i) then
-                rem(t,i-remCount)
+        for i=1,#org do
+            if f(org[i-remCount],i) then
+                rem(org,i-remCount)
                 remCount=remCount+1
             end
         end
     end
-    return t
+    return org
 end
 
 ---Execute func(table[k],k) in whole table, and optional element removing
 ---@generic K, V
----@param t {[K]:V}
+---@param org {[K]:V}
 ---@param f fun(v:V, k:K): boolean return `true` to remove element (**Warning**: Won't shrink the list part when removing list element)
 ---@return {[K]:V}
-function TABLE.foreachAll(t,f)
-    for k,v in next,t do
-        if f(v,k) then t[k]=nil end
+function TABLE.foreachAll(org,f)
+    for k,v in next,org do
+        if f(v,k) then org[k]=nil end
     end
-    return t
+    return org
 end
 
 ---Apply a function to value in [1~#]
 ---@generic V1, V2
----@param t V1[]
+---@param org V1[]
 ---@param f fun(v:V1): V2
 ---@return V2[]
-function TABLE.applyeach(t,f)
-    for i=1,#t do
-        t[i]=f(t[i])
+function TABLE.applyeach(org,f)
+    for i=1,#org do
+        org[i]=f(org[i])
     end
-    return t
+    return org
 end
 
 ---Apply a function to value in whole table
 ---@generic K, V1, V2
----@param t {[K]:V1}
+---@param org {[K]:V1}
 ---@param f fun(V1): V2
 ---@return {[K]:V2}
-function TABLE.applyeachAll(t,f)
-    for k,v in next,t do
-        t[k]=f(v)
+function TABLE.applyeachAll(org,f)
+    for k,v in next,org do
+        org[k]=f(v)
     end
-    return t
+    return org
 end
 
 ---Apply a function to value in matrix
 ---@generic V1, V2
----@param t Mat<V1>
+---@param org Mat<V1>
 ---@param f fun(V1): V2
 ---@return Mat<V2>
-function TABLE.applyeachMat(t,f)
-    for y=1,#t do for x=1,#t[y] do
-        t[y][x]=f(t[y][x])
+function TABLE.applyeachMat(org,f)
+    for y=1,#org do for x=1,#org[y] do
+        org[y][x]=f(org[y][x])
     end end
-    return t
+    return org
 end
 
 --------------------------------------------------------------
 -- (Utility) Shortcuts
 
 ---Return a function that return a value of table
----@param t table
+---@param org table
 ---@param k any
 ---@return fun(): any
 ---@nodiscard
-function TABLE.func_getVal(t,k)
-    return function() return t[k] end
+function TABLE.func_getVal(org,k)
+    return function() return org[k] end
 end
 
 ---Return a function that reverse a value of table
----@param t table
+---@param org table
 ---@param k any
 ---@return fun()
 ---@nodiscard
-function TABLE.func_revVal(t,k)
-    return function() t[k]=not t[k] end
+function TABLE.func_revVal(org,k)
+    return function() org[k]=not org[k] end
 end
 
 ---Return a function that set a value of table
----@param t table
+---@param org table
 ---@param k any
 ---@return fun(v:any)
 ---@nodiscard
-function TABLE.func_setVal(t,k)
-    return function(v) t[k]=v end
+function TABLE.func_setVal(org,k)
+    return function(v) org[k]=v end
 end
 
 --------------------------------------------------------------
@@ -1055,11 +1057,11 @@ end
 
 ---Make a table to be able to auto filled from a source
 ---@generic T
----@param t T
+---@param org T
 ---@param source table
 ---@return T
-function TABLE.setAutoFill(t,source)
-    return setmetatable(t,{
+function TABLE.setAutoFill(org,source)
+    return setmetatable(org,{
         __index=function(self,k)
             self[k]=source[k]
             return source[k]
@@ -1145,17 +1147,17 @@ end
 -- (Utility) PathIndex
 
 ---Get value in a table by a path-like string
----@param t table
+---@param org table
 ---@param str string
 ---@param sep? char Single-byte separator string (no need to consider escape), default to '.'
 ---@return any
 ---@nodiscard
-function TABLE.pathIndex(t,str,sep)
+function TABLE.pathIndex(org,str,sep)
     local pattern=sep and '[^%'..sep..']+' or '[^%.]+'
     for k in gmatch(str,pattern) do
-        t=t[k]
+        org=org[k]
     end
-    return t
+    return org
 end
 
 return TABLE
