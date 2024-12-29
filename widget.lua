@@ -10,13 +10,15 @@
 ---@field h? number [EXCEPT text & checkBox & slider & selector]
 ---@field widthLimit? number [EXCEPT image & button & input/text/listBox]
 ---
----@field color? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & input/text/listBox]
+---@field color? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & input/text/listBox] fallback of other color options
 ---@field text? string | function [EXCEPT image & text/listBox]
 ---@field fontSize? number [EXCEPT image & listBox]
 ---@field fontType? string [EXCEPT image & listBox]
 ---@field image? string | love.Drawable [image & button] Can use slash-path to read from IMG lib
----@field alignX? 'left' | 'right' | 'center' [text & image & button]
----@field alignY? 'top' | 'bottom' | 'center' [text & image & button]
+---@field alignX? 'left' | 'right' | 'center' [text & image & button & hint]
+---@field alignY? 'top' | 'bottom' | 'center' [text & image & button & hint]
+---@field marginX? number [button & hint]
+---@field marginY? number [button & hint]
 ---@field labelPos? 'left' | 'right' | 'top' | 'bottom' [EXCEPT text & image & button & text/listBox] Some widget (like Slider) didn't use 'top'
 ---@field labelDistance? number [EXCEPT text & image & button & text/listBox]
 ---@field disp? function [checkBox & switch & sliders & selector] Must return the value that widget should show
@@ -28,12 +30,18 @@
 ---@field cornerR? number [button & checkBox & slider &input/text/listBox] Round corner ratio
 ---
 ---@field textColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & slider_progress & listBox]
----@field fillColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image selector]
+---@field fillColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image & hint & selector]
 ---@field frameColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image]
 ---@field activeColor? Zenitha.ColorStr | Zenitha.Color [input/text/listBox]
 ---
 ---@field sound_press? string [button & checkBox & switch & selector & inputBox]
 ---@field sound_hover? string [button & checkBox & switch & selector & inputBox]
+---
+---@field floatText? string | function [hint]
+---@field floatFontSize? number [hint]
+---@field floatFontType? string [hint]
+---@field floatImage? string | love.Drawable [hint]
+---@field floatBox? number[] [hint]
 ---
 ---@field ang? number [image]
 ---@field k? number [image]
@@ -41,6 +49,8 @@
 ---@field sound_on? string | false [checkBox & switch]
 ---@field sound_off? string | false [checkBox & switch]
 ---
+---@field numFontSize? number [slider]
+---@field numFontType? string [slider]
 ---@field axis? {minVal:number, maxVal:number, step?:number} [slider & slider_fill]
 ---@field smooth? boolean [slider] Unit point visibility
 ---@field valueShow? false | 'int' | 'float' | 'percent' | function [slider] Value showing mode or function [called with widgetObj)
@@ -80,10 +90,11 @@ local gc_setColor,gc_setLineWidth=GC.setColor,GC.setLineWidth
 local gc_draw,gc_line=GC.draw,GC.line
 local gc_rectangle,gc_circle=GC.rectangle,GC.circle
 local gc_print,gc_printf=GC.print,GC.printf
-local gc_mStr=GC.mStr
 local gc_stc_reset,gc_stc_stop=GC.stc_reset,GC.stc_stop
 local gc_stc_circ,gc_stc_rect=GC.stc_circ,GC.stc_rect
+local gc_mStr=GC.mStr
 local gc_mRect=GC.mRect
+local gc_mDraw=GC.mDraw
 
 local kb=ZENITHA.keyboard
 local timer=ZENITHA.timer.getTime
@@ -121,9 +132,17 @@ local function alignDraw(self,drawable,x,y,ang,kx,ky)
     local h=drawable:getHeight()
     if not kx then kx=min(self.widthLimit/w,1) end
     if not ky then ky=kx or 1 end
-    local ox=self.alignX=='left' and 0 or self.alignX=='right' and w or w*.5
-    local oy=self.alignY=='top' and 0 or self.alignY=='bottom' and h or h*.5
+    local ox=self.alignX=='center' and w*.5 or self.alignX=='left' and 0 or w
+    local oy=self.alignY=='center' and h*.5 or self.alignY=='top' and 0 or h
     gc_draw(drawable,x,y,ang,kx,ky,ox,oy)
+end
+local function parseImgPath(path)
+    local str=STRING.split(path,'/')
+    local _img=IMG
+    repeat
+        _img=_img[rem(str,1)]
+    until not (str[1] and _img)
+    return _img or PAPER
 end
 
 local leftAngle=GC.load{w=20,h=20,
@@ -200,6 +219,7 @@ Widgets.base={
     widthLimit=1e99,
     labelPos='left',
     alignX='center',alignY='center',
+    marginX=5,marginY=0,
     sound_press=false,sound_hover=false,
 
     isAbove=NULL,
@@ -248,6 +268,7 @@ function Widgets.base:reset(init)
 
     assert(self.alignX=='left' or self.alignX=='right' or self.alignX=='center',"[widget].alignX need 'left', 'right' or 'center'")
     assert(self.alignY=='top' or self.alignY=='bottom' or self.alignY=='center',"[widget].alignY need 'top', 'bottom' or 'center'")
+    assert(type(self.marginX)=='number' and type(self.marginY)=='number',"[widget].marginX/Y need number")
     assert(self.labelPos=='left' or self.labelPos=='right' or self.labelPos=='top' or self.labelPos=='bottom',"[widget].labelPos need 'left', 'right', 'top', or 'bottom'")
 
     if self.pos then
@@ -284,18 +305,11 @@ function Widgets.base:reset(init)
         self._text=PAPER
     end
 
-    self._image=false
     if self.image then
-        if type(self.image)=='string' then
-            local path=STRING.split(self.image,'/')
-            local _img=IMG
-            repeat
-                _img=_img[rem(path,1)]
-            until not (path[1] and _img)
-            self._image=_img or PAPER
-        else
-            self._image=self.image
-        end
+        self._image=
+            type(self.image)=='string' and
+            parseImgPath(self.image) or
+            self.image
     end
 
     self._hoverTime=0
@@ -390,7 +404,7 @@ Widgets.image=setmetatable({
         'name',
         'pos',
         'x','y',
-        'k','w','h', -- Not compatible
+        'k','w','h', -- k & w+h are not compatible
         'alignX','alignY',
 
         'ang',
@@ -448,6 +462,7 @@ Widgets.button=setmetatable({
         'pos',
         'x','y','w','h',
         'alignX','alignY',
+        'marginX','marginY',
         'lineWidth','cornerR',
 
         'color','fillColor','frameColor','textColor',
@@ -516,13 +531,159 @@ function Widgets.button:draw()
     gc_mRect('line',0,0,w,h,self.cornerR)
 
     -- Drawable
+    local startX=self.alignX=='center' and 0 or self.alignX=='left' and -w*.5+self.marginX or w*.5-self.marginX
+    local startY=self.alignY=='center' and 0 or self.alignY=='top' and -h*.5+self.marginY or h*.5-self.marginY
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image)
+        alignDraw(self,self._image,startX,startY)
     end
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text)
+        alignDraw(self,self._text,startX,startY)
+    end
+    gc_pop()
+end
+
+
+---@class Zenitha.Widget.hint: Zenitha.Widget.base
+---@field w number
+---@field h number
+---@field floatFontSize number
+---@field floatFontType string
+---@field _floatText love.Drawable | false
+---@field _floatImage love.Drawable | false
+---@field floatFillColor Zenitha.ColorStr | Zenitha.Color
+---@field floatFrameColor Zenitha.ColorStr | Zenitha.Color
+Widgets.hint=setmetatable({
+    type='hint',
+    w=40,h=false,
+
+    text=false,
+    image=false,
+    cornerR=10,
+
+    floatText=false,
+    floatFontSize=30,
+    floatFontType=false,
+    floatImage=false,
+    floatBox={-100,-50,200,100,5},
+    floatLineWidth=3,
+    floatFillColor={.1,.1,.1,.6},
+    floatFrameColor='DL',
+
+    _floatText=false,
+    _floatImage=false,
+
+    buildArgs={
+        'name',
+        'pos',
+        'x','y','w','h',
+        'alignX','alignY',
+        'marginX','marginY',
+        'lineWidth','cornerR',
+
+        'color','frameColor','textColor',
+        'text','fontSize','fontType','image',
+        'floatImage','floatText','floatFontSize','floatFontType',
+        'floatBox','floatLineWidth','floatFillColor','floatFrameColor',
+
+        'sound_hover',
+
+        'visibleFunc',
+        'visibleTick',
+    },
+},{__index=Widgets.base,__metatable=true})
+function Widgets.hint:reset(init)
+    self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
+    self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
+    self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
+    Widgets.base.reset(self,init)
+    if not self.h then self.h=self.w end
+    assert(self.w and type(self.w)=='number',"[hint].w need number")
+    assert(self.h and type(self.h)=='number',"[hint].h need number")
+
+    if type(self.floatFillColor)=='string' then self.floatFillColor=COLOR[self.floatFillColor] end
+    assert(type(self.floatFillColor)=='table',"[widget].floatFillColor need table")
+    if type(self.floatFrameColor)=='string' then self.floatFrameColor=COLOR[self.floatFrameColor] end
+    assert(type(self.floatFrameColor)=='table',"[widget].floatFrameColor need table")
+
+    if self.floatImage then
+        self._floatImage=
+            type(self.floatImage)=='string' and
+            parseImgPath(self.floatImage) or
+            self.floatImage
+    end
+    if self.floatText then
+        if type(self.floatText)=='function' then
+            self._floatText=self.floatText()
+        else
+            self._floatText=self.floatText
+        end
+        assert(type(self._floatText)=='string',"[hint].floatText need string|fun():string")
+        self._floatText=GC.newText(getFont(self.floatFontSize,self.floatFontType),self._floatText)
+    end
+    if not self.floatFontSize then self.floatFontSize=self.fontSize end
+    if not self.floatFontType then self.floatFontType=self.fontType end
+    assert(type(self.floatFontSize)=='number',"[widget].floatFontSize need number")
+    assert(type(self.floatFontType)=='string' or self.floatFontType==false,"[widget].floatFontType need string")
+
+    assert(type(self.floatBox)=='table',"[widget].floatBox need {x,y,w,h,r?}")
+    for i=1,4 do assert(type(self.floatBox[i])=='number',"[widget].floatBox need number[4]") end
+    assert(self.floatBox[5]==nil or type(self.floatBox[5])=='number',"[widget].floatBox[5] need number")
+    self.widthLimit=self.floatBox[3]
+    assert(type(self.floatLineWidth)=='number',"[widget].floatLineWidth need number")
+end
+function Widgets.hint:isAbove(x,y)
+    return
+        abs(x-self._x)<self.w*.5 and
+        abs(y-self._y)<self.h*.5
+end
+function Widgets.hint:draw()
+    gc_push('transform')
+    gc_translate(self._x,self._y)
+
+    local w,h=self.w,self.h
+    local HOV=self._hoverTime/self._hoverTimeMax
+
+    local frameC=self.frameColor
+
+    -- Background
+    gc_setColor(frameC[1],frameC[2],frameC[3],.1+.1*HOV)
+    gc_setLineWidth(self.lineWidth)
+    gc_mRect('line',0,0,w,h,self.cornerR)
+
+    -- Drawable
+    if self._image then
+        gc_setColor(1,1,1)
+        gc_mDraw(self._image)
+    end
+    if self._text then
+        gc_setColor(self.textColor)
+        gc_mDraw(self._text)
+    end
+    if HOV>0 then
+        local box=self.floatBox
+        local fFillC=self.floatFillColor
+        local fFrameC=self.floatFrameColor
+        gc_translate(box[1],box[2])
+        gc_setColor(fFillC[1],fFillC[2],fFillC[3],fFillC[4]*HOV)
+        gc_rectangle('fill',0,0,box[3],box[4],box[5])
+        gc_setLineWidth(self.floatLineWidth)
+        gc_setColor(fFrameC[1],fFrameC[2],fFrameC[3],fFrameC[4]*HOV)
+        gc_rectangle('line',0,0,box[3],box[4],box[5])
+        gc_translate(box[3]*.5,box[4]*.5)
+        local startX=self.alignX=='center' and 0 or self.alignX=='left' and -.5*box[3]+self.marginX or .5*box[3]-self.marginX
+        local startY=self.alignY=='center' and 0 or self.alignY=='top' and -.5*box[4]+self.marginY or .5*box[4]-self.marginY
+        if self._floatImage then
+            gc_setColor(1,1,1,HOV)
+            alignDraw(self._floatImage,startX,startY)
+        end
+        if self._floatText then
+            local textC=self.textColor
+            setFont(self.floatFontSize,self.floatFontType)
+            gc_setColor(textC[1],textC[2],textC[3],HOV)
+            alignDraw(self,self._floatText,startX,startY)
+        end
     end
     gc_pop()
 end
@@ -1365,7 +1526,7 @@ function Widgets.selector:draw()
     end
     if self._selText then
         gc_setColor(self.textColor)
-        GC.mDraw(self._selText,x,y)
+        gc_mDraw(self._selText,x,y)
     end
 end
 function Widgets.selector:press(x)
