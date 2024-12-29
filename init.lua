@@ -1499,19 +1499,26 @@ function ZENITHA.setCleanCanvas(b)
     discardCanvas=b
 end
 
+---Set the max update rate of main loop cycle
+---@param fps number Default to 60
+function ZENITHA.setMaxFPS(fps)
+    assert(type(fps)=='number' and fps>0,"ZENITHA.setMaxFPS(fps): Need >0")
+    sleepInterval=1/fps
+end
+
 ---Set the updating rate of the application
 ---
 ---Default value is 100(%), all updating will be called every main loop cycle
 ---If set to 50(%), all *.update(dt) will be called every 2 main loop cycle
 ---@param rate number in [0,100]
-function ZENITHA.setUpdateFreq(rate)
+function ZENITHA.setUpdateRate(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setUpdateFreq(rate): Need in (0,100]")
     updateFreq=rate
 end
 
 ---Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
 ---@param rate number in [0,100]
-function ZENITHA.setDrawFreq(rate)
+function ZENITHA.setRenderRate(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setDrawFreq(rate): Need in (0,100]")
     drawFreq=rate
 end
@@ -1521,13 +1528,6 @@ end
 function ZENITHA.setShowFPS(b)
     assert(type(b)=='boolean',"ZENITHA.setShowFPS(b): Need boolean")
     showFPS=b
-end
-
----Set the max update rate of main loop cycle
----@param fps number Default to 60
-function ZENITHA.setMaxFPS(fps)
-    assert(type(fps)=='number' and fps>0,"ZENITHA.setMaxFPS(fps): Need >0")
-    sleepInterval=1/fps
 end
 
 ---Set click distance threshold
@@ -1544,8 +1544,9 @@ function ZENITHA.setMaxErrorCount(n)
     maxErrorCount=n
 end
 
----Set cursor invisible
-function ZENITHA.hideCursor() mouseShow=false end
+---Set cursor's visibility
+---@param b? boolean
+function ZENITHA.setCursorVis(b) mouseShow=b and true or false end
 
 ---Global event callback function table, they will be called earlier than scene event (if exist)
 ---
