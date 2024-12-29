@@ -554,6 +554,7 @@ end
 ---@field _floatImage love.Drawable | false
 ---@field floatFillColor Zenitha.ColorStr | Zenitha.Color
 ---@field floatFrameColor Zenitha.ColorStr | Zenitha.Color
+---@field floatTextColor Zenitha.ColorStr | Zenitha.Color
 Widgets.hint=setmetatable({
     type='hint',
     w=40,h=false,
@@ -570,6 +571,7 @@ Widgets.hint=setmetatable({
     floatLineWidth=3,
     floatFillColor={.1,.1,.1,.6},
     floatFrameColor='DL',
+    floatTextColor='dL',
 
     _floatText=false,
     _floatImage=false,
@@ -585,7 +587,7 @@ Widgets.hint=setmetatable({
         'color','frameColor','textColor',
         'text','fontSize','fontType','image',
         'floatImage','floatText','floatFontSize','floatFontType',
-        'floatBox','floatLineWidth','floatFillColor','floatFrameColor',
+        'floatBox','floatLineWidth','floatFillColor','floatFrameColor','floatTextColor',
 
         'sound_hover',
 
@@ -606,6 +608,8 @@ function Widgets.hint:reset(init)
     assert(type(self.floatFillColor)=='table',"[widget].floatFillColor need table")
     if type(self.floatFrameColor)=='string' then self.floatFrameColor=COLOR[self.floatFrameColor] end
     assert(type(self.floatFrameColor)=='table',"[widget].floatFrameColor need table")
+    if type(self.floatTextColor)=='string' then self.floatTextColor=COLOR[self.floatTextColor] end
+    assert(type(self.floatTextColor)=='table',"[widget].floatTextColor need table")
 
     if self.floatImage then
         self._floatImage=
@@ -679,7 +683,7 @@ function Widgets.hint:draw()
             alignDraw(self._floatImage,startX,startY)
         end
         if self._floatText then
-            local textC=self.textColor
+            local textC=self.floatTextColor
             setFont(self.floatFontSize,self.floatFontType)
             gc_setColor(textC[1],textC[2],textC[3],HOV)
             alignDraw(self,self._floatText,startX,startY)

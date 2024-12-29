@@ -18,6 +18,7 @@
     D: Dark
     L: Light
     T: Translucent
+    X: Xnothing
 ]]
 
 ---@class Zenitha.Color: table READ ONLY
