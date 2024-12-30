@@ -42,6 +42,11 @@
 ---@field floatFontType? string [hint]
 ---@field floatImage? string | love.Drawable [hint]
 ---@field floatBox? false | number[] [hint]
+---@field floatCornerR number
+---@field floatLineWidth number
+---@field floatFillColor Zenitha.ColorStr | Zenitha.Color
+---@field floatFrameColor Zenitha.ColorStr | Zenitha.Color
+---@field floatTextColor Zenitha.ColorStr | Zenitha.Color
 ---
 ---@field ang? number [image]
 ---@field k? number [image]
