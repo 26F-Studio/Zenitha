@@ -24,7 +24,7 @@ local scene={
         GC.stc_stop()
     end,
     widgetList={
-        {type='hint',        text='?', x=126,y=50,floatFontSize=25,floatText="By  MrZ",floatBox={30,-30,120,60,10},alignX='right',alignY='bottom'},
+        {type='hint',        text='?', x=126,y=50,floatFontSize=25,floatText="By  MrZ",labelPos='right'},
         {type='checkBox',    text='checkBox1', x=260,y=350,w=40,disp=function() return testVal_1[1] end,code=function() testVal_1[1]=not testVal_1[1] end},
         {type='checkBox',    text='checkBox2', x=260,y=400,w=40,disp=function() return testVal_1[2] end,code=function() testVal_1[2]=not testVal_1[2] end},
         {type='checkBox',    text='checkBox3', x=260,y=450,w=40,disp=function() return testVal_1[3] end,code=function() testVal_1[3]=not testVal_1[3] end},
