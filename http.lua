@@ -111,7 +111,7 @@ local function addThread(num)
 end
 
 ---Send a HTTP request
----```lua
+---```
 ---    HTTP.request{
 ---        pool='login',
 ---        url='example.com',

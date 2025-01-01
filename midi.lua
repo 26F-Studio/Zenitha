@@ -55,7 +55,7 @@ end
 ---@param handler fun(event: Zenitha.MIDI.Event)
 ---@return Zenitha.MIDI
 ---### Example
----```lua
+---```
 ---MIDI.newSong(FILE.load("music.mid"),function(event)
 ---    if event.name=='NoteStart' then
 ---        SFX.playSample('lead',event.velocity/127,event.note)

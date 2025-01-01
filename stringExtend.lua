@@ -353,7 +353,7 @@ end
 ---Trim spaces and tabs at the beginning of all lines, useful for inline multi-line strings  
 ---(Will remove ending \n)
 ---### Example
----```lua
+---```
 ---do
 ---    local s=STRING.trimIndent[=[
 ---        Hello
@@ -451,7 +451,7 @@ end
 
 ---Shorten a path by cutting off long directory name
 ---### Example
----```lua
+---```
 ---STRING.simplifyPath('Documents/Project/xxx.lua') --> 'D/P/xxx.lua'
 ---STRING.simplifyPath('Documents/Project/xxx.lua',3) --> 'Doc/Pro/xxx.lua'
 ---```
@@ -750,7 +750,7 @@ STRING.u8offset=utf8[('offset')]
 
 ---Get a char iterator function of a utf8 string, similar to `str:gmatch('.')`
 ---
---- ```lua
+--- ```
 --- for bytePos,codepoint in STRING.u8codes(str) do
 ---    -- code here
 --- end

@@ -563,7 +563,7 @@ end
 
 ---Re-index string value as key
 ---### Example
----```lua
+---```
 ---local t={a=print,b='a'}
 ---TABLE.reIndex(t)
 ---t.b('Hello Zenitha')
@@ -582,7 +582,7 @@ end
 
 ---Flatten a nested table to a flat table (no table type value included)
 ---### Example
----```lua
+---```
 ---local T={a=1,b={c=2},d={e={f=3}}}
 ---TABLE.flatten(T)
 -----[[ Now T is

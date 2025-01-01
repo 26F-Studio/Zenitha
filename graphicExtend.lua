@@ -714,7 +714,7 @@ do -- function GC.load(L), GC.execute(t)
     ---See commands list by going to declaration of this function, then scroll up.
     ---@param t Zenitha.drawingCommand[]
     ---### Example
-    ---```lua
+    ---```
     ---GC.execute{
     ---    {'setCL',1,0,0},
     ---    {'dRect','fill',0,0,100,100},
@@ -728,7 +728,7 @@ do -- function GC.load(L), GC.execute(t)
     ---Similar to GC.execute, but draw on a canvas.
     ---@param list {w:number, h:number, [number]:Zenitha.drawingCommand}
     ---### Example
-    ---```lua
+    ---```
     ---GC.load{w=100,h=100 -- size of canvas
     ---    {'setCL',1,0,0},
     ---    {'dRect','fill',0,0,100,100},

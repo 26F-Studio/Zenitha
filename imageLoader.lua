@@ -44,7 +44,7 @@ end
 ---Initialize IMG lib (only once)
 ---@param imgTable Map<string | table>
 ---### Example
----```lua
+---```
 ---IMG.init{
 ---    image1='.../image1.jpg',
 ---    image2='.../image2.png',
@@ -57,14 +57,14 @@ end
 ---        },
 ---    },
 ---}
------ Then you can get image objects same as with get things from table, like this:
+----- Then you can get image objects same as with get things from table like this:
 ---local image1=IMG.image1
 ---local image3_1=IMG.imagePack.image3_1
 ---local image4_1=IMG.imagePack.image4[1]
 ---```
 function IMG.init(imgTable)
     if initialized then
-        MSG.log('info',"IMG.init: Attempt to initialize IMG lib twice")
+        LOG('warn',"IMG.init: Attempt to initialize twice")
         return
     end
     initialized,IMG.init=true,nil

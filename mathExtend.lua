@@ -258,7 +258,7 @@ end
 
 ---Find which interval the number is in
 ---### Example
----```lua
+---```
 ---MATH.selectFreq(50,{10,20,30,40}) -- 3, because 50 will drop into the 3rd interval [30,60)
 ---```
 ---@param v number

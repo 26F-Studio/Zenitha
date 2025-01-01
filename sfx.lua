@@ -112,7 +112,7 @@ end
 ---Load SFX samples from specified directory
 ---@param pack {name:string, path:string, base:string, count:number}
 ---### Example
----```lua
+---```
 ---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
 ---```
 function SFX.loadSample(pack)
@@ -171,7 +171,7 @@ end
 ---@param pack string
 ---@param ... string | number 0~1 number for volume, big integer and string for tune
 ---### Example
----```lua
+---```
 ---SFX.playSample('piano', .7,'C4','E4', .9,'G4')
 ---```
 function SFX.playSample(pack,...)
