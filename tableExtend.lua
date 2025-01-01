@@ -1084,7 +1084,7 @@ function TABLE.setAutoFill(org,source)
     })
 end
 
-do -- function TABLE.newResourceTable(src,loadFunc)
+do -- function TABLE.linkSource(src,loadFunc)
     local function lazyLoadMF(self,k)
         local mt=getmetatable(self)
         local res=mt.__loader(mt.__source[k])
@@ -1114,18 +1114,16 @@ do -- function TABLE.newResourceTable(src,loadFunc)
         end
     end
     ---Create a new table with lazy load feature
+    ---@generic T
+    ---@param lib T lib table to be linked
     ---@param src table resourceID table
     ---@param loadFunc fun(resID:any): any Will receive resourceID from src table, must return a non-nil value
-    ---@param lazy? boolean
-    ---@return table
-    ---@nodiscard
-    function TABLE.newResourceTable(src,loadFunc,lazy)
-        local new={}
-        link(new,src,loadFunc)
-        if not lazy then
-            wakeLazyTable(src,new)
-        end
-        return new
+    ---@param noLazy? boolean
+    ---@return T
+    function TABLE.linkSource(lib,src,loadFunc,noLazy)
+        link(lib,src,loadFunc)
+        if noLazy then wakeLazyTable(src,lib) end
+        return lib
     end
 end
 
