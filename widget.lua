@@ -612,7 +612,7 @@ Widgets.hint=setmetatable({
     marginY=10,
     floatCornerR=5,
     floatLineWidth=3,
-    floatFillColor={.1,.1,.1,.6},
+    floatFillColor={.1,.1,.1,.8},
     floatFrameColor='DL',
     floatTextColor='dL',
 
