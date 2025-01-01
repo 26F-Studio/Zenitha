@@ -10,8 +10,8 @@ if not love.graphics then
     })
 end
 
-local gc=ZENITHA.graphics
-local getColor,setColor,setShader,getShader=gc.getColor,gc.setColor,gc.setShader,gc.getShader
+local gc=love.graphics
+local getColor,setColor,setShader=gc.getColor,gc.setColor,gc.setShader
 local prints,printf,draw,drawL=gc.print,gc.printf,gc.draw,gc.drawLayer
 local newText=gc.newText
 local line,arc,polygon=gc.line,gc.arc,gc.polygon

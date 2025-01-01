@@ -70,7 +70,7 @@ local SCR={
 }
 
 -- Set the default designing rect size
-SCR.w0,SCR.h0=ZENITHA.graphics.getDimensions()
+SCR.w0,SCR.h0=love.graphics.getDimensions()
 
 ---Set `Designing Rect` size
 
@@ -97,7 +97,7 @@ end
 ---@param w number
 ---@param h number
 function SCR._resize(w,h)
-    SCR.w,SCR.h,SCR.dpi=w,h,ZENITHA.graphics.getDPIScale()
+    SCR.w,SCR.h,SCR.dpi=w,h,love.graphics.getDPIScale()
     SCR.W,SCR.H=SCR.w*SCR.dpi,SCR.h*SCR.dpi
     SCR.r=h/w
     SCR.diam=(w^2+h^2)^.5

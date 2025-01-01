@@ -16,7 +16,7 @@ end
 ---@field event function
 ---@field discard function
 
-local gc_clear=ZENITHA.graphics.clear
+local gc_clear=love.graphics.clear
 
 ---@type Zenitha.Background[]
 local BGs={} -- Stored backgrounds
@@ -118,7 +118,7 @@ do -- Built-in: Color
     })
 end
 do -- Built-in: Image
-    local gc_setColor=ZENITHA.graphics.setColor
+    local gc_setColor=love.graphics.setColor
     local back={}
     local image=false
     local alpha=.26
