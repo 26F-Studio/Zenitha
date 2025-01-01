@@ -444,6 +444,21 @@ function TABLE.clearList(org)
     return org
 end
 
+---Clear whole table but keep the tree structure
+---@generic T
+---@param org T
+---@return T
+function TABLE.clearRecursive(org)
+    for k,v in next,org do
+        if type(v)=='table' then
+            TABLE.clearRecursive(v)
+        else
+            org[k]=nil
+        end
+    end
+    return org
+end
+
 ---Remove a specific value of [1~#]
 ---@generic V
 ---@param org V[]
@@ -1076,16 +1091,16 @@ do -- function TABLE.newResourceTable(src,loadFunc)
         self[k]=res
         return res
     end
-    local function link(A,B,loadFunc)
-        setmetatable(A,{
-            __source=B,
+    local function link(lib,index,loadFunc)
+        setmetatable(lib,{
+            __source=index,
             __loader=loadFunc,
             __index=lazyLoadMF,
         })
-        for k,v in next,B do
+        for k,v in next,index do
             if type(v)=='table' then
-                A[k]={}
-                link(A[k],v,loadFunc)
+                lib[k]={}
+                link(lib[k],v,loadFunc)
             end
         end
     end
