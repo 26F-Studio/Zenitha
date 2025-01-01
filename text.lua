@@ -144,7 +144,6 @@ local alignModes={
     bottomright={1,1},
 }
 ---Add text to container
----@param data Zenitha.TextAnimArg
 ---### Example
 ---```
 ---default={
@@ -162,6 +161,7 @@ local alignModes={
 ---    styleArg=...,
 ---}
 ---```
+---@param data Zenitha.TextAnimArg
 function TEXT:add(data)
     local T={
         text=GC.newText(FONT.get(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),

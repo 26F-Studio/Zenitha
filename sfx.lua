@@ -110,11 +110,11 @@ function SFX.load(name,path,lazyLoad)
 end
 
 ---Load SFX samples from specified directory
----@param pack {name:string, path:string, base:string, count:number}
 ---### Example
 ---```
 ---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
 ---```
+---@param pack {name:string, path:string, base:string, count:number}
 function SFX.loadSample(pack)
     assert(type(pack)=='table',"Usage: SFX.loadsample(table)")
     assert(pack.name,"SFX.loadSample: need field 'name'")
@@ -168,12 +168,12 @@ function SFX.setStereo(s)
 end
 
 ---Play a sample
----@param pack string
----@param ... string | number 0~1 number for volume, big integer and string for tune
 ---### Example
 ---```
 ---SFX.playSample('piano', .7,'C4','E4', .9,'G4')
 ---```
+---@param pack string
+---@param ... string | number 0~1 number for volume, big integer and string for tune
 function SFX.playSample(pack,...)
     if ... then
         local arg={...}

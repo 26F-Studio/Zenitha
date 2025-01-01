@@ -712,7 +712,6 @@ do -- function GC.load(L), GC.execute(t)
     ---Run a set of graphics commands in table-format
     ---
     ---See commands list by going to declaration of this function, then scroll up.
-    ---@param t Zenitha.drawingCommand[]
     ---### Example
     ---```
     ---GC.execute{
@@ -722,11 +721,11 @@ do -- function GC.load(L), GC.execute(t)
     ---    {'dCirc','fill',50,50,40},
     ---}
     ---```
+    ---@param t Zenitha.drawingCommand[]
     function GC.execute(t) GC_execute(t) end
 
     local sizeLimit=gc.getSystemLimits().texturesize
     ---Similar to GC.execute, but draw on a canvas.
-    ---@param list {w:number, h:number, [number]:Zenitha.drawingCommand}
     ---### Example
     ---```
     ---GC.load{w=100,h=100 -- size of canvas
@@ -736,6 +735,7 @@ do -- function GC.load(L), GC.execute(t)
     ---    {'dCirc','fill',50,50,40},
     ---} --> canvas
     ---```
+    ---@param list {w:number, h:number, [number]:Zenitha.drawingCommand}
     function GC.load(list)
         local w,h=tonumber(list.w),tonumber(list.h)
         assert(w and h and w>0 and h>0 and w%1==0 and h%1==0,"GC.load(L): L[1] and L[2] need int >=1")

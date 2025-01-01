@@ -12,16 +12,22 @@ local IMG={}
 local initialized=false
 local IMGlistMeta={
     __index=function(self,k)
-        local path=assertf(self.__source[k],"IMG[]: No field '%s'",k)
-        if type(path)~='string' then return path end
-        local ok,res=pcall(ZENITHA.graphics.newImage,path)
-        if ok then
+        local path=self.__source[k]
+        assertf(path~=nil,"IMG[]: No field '%s'",k)
+        if type(path)=='string' then
+            -- string: Load image with path
+            local suc,res=pcall(ZENITHA.graphics.newImage,path)
+            if not suc then
+                MSG.log('error',("Cannot load image '%s': %s"):format(path,res))
+                res=PAPER
+            end
             self[k]=res
+            return res
         else
-            self[k]=PAPER
-            MSG.log('error',("Cannot load image '%s': %s"):format(path,res))
+            -- other types: Copy value to the table
+            self[k]=path
+            return path
         end
-        return self[k]
     end,
     __metatable=true,
 }
@@ -37,7 +43,6 @@ local function link(A,B)
 end
 
 ---Initialize IMG lib (only once)
----@param imgTable Map<string | table>
 ---### Example
 ---```
 ---IMG.init{
@@ -57,6 +62,7 @@ end
 ---local image3_1=IMG.imagePack.image3_1
 ---local image4_1=IMG.imagePack.image4[1]
 ---```
+---@param imgTable Map<string | table>
 function IMG.init(imgTable)
     if initialized then
         LOG('warn',"IMG.init: Attempt to initialize twice")
@@ -64,6 +70,7 @@ function IMG.init(imgTable)
     end
     initialized,IMG.init=true,nil
     link(IMG,imgTable)
+    return imgTable
 end
 
 return IMG

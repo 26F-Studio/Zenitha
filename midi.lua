@@ -51,9 +51,6 @@ local function VLQ(buf)
     end
 end
 
----@param sData string
----@param handler fun(event: Zenitha.MIDI.Event)
----@return Zenitha.MIDI
 ---### Example
 ---```
 ---MIDI.newSong(FILE.load("music.mid"),function(event)
@@ -62,6 +59,9 @@ end
 ---    end
 ---end):play()
 ---```
+---@param sData string
+---@param handler fun(event: Zenitha.MIDI.Event)
+---@return Zenitha.MIDI
 function MIDI.newSong(sData,handler)
     assert(type(sData)=='string',"MIDI.newSong(songData,handler): songData need string")
     local songBuf=STRING.newBuf()
