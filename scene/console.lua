@@ -51,7 +51,7 @@ local commands={} do
                     local color=body.builtin and COLOR.L or COLOR.lR
                     log(
                         body.description and
-                            {color,cmd,COLOR.LD,STRING.repD(" $1 $2",("·"):rep(16-#cmd),body.description)}
+                            {color,cmd,COLOR.LD," "..("·"):rep(16-#cmd).." "..body.description}
                         or
                             {color,cmd}
                     )
@@ -348,7 +348,7 @@ local commands={} do
                     TASK.new(function()
                         TASK.yieldT(0.5)
                         for i=10,0,-1 do
-                            log{COLOR.R,STRING.repD("Deleting all data in $1...",i)}
+                            log{COLOR.R,"Deleting all data in "..i.."..."}
                             TASK.yieldT(1)
                         end
                         outputBox:setVisible(false)

@@ -165,11 +165,11 @@ local function _tryLoad(name)
                 ins(lastLoadNames,1,name)
                 return true
             else
-                LOG('info',STRING.repD("Wrong path for BGM '$1': $2",obj.name,obj.path),5)
+                LOG('info',("Wrong path for BGM '%s': %s"):format(obj.name,obj.path))
             end
         end
     elseif name then
-        LOG('info',"No BGM: "..name,5)
+        LOG('info',"No BGM: "..name)
     end
 end
 

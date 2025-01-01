@@ -12,19 +12,14 @@ local IMG={}
 local initialized=false
 local IMGlistMeta={
     __index=function(self,k)
-        local path=self.__source[k]
-        local ok,res
-        if type(path)=='string' then -- string, load image from path
-            assert(path,STRING.repD("IMG[]: No field '$1'",tostring(k)))
-            ok,res=pcall(ZENITHA.graphics.newImage,path)
-        else -- not string (neither table), keep the value
-            ok,res=true,path
-        end
+        local path=assertf(self.__source[k],"IMG[]: No field '%s'",k)
+        if type(path)~='string' then return path end
+        local ok,res=pcall(ZENITHA.graphics.newImage,path)
         if ok then
             self[k]=res
         else
             self[k]=PAPER
-            MSG.log('error',STRING.repD("Cannot load image '$1': $2",path,res))
+            MSG.log('error',("Cannot load image '%s': %s"):format(path,res))
         end
         return self[k]
     end,
