@@ -9,68 +9,54 @@ end
 
 local IMG={}
 
-local initialized=false
-local IMGlistMeta={
-    __index=function(self,k)
-        local path=self.__source[k]
-        assertf(path~=nil,"IMG[]: No field '%s'",k)
-        if type(path)=='string' then
-            -- string: Load image with path
-            local suc,res=pcall(ZENITHA.graphics.newImage,path)
-            if not suc then
-                MSG.log('error',("Cannot load image '%s': %s"):format(path,res))
-                res=PAPER
-            end
-            self[k]=res
-            return res
-        else
-            -- other types: Copy value to the table
-            self[k]=path
-            return path
-        end
-    end,
-    __metatable=true,
-}
-local function link(A,B)
-    A.__source=B
-    setmetatable(A,IMGlistMeta)
-    for k,v in next,B do
-        if type(v)=='table' then
-            A[k]={}
-            link(A[k],v)
-        end
+function IMG._loader(path)
+    -- Non-string: Just keep the value as it is
+    if type(path)~='string' then return path end
+
+    -- string: Load image with path
+    local suc,res=pcall(love.graphics.newImage,path)
+    if not suc then
+        MSG.log('error',("Cannot load image '%s': %s"):format(path,res))
+        return PAPER
     end
+    return res
 end
 
 ---Initialize IMG lib (only once)
 ---### Example
 ---```
 ---IMG.init{
----    image1='.../image1.jpg',
----    image2='.../image2.png',
----    imagePack={
----        image3_1='.../image3/1.jpg',
----        image3_2='.../image3/2.jpg',
----        image4={
----            '.../image4/1.png',
----            '.../image4/2.png',
+---    img1='.../img1.jpg',
+---    img2='.../img2.png',
+---    imgPack={
+---        img3_1='.../img3/1.jpg',
+---        img3_2='.../img3/2.jpg',
+---        img4={
+---            '.../img4/1.png',
+---            '.../img4/2.png',
 ---        },
 ---    },
 ---}
------ Then you can get image objects same as with get things from table like this:
----local image1=IMG.image1
----local image3_1=IMG.imagePack.image3_1
----local image4_1=IMG.imagePack.image4[1]
+----- Now you can get image objects same as with get things from the index table:
+---local img1=IMG.img1
+---local img3_1=IMG.imgPack.img3_1
+---local img4_1=IMG.imgPack.img4[1]
+---
 ---```
----@param imgTable Map<string | table>
-function IMG.init(imgTable)
-    if initialized then
-        LOG('warn',"IMG.init: Attempt to initialize twice")
-        return
-    end
-    initialized,IMG.init=true,nil
-    link(IMG,imgTable)
-    return imgTable
+---`IMG.init(index)` is actually an overload of `IMG.init(IMG,index)`.
+---
+---You can make your own lib with `lib=IMG.init(index,true)`, and init in this way can help language server doing auto-completion for you.
+---
+---Note: This is actually a wrapper of TABLE.linkSource + IMG._loader. Explore the cool implementation of `TABLE.linkSource` yourself!
+---@overload fun(index: Map<string | table>)
+---@generic T
+---@param index T
+---@param export? boolean
+---@return T
+function IMG.init(index,export)
+    local lib=export and {} or IMG
+    TABLE.linkSource(lib,index,IMG._loader)
+    return lib
 end
 
 return IMG
