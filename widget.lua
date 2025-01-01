@@ -1132,8 +1132,8 @@ function Widgets.slider:reset(init)
         if type(self.valueShow)=='function' then
             self._showFunc=self.valueShow
         elseif type(self.valueShow)=='string' then
-            self._showFunc=assert(sliderShowFunc[self.valueShow],"[slider].valueShow need function, or 'int', 'float', or 'percent'")
-        end
+            self._showFunc=sliderShowFunc[self.valueShow] or error("[slider].valueShow need function, or 'int', 'float', or 'percent'")
+            end
     elseif self.valueShow==false then -- Show nothing if false
         self._showFunc=sliderShowFunc.null
     else -- Use default if nil

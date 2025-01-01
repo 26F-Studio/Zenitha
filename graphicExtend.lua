@@ -760,7 +760,8 @@ do -- function GC.load(L), GC.execute(t)
                 local code=list[i]
                 local cmd=code[1]
                 if type(cmd)=='string' then
-                    cmd=assert(cmds[cmd],"GC.load(L): No gc command: "..cmd)(unpack(code,2))
+                    if not cmds[cmd] then error("GC.load(L): No gc command: "..cmd) end
+                    cmd=cmds[cmd](unpack(code,2))
                 elseif type(cmd)=='function' then
                     cmd(unpack(code,2))
                 else

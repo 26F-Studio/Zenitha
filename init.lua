@@ -185,7 +185,7 @@
 ---     print(AE'r;d;_M'.."reset, delete, magenta "..AE.."and reset manually")
 ---  ```
 ---
---- And some useful utility functions like `ZENITHA.setMaxFPS` `ZENITHA.setDebugInfo` `ZENITHA.setVersionText`.
+--- And some useful utility functions like `ZENITHA.setMainLoopSpeed` `ZENITHA.setDebugInfo` `ZENITHA.setVersionText`.
 ---
 --- Experimental modules:
 --- `WAIT`, `DEBUG`, `SYSFX`, `TEXT`, `VIB`, `WHEELMOV`, `LOADLIB`, `MIDI`
@@ -367,7 +367,8 @@ local discardCanvas=false
 local showFPS=true
 local updateFreq=100
 local drawFreq=100
-local sleepInterval=1/60
+local mainLoopInterval=1/60
+local sleepDurationError=0
 local clickDist2=62
 local maxErrorCount=3
 ---@class Zenitha.GlobalEvent
@@ -1252,10 +1253,9 @@ function love.run()
     local timer=ZENITHA.timer.getTime
 
     local frameTimeList={}
-    local lastLoopTime=timer()
-    local lastUpdateTime=lastLoopTime
-    local lastDrawTime=lastLoopTime
-    local lastScreenCheckTime=lastLoopTime
+    local lastUpdateTime=timer()
+    local lastDrawTime=lastUpdateTime
+    local lastScreenCheckTime=lastUpdateTime
 
     -- counters range from 0 to 99, trigger at 100
     -- start at 100 to guarantee trigger both of them at first frame
@@ -1272,11 +1272,9 @@ function love.run()
 
     -- Main loop
     return function()
-        local time=timer()
+        -- Loop start time
+        local loopT=timer()
         STEP()
-
-        -- local loopDT=time-lastLoopTime
-        lastLoopTime=time
 
         -- EVENT
         if PUMP then
@@ -1296,8 +1294,8 @@ function love.run()
         if updateCounter>=100 then
             updateCounter=updateCounter-100
 
-            local updateDT=time-lastUpdateTime
-            lastUpdateTime=time
+            local updateDT=loopT-lastUpdateTime
+            lastUpdateTime=loopT
 
             if mouseShow then mouse_update(updateDT) end
             if next(jsState) then gp_update(jsState[1],updateDT) end
@@ -1321,8 +1319,8 @@ function love.run()
             if drawCounter>=100 then
                 drawCounter=drawCounter-100
 
-                local drawDT=time-lastDrawTime
-                lastDrawTime=time
+                local drawDT=loopT-lastDrawTime
+                lastDrawTime=loopT
 
                 gc_replaceTransform(SCR.origin)
                     BG._draw()
@@ -1337,7 +1335,7 @@ function love.run()
                 gc_replaceTransform(xOy)
                     SYSFX._draw()
                     TEXT.draw(TEXT)
-                    if mouseShow then globalEvent.drawCursor(mx,my,time) end
+                    if mouseShow then globalEvent.drawCursor(mx,my,loopT) end
                 gc_replaceTransform(SCR.xOy_ul)
                     globalEvent.drawSysInfo()
                 gc_replaceTransform(xOy)
@@ -1402,9 +1400,9 @@ function love.run()
         end
 
         -- Check screen size
-        if time-lastScreenCheckTime>1.26 and (gc.getWidth()~=SCR.w or gc.getHeight()~=SCR.h) then
+        if loopT-lastScreenCheckTime>1 and (gc.getWidth()~=SCR.w or gc.getHeight()~=SCR.h) then
             love.resize(gc.getWidth(),gc.getHeight())
-            lastScreenCheckTime=time
+            lastScreenCheckTime=loopT
         end
 
         -- Slow devmode
@@ -1416,9 +1414,9 @@ function love.run()
             end
         end
 
-        local curFrameInterval=timer()-lastLoopTime
-        if curFrameInterval<sleepInterval*.9626 then SLEEP(sleepInterval*.9626-curFrameInterval) end
-        while timer()-lastLoopTime<sleepInterval do end
+        local timeRemain=loopT+mainLoopInterval-timer()
+        if timeRemain>sleepDurationError then SLEEP(timeRemain-sleepDurationError) end
+        while timer()-loopT<mainLoopInterval do end
     end
 end
 
@@ -1500,10 +1498,30 @@ function ZENITHA.setCleanCanvas(bool)
 end
 
 ---Set the max update rate of main loop cycle
----@param fps number Default to 60
-function ZENITHA.setMaxFPS(fps)
-    assert(type(fps)=='number' and fps>0,"ZENITHA.setMaxFPS(fps): Need >0")
-    sleepInterval=1/fps
+---@param lps number Loop/sec, default to 60
+function ZENITHA.setMainLoopSpeed(lps)
+    assert(type(lps)=='number' and lps>0,"ZENITHA.setMainLoopSpeed(lps): Need >0")
+    mainLoopInterval=1/lps
+end
+
+---Set the sleep duration error to balance accuracy & performance of main-loop-frequency
+---
+---Recommend value:
+---| Mode \| | Value |
+---| -: | :-: |
+---| Accuracy \| | 🪟1.0, 🐧0.5 |
+---| Normal \| | 0 |
+---| Performance \| | -0.5 |
+---| Power-Saving \| | -1.0 |
+---
+---How this works: Because `love.timer.sleep(t)` is not accurate enough (always a bit more time), so we can sleep `[setting value] LESS`, then busy-wait to obtain the exact time interval.  
+---
+---But `sleep()` actually only accept integer microsecond value, so when we need to sleep 1.5ms, doing `sleep(1.5ms)` is same as `sleep(1ms)`, so busy-wait will still work for ~0.5ms.  
+---That's why we accept negative number. Setting error to -1ms means we will do `sleep(2.5ms)` when we need 1.5, so busy-wait is guaranteed not to be triggered, saving more resource.
+---@param ms number in [-1,1], default to 0 (ms)
+function ZENITHA.setSleepDurationError(ms)
+    assert(type(ms)=='number' and ms>=-1 and ms<=1,"ZENITHA.setSleepFault(ms): Need in [-1,1]")
+    sleepDurationError=ms/1000
 end
 
 ---Set the updating rate of the application
