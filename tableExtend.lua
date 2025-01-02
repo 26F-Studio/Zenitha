@@ -60,11 +60,11 @@ end
 ---Create the subset list of a list, like string.sub
 ---
 ---leave `start&stop` as `nil` will simply copy
----@generic K, V
----@param org {[K]:V} original table
+---@generic T
+---@param org T original table
 ---@param start? integer start pos (default 1)
 ---@param stop? integer end pos (default #org)
----@return {[K]:V}
+---@return T
 ---@nodiscard
 function TABLE.sub(org,start,stop)
     if not start then start=1 end
@@ -95,10 +95,10 @@ function TABLE.copy(org,depth)
 end
 
 ---Create a full copy of org, depth = how many layers will be recreate, default to inf
----@generic K, V
----@param org {[K]:V} original table
+---@generic T
+---@param org T original table
 ---@param depth? integer how many layers will be recreate, default to inf
----@return {[K]:V}
+---@return T
 ---@nodiscard
 function TABLE.copyAll(org,depth)
     if not depth then depth=1e99 end
@@ -334,10 +334,10 @@ function TABLE.subtract(org,sub)
 end
 
 ---Delete all items in org which also in sub
----@generic K, V
----@param org {[K]:V}
+---@generic T
+---@param org T
 ---@param sub table
----@return {[K]:V}
+---@return T
 function TABLE.subtractAll(org,sub)
     for _,v in next,sub do
         while true do
@@ -423,9 +423,9 @@ pcall(function() TABLE[('clear')]=require'table.clear' end)
 ---Clear whole table (pure lua implementation)
 ---
 ---Recommend to use `TABLE.clear` instead
----@generic K, V
----@param org {[K]:V}
----@return {[K]:V}
+---@generic T
+---@param org T
+---@return T
 function TABLE.clearAll(org)
     for k in next,org do
         org[k]=nil
@@ -473,9 +473,9 @@ function TABLE.delete(org,value)
 end
 
 ---Remove a specific value in whole table
----@generic K, V
----@param org {[K]:V}
----@return {[K]:V}
+---@generic T
+---@param org T
+---@return T
 function TABLE.deleteAll(org,value)
     for k,v in next,org do
         if v==value then
@@ -506,9 +506,9 @@ function TABLE.removeDuplicate(org)
 end
 
 ---Remove duplicated value in whole table
----@generic K, V
----@param org {[K]:V}
----@return {[K]:V}
+---@generic T
+---@param org T
+---@return T
 function TABLE.removeDuplicateAll(org)
     local cache={}
     for k,v in next,org do
