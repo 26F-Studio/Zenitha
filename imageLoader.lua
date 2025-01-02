@@ -25,6 +25,7 @@ end
 ---Initialize IMG lib (only once)
 ---### Example
 ---```
+----- Initialize the IMG lib with a index table
 ---IMG.init{
 ---    img1='.../img1.jpg',
 ---    img2='.../img2.png',
@@ -41,13 +42,12 @@ end
 ---local img1=IMG.img1
 ---local img3_1=IMG.imgPack.img3_1
 ---local img4_1=IMG.imgPack.img4[1]
----
 ---```
----`IMG.init(index)` is actually an overload of `IMG.init(IMG,index)`.
+--- By the way, the index table **CAN** include non-string value, they won't be loaded as a path string, but just keep the value as it is.
 ---
----You can make your own lib with `lib=IMG.init(index,true)`, and init in this way can help language server doing auto-completion for you.
+---Advanced usage: `IMG.init(index)` is overload of `IMG.init(IMG,index)`, so you can create your own lib with `lib=IMG.init(index,true)`, in this way you can help language server doing auto-completion for you.
 ---
----Note: This is actually a wrapper of TABLE.linkSource + IMG._loader. Explore the cool implementation of `TABLE.linkSource` yourself!
+---Interesting fact: This is actually a simple wrap of `TABLE.linkSource` + `IMG._loader`. Explore the cool implementation yourself!
 ---@overload fun(index: Map<string | table>)
 ---@generic T
 ---@param index T
