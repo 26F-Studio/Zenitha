@@ -289,6 +289,15 @@ function Widgets.base:getInfo()
     end
     return str
 end
+function Widgets.base:resetPos()
+    if self.pos then
+        self._x=self.x+(self.pos[1] and self.pos[1]*(SCR.w0+2*SCR.x/SCR.k)-SCR.x/SCR.k or 0)
+        self._y=self.y+(self.pos[2] and self.pos[2]*(SCR.h0+2*SCR.y/SCR.k)-SCR.y/SCR.k or 0)
+    else
+        self._x=self.x
+        self._y=self.y
+    end
+end
 function Widgets.base:reset(init)
     assert(not self.name or type(self.name)=='string',"[widget].name need string")
 
@@ -322,11 +331,6 @@ function Widgets.base:reset(init)
             (type(self.pos[2])=='number' or self.pos[2]==false),
             "[widget].pos[1] and [2] need number|false}"
         )
-        self._x=self.x+(self.pos[1] and self.pos[1]*(SCR.w0+2*SCR.x/SCR.k)-SCR.x/SCR.k or 0)
-        self._y=self.y+(self.pos[2] and self.pos[2]*(SCR.h0+2*SCR.y/SCR.k)-SCR.y/SCR.k or 0)
-    else
-        self._x=self.x
-        self._y=self.y
     end
 
     assert(type(self.fontSize)=='number',"[widget].fontSize need number")
@@ -337,6 +341,8 @@ function Widgets.base:reset(init)
 
     assert(not self.sound_press or type(self.sound_press)=='string',"[widget].sound_press need string")
     assert(not self.sound_hover or type(self.sound_hover)=='string',"[widget].sound_hover need string")
+
+    self:resetPos()
 
     local content=self.text or self.name and ("["..self.name.."]")
     if content then
