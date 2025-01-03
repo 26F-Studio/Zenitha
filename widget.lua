@@ -15,6 +15,7 @@
 ---@field fontSize? number [EXCEPT image & listBox]
 ---@field fontType? string [EXCEPT image & listBox]
 ---@field image? string | love.Drawable [image & button] Can use slash-path to read from IMG lib
+---@field quad? love.Quad [same as image] Optional
 ---@field alignX? 'left' | 'right' | 'center' [text & image & button]
 ---@field alignY? 'top' | 'bottom' | 'center' [text & image & button]
 ---@field marginX? number [button & hint]
@@ -169,6 +170,14 @@ local function alignDraw(self,drawable,x,y,ang,kx,ky)
     local oy=self.alignY=='center' and h*.5 or self.alignY=='top' and 0 or h
     gc_draw(drawable,x,y,ang,kx,ky,ox,oy)
 end
+local function alignDrawQ(self,texture,quad,x,y,ang,kx,ky)
+    local _,_,w,h=quad:getViewport()
+    if not kx then kx=min(self.widthLimit/w,1) end
+    if not ky then ky=kx or 1 end
+    local ox=self.alignX=='center' and w*.5 or self.alignX=='left' and 0 or w
+    local oy=self.alignY=='center' and h*.5 or self.alignY=='top' and 0 or h
+    gc_draw(texture,quad,x,y,ang,kx,ky,ox,oy)
+end
 local function parseImgPath(path)
     local str=STRING.split(path,'/')
     local _img=IMG
@@ -210,7 +219,7 @@ local Widgets={}
 ---@field sound_hover string | false
 ---
 ---@field _text love.Drawable | false
----@field _image love.Drawable | false
+---@field _image love.Image | love.Drawable | false
 ---@field _hoverTime number
 ---@field _hoverTimeMax number
 ---@field _pressed boolean
@@ -236,6 +245,7 @@ Widgets.base={
 
     text=false,
     image=false,
+    quad=false,
 
     keepFocus=false,
     x=0,y=0,
@@ -345,6 +355,9 @@ function Widgets.base:reset(init)
             parseImgPath(self.image) or
             self.image
     end
+    if self.quad then
+        assert(type(self.quad)=='userdata' and self.quad:type()=='Quad',"[widget].quad need love.Quad")
+    end
 
     self._hoverTime=0
 
@@ -442,7 +455,7 @@ Widgets.image=setmetatable({
         'alignX','alignY',
 
         'ang',
-        'image',
+        'image','quad',
 
         'visibleFunc',
         'visibleTick',
@@ -450,7 +463,7 @@ Widgets.image=setmetatable({
 },{__index=Widgets.base,__metatable=true})
 function Widgets.image:reset(init)
     Widgets.base.reset(self,init)
-    assert(not self.k or not (self.w or self.h),"[image].w/h and .k cannot appear simultaneously")
+    assert(not self.k or not (self.w or self.h),"[image].w/h and .k cannot appear at the same time")
     if not self._image then return end
 
     if self.k then
@@ -464,14 +477,14 @@ function Widgets.image:reset(init)
         self._kx,self._ky=1,1
     end
 end
-function Widgets.image:setImage(_img)
-    self.image=_img
-    self:reset(false)
-end
 function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,self._x,self._y,self.ang,self._kx,self._ky)
+        if self.quad then
+            alignDrawQ(self,self._image,self.quad,self._x,self._y,self.ang,self._kx,self._ky)
+        else
+            alignDraw(self,self._image,self._x,self._y,self.ang,self._kx,self._ky)
+        end
     end
 end
 
@@ -500,7 +513,7 @@ Widgets.button=setmetatable({
         'lineWidth','cornerR',
 
         'color','fillColor','frameColor','textColor',
-        'text','fontSize','fontType','image',
+        'text','fontSize','fontType','image','quad',
         'sound_trigger',
         'sound_press','sound_hover',
 
@@ -569,7 +582,11 @@ function Widgets.button:draw()
     local startY=self.alignY=='center' and 0 or self.alignY=='top' and -h*.5+self.marginY or h*.5-self.marginY
     if self._image then
         gc_setColor(1,1,1)
-        alignDraw(self,self._image,startX,startY)
+        if self.quad then
+            alignDrawQ(self,self._image,self.quad,startX,startY)
+        else
+            alignDraw(self,self._image,startX,startY)
+        end
     end
     if self._text then
         gc_setColor(self.textColor)
@@ -627,7 +644,7 @@ Widgets.hint=setmetatable({
         'lineWidth','cornerR',
 
         'color','frameColor','textColor',
-        'text','fontSize','fontType','image',
+        'text','fontSize','fontType','image','quad',
         'floatImage','floatText','floatFontSize','floatFontType',
         'floatBox','marginX','marginY',
         'labelPos','labelDist',
@@ -756,7 +773,11 @@ function Widgets.hint:draw()
     -- Drawable
     if self._image then
         gc_setColor(1,1,1)
-        gc_mDraw(self._image)
+        if self.quad then
+            alignDrawQ(self,self._image,self.quad)
+        else
+            alignDraw(self,self._image)
+        end
     end
     if self._text then
         gc_setColor(self.textColor)
@@ -887,10 +908,6 @@ function Widgets.checkBox:draw()
     elseif self.labelPos=='bottom' then
         y2=w*.5+self.labelDist
     end
-    if self._image then
-        gc_setColor(1,1,1)
-        alignDraw(self,self._image,x2,y2)
-    end
     if self._text then
         gc_setColor(self.textColor)
         alignDraw(self,self._text,x2,y2)
@@ -991,10 +1008,6 @@ function Widgets.switch:draw()
         y2=-h*.5-self.labelDist
     elseif self.labelPos=='bottom' then
         y2=h*.5+self.labelDist
-    end
-    if self._image then
-        gc_setColor(1,1,1)
-        alignDraw(self,self._image,x2,y2)
     end
     if self._text then
         gc_setColor(self.textColor)
@@ -1612,10 +1625,6 @@ function Widgets.selector:draw()
         x2,y2=x,y-self.labelDist
     elseif self.labelPos=='bottom' then
         x2,y2=x,y+self.labelDist
-    end
-    if self._image then
-        gc_setColor(1,1,1)
-        alignDraw(self,self._image,x2,y2)
     end
     if self._text then
         gc_setColor(self.textColor)
@@ -2612,5 +2621,6 @@ function WIDGET.newClass(name,parent)
     return Widgets[name]
 end
 WIDGET._alignDraw=alignDraw
+WIDGET._alignDrawQ=alignDrawQ
 
 return WIDGET
