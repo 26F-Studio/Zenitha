@@ -309,7 +309,6 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
 end
 
 local fillShader=gc.newShader[[
-    #pragma language glsl3
     uniform float fill=0; // 0~.5
     vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
         float dist = length(texCoord.xy - .5);
