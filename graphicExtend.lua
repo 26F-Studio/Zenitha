@@ -309,13 +309,13 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
 end
 
 local fillShader=gc.newShader[[
-    uniform float fill=0; // 0~.5
+    uniform float fill;
     vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
-        float dist = length(texCoord.xy - .5);
-        color.a *= smoothstep(.5, fill, dist);
+        float dist = length(texCoord.xy - 0.5);
+        color.a *= smoothstep(0.5, fill, dist);
         return color;
     }
-]]
+]] fillShader:send('fill',.5)
 ---(Shader Implementation) Draw a filled circle with blurring edge
 ---@param solid? number .5=sharp, .5-1/r=natural, 0=light, nil=last value
 ---@param x number
