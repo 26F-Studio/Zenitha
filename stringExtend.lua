@@ -418,7 +418,6 @@ function STRING.cutUnit(str)
 end
 
 local b16=STRING.atomize('123456789ABCDEF') b16[0]='0'
-local rshift=bit.rshift
 ---Simple url encoding
 ---@param str string
 ---@return string
@@ -430,7 +429,7 @@ function STRING.urlEncode(str)
             buf_put(buf,sub(str,i,i))
         else
             local b=byte(str,i)
-            buf_put(buf,'%'..b16[rshift(b,4)]..b16[b%16])
+            buf_put(buf,'%'..b16[bit.rshift(b,4)]..b16[b%16])
         end
     end
     return buf_get(buf)
