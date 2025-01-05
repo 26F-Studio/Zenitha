@@ -24,6 +24,7 @@
 ---@field labelDist? number [EXCEPT text & image & button & text/listBox]
 ---@field disp? function [checkBox & switch & sliders & selector] Must return the value that widget should show
 ---@field code? function [EXCEPT text & image & hint & input/textBox] Called 'When triggered'
+---@field onPress? function [button] Called 'When pressed down'
 ---@field visibleFunc? function [All] Used to change widget's visibility when scene changed
 ---@field visibleTick? function [All] Used to update widget's visibility every frame
 ---
@@ -509,6 +510,7 @@ Widgets.button=setmetatable({
     sound_trigger=false,
 
     code=NULL,
+    onPress=NULL,
 
     buildArgs={
         'name',
@@ -523,7 +525,7 @@ Widgets.button=setmetatable({
         'sound_trigger',
         'sound_press','sound_hover',
 
-        'code',
+        'code','onPress',
         'visibleFunc',
         'visibleTick',
     },
@@ -546,6 +548,7 @@ function Widgets.button:isAbove(x,y)
 end
 function Widgets.button:press()
     self._pressed=true
+    self.onPress()
 end
 function Widgets.button:release(_,_,k)
     if self._pressed then
