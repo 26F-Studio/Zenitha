@@ -64,8 +64,8 @@ function GC.mDraw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHei
 ---@param a? number
 ---@param k? number
 function GC.mDrawQX(obj,quad,x,y,a,k)
-    local _,_,w,h=quad:getViewport()
-    draw(obj,quad,x,y,a,k,nil,w*.5,h*.5)
+    local _,_,w=quad:getViewport()
+    draw(obj,quad,x,y,a,k,nil,w*.5,0)
 end
 
 ---Draw an object with both middle X & Y
@@ -75,8 +75,8 @@ end
 ---@param a? number
 ---@param k? number
 function GC.mDrawQY(obj,quad,x,y,a,k)
-    local _,_,w,h=quad:getViewport()
-    draw(obj,quad,x,y,a,k,nil,w*.5,h*.5)
+    local _,_,_,h=quad:getViewport()
+    draw(obj,quad,x,y,a,k,nil,0,h*.5)
 end
 
 ---Draw an object with both middle X & Y
