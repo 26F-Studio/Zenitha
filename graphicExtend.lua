@@ -37,12 +37,12 @@ function GC.mStr(obj,x,y) printf(obj,x-1260,y,2520,'center') end
 ---@param obj love.Texture | love.Drawable
 ---@param x? number
 ---@param y? number
----@param a? number
+---@param r? number
 ---@param kx? number
 ---@param ky? number
-function GC.mDraw(obj,x,y,a,kx,ky)
+function GC.mDraw(obj,x,y,r,kx,ky)
     local w,h=obj:getDimensions()
-    draw(obj,x,y,a,kx,ky,w*.5,h*.5)
+    draw(obj,x,y,r,kx,ky,w*.5,h*.5)
 end
 
 ---Draw an object with both middle X & Y, clipped with a quad
@@ -50,12 +50,12 @@ end
 ---@param quad love.Quad
 ---@param x? number
 ---@param y? number
----@param a? number
+---@param r? number
 ---@param kx? number
 ---@param ky? number
-function GC.mDrawQ(obj,quad,x,y,a,kx,ky)
+function GC.mDrawQ(obj,quad,x,y,r,kx,ky)
     local _,_,w,h=quad:getViewport()
-    draw(obj,quad,x,y,a,kx,ky,w*.5,h*.5)
+    draw(obj,quad,x,y,r,kx,ky,w*.5,h*.5)
 end
 
 ---Draw an layered obj with both middle X & Y
@@ -63,12 +63,12 @@ end
 ---@param layer number
 ---@param x? number
 ---@param y? number
----@param a? number
+---@param r? number
 ---@param kx? number
 ---@param ky? number
-function GC.mDrawL(obj,layer,x,y,a,kx,ky)
+function GC.mDrawL(obj,layer,x,y,r,kx,ky)
     local w,h=obj:getDimensions()
-    drawL(obj,layer,x,y,a,kx,ky,w*.5,h*.5)
+    drawL(obj,layer,x,y,r,kx,ky,w*.5,h*.5)
 end
 
 ---Draw an layered obj with both middle X & Y, clipped with a quad
@@ -77,12 +77,12 @@ end
 ---@param quad love.Quad
 ---@param x? number
 ---@param y? number
----@param a? number
+---@param r? number
 ---@param kx? number
 ---@param ky? number
-function GC.mDrawLQ(obj,layer,quad,x,y,a,kx,ky)
+function GC.mDrawLQ(obj,layer,quad,x,y,r,kx,ky)
     local _,_,w,h=quad:getViewport()
-    drawL(obj,layer,quad,x,y,a,kx,ky,w*.5,h*.5)
+    drawL(obj,layer,quad,x,y,r,kx,ky,w*.5,h*.5)
 end
 
 --------------------------------------------------------------
@@ -202,18 +202,18 @@ end
 ---@param y? number
 ---@param rad number Radius
 ---@param segments number
----@param ang? number
-function GC.regPolygon(mode,x,y,rad,segments,ang)
+---@param rot? number
+function GC.regPolygon(mode,x,y,rad,segments,rot)
     if not x then x=0 end
     if not y then y=0 end
-    if not ang then ang=0 end
+    if not rot then rot=0 end
 
     local l={}
-    local angStep=6.283185307179586/segments
+    local rotStep=6.283185307179586/segments
     for i=1,segments do
-        l[2*i-1]=x+rad*cos(ang)
-        l[2*i]=y+rad*sin(ang)
-        ang=ang+angStep
+        l[2*i-1]=x+rad*cos(rot)
+        l[2*i]=y+rad*sin(rot)
+        rot=rot+rotStep
     end
     polygon(mode,l)
 end
@@ -231,15 +231,15 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
     if not y then y=0 end
 
     local X,Y={},{}
-    local ang=phase or 0
-    local angStep=6.283185307179586/segments
+    local rot=phase or 0
+    local rotStep=6.283185307179586/segments
     for i=1,segments do
-        X[i]=x+rad*cos(ang)
-        Y[i]=y+rad*sin(ang)
-        ang=ang+angStep
+        X[i]=x+rad*cos(rot)
+        Y[i]=y+rad*sin(rot)
+        rot=rot+rotStep
     end
-    X[segments+1]=x+rad*cos(ang)
-    Y[segments+1]=y+rad*sin(ang)
+    X[segments+1]=x+rad*cos(rot)
+    Y[segments+1]=y+rad*sin(rot)
     local halfAng=6.283185307179586/segments/2
     local erasedLen=rCorner*math.tan(halfAng)
     if mode=='line' then
@@ -251,10 +251,10 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
             line(x1+erasedLen*cos(dir),y1+erasedLen*sin(dir),x2-erasedLen*cos(dir),y2-erasedLen*sin(dir))
 
             -- Arc
-            ang=ang+angStep
+            rot=rot+rotStep
             local R2=rad-rCorner/cos(halfAng)
-            local arcCX,arcCY=x+R2*cos(ang),y+R2*sin(ang)
-            arc('line','open',arcCX,arcCY,rCorner,ang-halfAng,ang+halfAng)
+            local arcCX,arcCY=x+R2*cos(rot),y+R2*sin(rot)
+            arc('line','open',arcCX,arcCY,rCorner,rot-halfAng,rot+halfAng)
         end
     elseif mode=='fill' then
         local L={}
@@ -268,10 +268,10 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
             L[4*i]=y2-erasedLen*sin(dir)
 
             -- Arc
-            ang=ang+angStep
+            rot=rot+rotStep
             local R2=rad-rCorner/cos(halfAng)
-            local arcCX,arcCY=x+R2*cos(ang),y+R2*sin(ang)
-            arc('fill','open',arcCX,arcCY,rCorner,ang-halfAng,ang+halfAng)
+            local arcCX,arcCY=x+R2*cos(rot),y+R2*sin(rot)
+            arc('fill','open',arcCX,arcCY,rCorner,rot-halfAng,rot+halfAng)
         end
         polygon('fill',L)
     else
@@ -529,9 +529,9 @@ function Camera:move(dx,dy)
     if self.maxDist then
         local dist=MATH.distance(0,0,self.x0,self.y0)/self.k0
         if dist>self.maxDist then
-            local angle=math.atan2(self.y0,self.x0)
-            self.x0=self.maxDist*math.cos(angle)*self.k0
-            self.y0=self.maxDist*math.sin(angle)*self.k0
+            local rot=math.atan2(self.y0,self.x0)
+            self.x0=self.maxDist*math.cos(rot)*self.k0
+            self.y0=self.maxDist*math.sin(rot)*self.k0
         end
     end
 end

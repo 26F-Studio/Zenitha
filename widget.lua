@@ -50,7 +50,7 @@
 ---@field floatFrameColor? Zenitha.ColorStr | Zenitha.Color
 ---@field floatTextColor? Zenitha.ColorStr | Zenitha.Color
 ---
----@field ang? number [image]
+---@field r? number [image]
 ---@field k? number [image]
 ---
 ---@field sound_on? string | false [checkBox & switch]
@@ -162,22 +162,22 @@ local function updateWheel(self,d)
         return n
     end
 end
-local function alignDraw(self,drawable,x,y,ang,kx,ky)
+local function alignDraw(self,drawable,x,y,r,kx,ky)
     local w=drawable:getWidth()
     local h=drawable:getHeight()
     if not kx then kx=min(self.widthLimit/w,1) end
     if not ky then ky=kx or 1 end
     local ox=self.alignX=='center' and w*.5 or self.alignX=='left' and 0 or w
     local oy=self.alignY=='center' and h*.5 or self.alignY=='top' and 0 or h
-    gc_draw(drawable,x,y,ang,kx,ky,ox,oy)
+    gc_draw(drawable,x,y,r,kx,ky,ox,oy)
 end
-local function alignDrawQ(self,texture,quad,x,y,ang,kx,ky)
+local function alignDrawQ(self,texture,quad,x,y,r,kx,ky)
     local _,_,w,h=quad:getViewport()
     if not kx then kx=min(self.widthLimit/w,1) end
     if not ky then ky=kx or 1 end
     local ox=self.alignX=='center' and w*.5 or self.alignX=='left' and 0 or w
     local oy=self.alignY=='center' and h*.5 or self.alignY=='top' and 0 or h
-    gc_draw(texture,quad,x,y,ang,kx,ky,ox,oy)
+    gc_draw(texture,quad,x,y,r,kx,ky,ox,oy)
 end
 local function parseImgPath(path)
     local str=STRING.split(path,'/')
@@ -449,7 +449,7 @@ end
 Widgets.image=setmetatable({
     type='image',
     w=false,h=false,k=false,
-    ang=0,
+    r=0,
 
     image=false,
     _kx=false,_ky=false,
@@ -461,7 +461,7 @@ Widgets.image=setmetatable({
         'k','w','h', -- k & w+h are not compatible
         'alignX','alignY',
 
-        'ang',
+        'r',
         'image','quad',
 
         'visibleFunc',
@@ -488,9 +488,9 @@ function Widgets.image:draw()
     if self._image then
         gc_setColor(1,1,1)
         if self.quad then
-            alignDrawQ(self,self._image,self.quad,self._x,self._y,self.ang,self._kx,self._ky)
+            alignDrawQ(self,self._image,self.quad,self._x,self._y,self.r,self._kx,self._ky)
         else
-            alignDraw(self,self._image,self._x,self._y,self.ang,self._kx,self._ky)
+            alignDraw(self,self._image,self._x,self._y,self.r,self._kx,self._ky)
         end
     end
 end
