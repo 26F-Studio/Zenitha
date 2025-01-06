@@ -27,92 +27,63 @@ local GC=TABLE.copyAll(gc,0)
 --------------------------------------------------------------
 -- Aligning Draw
 
----Printf a string with 'center'
+---Printf a string with 'center' option
 ---@param obj string | number
 ---@param x number
 ---@param y number
 function GC.mStr(obj,x,y) printf(obj,x-1260,y,2520,'center') end
 
----Draw an object with x=obj:getWidth()/2
----@param obj love.Texture | love.Drawable
----@param x? number
----@param y? number
----@param a? number
----@param k? number
-function GC.mDrawX(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,0) end
-
----Draw an object with y=obj:getWidth()/2
----@param obj love.Texture | love.Drawable
----@param x? number
----@param y? number
----@param a? number
----@param k? number
-function GC.mDrawY(obj,x,y,a,k) draw(obj,x,y,a,k,nil,0,obj:getHeight()*.5) end
-
 ---Draw an object with both middle X & Y
 ---@param obj love.Texture | love.Drawable
 ---@param x? number
 ---@param y? number
 ---@param a? number
----@param k? number
-function GC.mDraw(obj,x,y,a,k) draw(obj,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
-
----Draw an object with both middle X & Y
----@param obj love.Texture | love.Drawable
----@param x? number
----@param y? number
----@param a? number
----@param k? number
-function GC.mDrawQX(obj,quad,x,y,a,k)
-    local _,_,w=quad:getViewport()
-    draw(obj,quad,x,y,a,k,nil,w*.5,0)
+---@param kx? number
+---@param ky? number
+function GC.mDraw(obj,x,y,a,kx,ky)
+    local w,h=obj:getDimensions()
+    draw(obj,x,y,a,kx,ky,w*.5,h*.5)
 end
 
----Draw an object with both middle X & Y
+---Draw an object with both middle X & Y, clipped with a quad
 ---@param obj love.Texture | love.Drawable
+---@param quad love.Quad
 ---@param x? number
 ---@param y? number
 ---@param a? number
----@param k? number
-function GC.mDrawQY(obj,quad,x,y,a,k)
-    local _,_,_,h=quad:getViewport()
-    draw(obj,quad,x,y,a,k,nil,0,h*.5)
-end
-
----Draw an object with both middle X & Y
----@param obj love.Texture | love.Drawable
----@param x? number
----@param y? number
----@param a? number
----@param k? number
-function GC.mDrawQ(obj,quad,x,y,a,k)
+---@param kx? number
+---@param ky? number
+function GC.mDrawQ(obj,quad,x,y,a,kx,ky)
     local _,_,w,h=quad:getViewport()
-    draw(obj,quad,x,y,a,k,nil,w*.5,h*.5)
+    draw(obj,quad,x,y,a,kx,ky,w*.5,h*.5)
 end
-
----Draw an layered obj with x=obj:getWidth()/2
----@param obj love.Texture
----@param x? number
----@param y? number
----@param a? number
----@param k? number
-function GC.mDrawLX(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,obj:getWidth()*.5,0) end
-
----Draw an layered obj with y=obj:getWidth()/2
----@param obj love.Texture
----@param x? number
----@param y? number
----@param a? number
----@param k? number
-function GC.mDrawLY(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,0,obj:getHeight()*.5) end
 
 ---Draw an layered obj with both middle X & Y
 ---@param obj love.Texture
+---@param layer number
 ---@param x? number
 ---@param y? number
 ---@param a? number
----@param k? number
-function GC.mDrawL(obj,l,x,y,a,k) drawL(obj,l,x,y,a,k,nil,obj:getWidth()*.5,obj:getHeight()*.5) end
+---@param kx? number
+---@param ky? number
+function GC.mDrawL(obj,layer,x,y,a,kx,ky)
+    local w,h=obj:getDimensions()
+    drawL(obj,layer,x,y,a,kx,ky,w*.5,h*.5)
+end
+
+---Draw an layered obj with both middle X & Y, clipped with a quad
+---@param obj love.Texture
+---@param layer number
+---@param quad love.Quad
+---@param x? number
+---@param y? number
+---@param a? number
+---@param kx? number
+---@param ky? number
+function GC.mDrawLQ(obj,layer,quad,x,y,a,kx,ky)
+    local _,_,w,h=quad:getViewport()
+    drawL(obj,layer,quad,x,y,a,kx,ky,w*.5,h*.5)
+end
 
 --------------------------------------------------------------
 -- Utility
