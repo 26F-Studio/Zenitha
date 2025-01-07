@@ -4,7 +4,7 @@ local data=love.data or {
     decompress=NULL,
     decode=NULL,
 }
-local assert,tostring,tonumber=assert,tostring,tonumber
+local type,assert,tostring,tonumber=type,assert,tostring,tonumber
 local floor,min=math.floor,math.min
 local log,lg=math.log,math.log10
 local match,find,format=string.match,string.find,string.format
@@ -59,6 +59,7 @@ end
 function STRING.installIndex()
     function STRING.installIndex() error("STRING.installIndex: Attempt to install stringIndex syntax twice") end
     local meta=getmetatable('')
+    local string=string
     function meta.__index(str,n)
         if type(n)~='number' then
             return string[n]
