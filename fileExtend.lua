@@ -27,8 +27,9 @@ end
 ---(Auto detect if mode not given, not accurate)
 ---@param path string
 ---@param args? string | '-luaon' | '-lua' | '-json' | '-string' | '-canskip'
+---@param venv? table Used as environment for LuaON
 ---@return any
-function FILE.load(path,args)
+function FILE.load(path,args,venv)
     if not args then args='' end
     if fs.getInfo(path) then
         local F=fs.newFile(path)
@@ -46,7 +47,7 @@ function FILE.load(path,args)
         if mode=='luaon' then
             local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..']]'..s)
             if func then
-                setfenv(func,{})
+                setfenv(func,venv or {})
                 local res=func()
                 return assert(res,"FILE.load: Decode error")
             else
