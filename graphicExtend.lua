@@ -602,7 +602,7 @@ end
 --------------------------------------------------------------
 
 do -- function GC.load(L), GC.execute(t)
-    ---@alias Zenitha.drawingCommand {[1]:Zenitha.Graphics.drawingCommandType, [number]:any}
+    ---@alias Zenitha.drawingCommand {_help?:Zenitha.Graphics.drawingCommandType, [1]:Zenitha.Graphics.drawingCommandType, [number]:any}
 
     ---@enum (key) Zenitha.Graphics.drawingCommandType
     local cmds={
