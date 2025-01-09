@@ -633,6 +633,9 @@ do -- function GC.load(L), GC.execute(t)
         setFT=    function(...) FONT.set(...) end,
         mStr=     'mStr',
         mDraw=    'mDraw',
+        mDrawQ=   'mDrawQ',
+        mDrawL=   'mDrawL',
+        mDrawLQ=  'mDrawLQ',
         stStr=    'strokePrint',
         stDraw=   'strokeDraw',
 
