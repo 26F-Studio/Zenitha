@@ -41,20 +41,18 @@
 --
 --
 -- CHANGELOG:
---  version     date      description
---  ------- ----------  -----------
---    12     2022-02-23   Now works in Luau (but NOT optimized for speed)
---    11     2022-01-09   BLAKE3 added
---    10     2022-01-02   BLAKE2 functions added
---     9     2020-05-10   Now works in OpenWrt's Lua (dialect of Lua 5.1 with "double" + "invisible int32")
---     8     2019-09-03   SHA-3 functions added
---     7     2019-03-17   Added functions to convert to/from base64
---     6     2018-11-12   HMAC added
---     5     2018-11-10   SHA-1 added
---     4     2018-11-03   MD5 added
---     3     2018-11-02   Bug fixed: incorrect hashing of long (2 GByte) data streams on Lua 5.3/5.4 built with "int32" integers
---     2     2018-10-07   Decreased module loading time in Lua 5.1 implementation branch (thanks to Peter Melnichenko for giving a hint)
---     1     2018-10-06   First release (only SHA-2 functions)
+-- v12  2022-02-23  Now works in Luau (but NOT optimized for speed)
+-- v11  2022-01-09  BLAKE3 added
+-- v10  2022-01-02  BLAKE2 functions added
+-- v9   2020-05-10  Now works in OpenWrt's Lua (dialect of Lua 5.1 with "double" + "invisible int32")
+-- v8   2019-09-03  SHA-3 functions added
+-- v7   2019-03-17  Added functions to convert to/from base64
+-- v6   2018-11-12  HMAC added
+-- v5   2018-11-10  SHA-1 added
+-- v4   2018-11-03  MD5 added
+-- v3   2018-11-02  Bug fixed: incorrect hashing of long (2 GByte) data streams on Lua 5.3/5.4 built with "int32" integers
+-- v2   2018-10-07  Decreased module loading time in Lua 5.1 implementation branch (thanks to Peter Melnichenko for giving a hint)
+-- v1   2018-10-06  First release (only SHA-2 functions)
 -----------------------------------------------------------------------------
 
 
