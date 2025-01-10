@@ -62,9 +62,10 @@ local msgStyle={
 local mesList={}
 local startY=0
 
-local MSG={}
-
-setmetatable(MSG,{
+---Directly call to create a new message popup at up-left corner  
+---Last 3 seconds by default
+---@class Zenitha.Message
+local MSG=setmetatable({},{
     __call=function(_,icon,str,time)
         MSG._(icon,str,time)
     end,
@@ -83,7 +84,6 @@ function MSG.addCategory(name,backColor,textColor,canvas)
     msgStyle[name]={backColor=backColor,textColor=textColor,canvas=canvas}
 end
 
----Create a new message popup at up-left corner
 ---@param icon Zenitha.MessageType | love.Canvas
 ---@param str string
 ---@param time? number
@@ -96,8 +96,9 @@ function MSG._(icon,str,time)
         icon=msgStyle[icon].canvas
     end
     local text=GC.newText(FONT.get(30),str)
-    local w=math.max(text:getWidth()+(icon and 45 or 5),200)+15
-    local h=math.max(text:getHeight()+2,50)
+    local w,h=text:getDimensions()
+    w=math.max(w+(icon and 45 or 5),200)+15
+    h=math.max(h+2,50)
     local k=h>400 and 1/math.min(h/400,2.6) or 1
 
     table.insert(mesList,1,{
