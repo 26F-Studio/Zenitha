@@ -2,6 +2,7 @@ local MATH={}
 
 for k,v in next,math do MATH[k]=v end
 
+MATH.e=math.exp(1)
 MATH.tau=2*math.pi
 MATH.phi=(1+math.sqrt(5))/2
 MATH.inf=1/0
