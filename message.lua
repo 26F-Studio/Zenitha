@@ -98,7 +98,7 @@ function MSG._(icon,str,time)
     local text=GC.newText(FONT.get(30),str)
     local w,h=text:getDimensions()
     w=math.max(w+(icon and 45 or 5),200)+15
-    h=math.max(h+2,50)
+    h=math.max(h+12,50)
     local k=h>400 and 1/math.min(h/400,2.6) or 1
 
     table.insert(mesList,1,{
