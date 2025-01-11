@@ -9,16 +9,16 @@ if not love.graphics then
 end
 
 ---@class Zenitha.Background
----@field init function
----@field resize function
----@field update function
----@field draw function
----@field event function
----@field discard function
+---@field init? function
+---@field resize? function
+---@field update? function
+---@field draw? function
+---@field event? function
+---@field discard? function
 
 local gc_clear=love.graphics.clear
 
----@type Zenitha.Background[]
+---@type Map<Zenitha.Background>
 local BGs={} -- Stored backgrounds
 
 local BG={
