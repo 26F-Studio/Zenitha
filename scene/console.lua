@@ -9,7 +9,7 @@ local function log(str) outputBox:push(str) end
 _CL=log
 
 log{COLOR.lP,"Zenitha Console"}
-log{COLOR.lC,"© Copyright 2019–2023 26F Studio. Some rights reserved."}
+log{COLOR.lC,"© Copyright 2019–2025 26F Studio. Some rights reserved."}
 log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
 
 local history,hisPtr={"?"},false
