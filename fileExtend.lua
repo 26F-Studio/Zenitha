@@ -62,8 +62,8 @@ function FILE.load(path,args,venv)
                 error("FILE.load: Compile error: "..err_mes)
             end
         elseif mode=='json' then
-            local res,data=pcall(JSON.decode,s)
-            return res and data or error("FILE.load: Decode error")
+            local suc,res=pcall(JSON.decode,s)
+            return suc and res or error("FILE.load: Decode error")
         elseif mode=='string' then
             return s
         else
@@ -94,9 +94,9 @@ function FILE.save(data,path,args)
                 error("FILE.save: Luaon-encoding error")
             end
         else
-            local res
-            res,data=pcall(JSON.encode,data)
-            assert(res,"FILE.save: Json-encoding error")
+            local suc
+            suc,data=pcall(JSON.encode,data)
+            assert(suc,"FILE.save: Json-encoding error")
         end
     else
         data=tostring(data)

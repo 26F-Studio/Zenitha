@@ -417,9 +417,9 @@ local commands={} do
     commands.openurl={
         code=function(url)
             if url~="" then
-                local res,err=pcall(love.system.openURL,url)
-                if not res then
-                    log{COLOR.R,"[ERR] ",COLOR.L,err}
+                local suc,res=pcall(love.system.openURL,url)
+                if not suc then
+                    log{COLOR.R,"[ERR] ",COLOR.L,res}
                 end
             else
                 log{COLOR.I,"Usage: openurl [url]"}
