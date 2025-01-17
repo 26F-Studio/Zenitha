@@ -144,9 +144,17 @@ function TASK.yieldN(count)
 end
 
 ---Yield for some seconds
+---@param time number
 function TASK.yieldT(time)
     local t=timer()
     while timer()-t<time do yield() end
+end
+
+local getLock=TASK.getLock
+---Yield until a lock expired
+---@param name string
+function TASK.yieldL(name)
+    while getLock(name) do yield() end
 end
 
 ---Yield until the scene swapping animation finished
