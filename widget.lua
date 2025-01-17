@@ -2551,7 +2551,7 @@ function WIDGET.new(args)
 end
 
 ---Adjust default widget option
----@param opt table
+---@param opt Map<Zenitha.WidgetArg>
 function WIDGET.setDefaultOption(opt)
     for t,data in next,opt do
         assertf(Widgets[t],"Widget type '%s' does not exist",t)
