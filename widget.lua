@@ -2362,9 +2362,6 @@ end
 ---@param reason? 'init' | 'press' | 'move' | 'release'
 function WIDGET.focus(W,reason)
     if WIDGET.sel==W then return end
-    if W.sound_hover then
-        SFX.play(W.sound_hover)
-    end
     if WIDGET.sel and WIDGET.sel.type=='inputBox' then
         kb.setTextInput(false)
         EDITING=''
@@ -2381,6 +2378,9 @@ function WIDGET.focus(W,reason)
         else
             WIDGET.sel=W
         end
+    end
+    if WIDGET.sel==W and W.sound_hover then
+        SFX.play(W.sound_hover)
     end
 end
 
