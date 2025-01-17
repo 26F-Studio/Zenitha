@@ -28,7 +28,7 @@
 ---@field visibleFunc? function [All] Used to change widget's visibility when scene changed
 ---@field visibleTick? function [All] Used to update widget's visibility every frame
 ---
----@field lineWidth? number [EXCEPT text & image selector]
+---@field lineWidth? number [EXCEPT text & image & selector]
 ---@field cornerR? number [EXCEPT text & image & slider_* & switch & selector] Round corner ratio
 ---
 ---@field textColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & slider_progress & listBox]
@@ -37,7 +37,7 @@
 ---@field activeColor? Zenitha.ColorStr | Zenitha.Color [*Box]
 ---
 ---@field sound_press? string [button & checkBox & switch & selector & inputBox]
----@field sound_hover? string [button & checkBox & switch & selector & inputBox]
+---@field sound_hover? string [EXCEPT text & image]
 ---
 ---@field floatText? string | function [hint]
 ---@field floatFontSize? number [hint]
@@ -1090,7 +1090,7 @@ Widgets.slider=setmetatable({
         'numFontSize','numFontType',
         'widthLimit',
         'textAlwaysShow',
-        'sound_drag',
+        'sound_drag','sound_hover',
         'soundInterval',
         'soundPitchRange',
 
@@ -1316,7 +1316,7 @@ Widgets.slider_fill=setmetatable({
         'color','fillColor','frameColor','textColor',
         'text','fontSize','fontType',
         'widthLimit',
-        'sound_drag',
+        'sound_drag','sound_hover',
         'soundInterval',
         'soundPitchRange',
 
@@ -1444,7 +1444,7 @@ Widgets.slider_progress=setmetatable({
         'lineWidth',
         'text','fontSize','fontType',
         'widthLimit',
-        'sound_drag',
+        'sound_drag','sound_hover',
         'soundInterval',
         'soundPitchRange',
 
@@ -1904,7 +1904,7 @@ Widgets.textBox=setmetatable({
         'lineHeight',
         'yOffset',
         'editable',
-        'sound_clear',
+        'sound_clear','sound_hover',
 
         'visibleFunc',
         'visibleTick',
@@ -2098,7 +2098,7 @@ Widgets.listBox=setmetatable({
         'drawFunc',
         'releaseDist',
         'stencilMode',
-        'sound_click','sound_select',
+        'sound_click','sound_select','sound_hover',
         'code',
         'visibleFunc',
         'visibleTick',
