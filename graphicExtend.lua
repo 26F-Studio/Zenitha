@@ -332,7 +332,6 @@ end
 ---@class Zenitha.Curve.Bezier
 ---@field points Zenitha.Curve.Point[]
 ---@field curve number[]
----@field ctrlPos number[]
 local Bezier={}
 Bezier.__index=Bezier
 
@@ -398,7 +397,7 @@ function Bezier:render(seg,dist)
 
     if dist~=nil then
         assert(type(dist)=='number' and dist>0,"Bezier:render(seg,dist): dist need positive number")
-        -- TODO
+        -- TODO: resample by distance
     end
     self.curve=curve
     return curve
