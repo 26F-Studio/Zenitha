@@ -214,7 +214,7 @@ local maxErrorCount=3
 ---@field drawCursor    fun(x:number, y:number, time:number) Cursor drawing function
 ---@field clickFX       fun(x:number, y:number, k:number) Called when "Click Event" triggered
 ---
----@field sceneSwap     fun(style?:string) Called when scene swapping start
+---@field sceneSwap     fun(state:'start' | 'swap' | 'finish', style?:string) Called when scene swapping start
 ---@field requestQuit   fun(): boolean? Called when request quiting with ZENITHA._quit()
 ---@field quit          fun() Called when exactly before quiting
 ---@field error         false | fun(msg:string): any When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'.

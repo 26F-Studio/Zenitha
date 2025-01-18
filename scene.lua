@@ -206,12 +206,14 @@ function SCN._swapUpdate(dt)
         -- print('unload',SCN.stackChange,S.target)
 
         SCN._load(S.target)
+        ZENITHA.globalEvent.sceneSwap('swap')
     end
     if S.timeRem<0 then
         SCN.swapping=false
         local scn=scenes[SCN.cur]
         if scn.enter then scn.enter(SCN.prev,unpack(SCN.args)) end
         -- print('enter',SCN.stackChange,SCN.prev)
+        ZENITHA.globalEvent.sceneSwap('finish')
         SCN.stackChange=0
     end
 end
@@ -273,7 +275,7 @@ function SCN.swapTo(tar,swapStyle,...)
             S.timeRem=swapStyles[swapStyle].duration
             S.timeChange=swapStyles[swapStyle].timeChange
             S.draw=swapStyles[swapStyle].draw
-            ZENITHA.globalEvent.sceneSwap(swapStyle)
+            ZENITHA.globalEvent.sceneSwap('start',swapStyle)
         end
     else
         MSG('warn',"No Scene: "..tar)
