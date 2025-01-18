@@ -1,36 +1,79 @@
--- Create ANSI escape code easier
 --[[
-Note:
-    There's a Lua feature: calling function with only one string or table argument doesn't need parentheses
-    Therefore, these are equivalent:
-        print("hello")  &  print"hello"
-        table.concat({"tech","mino"})  &  table.concant{"tech","mino"}
-    To make the result code shorter, I'll use this in the example below.
+## ANSI Escape module
+***Create ANSI Escape Code Easier***
 
-Usage:
-    AE.i"str" -- apply format to a string and reset
-    AE.i.."str"..AE -- apply format then reset
-    AE[520].."str" -- apply custom RGB5 color
-    AE'b;i;u;f;d;_R'.."str" -- parse format
+Lua has a feature: calling function with only one string or table argument doesn't need parentheses:  
+`print("hello")` **==** `print"hello"`  
+`table.concat({"tech","mino"})` **==** `table.concant{"tech","mino"}`  
+I'll use this feature below to make final result cleaner.
 
-Example:
-    print(AE.i"italic (call include reset)")
-    print(AE.f..AE._R.."flashing, red ")
-    print("not reset yet, "..AE'r;b;_G'.."reset, bold, green")
-    print(AE[005]..AE.u.."underline blue "..AE.."manual reset")
-    print(AE'd;_Y'.."reset, delete, yellow")
+## Usage:
+
+### Formats - `AE.xxx`
+    AE.xxx(str) -- Apply format to string, with reset
+    AE.xxx.. -- Apply format
+
+### Colors - `AE._x`
+    AE._x(str) -- Apply color to string, with reset
+    AE._x.. -- Apply color
+
+### Control - `AE.XXX`
+    ..AE.XXX.. -- Execute with default param
+    AE.XXX[param] -- Execute with single param
+    AE.XXX(...) -- Execute with custom params
+
+### Main - `AE`
+    ..AE -- Reset
+    AE(str) -- Apply multiple formats (splitted by ";")
+    AE[num] -- Set RGB5 color
+
+### Example
+```
+print(AE.i"italic") -- Auto set & reset format
+print(AE.f..AE._R.."flashing, red ") -- Manually set format
+print("not reset yet, "..AE'r;b;_G'.."reset, bold, green")
+print(AE[005]..AE.u.."underline blue "..AE.."manual reset")
+print(AE'd;_Y'.."reset, delete, yellow") -- Parse format
+```
 ]]
+---@diagnostic disable-next-line
+local _hoverMouseHereToRead
+
+local AE={}
 
 local type=type
 local floor=math.floor
 local find,match=string.find,string.match
 local sub,gsub=string.sub,string.gsub
 
-local AE={}
+local colorNum={
+    _R='91',_G='92',_Y='93',_B='94',_M='95',_C='96',
+    _r='31',_g='32',_y='33',_b='34',_m='35',_c='36',
+}
+---@param params? string leave blank to reset
+---@return string
+function _parse(params)
+    if not params then return '' end
+    if find(params,'_') then
+        while true do
+            local c=match(params,'_%d%d%d')
+            if not c then break end
+            params=gsub(params,c,'38;5;'..(16+c:sub(2,2)*36+c:sub(3,3)*6+c:sub(4,4)),1)
+        end
+        while true do
+            local c=match(params,'_[rgbcymRGBCYM]')
+            if not c then break end
+            params=gsub(params,c,colorNum[c])
+        end
+    end
+    if find(params,'[ruf]') then params=gsub(gsub(gsub(params,'r','0'),'u','4'),'f','5') end
+    if find(params,'[bid]') then params=gsub(gsub(gsub(params,'b','1'),'i','3'),'d','9') end
+    return '\27['..params..'m'
+end
 
 setmetatable(AE,{
     -- Shortcut call
-    __call=function(_,params) return AE.parse(params) end,
+    __call=function(_,params) return _parse(params) end,
     -- Shortcut string
     __concat=function(a,b) return AE==b and a..'\27[0m' or '\27[0m'..b end,
     -- Shortcut RGB5 color
@@ -48,14 +91,11 @@ AE._meta={
     __concat=function(a,b) return type(a)=='table' and a.ae and a.data..b or a..b.data end,
     __index=function(self,num) return '\27['..num..self.raw end,
     __call=function(self,n1,n2)
-        if n2 then
-            return '\27['..n1..","..n2..self.raw
-        else
-            return '\27['..n1..self.raw
-        end
+        return '\27['..n1..(n2 and ","..n2 or "")..self.raw
     end,
     __metatable=true,
 }
+---@return {data:string, raw:string, ae:true} | string | Map<string> | fun(str:string, str2:string?): string
 local function wrap(rawStr) return setmetatable({data='\27['..rawStr,raw=rawStr,ae=true},AE._meta) end
 
 AE.U=wrap'A' -- Move cursor <N=1> up
@@ -82,6 +122,7 @@ AE._metaM={
     end,
     __metatable=true,
 }
+---@return {data:string, raw:string, ae:true} | string | fun(str:string): string
 local function mWrap(rawStr) return setmetatable({data='\27['..rawStr..'m',raw=rawStr,ae=true},AE._metaM) end
 
 AE.r=mWrap'0' -- reset, not necessary tho
@@ -109,35 +150,11 @@ AE._y=mWrap'33' -- Yellow
 AE._b=mWrap'34' -- Blue
 AE._m=mWrap'35' -- Magenta
 AE._c=mWrap'36' -- Cyan
-AE._D=mWrap'30' -- Dark (1/4 brightness)
-AE._d=mWrap'90' -- dark (2/4 brightness)
-AE._l=mWrap'37' -- light (3/4 brightness)
-AE._L=mWrap'97' -- Light (4/4 brightness)
+AE._D=mWrap'30' -- Dark (0% brightness)
+AE._d=mWrap'90' -- dark (33% brightness)
+AE._l=mWrap'37' -- light (66% brightness)
+AE._L=mWrap'97' -- Light (100% brightness)
 
-local colorNum={
-    _R='91',_G='92',_Y='93',_B='94',_M='95',_C='96',
-    _r='31',_g='32',_y='33',_b='34',_m='35',_c='36',
-}
-
----@param params? string leave blank to reset
----@return string
-function AE.parse(params)
-    if not params then return '' end
-    if find(params,'_') then
-        while true do
-            local c=match(params,'_%d%d%d')
-            if not c then break end
-            params=gsub(params,c,'38;5;'..(16+c:sub(2,2)*36+c:sub(3,3)*6+c:sub(4,4)),1)
-        end
-        while true do
-            local c=match(params,'_[rgbcymRGBCYM]')
-            if not c then break end
-            params=gsub(params,c,colorNum[c])
-        end
-    end
-    if find(params,'[ruf]') then params=gsub(gsub(gsub(params,'r','0'),'u','4'),'f','5') end
-    if find(params,'[bid]') then params=gsub(gsub(gsub(params,'b','1'),'i','3'),'d','9') end
-    return '\27['..params..'m'
-end
+AE.parse=_parse
 
 return AE
