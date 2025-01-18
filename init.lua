@@ -185,21 +185,20 @@ local clickDist2=62
 local maxErrorCount=3
 ---@class Zenitha.GlobalEvent
 local globalEvent={
-    mouseDown=NULL, -- Able to interrupt scene event
-    mouseMove=NULL, -- Able to interrupt scene event and widget interaction
-    mouseUp=NULL, -- Able to interrupt scene event
-    mouseClick=NULL, -- Able to interrupt scene event
-    wheelMove=NULL, -- Able to interrupt scene event and widget interaction
+    mouseDown=NULL,  ---@type fun(...) | fun(mx:number, my:number, k:number, presses:number): boolean? Able to interrupt scene event
+    mouseMove=NULL,  ---@type fun(...) | fun(mx:number, my:number, dx:number, dy:number): boolean? Able to interrupt scene event and widget interaction
+    mouseUp=NULL,    ---@type fun(...) | fun(mx:number, my:number, k:number, presses:number): boolean? Able to interrupt scene event
+    mouseClick=NULL, ---@type fun(...) | fun(mx:number, my:number, k:number, dist:number, presses:number): boolean? Able to interrupt scene event
+    wheelMove=NULL,  ---@type fun(...) | fun(dx:number, dy:number): boolean? Able to interrupt scene event and widget interaction
 
-    touchDown=NULL, -- Able to interrupt scene event
-    touchUp=NULL, -- Able to interrupt scene event
-    touchMove=NULL, -- Able to interrupt scene event
-    touchClick=NULL, -- Able to interrupt scene event
+    touchDown=NULL,  ---@type fun(...) | fun(x:number, y:number, id:lightuserdata, pressure:number): boolean? Able to interrupt scene event
+    touchUp=NULL,    ---@type fun(...) | fun(x:number, y:number, id:lightuserdata, pressure:number): boolean? Able to interrupt scene event
+    touchMove=NULL,  ---@type fun(...) | fun(x:number, y:number, id:lightuserdata, pressure:number): boolean? Able to interrupt scene event
+    touchClick=NULL, ---@type fun(...) | fun(x:number, y:number, id:lightuserdata, dist:number): boolean? Able to interrupt scene event
 
-    -- Able to interrupt scene event and widget interaction
-    --
+    -- Able to interrupt scene event and widget interaction  
     -- Default to a debugging tool, switch on/off with F8, then use it with F1~F12
-    keyDown=function(key,isRep)
+    keyDown=function(key,isRep) ---@type fun(...) | fun(key:string, isRep:boolean, scancode:string): boolean?
         if isRep then return end
         if devMode then
             if     key=='f1'  then -- Show system info
@@ -257,46 +256,35 @@ local globalEvent={
             return true
         end
     end,
-    keyUp=NULL, -- Able to interrupt scene event
-    textInput=NULL, -- Able to interrupt scene event and widget interaction
-    imeChange=NULL, -- Able to interrupt scene event and var `EDIT` updating
+    keyUp=NULL,     ---@type fun(...) | fun(key:string, scancode:string): boolean? Able to interrupt scene event
+    textInput=NULL, ---@type fun(...) | fun(texts:string): boolean? Able to interrupt scene event and widget interaction
+    imeChange=NULL, ---@type fun(...) | fun(texts:string): boolean? Able to interrupt scene event and var `EDIT` updating
 
-    gamepadAdd=NULL, -- Able to interrupt gamepad managing
-    gamepadRemove=NULL, -- Able to interrupt gamepad managing
-    gamepadAxis=NULL, -- Able to interrupt gamepad managing
-    gamepadDown=NULL, -- Able to interrupt scene event and widget interaction
-    gamepadUp=NULL, -- Able to interrupt scene event
+    gamepadAdd=NULL,    ---@type fun(...) | fun(JS:love.Joystick): boolean? Able to interrupt gamepad managing
+    gamepadRemove=NULL, ---@type fun(...) | fun(JS:love.Joystick): boolean? Able to interrupt gamepad managing
+    gamepadAxis=NULL,   ---@type fun(...) | fun(JS:love.Joystick, axis:love.GamepadAxis, val:number): boolean? Able to interrupt gamepad managing
+    gamepadDown=NULL,   ---@type fun(...) | fun(JS:love.Joystick, key:love.GamepadButton | string): boolean? Able to interrupt scene event and widget interaction
+    gamepadUp=NULL,     ---@type fun(...) | fun(JS:love.Joystick, key:love.GamepadButton | string): boolean? Able to interrupt scene event
 
-    fileDrop=NULL, -- Able to interrupt scene event
-    folderDrop=NULL, -- Able to interrupt scene event
-    lowMemory=NULL, -- Able to interrupt scene event
-    resize=NULL, -- Able to interrupt scene event
-    focus=NULL, -- Able to interrupt scene event
+    fileDrop=NULL,   ---@type fun(...) | fun(file:love.DroppedFile): boolean? Able to interrupt scene event
+    folderDrop=NULL, ---@type fun(...) | fun(path:string): boolean? Able to interrupt scene event
+    lowMemory=NULL,  ---@type fun(...) | fun(): boolean? Able to interrupt scene event
+    resize=NULL,     ---@type fun(...) | fun(w:number, h:number): boolean? Able to interrupt scene event
+    focus=NULL,      ---@type fun(...) | fun(f:boolean): boolean? Able to interrupt scene event
 
-    -- System info function (like time and battery power) drawing function (default transform is SCR.xOy_ul)
-    drawSysInfo=NULL,
-
-    -- Cursor drawing function  
-    -- **Graphic states (like color) are uncertain**
-    ---@type fun(x:number, y:number, time:number)
-    drawCursor=function(x,y)
+    drawSysInfo=NULL,        ---@type fun(...) | fun() System info function (like time and battery power) drawing function (default transform is SCR.xOy_ul)
+    drawCursor=function(x,y) ---@type fun(...) | fun(x:number, y:number, time:number) Cursor drawing function
         gc_setColor(1,1,1)
         gc.setLineWidth(2)
         gc_circle(MSisDown(1) and 'fill' or 'line',x,y,6)
     end,
 
-    -- Called when "Click Event" triggered
-    ---@type fun(x:number,y:number,k:number)
+    ---@type fun(...) | fun(x:number, y:number, k:number) Called when "Click Event" triggered
     clickFX=function(x,y,_) SYSFX.tap(.26,x,y) end,
 
-    -- Called when request quiting with ZENITHA._quit()
-    requestQuit=NULL,
-
-    -- Called when exactly before quiting
-    quit=NULL,
-
-    -- When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'.
-    error=false,
+    requestQuit=NULL, ---@type fun(...) | fun(): boolean? Called when request quiting with ZENITHA._quit()
+    quit=NULL,        ---@type fun(...) | function Called when exactly before quiting
+    error=false,      ---@type fun(...) | false | fun(msg:string): any When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'.
 }
 
 --------------------------------------------------------------
