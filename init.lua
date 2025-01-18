@@ -209,9 +209,12 @@ local maxErrorCount=3
 ---@field lowMemory     fun(): boolean? Able to interrupt scene event
 ---@field resize        fun(w:number, h:number): boolean? Able to interrupt scene event
 ---@field focus         fun(f:boolean): boolean? Able to interrupt scene event
+---
 ---@field drawSysInfo   fun() System info function (like time and battery power) drawing function (default transform is SCR.xOy_ul)
 ---@field drawCursor    fun(x:number, y:number, time:number) Cursor drawing function
 ---@field clickFX       fun(x:number, y:number, k:number) Called when "Click Event" triggered
+---
+---@field sceneSwap     fun(style?:string) Called when scene swapping start
 ---@field requestQuit   fun(): boolean? Called when request quiting with ZENITHA._quit()
 ---@field quit          fun() Called when exactly before quiting
 ---@field error         false | fun(msg:string): any When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'.
@@ -307,9 +310,9 @@ local globalEvent={
         gc.setLineWidth(2)
         gc_circle(MSisDown(1) and 'fill' or 'line',x,y,6)
     end,
-
     clickFX=function(x,y,_) SYSFX.tap(.26,x,y) end,
 
+    sceneSwap=NULL,
     requestQuit=NULL,
     quit=NULL,
     error=false,

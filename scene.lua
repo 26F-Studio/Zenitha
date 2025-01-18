@@ -273,6 +273,7 @@ function SCN.swapTo(tar,swapStyle,...)
             S.timeRem=swapStyles[swapStyle].duration
             S.timeChange=swapStyles[swapStyle].timeChange
             S.draw=swapStyles[swapStyle].draw
+            ZENITHA.globalEvent.sceneSwap(swapStyle)
         end
     else
         MSG('warn',"No Scene: "..tar)
