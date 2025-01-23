@@ -23,7 +23,7 @@ local locks=setmetatable({},{
 ---```
 ---@param name any
 ---@param time? number
----@return boolean
+---@return boolean 
 function TASK.lock(name,time)
     if timer()>=locks[name] then
         locks[name]=timer()+(time or 1e99)
@@ -36,7 +36,7 @@ end
 ---Same as `TASK.lock`, but lock will be forced set even if the lock is not expired
 ---@param name any
 ---@param time? number
----@return boolean
+---@return boolean succeed
 function TASK.forceLock(name,time)
     local res=timer()>=locks[name]
     locks[name]=timer()+(time or 1e99)
@@ -87,10 +87,11 @@ function TASK._update(dt)
     end
 end
 
----Wrap a function into coroutine then Zenitha will resume it automatically.  
+---Wrap a function into coroutine then Zenitha will resume it automatically for each main loop cycle.  
 ---Immediately resume when `TASK.new()`, then trigger by time with `dt` passed to it through `coroutine.yield` inside
----@param code function
----@param ... any First-call arguments when `TASK.new()`
+---@generic T
+---@param code fun(...:T)
+---@param ... T First-call arguments when called
 function TASK.new(code,...)
     local thread=coroutine.create(code)
     assert(resume(thread,...))
@@ -132,7 +133,9 @@ end
 
 ---Remove all tasks
 function TASK.clear()
-    TABLE.clear(tasks)
+    for k in next,locks do
+        tasks[k]=nil
+    end
 end
 
 local yield=coroutine.yield
