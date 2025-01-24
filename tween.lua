@@ -318,7 +318,7 @@ end
 local TWEEN={}
 
 ---Create a new tween animation
----@param doFunc? fun(t:number, loopNo:number)
+---@param doFunc? fun(t:number) | fun(t:number, loopNo:number)
 ---@return Zenitha.Tween
 function TWEEN.new(doFunc)
     assert(doFunc==nil or type(doFunc)=='function',"TWEEN.new(doFunc): Need function")

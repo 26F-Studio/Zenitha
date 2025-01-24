@@ -40,6 +40,7 @@ local S_running=false
 local S_confCHN=love.thread.getChannel('tcp_s_config')
 local S_sendCHN=love.thread.getChannel('tcp_s_send')
 local S_recvCHN=love.thread.getChannel('tcp_s_receive')
+---@async
 local function S_daemonFunc()
     while true do
         TASK.yieldT(0.626)
@@ -129,6 +130,7 @@ local C_running=false
 local C_confCHN=love.thread.getChannel('tcp_c_config')
 local C_sendCHN=love.thread.getChannel('tcp_c_send')
 local C_recvCHN=love.thread.getChannel('tcp_c_receive')
+---@async
 local function C_daemonFunc()
     while true do
         TASK.yieldT(0.626)

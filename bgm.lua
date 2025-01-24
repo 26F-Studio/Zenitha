@@ -49,6 +49,7 @@ local defaultBGM=false
 local maxLoadedCount=3
 local volume=1
 
+---@async
 local function task_setVolume(obj,ve,time,stop)
     local vs=obj.vol
     local t=0
@@ -68,6 +69,7 @@ local function task_setVolume(obj,ve,time,stop)
     obj.volChanging=false
     return true
 end
+---@async
 local function task_setPitch(obj,pe,time)
     local ps=obj.pitch
     local t=0
@@ -82,6 +84,7 @@ local function task_setPitch(obj,pe,time)
         end
     end
 end
+---@async
 local function task_setLowgain(obj,pe,time)
     local ps=obj.lowgain
     local t=0
@@ -96,6 +99,7 @@ local function task_setLowgain(obj,pe,time)
         end
     end
 end
+---@async
 local function task_setHighgain(obj,pe,time)
     local ps=obj.highgain
     local t=0

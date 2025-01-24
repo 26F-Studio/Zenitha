@@ -90,7 +90,7 @@ end
 ---Wrap a function into coroutine then Zenitha will resume it automatically for each main loop cycle.  
 ---Immediately resume when `TASK.new()`, then trigger by time with `dt` passed to it through `coroutine.yield` inside
 ---@generic T
----@param code fun(...:T)
+---@param code async fun(...:T)
 ---@param ... T First-call arguments when called
 function TASK.new(code,...)
     local thread=coroutine.create(code)
