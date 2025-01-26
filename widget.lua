@@ -34,6 +34,7 @@
 ---@field textColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & slider_progress & listBox]
 ---@field fillColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image & hint & selector]
 ---@field frameColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image]
+---@field imageColor? Zenitha.ColorStr | Zenitha.Color [image & button]
 ---@field activeColor? Zenitha.ColorStr | Zenitha.Color [*Box]
 ---
 ---@field sound_press? string [button & checkBox & switch & selector & inputBox]
@@ -91,6 +92,12 @@
 ---@field sound_click? string [listBox]
 ---@field sound_select? string [listBox]
 
+local type,assert,next,rawget=type,assert,next,rawget
+local floor,ceil=math.floor,math.ceil
+local max,min=math.max,math.min
+local abs,clamp=math.abs,MATH.clamp
+local sub,ins,rem=string.sub,table.insert,table.remove
+
 local gc_translate,gc_scale=GC.translate,GC.scale
 local gc_push,gc_pop=GC.push,GC.pop
 local gc_setColor,gc_setLineWidth=GC.setColor,GC.setLineWidth
@@ -106,13 +113,7 @@ local gc_mDraw=GC.mDraw
 local kb=ZENITHA.keyboard
 local timer=ZENITHA.timer.getTime
 
-local type,assert,next,rawget=type,assert,next,rawget
-local floor,ceil=math.floor,math.ceil
-local max,min=math.max,math.min
-local abs,clamp=math.abs,MATH.clamp
-local sub,ins,rem=string.sub,table.insert,table.remove
-
-local SCN,SCR,xOy=SCN,SCR,SCR.xOy
+local COLOR,SCN,SCR,xOy=COLOR,SCN,SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
 local utf8=require'utf8'
 
@@ -210,6 +211,7 @@ local Widgets={}
 ---@field textColor Zenitha.ColorStr | Zenitha.Color
 ---@field fillColor Zenitha.ColorStr | Zenitha.Color
 ---@field frameColor Zenitha.ColorStr | Zenitha.Color
+---@field imageColor Zenitha.ColorStr | Zenitha.Color
 ---@field activeColor Zenitha.ColorStr | Zenitha.Color
 ---@field scrollBarColor Zenitha.ColorStr | Zenitha.Color
 ---
@@ -255,6 +257,7 @@ Widgets.base={
     textColor='L',
     fillColor='L',
     frameColor='L',
+    imageColor='LL',
     activeColor='LY',
     scrollBarColor='L',
     pos=false,
@@ -312,6 +315,8 @@ function Widgets.base:reset(init)
     assert(type(self.fillColor)=='table',"[widget].fillColor need table")
     if type(self.frameColor)=='string' then self.frameColor=COLOR[self.frameColor] end
     assert(type(self.frameColor)=='table',"[widget].frameColor need table")
+    if type(self.imageColor)=='string' then self.imageColor=COLOR[self.imageColor] end
+    assert(type(self.imageColor)=='table',"[widget].imageColor need table")
     if type(self.activeColor)=='string' then self.activeColor=COLOR[self.activeColor] end
     assert(type(self.activeColor)=='table',"[widget].activeColor need table")
     if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
@@ -462,6 +467,7 @@ Widgets.image=setmetatable({
         'alignX','alignY',
 
         'r',
+        'imageColor',
         'image','quad',
 
         'visibleFunc',
@@ -486,7 +492,7 @@ function Widgets.image:reset(init)
 end
 function Widgets.image:draw()
     if self._image then
-        gc_setColor(1,1,1)
+        gc_setColor(self.imageColor)
         if self.quad then
             alignDrawQ(self,self._image,self.quad,self._x,self._y,self.r,self._kx,self._ky)
         else
@@ -520,7 +526,7 @@ Widgets.button=setmetatable({
         'marginX','marginY',
         'lineWidth','cornerR',
 
-        'color','fillColor','frameColor','textColor',
+        'color','fillColor','frameColor','imageColor','textColor',
         'text','fontSize','fontType','image','quad',
         'sound_trigger',
         'sound_press','sound_hover',
@@ -590,7 +596,7 @@ function Widgets.button:draw()
     local startX=self.alignX=='center' and 0 or self.alignX=='left' and -w*.5+self.marginX or w*.5-self.marginX
     local startY=self.alignY=='center' and 0 or self.alignY=='top' and -h*.5+self.marginY or h*.5-self.marginY
     if self._image then
-        gc_setColor(1,1,1)
+        gc_setColor(self.imageColor)
         if self.quad then
             alignDrawQ(self,self._image,self.quad,startX,startY)
         else
