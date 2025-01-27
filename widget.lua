@@ -545,9 +545,9 @@ function Widgets.button:isAbove(x,y)
         abs(x-self._x)<self.w*.5 and
         abs(y-self._y)<self.h*.5
 end
-function Widgets.button:press()
+function Widgets.button:press(_,_,k)
     self._pressed=true
-    self.onPress()
+    self.onPress(k)
 end
 function Widgets.button:release(_,_,k)
     if self._pressed then
@@ -767,8 +767,8 @@ function Widgets.hint:isAbove(x,y)
         abs(x-self._x)<self.w*.5 and
         abs(y-self._y)<self.h*.5
 end
-function Widgets.hint:press()
-    self.onPress()
+function Widgets.hint:press(_,_,k)
+    self.onPress(k)
 end
 function Widgets.hint:draw()
     gc_push('transform')
