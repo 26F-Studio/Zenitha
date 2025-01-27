@@ -584,7 +584,7 @@ function Widgets.button:draw()
     local frameC=self.frameColor
 
     -- Background
-    gc_setColor(fillC[1],fillC[2],fillC[3],.1+.2*self._hoverTime/self._hoverTimeMax)
+    gc_setColor(fillC[1],fillC[2],fillC[3],fillC[4]*(.1+.2*self._hoverTime/self._hoverTimeMax))
     gc_mRect('fill',0,0,w,h,self.cornerR)
 
     -- Frame
@@ -780,8 +780,8 @@ function Widgets.hint:draw()
 
     local frameC=self.frameColor
 
-    -- Background
-    gc_setColor(frameC[1],frameC[2],frameC[3],.1+.1*HOV)
+    -- Frame
+    gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.1+.1*HOV))
     gc_setLineWidth(self.lineWidth)
     gc_mRect('line',0,0,w,h,self.cornerR)
 
@@ -798,6 +798,8 @@ function Widgets.hint:draw()
         gc_setColor(self.textColor)
         gc_mDraw(self._text)
     end
+
+    -- Hovering info
     if HOV>0 then
         local box=self._floatBox
         local fFillC=self.floatFillColor
@@ -815,7 +817,7 @@ function Widgets.hint:draw()
         end
         if self._floatText then
             local textC=self.floatTextColor
-            gc_setColor(textC[1],textC[2],textC[3],HOV)
+            gc_setColor(textC[1],textC[2],textC[3],textC[4]*HOV)
             gc_mDraw(self._floatText)
         end
     end
@@ -903,7 +905,7 @@ function Widgets.checkBox:draw()
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
-    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8)
+    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,frameC[4])
     gc_mRect('line',0,0,w,w,self.cornerR)
     if self.disp() then
         gc_scale(.5*w)
@@ -1001,12 +1003,12 @@ function Widgets.switch:draw()
     local frameC=self.frameColor
 
     -- Background
-    gc_setColor(fillC[1],fillC[2],fillC[3],self._slideTime/self._hoverTimeMax+.5)
+    gc_setColor(fillC[1],fillC[2],fillC[3],fillC[4]*(self._slideTime/self._hoverTimeMax+.5))
     gc_mRect('fill',0,0,h*2,h,h*.5)
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
-    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,.8+.2*HOV)
+    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,frameC[4]*(.8+.2*HOV))
     gc_mRect('line',0,0,h*2,h,h*.5)
 
     -- Axis
@@ -1209,7 +1211,7 @@ function Widgets.slider:draw()
 
     -- Axis Units
     if not self._smooth and self._unit then
-        gc_setColor(frameC[1],frameC[2],frameC[3],.26)
+        gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*.26)
         gc_setLineWidth(self.lineWidth)
         for p=rangeL,rangeR,self._unit do
             local X=x+self.w*(p-rangeL)/self._rangeWidth
@@ -1218,7 +1220,7 @@ function Widgets.slider:draw()
     end
 
     -- Axis Line
-    gc_setColor(frameC[1],frameC[2],frameC[3],.5+HOV*.26)
+    gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.5+HOV*.26))
     gc_setLineWidth(self.lineWidth*2)
     gc_line(x,y,x2,y)
 
@@ -1233,14 +1235,14 @@ function Widgets.slider:draw()
     -- Glow
     if HOV>0 then
         gc_setLineWidth(self.lineWidth*.5)
-        gc_setColor(frameC[1],frameC[2],frameC[3],HOV*.8)
+        gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*HOV*.8)
         gc_rectangle('line',bx+1,by+1,bw-2,bh-2,self.cornerR)
     end
 
     -- Float text
     if self._textShowTime>0 then
         setFont(self.numFontSize,self.numFontType)
-        gc_setColor(fillC[1],fillC[2],fillC[3],min(self._textShowTime/2,1))
+        gc_setColor(fillC[1],fillC[2],fillC[3],fillC[4]*min(self._textShowTime/2,1))
         gc_mStr(self:_showFunc(),cx,by-self.numFontSize-10)
     end
 
@@ -1380,11 +1382,11 @@ function Widgets.slider_fill:draw()
     local frameC=self.frameColor
 
     -- Capsule
-    gc_setColor(frameC[1],frameC[2],frameC[3],.6+HOV*.26)
+    gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.6+HOV*.26))
     gc_setLineWidth(self.lineWidth+HOV)
     gc_mRect('line',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     if HOV>0 then
-        gc_setColor(fillC[1],fillC[2],fillC[3],HOV*.12)
+        gc_setColor(fillC[1],fillC[2],fillC[3],fillC[4]*HOV*.12)
         gc_mRect('fill',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     end
 
@@ -1506,7 +1508,7 @@ function Widgets.slider_progress:draw()
 
     h=h*(1+HOV)
 
-    gc_setColor(frameC[1],frameC[2],frameC[3],.4+.1*HOV)
+    gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.4+.1*HOV))
     gc_rectangle('fill',x,y-h*.5,w,h,h*.5)
     gc_setColor(fillC)
     if w*self._pos>=1 then
@@ -1611,20 +1613,20 @@ function Widgets.selector:draw()
 
     -- Arrow
     if self._select then
-        gc_setColor(frameC[1],frameC[2],frameC[3],.6+HOV*.26)
+        gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.6+HOV*.26))
         local t=(timer()%.5)^.5
         if self._select>1 then
             gc_draw(leftAngle,x-w*.5,y-10)
             if HOV>0 then
-                gc_setColor(frameC[1],frameC[2],frameC[3],HOV*1.5*(.5-t))
+                gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*HOV*1.5*(.5-t))
                 gc_draw(leftAngle,x-w*.5-t*40,y-10)
-                gc_setColor(frameC[1],frameC[2],frameC[3],.6+HOV*.26)
+                gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.6+HOV*.26))
             end
         end
         if self._select<#self.list then
             gc_draw(rightAngle,x+w*.5-20,y-10)
             if HOV>0 then
-                gc_setColor(frameC[1],frameC[2],frameC[3],HOV*1.5*(.5-t))
+                gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*HOV*1.5*(.5-t))
                 gc_draw(rightAngle,x+w*.5-20+t*40,y-10)
             end
         end
@@ -1805,7 +1807,7 @@ function Widgets.inputBox:draw()
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Highlight
-    gc_setColor(actColor[1],actColor[2],actColor[3],HOV*.2*(math.sin(timer()*6.26)*.25+.75))
+    gc_setColor(actColor[1],actColor[2],actColor[3],actColor[4]*HOV*.2*(math.sin(timer()*6.26)*.25+.75))
     gc_rectangle('fill',x,y,w,h,self.cornerR)
 
     -- Frame
