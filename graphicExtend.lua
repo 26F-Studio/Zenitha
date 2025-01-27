@@ -22,6 +22,7 @@ local type,pcall=type,pcall
 local lerp=MATH.lerp
 local NULL=NULL
 
+---@class Zenitha.Graphics: love.graphics
 local GC=TABLE.copyAll(gc,0)
 
 --------------------------------------------------------------
