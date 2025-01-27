@@ -23,13 +23,14 @@
 ---@field labelPos? 'top' |'right' |'bottom' |'left' |'topRight' |'topLeft' |'rightBottom' |'rightTop' |'bottomRight' |'bottomLeft' |'leftBottom' |'leftTop' [EXCEPT text & image & button & text/listBox]
 ---@field labelDist? number [EXCEPT text & image & button & text/listBox]
 ---@field disp? function [checkBox & switch & sliders & selector] Must return the value that widget should show
----@field code? function [EXCEPT text & image & hint & input/textBox] Called 'When triggered'
----@field onPress? function [button] Called 'When pressed down'
+---@field code? function [checkBox & switch & sliders & selector & listBox] Called 'When triggered'
+---@field onPress? function [button & hint] Called 'When pressed down'
+---@field onClick? function [button] Called 'When pressed and release'
 ---@field visibleFunc? function [All] Used to change widget's visibility when scene changed
 ---@field visibleTick? function [All] Used to update widget's visibility every frame
 ---
 ---@field lineWidth? number [EXCEPT text & image & selector]
----@field cornerR? number [EXCEPT text & image & slider_* & switch & selector] Round corner ratio
+---@field cornerR? number [EXCEPT text & image & slider_fill & slider_progress & switch & selector] Round corner ratio
 ---
 ---@field textColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & slider_progress & listBox]
 ---@field fillColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image & hint & selector]
@@ -302,25 +303,17 @@ function Widgets.base:resetPos()
         self._y=self.y
     end
 end
+local colorKeys={'color','textColor','fillColor','frameColor','imageColor','activeColor','scrollBarColor'}
 function Widgets.base:reset(init)
     assert(not self.name or type(self.name)=='string',"[widget].name need string")
 
     assert(type(self.x)=='number',"[widget].x need number")
     assert(type(self.y)=='number',"[widget].y need number")
-    if type(self.color)=='string' then self.color=COLOR[self.color] end
-    assert(type(self.color)=='table',"[widget].color need table")
-    if type(self.textColor)=='string' then self.textColor=COLOR[self.textColor] end
-    assert(type(self.textColor)=='table',"[widget].textColor need table")
-    if type(self.fillColor)=='string' then self.fillColor=COLOR[self.fillColor] end
-    assert(type(self.fillColor)=='table',"[widget].fillColor need table")
-    if type(self.frameColor)=='string' then self.frameColor=COLOR[self.frameColor] end
-    assert(type(self.frameColor)=='table',"[widget].frameColor need table")
-    if type(self.imageColor)=='string' then self.imageColor=COLOR[self.imageColor] end
-    assert(type(self.imageColor)=='table',"[widget].imageColor need table")
-    if type(self.activeColor)=='string' then self.activeColor=COLOR[self.activeColor] end
-    assert(type(self.activeColor)=='table',"[widget].activeColor need table")
-    if type(self.scrollBarColor)=='string' then self.scrollBarColor=COLOR[self.scrollBarColor] end
-    assert(type(self.scrollBarColor)=='table',"[widget].scrollBarColor need table")
+    for _,key in next,colorKeys do
+        if type(self[key])=='string' then self[key]=COLOR[self[key]] end
+        assert(type(self[key])=='table',"[widget]."..key.." need table")
+        if not self[key][4] then self[key][4]=1 end
+    end
 
     assert(type(self.lineWidth)=='number',"[widget].lineWidth need number")
     assert(type(self.cornerR)=='number',"[widget].cornerR need number")
@@ -515,8 +508,8 @@ Widgets.button=setmetatable({
     cornerR=10,
     sound_trigger=false,
 
-    code=NULL,
     onPress=NULL,
+    onClick=NULL,
 
     buildArgs={
         'name',
@@ -531,7 +524,7 @@ Widgets.button=setmetatable({
         'sound_trigger',
         'sound_press','sound_hover',
 
-        'code','onPress',
+        'onPress','onClick',
         'visibleFunc',
         'visibleTick',
     },
@@ -562,7 +555,7 @@ function Widgets.button:release(_,_,k)
         if self.sound_trigger then
             SFX.play(self.sound_trigger)
         end
-        self.code(k)
+        self.onClick(k)
     end
 end
 function Widgets.button:drag(x,y)
@@ -652,6 +645,8 @@ Widgets.hint=setmetatable({
     _floatImage=false,
     _floatBox=false,
 
+    onPress=NULL,
+
     buildArgs={
         'name',
         'pos',
@@ -667,10 +662,12 @@ Widgets.hint=setmetatable({
 
         'sound_hover',
 
+        'onPress',
         'visibleFunc',
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
+local colorKeys_hint={'floatFillColor','floatFrameColor','floatTextColor'}
 function Widgets.hint:reset(init)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
@@ -679,14 +676,13 @@ function Widgets.hint:reset(init)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number',"[hint].w need number")
     assert(self.h and type(self.h)=='number',"[hint].h need number")
-    assert(legalLabelPos.complex[self.labelPos],"[hint].labelPos need 'center', or (combination of) 'left', 'right', 'top', 'bottom'")
+    assert(legalLabelPos.complex[self.labelPos],"[hint].labelPos need 'center', or (combination of, like 'rightTop') 'left', 'right', 'top', 'bottom'")
 
-    if type(self.floatFillColor)=='string' then self.floatFillColor=COLOR[self.floatFillColor] end
-    assert(type(self.floatFillColor)=='table',"[hint].floatFillColor need table")
-    if type(self.floatFrameColor)=='string' then self.floatFrameColor=COLOR[self.floatFrameColor] end
-    assert(type(self.floatFrameColor)=='table',"[hint].floatFrameColor need table")
-    if type(self.floatTextColor)=='string' then self.floatTextColor=COLOR[self.floatTextColor] end
-    assert(type(self.floatTextColor)=='table',"[hint].floatTextColor need table")
+    for _,key in next,colorKeys_hint do
+        if type(self[key])=='string' then self[key]=COLOR[self[key]] end
+        assert(type(self[key])=='table',"[hint]."..key.." need table")
+        if not self[key][4] then self[key][4]=1 end
+    end
 
     if self.floatImage then
         self._floatImage=
@@ -770,6 +766,9 @@ function Widgets.hint:isAbove(x,y)
     return
         abs(x-self._x)<self.w*.5 and
         abs(y-self._y)<self.h*.5
+end
+function Widgets.hint:press()
+    self.onPress()
 end
 function Widgets.hint:draw()
     gc_push('transform')

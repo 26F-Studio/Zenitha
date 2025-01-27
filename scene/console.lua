@@ -342,7 +342,7 @@ local commands={} do
                 commands.clear.code()
                 outputBox:clear()
                 outputBox.h=SCR.h0-140
-                local button=WIDGET.new{type='button',name='bye',text=ZENITHA.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,code=function()
+                local button=WIDGET.new{type='button',name='bye',text=ZENITHA.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,onPress=function()
                     WIDGET.active.bye:setVisible(false)
                     outputBox.h=SCR.h0-20
                     TASK.new(function()
@@ -795,10 +795,10 @@ function scene.keyDown(key,isRep)
 end
 
 scene.widgetList={
-    WIDGET.new{type='button',name='quit', pos={1,1},w=80,x=-60,y=-460,color='lR',fontSize=20,text="QUIT",  code=function() SCN.back() end},
-    WIDGET.new{type='button',name='up',   pos={1,1},w=80,x=-60,y=-360,color='lG',fontSize=20,text="UP",    code=function() scene.keyDown('up') end},
-    WIDGET.new{type='button',name='down', pos={1,1},w=80,x=-60,y=-260,color='lY',fontSize=20,text="DOWN",  code=function() scene.keyDown('down') end},
-    WIDGET.new{type='button',name='paste',pos={1,1},w=80,x=-60,y=-160,color='lC',fontSize=20,text="PASTE", code=function() inputBox:addText(love.system.getClipboardText() or "") end},
+    WIDGET.new{type='button',name='quit', pos={1,1},w=80,x=-60,y=-460,color='lR',fontSize=20,text="QUIT",  onClick=function() SCN.back() end},
+    WIDGET.new{type='button',name='up',   pos={1,1},w=80,x=-60,y=-360,color='lG',fontSize=20,text="UP",    onClick=function() scene.keyDown('up') end},
+    WIDGET.new{type='button',name='down', pos={1,1},w=80,x=-60,y=-260,color='lY',fontSize=20,text="DOWN",  onClick=function() scene.keyDown('down') end},
+    WIDGET.new{type='button',name='paste',pos={1,1},w=80,x=-60,y=-160,color='lC',fontSize=20,text="PASTE", onClick=function() inputBox:addText(love.system.getClipboardText() or "") end},
     outputBox,
     inputBox,
 }

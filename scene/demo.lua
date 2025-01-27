@@ -37,12 +37,12 @@ local scene={
         {type='selector',    text='selector2', x=330,y=560,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[2] end,code=function(v) testVal_3[2]=v end},
         {type='selector',    text='selector3', x=330,y=610,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[3] end,code=function(v) testVal_3[3]=v end},
 
-        {type='button',      text='Quit',      x=600,y=540,w=200,h=80,code=function() love.event.quit() end},
-        {type='button',      text='Console',   x=600,y=620,w=190,h=60,code=WIDGET.c_goScn'_console'},
-        {type='button',      text='Text',      alignX='left', alignY='top',   x=550,y=690,w=90,h=60,code=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,k=2,fontSize=50} end},
-        {type='button',      text='Wait',      alignX='right',alignY='top',   x=650,y=690,w=90,h=60,code=function() WAIT.new{timeout=1} end},
-        {type='button',      text='Msg',       alignX='left', alignY='bottom',x=550,y=760,w=90,h=60,code=function() MSG(TABLE.getRandom{'info','check','warn','error','other'},"Test message",5) end},
-        {type='button',      text='Task',      alignX='right',alignY='bottom',x=650,y=760,w=90,h=60,code=function() TASK.new(function() for a=0,MATH.tau,MATH.tau/32 do SYSFX.ripple(1,SCR.w0/2+260*math.cos(a),SCR.h0/2+260*math.sin(a),50) TASK.yieldT(.01) end end) end},
+        {type='button',      text='Quit',      x=600,y=540,w=200,h=80,onClick=function() love.event.quit() end},
+        {type='button',      text='Console',   x=600,y=620,w=190,h=60,onClick=WIDGET.c_goScn'_console'},
+        {type='button',      text='Text',      alignX='left', alignY='top',   x=550,y=690,w=90,h=60,onClick=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,k=2,fontSize=50} end},
+        {type='button',      text='Wait',      alignX='right',alignY='top',   x=650,y=690,w=90,h=60,onClick=function() WAIT.new{timeout=1} end},
+        {type='button',      text='Msg',       alignX='left', alignY='bottom',x=550,y=760,w=90,h=60,onClick=function() MSG(TABLE.getRandom{'info','check','warn','error','other'},"Test message",5) end},
+        {type='button',      text='Task',      alignX='right',alignY='bottom',x=650,y=760,w=90,h=60,onClick=function() TASK.new(function() for a=0,MATH.tau,MATH.tau/32 do SYSFX.ripple(1,SCR.w0/2+260*math.cos(a),SCR.h0/2+260*math.sin(a),50) TASK.yieldT(.01) end end) end},
 
         {type='inputBox',    text='inputBox',  x=100,y=650,w=300,h=100,labelPos='bottom'},
         {type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
