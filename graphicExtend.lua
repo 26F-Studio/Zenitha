@@ -28,20 +28,12 @@ local GC=TABLE.copyAll(gc,0)
 --------------------------------------------------------------
 -- Aligning Draw
 
-local textWidth=2600
-
----Set text width for GC.mStr (when w not specified) and GC.strokePrint
-function GC._setCenteredTextWidth(width)
-    assert(type(width)=='number',"GC._setMStrWidth: need number")
-    textWidth=width
-end
-
 ---Printf a string with 'center' option
 ---@param obj string | number
 ---@param x number
 ---@param y number
----@param w? number max width, default to the value set by GC._setCenteredTextWidth
-function GC.mStr(obj,x,y,w) printf(obj,x-(w or textWidth)/2,y,(w or textWidth),'center') end
+---@param w? number warping width, default to SCR.w0
+function GC.mStr(obj,x,y,w) printf(obj,x-(w or SCR.w0)/2,y,(w or SCR.w0),'center') end
 
 ---Draw an object with both middle X & Y
 ---@param obj love.Texture | love.Drawable
@@ -152,7 +144,6 @@ function GC.strokeDraw(strokeMode,d,obj,x,y,r,sx,sy,ox,oy,kx,ky)
 end
 
 ---Print text with stroke (extended love.gc.printf)  
----Note: set warping width with GC._setCenteredTextWidth
 ---@param strokeMode? 'side' | 'corner' | 'full' other values will be treated as 'full'
 ---@param d number
 ---@param strokeColor? Zenitha.Color Stroke color (default to white)
@@ -160,6 +151,7 @@ end
 ---@param str string
 ---@param x number
 ---@param y number
+---@param w number? warping width, default to SCR.w0
 ---@param align? love.AlignMode
 ---@param r? number rotation
 ---@param sx? number scale
@@ -168,29 +160,30 @@ end
 ---@param oy? number offset
 ---@param kx? number shear
 ---@param ky? number shear
-function GC.strokePrint(strokeMode,d,strokeColor,textColor,str,x,y,align,r,sx,sy,ox,oy,kx,ky)
+function GC.strokePrint(strokeMode,d,strokeColor,textColor,str,x,y,w,align,r,sx,sy,ox,oy,kx,ky)
+    if not w then w=SCR.w0 end
     if align=='center' then
-        x=x-textWidth*.5
+        x=x-w*.5
     elseif align=='right' then
-        x=x-textWidth
+        x=x-w
     end
     setColor(strokeColor or COLOR.L)
     if strokeMode~='corner' then
-        printf(str,x-d,y,textWidth,align,r,sx,sy,ox,oy,kx,ky)
-        printf(str,x+d,y,textWidth,align,r,sx,sy,ox,oy,kx,ky)
-        printf(str,x,y-d,textWidth,align,r,sx,sy,ox,oy,kx,ky)
-        printf(str,x,y+d,textWidth,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x-d,y,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x+d,y,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x,y-d,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x,y+d,w,align,r,sx,sy,ox,oy,kx,ky)
     end
     if strokeMode~='side' then
         d=d/1.4142135623730951
-        printf(str,x-d,y-d,textWidth,align,r,sx,sy,ox,oy,kx,ky)
-        printf(str,x-d,y+d,textWidth,align,r,sx,sy,ox,oy,kx,ky)
-        printf(str,x+d,y-d,textWidth,align,r,sx,sy,ox,oy,kx,ky)
-        printf(str,x+d,y+d,textWidth,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x-d,y-d,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x-d,y+d,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x+d,y-d,w,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x+d,y+d,w,align,r,sx,sy,ox,oy,kx,ky)
     end
     if textColor then
         setColor(textColor)
-        printf(str,x,y,textWidth,align,r,sx,sy,ox,oy,kx,ky)
+        printf(str,x,y,w,align,r,sx,sy,ox,oy,kx,ky)
     end
 end
 
