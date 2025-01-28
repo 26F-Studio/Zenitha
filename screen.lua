@@ -1,5 +1,6 @@
-if not (love.math and love.graphics and love.window) then
-    LOG("SCR lib is not loaded (need love.math & love.graphics & love.window)")
+if not love.graphics then
+    LOG("SCR lib is not loaded (need love.graphics)")
+    if not love.window then LOG("SCR lib needs love.window to enable feature 'SCR.safeX/Y/W/H'") end
     local fakeTransform={
         transformPoint=NULL,
         inverseTransformPoint=NULL,
@@ -112,8 +113,10 @@ function SCR._resize(w,h)
     end
     SCR.cx,SCR.cy=SCR.w/2,SCR.h/2
     SCR.ex,SCR.ey=SCR.w-SCR.x,SCR.h-SCR.y
-    if love.window.getSafeArea then
+    if love.window and love.window.getSafeArea then
         SCR.safeX,SCR.safeY,SCR.safeW,SCR.safeH=love.window.getSafeArea()
+    else
+        SCR.safeX,SCR.safeY,SCR.safeW,SCR.safeH=0,0,w,h
     end
 
     SCR.origin:setTransformation(0,0)
