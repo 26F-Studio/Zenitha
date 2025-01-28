@@ -1362,14 +1362,14 @@ end
 ---If set to 50(%), all *.update(dt) will be called every 2 main loop cycle
 ---@param rate number in [0,100]
 function ZENITHA.setUpdateRate(rate)
-    assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setUpdateFreq(rate): Need in (0,100]")
+    assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setUpdateRate(rate): Need in (0,100]")
     updateFreq=rate
 end
 
----Set the drawing rate of the application, same as Zenitha.setUpdateFreq(rate)
+---Set the drawing rate of the application, same as Zenitha.setUpdateRate(rate)
 ---@param rate number in [0,100]
 function ZENITHA.setRenderRate(rate)
-    assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setDrawFreq(rate): Need in (0,100]")
+    assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setRenderRate(rate): Need in (0,100]")
     drawFreq=rate
 end
 
