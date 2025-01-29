@@ -32,7 +32,7 @@ end
 
 if not (love.filesystem and love.audio and love.sound) then
     LOG("SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
-    function SFX.load()
+    SFX[('load')]=function()
         error("attempt to use SFX.load, but SFX lib is not loaded (need love.filesystem & love.audio & love.sound)")
     end
     return setmetatable(SFX,{
@@ -79,17 +79,20 @@ local function loadOne(name,path,lazyLoad)
 end
 
 ---Load SFX name-path pairs
----@param name string
----@param path string
----@param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
----@overload fun(pathTable:table, lazyLoad?:boolean)
----@overload fun(metaInfo:table<string, {[1]:number, [2]:number}>, path:string)
-function SFX.load(name,path,lazyLoad)
-    if type(name)=='table'and not path then
-        ---@cast name +{name:string, path:string}
+---@overload fun(name:string, path:string, lazyLoad?:boolean) In lazeLoad mode, the file will be loaded when it's played for the first time
+---@overload fun(pathTable:table<string, string>, lazyLoad?:boolean) Batch Name-Path load
+---@overload fun(path:string, metaInfo:table<string, {[1]:number, [2]:number}>) Load one SFX file with clips with Name-{start,length} pairs
+function SFX.load(_1,_2,_3)
+    if type(_1)=='string' and type(_2)=='string' then
+        if loadOne(_1,_2,_3) then
+            LOG("SFX loaded: ".._1)
+        else
+            LOG("No SFX: ".._2)
+        end
+    elseif type(_1)=='table' then
         local success=0
         local fail=0
-        for k,v in next,name do
+        for k,v in next,_1 do
             if loadOne(k,v) then
                 success=success+1
             else
@@ -100,27 +103,23 @@ function SFX.load(name,path,lazyLoad)
             LOG(fail.." SFX files missing")
         end
         LOG(("%d SFX files added, total %d"):format(success,#nameList))
-    elseif type(name)=='table' then
-        local metaDec=love.sound.newDecoder(path)
+    elseif type(_1)=='string' and type(_2)=='table' then
+        local metaDec=love.sound.newDecoder(_1)
         local duration=metaDec:getDuration()
         local fullSize=
             metaDec:getSampleRate()*
             metaDec:getDuration()*
             metaDec:getBitDepth()*
             metaDec:getChannelCount()/8
-        local meta=name
+        local meta=_2
         for n,t in next,meta do
-            local dec=love.sound.newDecoder(path,math.ceil(t[2]/duration*fullSize))
+            local dec=love.sound.newDecoder(_1,math.ceil(t[2]/duration*fullSize))
             dec:seek(t[1])
             ins(nameList,n)
             srcMap[n]={love.audio.newSource(dec:decode(),'static')}
         end
     else
-        if loadOne(name,path,lazyLoad) then
-            LOG("SFX loaded: "..name)
-        else
-            LOG("No SFX: "..path)
-        end
+        LOG("SFX.load: need (name,path,bool?) or ({name=path,...},bool?) or (path,{name={start,len},...})")
     end
     table.sort(nameList)
 end
