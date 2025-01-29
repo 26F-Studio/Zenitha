@@ -41,11 +41,14 @@ function FILE.load(path,args,venv)
             STRING.sArg(args,'-lua') and 'lua' or
             STRING.sArg(args,'-json') and 'json' or
             STRING.sArg(args,'-string') and 'string' or
+
             s:sub(1,9):find('return%s*%{') and 'luaon' or
             (s:sub(1,1)=='[' and s:sub(-1)==']' or s:sub(1,1)=='{' and s:sub(-1)=='}') and 'json' or
             'string'
+
         if mode=='luaon' then
-            local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..']]'..s)
+            local lackReturn=s:match("^%s*[{]")
+            local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..(lackReturn and ']]return' or ']]')..s)
             if func then
                 setfenv(func,venv or {})
                 local res=func()
