@@ -11,9 +11,10 @@
 ---@field widthLimit? number [EXCEPT image & button & *Box]
 ---
 ---@field color? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & *Box] fallback of other color options
----@field text? string | function [EXCEPT image & text/listBox]
----@field fontSize? number [EXCEPT image & listBox]
----@field fontType? string [EXCEPT image & listBox]
+---@field text? string | function [EXCEPT image & listBox]
+---@field textScale? number [same as text]
+---@field fontSize? number [same as text]
+---@field fontType? string [same as text]
 ---@field image? string | love.Drawable [image & button] Can use slash-path to read from IMG lib
 ---@field quad? love.Quad [same as image] Optional
 ---@field alignX? 'left' | 'right' | 'center' [text & image & button]
@@ -263,7 +264,7 @@ Widgets.base={
     scrollBarColor='L',
     pos=false,
     lineWidth=4,cornerR=3,
-    fontSize=30,fontType=false,
+    textScale=1,fontSize=30,fontType=false,
     widthLimit=1e99,
     labelPos='left',
     labelDist=20,
@@ -419,7 +420,7 @@ Widgets.text=setmetatable({
         'alignX','alignY',
 
         'color','textColor',
-        'text','fontSize','fontType',
+        'text','textScale','fontSize','fontType',
 
         'widthLimit',
 
@@ -436,7 +437,7 @@ end
 function Widgets.text:draw()
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,self._x,self._y)
+        alignDraw(self,self._text,self._x,self._y,nil,self.textScale)
     end
 end
 
@@ -520,7 +521,7 @@ Widgets.button=setmetatable({
         'lineWidth','cornerR',
 
         'color','fillColor','frameColor','imageColor','textColor',
-        'text','fontSize','fontType','image','quad',
+        'text','textScale','fontSize','fontType','image','quad',
         'sound_trigger',
         'sound_press','sound_hover',
 
@@ -598,7 +599,7 @@ function Widgets.button:draw()
     end
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,startX,startY)
+        alignDraw(self,self._text,startX,startY,nil,self.textScale)
     end
     gc_pop()
 end
@@ -654,7 +655,7 @@ Widgets.hint=setmetatable({
         'lineWidth','cornerR',
 
         'color','frameColor','textColor',
-        'text','fontSize','fontType','image','quad',
+        'text','textScale','fontSize','fontType','image','quad',
         'floatImage','floatText','floatFontSize','floatFontType',
         'floatBox','marginX','marginY',
         'labelPos','labelDist',
@@ -795,7 +796,7 @@ function Widgets.hint:draw()
     end
     if self._text then
         gc_setColor(self.textColor)
-        gc_mDraw(self._text)
+        gc_mDraw(self._text,nil,nil,nil,self.textScale)
     end
 
     -- Hovering info
@@ -848,7 +849,7 @@ Widgets.checkBox=setmetatable({
         'labelPos',
         'labelDist',
         'color','fillColor','frameColor','textColor',
-        'text','fontSize','fontType',
+        'text','textScale','fontSize','fontType',
         'widthLimit',
         'sound_on','sound_off',
         'sound_press','sound_hover',
@@ -926,7 +927,7 @@ function Widgets.checkBox:draw()
     end
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,x2,y2)
+        alignDraw(self,self._text,x2,y2,nil,self.textScale)
     end
     gc_pop()
 end
@@ -955,7 +956,7 @@ Widgets.switch=setmetatable({
         'labelPos',
         'labelDist',
         'color','fillColor','frameColor','textColor',
-        'text','fontSize','fontType',
+        'text','textScale','fontSize','fontType',
         'lineWidth','widthLimit',
         'sound_on','sound_off',
         'sound_press','sound_hover',
@@ -1027,7 +1028,7 @@ function Widgets.switch:draw()
     end
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,x2,y2)
+        alignDraw(self,self._text,x2,y2,nil,self.textScale)
     end
     gc_pop()
 end
@@ -1093,7 +1094,7 @@ Widgets.slider=setmetatable({
         'labelPos',
         'labelDist',
         'color','fillColor','frameColor','textColor',
-        'text','fontSize','fontType',
+        'text','textScale','fontSize','fontType',
         'numFontSize','numFontType',
         'widthLimit',
         'textAlwaysShow',
@@ -1249,11 +1250,11 @@ function Widgets.slider:draw()
     if self._text then
         gc_setColor(self.textColor)
         if self.labelPos=='left' then
-            alignDraw(self,self._text,x-self.labelDist,y)
+            alignDraw(self,self._text,x-self.labelDist,y,nil,self.textScale)
         elseif self.labelPos=='right' then
-            alignDraw(self,self._text,x+self.w+self.labelDist,y)
+            alignDraw(self,self._text,x+self.w+self.labelDist,y,nil,self.textScale)
         elseif self.labelPos=='bottom' then
-            alignDraw(self,self._text,x+self.w*.5,y+self.labelDist)
+            alignDraw(self,self._text,x+self.w*.5,y+self.labelDist,nil,self.textScale)
         end
     end
 end
@@ -1321,7 +1322,7 @@ Widgets.slider_fill=setmetatable({
         'labelDist',
         'lineWidth','lineDist',
         'color','fillColor','frameColor','textColor',
-        'text','fontSize','fontType',
+        'text','textScale','fontSize','fontType',
         'widthLimit',
         'sound_drag','sound_hover',
         'soundInterval',
@@ -1419,7 +1420,7 @@ function Widgets.slider_fill:draw()
         elseif self.labelPos=='bottom' then
             x2,y2=x+w*.5,y-self.labelDist
         end
-        alignDraw(self,self._text,x2,y2)
+        alignDraw(self,self._text,x2,y2,nil,self.textScale)
     end
 end
 
@@ -1449,7 +1450,7 @@ Widgets.slider_progress=setmetatable({
         'labelPos',
         'labelDist',
         'lineWidth',
-        'text','fontSize','fontType',
+        'text','textScale','fontSize','fontType',
         'widthLimit',
         'sound_drag','sound_hover',
         'soundInterval',
@@ -1524,7 +1525,7 @@ function Widgets.slider_progress:draw()
         elseif self.labelPos=='bottom' then
             x2,y2=x+w*.5,y-self.labelDist
         end
-        alignDraw(self,self._text,x2,y2)
+        alignDraw(self,self._text,x2,y2,nil,self.textScale)
     end
 end
 
@@ -1553,7 +1554,7 @@ Widgets.selector=setmetatable({
         'x','y','w',
 
         'color','frameColor','textColor',
-        'text','fontSize','fontType',
+        'text','textScale','fontSize','fontType',
         'selFontSize','selFontType',
         'widthLimit',
 
@@ -1644,7 +1645,7 @@ function Widgets.selector:draw()
     end
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,x2,y2)
+        alignDraw(self,self._text,x2,y2,nil,self.textScale)
     end
     if self._selText then
         gc_setColor(self.textColor)
@@ -1725,7 +1726,7 @@ Widgets.inputBox=setmetatable({
         'lineWidth','cornerR',
 
         'fillColor','frameColor','textColor','activeColor',
-        'text','fontSize','fontType',
+        'text','textScale','fontSize','fontType',
         'secret',
         'regex',
         'labelPos',
@@ -1827,7 +1828,7 @@ function Widgets.inputBox:draw()
         elseif self.labelPos=='bottom' then
             x2,y2=x+self.w*.5,y+self.h
         end
-        alignDraw(self,self._text,x2,y2)
+        alignDraw(self,self._text,x2,y2,nil,self.textScale)
     end
 
     local f=self.fontSize
