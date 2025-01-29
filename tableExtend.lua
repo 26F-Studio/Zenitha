@@ -820,7 +820,7 @@ do -- function TABLE.dumpDeflate(org,depth)
     ---@return string
     ---@nodiscard
     function TABLE.dumpDeflate(org,depth)
-        assert(type(org)=='table',"Only table can be dumped")
+        assert(type(org)=='table',"TABLE.dumpDeflate: need table")
         return dump(org,1,depth or 1e99)
     end
 end
@@ -836,13 +836,7 @@ do -- function TABLE.dump(org,depth)
         end,
     })
     local function dump(L,t,lim)
-        local s
-        if t then
-            s='{\n'
-        else
-            s='return {\n'
-            t=1
-        end
+        local s='{\n'
         local count=1
         for k,v in next,L do
             -- Key part
@@ -887,7 +881,7 @@ do -- function TABLE.dump(org,depth)
     ---@return string
     ---@nodiscard
     function TABLE.dump(org,depth)
-        assert(type(org)=='table',"Only table can be dumped")
+        assert(type(org)=='table',"TABLE.dump: need table")
         return dump(org,1,depth or 1e99)
     end
 end
