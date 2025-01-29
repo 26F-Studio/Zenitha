@@ -63,9 +63,9 @@ local stereo=1
 local function loadOne(name,path,lazyLoad)
     assert(type(name)=='string',"SFX.load: name need string")
     assert(type(path)=='string',"SFX.load: path need string")
-    if love.filesystem.getInfo(path) and FILE.isSafe(path) then
+    if love.filesystem.getInfo(path) then
         if srcMap[name] then
-            rem(nameList,TABLE.find(nameList,name))
+            TABLE.delete(nameList,name)
             for _,src in next,srcMap[name] do
                 if type(src)~='string' then
                     src:release()
@@ -83,8 +83,9 @@ end
 ---@param path string
 ---@param lazyLoad? boolean If true, the file will be loaded when it's played for the first time
 ---@overload fun(pathTable:table, lazyLoad?:boolean)
+---@overload fun(metaInfo:table<string, {[1]:number, [2]:number}>, path:string)
 function SFX.load(name,path,lazyLoad)
-    if type(name)=='table' then
+    if type(name)=='table'and not path then
         ---@cast name +{name:string, path:string}
         local success=0
         local fail=0
@@ -99,6 +100,21 @@ function SFX.load(name,path,lazyLoad)
             LOG(fail.." SFX files missing")
         end
         LOG(("%d SFX files added, total %d"):format(success,#nameList))
+    elseif type(name)=='table' then
+        local metaDec=love.sound.newDecoder(path)
+        local duration=metaDec:getDuration()
+        local fullSize=
+            metaDec:getSampleRate()*
+            metaDec:getDuration()*
+            metaDec:getBitDepth()*
+            metaDec:getChannelCount()/8
+        local meta=name
+        for n,t in next,meta do
+            local dec=love.sound.newDecoder(path,math.ceil(t[2]/duration*fullSize))
+            dec:seek(t[1])
+            ins(nameList,n)
+            srcMap[n]={love.audio.newSource(dec:decode(),'static')}
+        end
     else
         if loadOne(name,path,lazyLoad) then
             LOG("SFX loaded: "..name)
@@ -211,9 +227,8 @@ function SFX.play(name,vol,pos,pitch)
     if not S then return end
     if type(S[1])=='string' then -- Do the lazy load
         local path=tostring(S[1]) -- to avoid syntax checker error
-        local src=love.filesystem.getInfo(path) and FILE.isSafe(path) and love.audio.newSource(path,'static')
-        assert(src,"WTF why path data can be bad")
-        S[1]=src
+        local src=love.filesystem.getInfo(path) and love.audio.newSource(path,'static')
+        S[1]=assert(src,"WTF why path data can be bad")
     end
 
     ---@cast S love.Source[]
