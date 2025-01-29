@@ -59,12 +59,15 @@
 ---@field sound_on? string | false [checkBox & switch]
 ---@field sound_off? string | false [checkBox & switch]
 ---
----@field numFontSize? number [slider]
----@field numFontType? string [slider]
+---@field numFontSize? number [sliders]
+---@field numFontType? string [sliders]
 ---@field axis? {minVal:number, maxVal:number, step?:number} [slider & slider_fill]
----@field smooth? boolean [slider] Unit point visibility
----@field valueShow? false | 'int' | 'float' | 'percent' | function [slider] Value showing mode or function [called with widgetObj)
+---@field smooth? boolean [sliders] Unit point visibility
+---@field valueShow? false | 'int' | 'float' | 'percent' | function [sliders] Value showing mode or function [called with widgetObj)
 ---@field lineDist? number [slider_fill] Outline dist from the bat
+---@field soundInterval? number [sliders] Minimum interval between two sounds
+---@field soundPitchRange? number [sliders] Pitch range applied to sound_drag, 12 for ±1 octave
+---@field sound_drag? string [sliders] Drag sound
 ---
 ---@field selFontSize? number [selector]
 ---@field selFontType? string [selector]
