@@ -124,12 +124,14 @@ function SFX.load(_1,_2,_3)
     table.sort(nameList)
 end
 
----Load SFX samples from specified directory
+---Load SFX samples from specified directory  
+---Files should be 1.ogg, 2.ogg, ..., and 1 semitone higher then previous one  
+---shrink: drop a bit of samples at the end of each clip, to avoid error due to compressing
 ---### Example
 ---```
----SFX.loadSample{name='bass',path='assets/sample/bass',base='A2'}
+---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2',shrink=0.01}
 ---```
----@param pack {name:string, path:string, base:string, count:number}
+---@param pack {name:string, path:string, base:string, count:number, shrink?:number}
 function SFX.loadSample(pack)
     assert(type(pack)=='table',"Usage: SFX.loadsample(table)")
     assert(pack.name,"SFX.loadSample: need field 'name'")
@@ -137,15 +139,17 @@ function SFX.loadSample(pack)
     local base=(SFX.getTuneHeight(pack.base) or 37)-1
     if pack.path:match('%.[a-z]+$') then
         -- Single file mode
-        local decoder=love.sound.newDecoder(pack.path)
-        local soundDataSize=
-            decoder:getSampleRate()*
-            decoder:getDuration()*
-            decoder:getBitDepth()*
-            decoder:getChannelCount()/8
-        decoder=love.sound.newDecoder(pack.path,soundDataSize/pack.count)
+        local dcd=love.sound.newDecoder(pack.path)
+        local duration=dcd:getDuration()
+        local fullSize=
+            dcd:getSampleRate()*
+            dcd:getDuration()*
+            dcd:getBitDepth()*
+            dcd:getChannelCount()/8
+        dcd=love.sound.newDecoder(pack.path,fullSize/pack.count*(1-(pack.shrink or 0)))
         for n=1,pack.count do
-            srcMap[pack.name..n]={love.audio.newSource(decoder:decode())}
+            dcd:seek((n-1)*duration/pack.count)
+            srcMap[pack.name..n]={love.audio.newSource(dcd:decode())}
         end
         packSetting[pack.name]={base=base,top=base+pack.count-1}
         LOG(pack.count.." "..pack.name.." samples loaded")
