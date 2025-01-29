@@ -40,6 +40,7 @@
 ---@field activeColor? Zenitha.ColorStr | Zenitha.Color [*Box]
 ---
 ---@field sound_press? string [button & checkBox & switch & selector & inputBox]
+---@field sound_release? string [button]
 ---@field sound_hover? string [EXCEPT text & image]
 ---
 ---@field floatText? string | function [hint]
@@ -502,7 +503,7 @@ end
 ---@class Zenitha.Widget.button: Zenitha.Widget.base
 ---@field w number
 ---@field h number
----@field sound_trigger string | false
+---@field sound_release string | false
 Widgets.button=setmetatable({
     type='button',
     w=40,h=false,
@@ -510,7 +511,7 @@ Widgets.button=setmetatable({
     text=false,
     image=false,
     cornerR=10,
-    sound_trigger=false,
+    sound_release=false,
 
     onPress=NULL,
     onClick=NULL,
@@ -525,7 +526,7 @@ Widgets.button=setmetatable({
 
         'color','fillColor','frameColor','imageColor','textColor',
         'text','textScale','fontSize','fontType','image','quad',
-        'sound_trigger',
+        'sound_release',
         'sound_press','sound_hover',
 
         'onPress','onClick',
@@ -541,7 +542,7 @@ function Widgets.button:reset(init)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number',"[button].w need number")
     assert(self.h and type(self.h)=='number',"[button].h need number")
-    assert(not self.sound_trigger or type(self.sound_trigger)=='string',"[button].sound_trigger need string")
+    assert(not self.sound_release or type(self.sound_release)=='string',"[button].sound_release need string")
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
@@ -556,8 +557,8 @@ end
 function Widgets.button:release(_,_,k)
     if self._pressed then
         self._pressed=false
-        if self.sound_trigger then
-            SFX.play(self.sound_trigger)
+        if self.sound_release then
+            SFX.play(self.sound_release)
         end
         self.onClick(k)
     end
