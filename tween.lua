@@ -129,7 +129,7 @@ function Tween:setOnFinish(func)
     return self
 end
 
----Set onFinish callback function
+---Set onKill callback function
 ---@param func function
 ---@return Zenitha.Tween
 function Tween:setOnKill(func)
