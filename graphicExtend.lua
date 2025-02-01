@@ -660,6 +660,8 @@ do -- function GC.load(L), GC.execute(t)
         fArc=function(...) arc('fill','open',...) end,
         fBow=function(...) arc('fill','closed',...) end,
 
+        fMRect=function(...) GC.mRect('fill',...) end,
+        dMRect=function(...) GC.mRect('line',...) end,
         fRPol=function(...) GC.regPolygon('fill',...) end,
         dRPol=function(...) GC.regPolygon('line',...) end,
         fRRPol=function(...) GC.regRoundPolygon('fill',...) end,
