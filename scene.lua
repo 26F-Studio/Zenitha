@@ -33,6 +33,7 @@
 ---@class Zenitha.SceneSwap
 ---@field duration number
 ---@field timeChange number
+---@field init? function
 ---@field draw fun(timeRemain:number)
 
 ---@type Map<Zenitha.Scene>
@@ -181,6 +182,7 @@ function SCN.addSwapStyle(name,swapStyle)
     assertf(type(swapStyle)=='table',"SCN.addSwap(name,swp): swp need table")
     assertf(type(swapStyle.duration)=='number' and swapStyle.duration>=0,"SCN.addSwap(name,swp): swp.duration need >=0")
     assertf(type(swapStyle.timeChange)=='number' and swapStyle.timeChange>=0,"SCN.addSwap(name,swp): swp.timeChange need >=0")
+    assertf(swapStyle.init==nil or type(swapStyle.init)=='function',"SCN.addSwap(name,swp): swp.init need function")
     assertf(type(swapStyle.draw)=='function',"SCN.addSwap(name,swp): swp.draw need function")
     swapStyles[name]=swapStyle
 end
@@ -274,6 +276,7 @@ function SCN.swapTo(tar,swapStyle,...)
             S.target,S.style=tar,swapStyle
             S.timeRem=swapStyles[swapStyle].duration
             S.timeChange=swapStyles[swapStyle].timeChange
+            if swapStyles[swapStyle].init then swapStyles[swapStyle].init() end
             S.draw=swapStyles[swapStyle].draw
             ZENITHA.globalEvent.sceneSwap('start',swapStyle)
         end
