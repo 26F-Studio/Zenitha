@@ -39,9 +39,9 @@
 ---@field imageColor? Zenitha.ColorStr | Zenitha.Color [image & button]
 ---@field activeColor? Zenitha.ColorStr | Zenitha.Color [*Box]
 ---
----@field sound_press? string [button & checkBox & switch & selector & inputBox]
----@field sound_release? string [button]
----@field sound_hover? string [EXCEPT text & image]
+---@field sound_press? string|false [button & checkBox & switch & selector & inputBox]
+---@field sound_release? string|false [button]
+---@field sound_hover? string|false [EXCEPT text & image]
 ---
 ---@field floatText? string | function [hint]
 ---@field floatFontSize? number [hint]
@@ -57,8 +57,8 @@
 ---@field r? number [image]
 ---@field k? number [image]
 ---
----@field sound_on? string | false [checkBox & switch]
----@field sound_off? string | false [checkBox & switch]
+---@field sound_on? string | false | false [checkBox & switch]
+---@field sound_off? string | false | false [checkBox & switch]
 ---
 ---@field numFontSize? number [sliders]
 ---@field numFontType? string [sliders]
@@ -68,7 +68,7 @@
 ---@field lineDist? number [slider_fill] Outline dist from the bat
 ---@field soundInterval? number [sliders] Minimum interval between two sounds
 ---@field soundPitchRange? number [sliders] Pitch range applied to sound_drag, 12 for ±1 octave
----@field sound_drag? string [sliders] Drag sound
+---@field sound_drag? string | false [sliders] Drag sound
 ---
 ---@field selFontSize? number [selector]
 ---@field selFontType? string [selector]
@@ -78,10 +78,10 @@
 ---@field secret? boolean [inputBox]
 ---@field regex? string [inputBox]
 ---@field maxInputLength? number [inputBox]
----@field sound_input? string [inputBox]
----@field sound_bksp? string [inputBox]
----@field sound_clear? string [input/textBox]
----@field sound_fail? string [inputBox]
+---@field sound_input? string | false [inputBox]
+---@field sound_bksp? string | false [inputBox]
+---@field sound_clear? string | false [input/textBox]
+---@field sound_fail? string | false [inputBox]
 ---
 ---@field scrollBarPos? 'left' | 'right' [textBox & listBox]
 ---@field scrollBarWidth? number [textBox & listBox]
@@ -95,8 +95,8 @@
 ---@field drawFunc? function [listBox]
 ---@field releaseDist? number [listBox]
 ---@field stencilMode? 'total' | 'single' | false [listBox]
----@field sound_click? string [listBox]
----@field sound_select? string [listBox]
+---@field sound_click? string | false [listBox]
+---@field sound_select? string | false [listBox]
 
 local type,assert,next,rawget=type,assert,next,rawget
 local floor,ceil=math.floor,math.ceil
