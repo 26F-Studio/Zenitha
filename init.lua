@@ -1176,7 +1176,7 @@ function love.run()
                     end
                 gc_replaceTransform(SCR.origin)
                     if SCN.swapping then
-                        SCN.state.draw(SCN.state.timeRem)
+                        SCN.swapState.draw(SCN.swapState.time)
                     end
                 gc_replaceTransform(SCR.xOy_ul)
                     MSG._draw()

@@ -27,14 +27,14 @@
 ---@field resize?      fun() | fun(width:number, height:number)
 ---@field focus?       fun() | fun(focus:boolean)
 ---@field update?      fun() | fun(dt:number)
----@field draw?        fun()
----@field overDraw?    fun()
+---@field draw?        fun() Draw below widgets
+---@field overDraw?    fun() Draw above widgets
 
 ---@class Zenitha.SceneSwap
----@field duration number
----@field timeChange number
+---@field duration number Total duration
+---@field switchTime? number Default to half of duration
 ---@field init? function
----@field draw fun(timeRemain:number)
+---@field draw fun(time:number) time from 0 to 1
 
 ---@type Map<Zenitha.Scene>
 local scenes={}
@@ -61,12 +61,13 @@ local SCN={
     curScroll=0,
 
     swapping=false, -- If Swapping
-    state={
+    swapState={
         target=false,     -- Swapping target
         swapStyle=false,  -- Swapping style
         draw=false,       -- Swap draw func
-        timeRem=false,    -- Swap time remain
-        timeChange=false, -- Loading point
+        time=false,       -- Swap time (0~1)
+        duration=false,   -- Swap time (total)
+        transPoint=false, -- Transition time
     },
     stack={}, -- Scene stack
     prev=false,
@@ -79,63 +80,52 @@ local SCN={
 
 local defaultSwap='fade'
 
----@alias Zenitha.SceneSwapStyle Zenitha._SceneSwapStyle | string
----@enum (key) Zenitha._SceneSwapStyle
-local swapStyles={
+local function fadeDraw(t)
+    GC.setColor(.1,.1,.1,1-(t-.5)*(t-.5)*4)
+    GC.rectangle('fill',0,0,SCR.w,SCR.h)
+end
+
+---@alias Zenitha.SceneSwapStyle Zenitha._swapStyles | string
+
+---@enum (key) Zenitha._swapStyles
+local swapStyles={---@type Map<Zenitha.SceneSwap>
     none={
-        duration=0,timeChange=0,
+        duration=0,switchTime=0,
         draw=function() end,
     },
     flash={
-        duration=.16,timeChange=.08,
+        duration=.16,switchTime=.08,
         draw=function() GC.clear(1,1,1) end,
     },
-    fade={
-        duration=.5,timeChange=.25,
-        draw=function(t)
-            GC.setColor(.1,.1,.1,t>.25 and 2-t*4 or t*4)
-            GC.rectangle('fill',0,0,SCR.w,SCR.h)
-        end,
-    },
-    fastFade={
-        duration=.2,timeChange=.1,
-        draw=function(t)
-            GC.setColor(.1,.1,.1,t>.1 and 2-t*10 or t*10)
-            GC.rectangle('fill',0,0,SCR.w,SCR.h)
-        end,
-    },
-    slowFade={
-        duration=3,timeChange=1.5,
-        draw=function(t)
-            GC.setColor(.1,.1,.1,t>1.5 and (3-t)/1.5 or t/1.5)
-            GC.rectangle('fill',0,0,SCR.w,SCR.h)
-        end,
-    },
+    fade=    {duration=0.5,switchTime=.25,draw=fadeDraw},
+    fastFade={duration=0.2,switchTime=0.1,draw=fadeDraw},
+    slowFade={duration=3.0,switchTime=1.5,draw=fadeDraw},
     swipeL={
-        duration=.5,timeChange=.25,
+        duration=.5,switchTime=.25,
         draw=function(t)
-        t=t*2
             GC.setColor(.1,.1,.1,1-math.abs(t-.5))
-            t=t*t*(3-2*t)*2-1
-            GC.rectangle('fill',t*SCR.w,0,SCR.w,SCR.h)
+            GC.rectangle('fill',(t*t*(2*t-3)*2+1)*SCR.w,0,SCR.w,SCR.h)
         end,
     },
     swipeR={
-        duration=.5,timeChange=.25,
+        duration=.5,switchTime=.25,
         draw=function(t)
-            t=t*2
             GC.setColor(.1,.1,.1,1-math.abs(t-.5))
-            t=t*t*(2*t-3)*2+1
-            GC.rectangle('fill',t*SCR.w,0,SCR.w,SCR.h)
+            GC.rectangle('fill',(t*t*(3-2*t)*2-1)*SCR.w,0,SCR.w,SCR.h)
+        end,
+    },
+    swipeU={
+        duration=.5,switchTime=.25,
+        draw=function(t)
+            GC.setColor(.1,.1,.1,1-math.abs(t-.5))
+            GC.rectangle('fill',0,(t*t*(2*t-3)*2+1)*SCR.h,SCR.w,SCR.h)
         end,
     },
     swipeD={
-        duration=.5,timeChange=.25,
+        duration=.5,switchTime=.25,
         draw=function(t)
-            t=t*2
             GC.setColor(.1,.1,.1,1-math.abs(t-.5))
-            t=t*t*(2*t-3)*2+1
-            GC.rectangle('fill',0,t*SCR.h,SCR.w,SCR.h)
+            GC.rectangle('fill',0,(t*t*(3-2*t)*2-1)*SCR.h,SCR.w,SCR.h)
         end,
     },
 }
@@ -181,7 +171,8 @@ function SCN.addSwapStyle(name,swapStyle)
     assertf(not swapStyles[name],"SCN.addSwap(name,swp): Swap '%s' already exist",name)
     assertf(type(swapStyle)=='table',"SCN.addSwap(name,swp): swp need table")
     assertf(type(swapStyle.duration)=='number' and swapStyle.duration>=0,"SCN.addSwap(name,swp): swp.duration need >=0")
-    assertf(type(swapStyle.timeChange)=='number' and swapStyle.timeChange>=0,"SCN.addSwap(name,swp): swp.timeChange need >=0")
+    if swapStyle.switchTime==nil then swapStyle.switchTime=swapStyle.duration/2 end
+    assertf(type(swapStyle.switchTime)=='number' and swapStyle.switchTime>=0,"SCN.addSwap(name,swp): swp.switchTime need >=0")
     assertf(swapStyle.init==nil or type(swapStyle.init)=='function',"SCN.addSwap(name,swp): swp.init need function")
     assertf(type(swapStyle.draw)=='function',"SCN.addSwap(name,swp): swp.draw need function")
     swapStyles[name]=swapStyle
@@ -197,9 +188,9 @@ end
 ---Update scene swapping animation (called by Zenitha)
 ---@param dt number
 function SCN._swapUpdate(dt)
-    local S=SCN.state
-    S.timeRem=S.timeRem-dt
-    if S.timeRem<S.timeChange and S.timeRem+dt>=S.timeChange then
+    local S=SCN.swapState
+    dt=math.min(dt/S.duration,1)
+    if S.time<=S.transPoint and S.time+dt>S.transPoint then
         -- Actually change scene at this moment
         SCN.prev=SCN.cur
 
@@ -210,7 +201,8 @@ function SCN._swapUpdate(dt)
         SCN._load(S.target)
         ZENITHA.globalEvent.sceneSwap('swap')
     end
-    if S.timeRem<0 then
+    S.time=S.time+dt
+    if S.time>1 then
         SCN.swapping=false
         local scn=scenes[SCN.cur]
         if scn.enter then scn.enter(SCN.prev,unpack(SCN.args)) end
@@ -265,19 +257,24 @@ function SCN.swapTo(tar,swapStyle,...)
             if SCN.leave then SCN.leave(tar,unpack(SCN.args)) end
             -- print('leave',SCN.stackChange,tar)
 
-            swapStyle=swapStyle or defaultSwap
+            SCN.swapping=true
+            SCN.args={...}
+            local S=SCN.swapState
+            S.target,S.style=tar,swapStyle
+            S.time=0
+
+            if not swapStyle then swapStyle=defaultSwap end
             if not swapStyles[swapStyle] then
                 MSG.log('warn',"No swap style named '"..swapStyle.."'")
                 swapStyle=defaultSwap
             end
-            SCN.swapping=true
-            SCN.args={...}
-            local S=SCN.state
-            S.target,S.style=tar,swapStyle
-            S.timeRem=swapStyles[swapStyle].duration
-            S.timeChange=swapStyles[swapStyle].timeChange
-            if swapStyles[swapStyle].init then swapStyles[swapStyle].init() end
-            S.draw=swapStyles[swapStyle].draw
+
+            local styleData=swapStyles[swapStyle]
+            S.duration=styleData.duration
+            S.transPoint=S.duration==0 and 0 or styleData.switchTime/S.duration
+            S.draw=styleData.draw
+            if styleData.init then styleData.init() end
+
             ZENITHA.globalEvent.sceneSwap('start',swapStyle)
         end
     else
