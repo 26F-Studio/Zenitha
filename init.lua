@@ -1166,7 +1166,7 @@ function love.run()
                     WIDGET._draw()
                 gc_replaceTransform(xOy)
                     SYSFX._draw()
-                    TEXT.draw(TEXT)
+                    TEXT:draw()
                     if mouseShow then globalEvent.drawCursor(mx,my,loopT) end
                 gc_replaceTransform(SCR.xOy_ul)
                     globalEvent.drawSysInfo()

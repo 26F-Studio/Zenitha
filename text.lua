@@ -204,7 +204,9 @@ end
 ---Draw text container
 function TEXT:draw()
     local list=self._texts
-    for i=1,#list do list[i]:draw() end
+    if list[1] then
+        for i=1,#list do list[i]:draw() end
+    end
 end
 
 ---Create new text container
