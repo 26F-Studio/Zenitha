@@ -210,7 +210,7 @@ function BGM.setMaxSources(count)
     _updateSources()
 end
 
----Set BGM volume
+---Set the volume of BGM module
 ---@param vol number
 function BGM.setVol(vol)
     assert(type(vol)=='number' and vol>=0 and vol<=1,"BGM.setVol(vol): Need in [0,1]")
@@ -338,7 +338,7 @@ function BGM.stop(time)
     end
 end
 
----Set (current playing) BGM(s) states
+---Set current playing BGM(s) states
 ---@param bgms 'all' | string | string[]
 ---@param mode 'volume' | 'lowgain' | 'highgain' | 'volume' | 'pitch' | 'seek'
 ---@param ... any
@@ -366,13 +366,13 @@ function BGM.set(bgms,mode,...)
             if mode=='volume' then
                 _clearTask(obj,'volume')
 
-                local vol,time=...
-                if not time then time=1 end
+                local vol,timeUse=...
+                if not timeUse then timeUse=1 end
 
                 assert(type(vol)=='number' and vol>=0 and vol<=1,"BGM.set(...,volume): Need in [0,1]")
-                assert(type(time)=='number' and time>=0,"BGM.set(...,time): Need >=0")
+                assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
-                TASK.new(task_setVolume,obj,vol,time)
+                TASK.new(task_setVolume,obj,vol,timeUse)
             elseif mode=='pitch' then
                 _clearTask(obj,'pitch')
 
@@ -423,7 +423,7 @@ function BGM.set(bgms,mode,...)
     end
 end
 
----Get (current playing) BGM(s) name list
+---Get current playing BGM(s) name list (from last called `BGM.play(THIS,...)`)
 ---@return string[]
 function BGM.getPlaying()
     return TABLE.copy(lastPlay)
