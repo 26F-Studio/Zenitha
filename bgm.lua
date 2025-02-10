@@ -231,25 +231,15 @@ end
 function BGM.play(bgms,args)
     if type(bgms)=='string' then bgms={bgms} end
     assert(type(bgms)=='table',"BGM.play(bgms,args): bgms need string|string[]")
-    if not args then args='' end
-
     for i=1,#bgms do
         if type(bgms[i])~='string' then
             error("BGM.play(bgms,args): bgms need string|string[]")
         end
     end
 
-    if
-        TABLE.equal(lastPlay,bgms) and
-        srcLib[lastPlay[1]] and srcLib[lastPlay[1]].source and
-        srcLib[lastPlay[1]].source:isPlaying()
-    then
-        return
-    end
+    if TABLE.equal(lastPlay,bgms) and BGM.isPlaying() then return end
 
-    if not STRING.sArg(args,'-preLoad') then
-        lastPlay=bgms
-    end
+    if not args then args='' end
 
     if STRING.sArg(args,'-preLoad') then
         for _,bgm in next,bgms do
@@ -294,6 +284,7 @@ function BGM.play(bgms,args)
         for i=1,#sourceReadyToPlay do
             sourceReadyToPlay[i]:play()
         end
+        lastPlay=bgms
     end
 
     _updateSources()
