@@ -263,8 +263,6 @@ function BGM.play(bgms,args)
         return
     end
 
-    BGM.stop()
-
     if not STRING.sArg(args,'-preLoad') then
         lastPlay=bgms
     end
@@ -274,6 +272,8 @@ function BGM.play(bgms,args)
             _tryLoad(bgm)
         end
     else
+        BGM.stop()
+
         local sourceReadyToPlay={}
         for _,bgm in next,bgms do
             if _tryLoad(bgm) then
