@@ -44,8 +44,6 @@ local srcLib={}
 ---@type Zenitha.BgmObj[]
 local nowPlay={}
 
----@type false | string | string[]
-local defaultBGM=false
 local maxLoadedCount=3
 local volume=1
 
@@ -187,19 +185,6 @@ function BGM.getList() return nameList end
 ---@return number
 function BGM.getCount() return #nameList end
 
----Set the default BGM(s) to play when `BGM.play()` is called without arguments
----@param bgms string | string[]
-function BGM.setDefault(bgms)
-    if type(bgms)=='string' then
-        bgms={bgms}
-    elseif type(bgms)=='table' then
-        for i=1,#bgms do assert(type(bgms[i])=='string',"BGM.setDefault(bgms): Need string|list<string>") end
-    else
-        error("BGM.setDefault(bgms): Need string|list<string>")
-    end
-    defaultBGM=bgms
-end
-
 ---Set the max count of loaded BGMs
 ---
 ---When loaded BGMs' count exceeds this value, some not-playing BGM source will be released
@@ -244,7 +229,6 @@ end
 ---@param bgms? false | string | string[]
 ---@param args? string | '-preLoad' | '-noloop' | '-sdin'
 function BGM.play(bgms,args)
-    if not bgms then bgms=defaultBGM end
     if not bgms then return end
     if not args then args='' end
 
