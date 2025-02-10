@@ -336,12 +336,12 @@ function BGM.set(bgms,mode,...)
         bgms=TABLE.copy(bgms)
         for i=1,#bgms do
             if type(bgms[i])~='string' then
-                error("BGM.set(bgms,mode,...): bgms need string|list<string>")
+                error("BGM.set(bgms,mode,...): bgms need string|string[]")
             end
             bgms[i]=srcLib[bgms[i]]
         end
     else
-        error("BGM.set(bgms,mode,...): bgms need string|list<string>")
+        error("BGM.set(bgms,mode,...): bgms need string|string[]")
     end
     for i=1,#bgms do
         local obj=bgms[i]

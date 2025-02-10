@@ -146,7 +146,7 @@ function SCN.add(name,scene)
         if k=='widgetList' then
             assertf(type(scene.widgetList)=='table',"SCN.add: scene[%s].widgetList need table",name)
             for kw,w in next,scene.widgetList do
-                assertf(type(w)=='table',"SCN.add: scene[%s].widgetList need list<widgetArgTable | widgetObj>",name)
+                assertf(type(w)=='table',"SCN.add: scene[%s].widgetList need (widgetArgTable | widgetObj)[]",name)
                 if not w._widget then
                     ---@cast w Zenitha.WidgetArg
                     scene.widgetList[kw]=WIDGET.new(w)
