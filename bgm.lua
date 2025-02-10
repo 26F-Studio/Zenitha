@@ -298,7 +298,6 @@ function BGM.play(bgms,args)
                 if STRING.sArg(args,'-sdin') then
                     obj.vol=1
                     source:setVolume(volume)
-                    BGM.set(bgm,'volume',1,0)
                 else
                     source:setVolume(0)
                     BGM.set(bgm,'volume',1,.626)
