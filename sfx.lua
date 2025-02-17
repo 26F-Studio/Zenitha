@@ -113,7 +113,7 @@ function SFX.load(_1,_2,_3)
             metaDec:getChannelCount()/8
         local meta=_2
         for n,t in next,meta do
-            local dec=love.sound.newDecoder(_1,math.ceil(t[2]/duration*fullSize))
+            local dec=love.sound.newDecoder(_1,math.ceil(t[2]/duration*fullSize/4)*4)
             dec:seek(t[1])
             ins(nameList,n)
             srcMap[n]={love.audio.newSource(dec:decode(),'static')}
