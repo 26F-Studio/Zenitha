@@ -430,4 +430,6 @@ function BGM.getDuration()
     end
 end
 
+BGM._srcLib=srcLib
+
 return BGM
