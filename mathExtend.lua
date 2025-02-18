@@ -241,7 +241,8 @@ function MATH.randFreqAll(fList)
 end
 
 local randNormBF
----Get a random numbers in gaussian distribution (Box-Muller algorithm + stream buffer)
+---Get a random numbers in gaussian distribution (Box-Muller algorithm + stream buffer)  
+---Mean = 0, Standard Deviation = 1
 ---@return number
 ---@nodiscard
 function MATH.randNorm()
@@ -251,7 +252,7 @@ function MATH.randNorm()
         return res
     else
         local r=rnd()*tau
-        local d=(-2*log(1-rnd())*tau)^.5
+        local d=(-2*log(1-rnd()))^.5
         randNormBF=sin(r)*d
         return cos(r)*d
     end
