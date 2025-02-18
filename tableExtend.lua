@@ -564,6 +564,18 @@ function TABLE.popRandom(org)
     end
 end
 
+---Sort [1~#] elements  
+---Just normal table.sort, but return the original table for convenience
+---@generic V
+---@param org V[]
+---@param comp? fun(a:V,b:V):boolean default to `<`
+---@return V[]
+---@nodiscard
+function TABLE.sort(org,comp)
+    table.sort(org,comp)
+    return org
+end
+
 ---Shuffle [1~#]
 ---@generic V
 ---@param org V[]
