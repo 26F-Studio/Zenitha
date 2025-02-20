@@ -800,10 +800,10 @@ do -- function TABLE.dumpDeflate(org,depth)
                     k='['..k..']='
                 end
             elseif T=='string' then
-                if match(k,'^[^a-zA-Z_]') then
-                    k='["'..gsub(k,'"',[[\"]])..'"]='
-                else
+                if k:match("^[a-zA-Z_][a-zA-Z0-9_]*$") then
                     k=k..'='
+                else
+                    k='["'..gsub(k,'"',[[\"]])..'"]='
                 end
             elseif T=='boolean' then
                 k='['..k..']='
@@ -861,10 +861,10 @@ do -- function TABLE.dump(org,depth)
                     k='['..k..']='
                 end
             elseif T=='string' then
-                if match(k,'^[^a-zA-Z_]') then
-                    k='["'..gsub(k,'"',[[\"]])..'"]='
-                else
+                if k:match("^[a-zA-Z_][a-zA-Z0-9_]*$") then
                     k=k..'='
+                else
+                    k='["'..gsub(k,'"',[[\"]])..'"]='
                 end
             elseif T=='boolean' then
                 k='['..k..']='
