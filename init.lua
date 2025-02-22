@@ -530,9 +530,7 @@ function love.mousereleased(x,y,k,touch,presses)
         local dist=((x-lastClicks[k].x)^2+(y-lastClicks[k].y)^2)^.5
         -- Skip scene event by global event
         if globalEvent.mouseClick(mx,my,k,dist,presses)~=true then
-            if SCN.mouseClick then
-                SCN.mouseClick(mx,my,k,dist,presses)
-            end
+            if SCN.mouseClick then SCN.mouseClick(mx,my,k,dist,presses) end
         end
     end
 
