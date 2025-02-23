@@ -155,6 +155,14 @@ function MATH.roundUnit(n,u)
     return floor(n/u+.5)*u
 end
 
+---Round a number with its fractional part as possibility
+---@param n number
+---@return integer
+---@nodiscard
+function MATH.roundRnd(n)
+    return rnd()<n%1 and ceil(n) or floor(n)
+end
+
 ---Round a number with specified unit
 ---@param x number
 ---@param base number
