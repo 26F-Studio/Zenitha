@@ -755,12 +755,12 @@ function Widgets.hint:reset(init)
     if self._x+box[1]<0 then
         box[1]=-self._x
     elseif self._x+box[1]+box[3]>SCR.w0 then
-        box[1]=SCR.w0-self._x+box[3]
+        box[1]=SCR.w0-self._x-box[3]
     end
     if self._y+box[2]<0 then
         box[2]=-self._y
     elseif self._y+box[2]+box[4]>SCR.h0 then
-        box[2]=SCR.h0-self._y+box[4]
+        box[2]=SCR.h0-self._y-box[4]
     end
     self._floatBox=box
 
