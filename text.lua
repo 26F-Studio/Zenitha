@@ -15,6 +15,8 @@ end
 ---@field kx? number
 ---@field ky? number
 ---@field align? Zenitha.TextAlignMode | {[1]:number, [2]:number}
+---@field textalign? 'center' | 'left' | 'right'
+---@field warplimit? number
 ---@field r? number
 ---@field g? number
 ---@field b? number
@@ -178,6 +180,7 @@ function TEXT:add(data)
     }
     assert(type(T.align)=='table',"Text.add: field align need string or {u,v}")
     T._t=0 -- Timer
+    T.text:setf(data.text or "Example Text",data.warplimit or T.text:getWidth(),data.textalign or 'center')
     T._ox,T._oy=T.text:getWidth()*T.align[1],T.text:getHeight()*T.align[2]
     if type(data.color)=='string' then data.color=COLOR[data.color] end
     if data.color then T.r,T.g,T.b,T.a=data.color[1],data.color[2],data.color[3],data.color[4] end
