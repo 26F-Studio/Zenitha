@@ -13,7 +13,7 @@ local set=love.graphics.setFont
 ---@type love.File[], Mat<love.Font>
 local fontFiles,fontCache={},{}
 
----@type string, string
+---@type string?, string
 local defaultFont,defaultFallBack
 
 ---@type table<string, string>
@@ -28,7 +28,7 @@ local curFont=nil -- Current using font object
 local FONT={}
 
 ---Set default font type
----@param name string
+---@param name? string
 function FONT.setDefaultFont(name)
     defaultFont=name
 end
