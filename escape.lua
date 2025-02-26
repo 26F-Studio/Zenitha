@@ -52,7 +52,7 @@ local colorNum={
 }
 ---@param params? string leave blank to reset
 ---@return string
-function _parse(params)
+local function _parse(params)
     if not params then return '' end
     if find(params,'_') then
         while true do
