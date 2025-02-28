@@ -215,8 +215,9 @@ end
 ---
 ---**Warning:** you still have full access to animation after [tween]:run(), but don't touch it unless you know what you're doing
 ---@param timeFunc? fun(): number Custom the timeFunc (return a number in duration)
+---@return Zenitha.Tween
 function Tween:run(timeFunc)
-    if self.running then return end
+    if self.running then return self end
     assert(timeFunc==nil or type(timeFunc)=='function',"[tween]:run(timeFunc): Need function if exists")
     assert(not (self.loop and timeFunc),"[tween]:run(timeFunc): Looping and timeFunc can't exist together")
     if self.unqTag then
@@ -233,6 +234,7 @@ function Tween:run(timeFunc)
     end
     self:update(0);
     (duringUpdate and preAnimSet or updAnimSet)[self]=true
+    return self
 end
 
 ---Finish instantly (cannot apply to animation with timeFunc)
