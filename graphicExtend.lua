@@ -436,6 +436,35 @@ function GC.newBezier(points)
 end
 
 --------------------------------------------------------------
+-- User Coordinate System
+
+local ucsMode,ucsD1,ucsD2
+
+---Move/Scale/Rotate the coordinate system and remember the movement (ONLY ONE TIME)  
+---Only useful when there's only one step, or you should use classical way (`push('transform')`+`pop()`) instead
+function GC.ucs_move(mode,d1,d2)
+    if mode=='m' then
+        gc.translate(d1,d2)
+    elseif mode=='s' then
+        gc.scale(d1,d2)
+    elseif mode=='r' then
+        gc.rotate(d1)
+    end
+    ucsMode,ucsD1,ucsD2=mode,d1,d2
+end
+
+---Revert ONE STEP of the coordinate system movement, which remembered by GC.ucs_move
+function GC.ucs_back()
+    if ucsMode=='m' then
+        gc.translate(-ucsD1,-ucsD2)
+    elseif ucsMode=='s' then
+        gc.scale(1/ucsD1,1/ucsD2)
+    elseif ucsMode=='r' then
+        gc.rotate(-ucsD1)
+    end
+end
+
+--------------------------------------------------------------
 -- Easier Stencil
 
 local gc_stencil,gc_setStencilTest=gc.stencil,gc.setStencilTest
