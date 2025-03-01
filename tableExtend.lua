@@ -13,7 +13,7 @@ for k,v in next,table do TABLE[k]=v end
 
 ---Create a new filled table
 ---
----You can also use `TABLE.newSize`, which is alias of `table.new` from luajit:  
+---You can also use `TABLE.newSize`, which is alias of `table.new` from luajit:
 ---https://luajit.org/extensions.html
 ---@generic V
 ---@param val V value to fill
@@ -170,7 +170,7 @@ function TABLE.getValueSet(org,val)
     return T
 end
 
----**Create** a table of two lists combined  
+---**Create** a table of two lists combined
 ---For **Appending** a table, use `TABLE.append`
 ---@generic T1, T2
 ---@param L1 T1[] list 1
@@ -210,7 +210,7 @@ function TABLE.transpose(matrix)
     return matrix
 end
 
----Create a transposed copy of a matrix  
+---Create a transposed copy of a matrix
 ---This one is faster then `TABLE.transpose` but creates new table
 ---@generic V
 ---@param matrix Mat<V>
@@ -287,7 +287,7 @@ function TABLE.equal(a,b)
     return true
 end
 
----Check if two whole table have same elements  
+---Check if two whole table have same elements
 ---**Warning**: won't check whether two table have same keys of hash part
 ---@param a table
 ---@param b table
@@ -302,7 +302,7 @@ function TABLE.equalAll(a,b)
     return true
 end
 
----**Append** [1~#] elements of new to the end of org  
+---**Append** [1~#] elements of new to the end of org
 ---For **Creating** a new table, use `TABLE.combine`
 ---@generic T1, T2
 ---@param org T1[] original list
@@ -564,7 +564,7 @@ function TABLE.popRandom(org)
     end
 end
 
----Sort [1~#] elements  
+---Sort [1~#] elements
 ---Just normal table.sort, but return the original table for convenience
 ---@generic V
 ---@param org V[]
@@ -720,7 +720,7 @@ function TABLE.replaceAll(org,v_old,v_new)
     return org
 end
 
----Find the minimum value (and key)  
+---Find the minimum value (and key)
 ---if you don't need the key and the list is short, use `math.min(unpack(t))` for better performance
 ---@generic V
 ---@param org V[]
@@ -751,7 +751,7 @@ function TABLE.minAll(org)
     return min,key
 end
 
----Find the maximum value (and key)  
+---Find the maximum value (and key)
 ---if you don't need the key and the list is short, use `math.max(unpack(t))` for better performance
 ---@generic V
 ---@param org V[]
@@ -941,29 +941,41 @@ function TABLE.countAll(org,val)
     return count
 end
 
----Return next value of [1~#] (by value), like _G.next  
----Return t[1] if val is nil
+---Return next value of [1~#] (by value), like _G.next
+---Return nil if input is the last value
+---Return list[1] if input is nil
 ---@generic K, V
 ---@param org {[K]:V}
 ---@param val V
+---@param loop? boolean loop back to first value when reaching the end
 ---@return V | nil nextValue nil when not found
 ---@nodiscard
-function TABLE.next(org,val)
+function TABLE.next(org,val,loop)
     if val==nil then return org[1] end
-    for i=1,#org do if org[i]==val then return org[i+1] end end
+    for i=1,#org do
+        if org[i]==val then
+            return org[loop and i==#org and 1 or i+1]
+        end
+    end
     return nil
 end
 
----Return previous value of [1~#] (by value), like TABLE.next but reversed  
----Return t[#t] if val is nil
+---Return previous value of [1~#] (by value), like TABLE.next but reversed
+---Return nil if input is the first value
+---Return list[#list] if input is nil
 ---@generic K, V
 ---@param org {[K]:V}
 ---@param val V
+---@param loop? boolean loop back to last value when reaching the start
 ---@return V | nil prevValue nil when not found
 ---@nodiscard
-function TABLE.prev(org,val)
+function TABLE.prev(org,val,loop)
     if val==nil then return org[#org] end
-    for i=#org,1,-1 do if org[i]==val then return org[i-1] end end
+    for i=#org,1,-1 do
+        if org[i]==val then
+            return org[loop and i==1 and 1 or i-1]
+        end
+    end
     return nil
 end
 
@@ -1037,9 +1049,11 @@ end
 ---@param f fun(V1): V2
 ---@return Mat<V2>
 function TABLE.applyeachMat(org,f)
-    for y=1,#org do for x=1,#org[y] do
-        org[y][x]=f(org[y][x])
-    end end
+    for y=1,#org do
+        for x=1,#org[y] do
+            org[y][x]=f(org[y][x])
+        end
+    end
     return org
 end
 
@@ -1086,7 +1100,7 @@ function TABLE.setAutoFill(org,source)
         __index=function(self,k)
             self[k]=source[k]
             return source[k]
-        end
+        end,
     })
 end
 
