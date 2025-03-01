@@ -87,6 +87,54 @@ function GC.mDrawLQ(obj,layer,quad,x,y,r,kx,ky)
     drawL(obj,layer,quad,x,y,r,kx,ky,w*.5,h*.5)
 end
 
+---Draw an object in a rectangle area
+---@param obj love.Texture | love.Drawable
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function GC.rDraw(obj,x,y,w,h)
+    local ow,oh=obj:getDimensions()
+    draw(obj,x,y,0,w/ow,h/oh)
+end
+
+---Draw an object in a rectangle area, clipped with a quad
+---@param obj love.Texture | love.Drawable
+---@param quad love.Quad
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function GC.rDrawQ(obj,quad,x,y,w,h)
+    local _,_,ow,oh=quad:getViewport()
+    draw(obj,quad,x,y,0,w/ow,h/oh)
+end
+
+---Draw an layered object in a rectangle area
+---@param obj love.Texture
+---@param layer number
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function GC.rDrawL(obj,layer,x,y,w,h)
+    local ow,oh=obj:getDimensions()
+    drawL(obj,layer,x,y,0,w/ow,h/oh)
+end
+
+---Draw an layered object in a rectangle area, clipped with a quad
+---@param obj love.Texture
+---@param layer number
+---@param quad love.Quad
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+function GC.rDrawLQ(obj,layer,quad,x,y,w,h)
+    local _,_,ow,oh=quad:getViewport()
+    drawL(obj,layer,quad,x,y,0,w/ow,h/oh)
+end
+
 --------------------------------------------------------------
 -- Utility
 
@@ -442,6 +490,9 @@ local ucsMode,ucsD1,ucsD2
 
 ---Move/Scale/Rotate the coordinate system and remember the movement (ONLY ONE TIME)  
 ---Only useful when there's only one step, or you should use classical way (`push('transform')`+`pop()`) instead
+---@param mode 'm' | 's' | 'r'
+---@param d1 number
+---@param d2? number not needed for mode 'r'
 function GC.ucs_move(mode,d1,d2)
     if mode=='m' then
         gc.translate(d1,d2)
@@ -449,6 +500,8 @@ function GC.ucs_move(mode,d1,d2)
         gc.scale(d1,d2)
     elseif mode=='r' then
         gc.rotate(d1)
+    else
+        error("GC.ucs_move(mode,...): mode need 'm' | 's' | 'r'")
     end
     ucsMode,ucsD1,ucsD2=mode,d1,d2
 end
