@@ -1165,13 +1165,13 @@ function love.run()
                 gc_replaceTransform(xOy)
                     SYSFX._draw()
                     TEXT:draw()
-                    if mouseShow then globalEvent.drawCursor(mx,my,loopT) end
-                gc_replaceTransform(SCR.xOy_ul)
-                    globalEvent.drawSysInfo()
-                gc_replaceTransform(xOy)
                     if SCN.overDraw then
                         SCN.overDraw()
                     end
+                gc_replaceTransform(xOy)
+                    if mouseShow then globalEvent.drawCursor(mx,my,loopT) end
+                gc_replaceTransform(SCR.xOy_ul)
+                    globalEvent.drawSysInfo()
                 gc_replaceTransform(SCR.origin)
                     if SCN.swapping then
                         SCN.swapState.draw(SCN.swapState.time)
