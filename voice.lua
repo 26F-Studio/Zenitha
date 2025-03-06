@@ -120,7 +120,7 @@ function VOC.init(list)
 
             if n==1 then
                 if not _loadVoiceFile(path,list[i],list[i]) then
-                    LOG('info',"No VOC: "..list[i],.1)
+                    LOG('info',"No VOC: "..list[i])
                 end
             end
             if not voiceSet[list[i]][1] then
