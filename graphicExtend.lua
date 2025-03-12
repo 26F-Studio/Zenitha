@@ -29,7 +29,7 @@ local GC=TABLE.copyAll(gc,0)
 -- Aligning Draw
 
 ---Printf a string with 'center' option
----@param obj string | number
+---@param obj string | number | table
 ---@param x number
 ---@param y number
 ---@param w? number warping width, default to SCR.w0
