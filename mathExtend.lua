@@ -317,7 +317,7 @@ end
 ---Get mix value (linear) of two numbers with a ratio (not clamped)
 ---@param v1 number
 ---@param v2 number
----@param t number 0~1 at most time
+---@param t number
 ---@return number
 ---@nodiscard
 function MATH.lerp(v1,v2,t)
@@ -337,7 +337,7 @@ end
 ---Similar to MATH.lerp (clamped)
 ---@param v1 number
 ---@param v2 number
----@param t number 0~1 at most time
+---@param t number
 ---@return number
 ---@nodiscard
 function MATH.cLerp(v1,v2,t)
@@ -354,10 +354,15 @@ end
 ---@return number
 ---@nodiscard
 function MATH.icLerp(v1,v2,value)
-    return
+    return v1<v2 and (
         value<=v1 and 0 or
         value>=v2 and 1 or
         (value-v1)/(v2-v1)
+    ) or (
+        value>=v1 and 0 or
+        value<=v2 and 1 or
+        (value-v1)/(v2-v1)
+    )
 end
 
 local clamp,lerp=MATH.clamp,MATH.lerp
