@@ -347,6 +347,8 @@ TASK=       require'task'
 HASH=       require'sha2'
 
 -- Love-based modules (simple)
+if SYSTEM=='Web' then JS=require'Zframework.js' end
+CLIPBOARD=  require'clipboard'
 VIB=        require'vibrate'
 WHEELMOV=   require'wheelToArrow'
 FONT=       require'fontExtend'
