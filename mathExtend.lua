@@ -445,7 +445,7 @@ end
 ---@return number
 ---@nodiscard
 function MATH.expApproach(a,b,k)
-    return b+(a-b)*exp(-k)
+    return b+(a-b)*2.718281828459045^-k
 end
 
 ---Get distance between two points
