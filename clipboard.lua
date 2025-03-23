@@ -74,7 +74,7 @@ local getCHN=love.thread.getChannel('CLIP_get')
 local setCHN=love.thread.getChannel('CLIP_set')
 local trigCHN=love.thread.getChannel('CLIP_trig')
 
-local clipboard_thread=love.thread.newThread('Zframework/clipboard_thread.lua')
+local clipboard_thread=love.thread.newThread('clipboard_thread.lua')
 local isStarted,errorMessage=clipboard_thread:start()
 
 if not isStarted then
