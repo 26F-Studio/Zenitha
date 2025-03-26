@@ -599,11 +599,11 @@ end
 
 local combKey={
     x=function()
-        love.system.setClipboardText(inputBox:getText())
+        CLIPBOARD.set(inputBox:getText())
         inputBox:clear()
     end,
     c=function()
-        love.system.setClipboardText(inputBox:getText())
+        CLIPBOARD.set(inputBox:getText())
     end,
     v=function()
         inputBox:addText(love.system.getClipboardText())

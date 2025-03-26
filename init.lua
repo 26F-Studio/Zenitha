@@ -1129,6 +1129,11 @@ function love.run()
             local updateDT=loopT-lastUpdateTime
             lastUpdateTime=loopT
 
+            if SYSTEM == 'Web' then
+                JS.retrieveData(updateDT)
+                CLIPBOARD._update(updateDT)
+            end
+
             if mouseShow then mouse_update(updateDT) end
             if next(jsState) then gp_update(jsState[1],updateDT) end
             VOC._update()

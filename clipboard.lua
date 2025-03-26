@@ -1,19 +1,18 @@
 local function _sanitize(content)
-    if type(content)=='boolean' then
-        content=content and 'true' or 'false'
-    end
-    if type(content)=='nil' then
-        content=''
+    if type(content)=='string' then
+        return content
     end
     if type(content)=='number' then
-        content=tostring(content)
-    end
-    if type(content)~='string' then
+        return tostring(content)
+    elseif type(content)=='boolean' then
+        return content and 'true' or 'false'
+    elseif type(content)=='nil' then
+        return ''
+    else
         MSG('error',"Invalid content type!")
         MSG.traceback()
         return ''
     end
-    return content
 end
 
 if SYSTEM~='Web' then
