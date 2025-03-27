@@ -792,10 +792,9 @@ local upperData,lowerData,diaData do
         end
         return d
     end
-    local zPath=(...):match('.+%.'):gsub('%.','/')
-    upperData=parseStrPair(zPath..'upcaser.txt')
-    lowerData=parseStrPair(zPath..'lowcaser.txt')
-    diaData=parseStrPair(zPath..'diacritics.txt')
+    upperData=parseStrPair(ZENITHA.path..'upcaser.txt')
+    lowerData=parseStrPair(ZENITHA.path..'lowcaser.txt')
+    diaData=parseStrPair(ZENITHA.path..'diacritics.txt')
 end
 
 ---string.upper with utf8 support, warning: very low performance, 

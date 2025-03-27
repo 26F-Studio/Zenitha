@@ -7,8 +7,6 @@ if not love.thread then
     })
 end
 
-local zPath=(...):match('.+%.')
-
 local defaultHost='127.0.0.1'
 local defaultPort='80'
 local defaultPath='/'
@@ -89,7 +87,7 @@ function WS.new(args)
         port=args.port or defaultPort,
         path=args.path or defaultPath..(args.subPath or ''),
         headers=heders,
-        thread=love.thread.newThread(zPath:gsub('%.','/')..'websocket_thread.lua'),
+        thread=love.thread.newThread(ZENITHA.path..'websocket_thread.lua'),
         connTimeout=args.connTimeout or 2.6,
         pongTimeout=args.pongTimeout or 16,
         sleepInterval=args.sleepInterval or 0.26,
@@ -115,7 +113,7 @@ function WS:connect()
         sleepInterval=self.sleepInterval,
         pingInterval=self.pingInterval,
     }
-    self.thread:start(zPath,self.confCHN,self.sendCHN,self.readCHN)
+    self.thread:start(ZENITHA.path,self.confCHN,self.sendCHN,self.readCHN)
     return true
 end
 

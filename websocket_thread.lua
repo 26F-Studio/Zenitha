@@ -1,6 +1,6 @@
 local debugPrint=false
 
-local zPath,confCHN,sendCHN,readCHN=...
+local confCHN,sendCHN,readCHN
 
 local connTimeout,pongTimeout=16,2.6
 local sleepInterval,pingInterval=6,0.26
@@ -14,7 +14,7 @@ local CHN_push,CHN_pop,CHN_peek=confCHN.push,confCHN.pop,confCHN.peek
 
 local SOCK=require'socket'.tcp()
 ---@type Zenitha.Json
-local JSON=require(zPath..'json')
+local JSON=require((...)..'json')
 
 do-- Connect
     local conf=CHN_demand(confCHN)

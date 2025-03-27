@@ -1,6 +1,6 @@
 local socket=require'socket'
 ---@type Zenitha.Json
-local JSON=require(((...):match('.+%.'))..'json')
+local JSON=require((...)..'json')
 
 local function printf(str,...) print(str:format(...)) end
 

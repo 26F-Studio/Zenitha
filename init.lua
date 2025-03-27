@@ -8,7 +8,7 @@
 -- An awesome, deluxe Pure-Lua game/app framework using Love2D
 
 ---@class Zenitha.Main
-local ZENITHA={}
+local ZENITHA={path=(...)..'/'}
 
 _G.ZENITHA=ZENITHA
 
