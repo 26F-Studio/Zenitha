@@ -7,8 +7,8 @@ if not love.thread then
     })
 end
 
----@alias Zenitha.TCP.sendID string 0 = server/broadcast, 1+ = client id, NUMBER ONLY
----@alias Zenitha.TCP.recvID Zenitha.TCP.sendID | Zenitha.TCP.sendID[] | nil 0 = server/broadcast, 1+ = client id, NUMBER ONLY, nil = broadcast
+---@alias Zenitha.TCP.sendID string 0 = server, 1+ = client id
+---@alias Zenitha.TCP.recvID Zenitha.TCP.sendID | Zenitha.TCP.sendID[] | nil 0 = server, 1+ = client id, nil = broadcast
 
 ---@class Zenitha.TCP.Client
 ---@field conn LuaSocket.client
@@ -52,7 +52,10 @@ local function S_daemonFunc()
 end
 
 local function checkRecvID(id)
-    if type(id)=='string' then id={id} end
+    if id==nil then return end
+    if type(id)=='number' then id=tostring(id)
+    elseif type(id)=='string' then id={id}
+    end
     for i=#id,1,-1 do
         if id[i]:find('[^0-9A-Za-z_]') then
             rem(id,i)
