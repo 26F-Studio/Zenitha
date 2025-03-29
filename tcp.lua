@@ -9,6 +9,9 @@ end
 
 ---@alias Zenitha.TCP.sendID string 0 = server, 1+ = client id
 ---@alias Zenitha.TCP.recvID Zenitha.TCP.sendID | Zenitha.TCP.sendID[] | nil 0 = server, 1+ = client id, nil = broadcast
+---@alias Zenitha.TCP.MsgEvent
+---| 'client.connect' recv: sender=client id
+---| 'client.disconnect' recv: sender=client id
 
 ---@class Zenitha.TCP.Client
 ---@field conn LuaSocket.client
@@ -17,6 +20,7 @@ end
 ---@field timestamp number
 
 ---@class Zenitha.TCP.MsgPack
+---@field event? Zenitha.TCP.MsgEvent
 ---@field config? Zenitha.TCP.MsgCfg
 ---@field data? any
 ---@field sender? Zenitha.TCP.sendID

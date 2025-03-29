@@ -199,6 +199,10 @@ local function serverLoop()
                 }
                 if printEvent then
                     printf("[TCP_S] %s connected",c.sockname)
+                    S_recvCHN:push{
+                        config='client.connect',
+                        sender=c.id,
+                    }
                 end
                 c.conn:settimeout(0.01)
                 clients[c.id]=c
@@ -279,6 +283,10 @@ local function serverLoop()
                 clients[id]=nil
                 if printEvent then
                     printf("[TCP_S] %s disconnected",client.sockname)
+                    S_recvCHN:push{
+                        config='client.disconnect',
+                        sender=id,
+                    }
                 end
             end
         end
