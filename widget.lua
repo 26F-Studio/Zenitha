@@ -1016,7 +1016,7 @@ function Widgets.switch:draw()
     gc_mRect('line',0,0,h*2,h,h*.5)
 
     -- Axis
-    gc_setColor(1,1,1,.8+.2*HOV)
+    gc_setColor(frameC[1],frameC[2],frameC[3],.8+.2*HOV)
     gc_circle('fill',h*(self._slideTime/self._hoverTimeMax),0,h*(.35+HOV*.05))
 
     -- Drawable
