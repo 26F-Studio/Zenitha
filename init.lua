@@ -154,6 +154,13 @@ function simpRequire(path)
         function(module) return require(path..module) end
 end
 
+---Use `local require=requirePath(...)` to require modules in simpler way
+---@generic T
+---@param class T
+---@return T
+---@diagnostic disable-next-line
+function class(class) return setmetatable({},{__index=class}) end
+
 --------------------------------------------------------------
 
 -- Inside values
