@@ -200,7 +200,7 @@ local function serverLoop()
                 if printEvent then
                     printf("[TCP_S] %s connected",c.sockname)
                     S_recvCHN:push{
-                        config='client.connect',
+                        event='client.connect',
                         sender=c.id,
                     }
                 end
@@ -284,7 +284,7 @@ local function serverLoop()
                 if printEvent then
                     printf("[TCP_S] %s disconnected",client.sockname)
                     S_recvCHN:push{
-                        config='client.disconnect',
+                        event='client.disconnect',
                         sender=id,
                     }
                 end
