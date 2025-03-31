@@ -111,12 +111,14 @@ function SFX.load(_1,_2,_3)
             metaDec:getDuration()*
             metaDec:getBitDepth()*
             metaDec:getChannelCount()/8
+        metaDec:release()
         local meta=_2
         for n,t in next,meta do
             local dec=love.sound.newDecoder(_1,math.ceil(t[2]/duration*fullSize/4)*4)
             dec:seek(t[1])
             ins(nameList,n)
             srcMap[n]={love.audio.newSource(dec:decode(),'static')}
+            dec:release()
         end
     else
         LOG("SFX.load: need (name,path,bool?) or ({name=path,...},bool?) or (path,{name={start,len},...})")
