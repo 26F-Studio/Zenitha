@@ -79,8 +79,10 @@ local function sendMessage(pack,sender)
             end
         end
     elseif allowBroadcast then
-        -- Send to everyone when receiver not specified
-        S_recvCHN:push(sendPack)
+        -- Send to everyone (except sender) when receiver not specified
+        if sender~='0' then
+            S_recvCHN:push(sendPack)
+        end
         for _,client in next,clients do
             if client.id~=sender then
                 client.conn:send(dataStr..'\n')
