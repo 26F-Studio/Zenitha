@@ -26,7 +26,7 @@ end
 ---Load a file with a specified mode
 ---(Auto detect if mode not given, not accurate)
 ---@param path string
----@param args? string | '-luaon' | '-lua' | '-json' | '-string' | '-canskip'
+---@param args? string | '-luaon' | '-lua' | '-json' | '-string'
 ---@param venv? table Used as environment for LuaON
 ---@return any
 function FILE.load(path,args,venv)
@@ -72,37 +72,28 @@ function FILE.load(path,args,venv)
         else
             error("FILE.load: Unknown mode")
         end
-    elseif not STRING.sArg(args,'-canskip') then
-        errorf("FILE.load: file '%s' doesn't exist",path)
     end
 end
 
----Save a file with a specified mode
----(Default to JSON, then LuaON, then string)
+---Save table(string) to a file
+---(Default dump method for table is JSON)
 ---@param data any
 ---@param path string
----@param args? string | '-d' | '-luaon' | '-expand'
+---@param args? string | '-json' | '-luaon' | '-expand'
 function FILE.save(data,path,args)
     if not args then args='' end
-    assert(not (STRING.sArg(args,'-d') and fs.getInfo(path)),"FILE.save: File already exist")
 
     if type(data)=='table' then
+        local suc
         if STRING.sArg(args,'-luaon') then
-            if STRING.sArg(args,'-expand') then
-                data=TABLE.dump(data)
-            else
-                data='return'..TABLE.dumpDeflate(data)
-            end
-            if not data then
-                error("FILE.save: Luaon-encoding error")
-            end
+            suc,data=pcall(STRING.sArg(args,'-expand') and TABLE.dump or TABLE.dumpDeflate,data)
+            assert(suc,"FILE.save: Luaon-encoding error: "..data)
         else
-            local suc
             suc,data=pcall(JSON.encode,data)
-            assert(suc,"FILE.save: Json-encoding error")
+            assert(suc,"FILE.save: Json-encoding error: "..data)
         end
-    else
-        data=tostring(data)
+    elseif type(data)~='string' then
+        error("FILE.save: data need table | string")
     end
 
     local F=fs.newFile(path)
