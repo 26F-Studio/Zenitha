@@ -353,7 +353,7 @@ local commands={} do
                         end
                         outputBox:setVisible(false)
                         TASK.yieldT(0.26)
-                        FILE.clear_s('')
+                        FILE.delete('','clear')
                         love.event.quit()
                     end)
                 end}

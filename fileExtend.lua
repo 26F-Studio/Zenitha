@@ -17,7 +17,7 @@ function FILE.exist(path,filterType)
     return not not fs.getInfo(path,filterType)
 end
 
----Check if a file is safe to read/write (not in save directory)
+---Check if a file is safe to read (in project, not save directory)
 ---@param file string
 function FILE.isSafe(file)
     return fs.getRealDirectory(file)~=fs.getSaveDirectory()
@@ -31,47 +31,47 @@ end
 ---@return any
 function FILE.load(path,args,venv)
     if not args then args='' end
-    if fs.getInfo(path) then
-        local F=fs.newFile(path)
-        assert(F:open'r',"FILE.load: Open error")
-        local s=F:read()
-        F:close()
-        local mode=
-            STRING.sArg(args,'-luaon') and 'luaon' or
-            STRING.sArg(args,'-lua') and 'lua' or
-            STRING.sArg(args,'-json') and 'json' or
-            STRING.sArg(args,'-string') and 'string' or
+    if not fs.getInfo(path) then return end
 
-            s:sub(1,9):find('return%s*%{') and 'luaon' or
-            (s:sub(1,1)=='[' and s:sub(-1)==']' or s:sub(1,1)=='{' and s:sub(-1)=='}') and 'json' or
-            'string'
+    local F=fs.newFile(path)
+    assert(F:open'r',"FILE.load: Open error")
+    local s=F:read()
+    F:close()
+    local mode=
+        STRING.sArg(args,'-luaon') and 'luaon' or
+        STRING.sArg(args,'-lua') and 'lua' or
+        STRING.sArg(args,'-json') and 'json' or
+        STRING.sArg(args,'-string') and 'string' or
 
-        if mode=='luaon' then
-            local lackReturn=s:match("^%s*[{]")
-            local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..(lackReturn and ']]return' or ']]')..s)
-            if func then
-                setfenv(func,venv or {})
-                local res=func()
-                return assert(res,"FILE.load: Decode error")
-            else
-                error("FILE.load: Decode error: "..err_mes)
-            end
-        elseif mode=='lua' then
-            local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..']]'..s)
-            if func then
-                local res=func()
-                return assert(res,"FILE.load: run error")
-            else
-                error("FILE.load: Compile error: "..err_mes)
-            end
-        elseif mode=='json' then
-            local suc,res=pcall(JSON.decode,s)
-            return suc and res or error("FILE.load: Decode error")
-        elseif mode=='string' then
-            return s
+        s:sub(1,9):find('return%s*%{') and 'luaon' or
+        (s:sub(1,1)=='[' and s:sub(-1)==']' or s:sub(1,1)=='{' and s:sub(-1)=='}') and 'json' or
+        'string'
+
+    if mode=='luaon' then
+        local lackReturn=s:match("^%s*[{]")
+        local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..(lackReturn and ']]return' or ']]')..s)
+        if func then
+            setfenv(func,venv or {})
+            local res=func()
+            return assert(res,"FILE.load: Decode error")
         else
-            error("FILE.load: Unknown mode")
+            error("FILE.load: Decode error: "..err_mes)
         end
+    elseif mode=='lua' then
+        local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..']]'..s)
+        if func then
+            local res=func()
+            return assert(res,"FILE.load: run error")
+        else
+            error("FILE.load: Compile error: "..err_mes)
+        end
+    elseif mode=='json' then
+        local suc,res=pcall(JSON.decode,s)
+        return suc and res or error("FILE.load: Decode error")
+    elseif mode=='string' then
+        return s
+    else
+        error("FILE.load: Unknown mode")
     end
 end
 
@@ -103,39 +103,42 @@ function FILE.save(data,path,args)
     F:close()
 end
 
----Clear a directory
+---@enum (key) Zenitha.folderDeleteMode
+local folderMode={
+    all=true,
+    clear=true,
+    keepFolder=true,
+    shallow=true,
+    __=true,
+}
+
+---Deleta a file / folder / symlink (other types are ignored)
 ---@param path string
-function FILE.clear(path)
-    if not FILE.isSafe(path) and fs.getInfo(path).type=='directory' then
+---@param mode? Zenitha.folderDeleteMode (only available for folder) `'all'` (default option) - delete whole folder, `'clear'` - delete everything in folder, `'keepFolder'` - keep folder structure, `'shallow'` - only delete files in first layer
+---@param rmSymlink? boolean if true, delete symlink
+---@return boolean? success always `nil` when deleting folder with `'keepFolder'` or `'shallow'` mode
+function FILE.delete(path,mode,rmSymlink)
+    if mode==nil then mode='all' end
+    assert(folderMode[mode],"FILE.delete: mode need 'all' | 'clear' | 'keepFolder' | 'clear' | 'shallow'")
+
+    if path~='' and (FILE.isSafe(path) or not fs.getInfo(path)) then return false end
+
+    local t=fs.getInfo(path).type
+    if t=='file' then
+        return fs.remove(path)
+    elseif t=='directory' then
+        if mode=='__' then return end
         for _,name in next,fs.getDirectoryItems(path) do
-            name=path..'/'..name
-            if not FILE.isSafe(name) then
-                local t=fs.getInfo(name).type
-                if t=='file' then
-                    fs.remove(name)
-                end
-            end
+            FILE.delete(path..'/'..name,mode=='shallow' and '__' or mode=='clear' and 'all' or mode,rmSymlink)
         end
+        if mode=='all' then
+            return fs.remove(path)
+        end
+    elseif t=='symlink' and rmSymlink then
+        return fs.remove(path)
+    else
+        return false
     end
 end
 
----Delete a directory recursively
----@param path string | ''
-function FILE.clear_s(path)
-    if path=='' or (not FILE.isSafe(path) and fs.getInfo(path).type=='directory') then
-        for _,name in next,fs.getDirectoryItems(path) do
-            name=path..'/'..name
-            if not FILE.isSafe(name) then
-                local t=fs.getInfo(name).type
-                if t=='file' then
-                    fs.remove(name)
-                elseif t=='directory' then
-                    FILE.clear_s(name)
-                    fs.remove(name)
-                end
-            end
-        end
-        fs.remove(path)
-    end
-end
 return FILE
