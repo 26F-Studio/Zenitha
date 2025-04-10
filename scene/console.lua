@@ -156,82 +156,21 @@ local commands={} do
         }
     end
     do -- del
-        local function delFile(name)
-            if love.filesystem.remove(name) then
-                log{COLOR.Y,("Deleted: '%s'"):format(name)}
-            else
-                log{COLOR.R,("Failed to delete: '%s'"):format(name)}
-            end
-        end
-        local function delDir(name)
-            if #love.filesystem.getDirectoryItems(name)==0 then
-                if love.filesystem.remove(name) then
-                    log{COLOR.Y,("Directory deleted: '%s'"):format(name)}
-                else
-                    log{COLOR.R,("Failed to delete directory '%s'"):format(name)}
-                end
-            else
-                log{COLOR.R,"Directory '"..name.."' is not empty"}
-            end
-        end
-        local function recursiveDelDir(dir)
-            local containing=love.filesystem.getDirectoryItems(dir)
-            if #containing==0 then
-                if love.filesystem.remove(dir) then
-                    log{COLOR.Y,("Succesfully deleted directory '%s'"):format(dir)}
-                else
-                    log{COLOR.R,("Failed to delete directory '%s'"):format(dir)}
-                end
-            else
-                for _,name in next,containing do
-                    local path=dir.."/"..name
-                    local info=love.filesystem.getInfo(path)
-                    if info then
-                        if info.type=='file' then
-                            delFile(path)
-                        elseif info.type=='directory' then
-                            recursiveDelDir(path)
-                        else
-                            log("Unknown item type: %s (%s)"):format(name,info.type)
-                        end
-                    end
-                end
-                delDir(dir)
-            end
-        end
         commands.del={
             code=function(name)
-                local recursive=name:sub(1,3)=="-s "
-                if recursive then
-                    name=name:sub(4)
-                end
-
                 if name~='' then
-                    local info=love.filesystem.getInfo(name)
-                    if info then
-                        if info.type=='file' then
-                            if not recursive then
-                                delFile(name)
-                            else
-                                log{COLOR.R,("'%s' is not a directory."):format(name)}
-                            end
-                        elseif info.type=='directory' then
-                            (recursive and recursiveDelDir or delDir)(name)
-                        else
-                            log("Unknown item type: %s (%s)"):format(name,info.type)
-                        end
+                    if FILE.delete(name) then
+                        log{COLOR.Y,("Succesfully deleted '%s'"):format(name)}
                     else
-                        log{COLOR.R,("No file named '%s'"):format(name)}
+                        log{COLOR.R,("Failed to delete '%s'"):format(name)}
                     end
                 else
                     log{COLOR.I,"Usage: del [filename|dirname]"}
-                    log{COLOR.I,"Usage: del -s [dirname]"}
                 end
             end,
             description="Delete a file or directory",
             details={
-                "Attempt to delete a file or directory (in save directory).",
-                "Include the -s flag to recursively delete a directory (i.e. delete all its contents too).",
+                "Attempt to delete something in app's save directory.",
                 "",
                 "Aliases: del rm",
                 "",
