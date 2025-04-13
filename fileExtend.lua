@@ -13,8 +13,9 @@ local FILE={}
 ---Check if a file exists
 ---@param path string
 ---@param filterType? love.FileType
+---@return {type: love.FileType, size: number, modtime: number}
 function FILE.exist(path,filterType)
-    return not not fs.getInfo(path,filterType)
+    return fs.getInfo(path,filterType)
 end
 
 ---Check if a file is safe to read (in project, not save directory)
