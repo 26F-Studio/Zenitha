@@ -547,11 +547,11 @@ function TABLE.getRandom(org)
     end
 end
 
----Remove & return random [1~#] of table (not really "pop"!)
+---Delete & return random [1~#] of table  
+---**Warning**: last element will be moved to fill in the hole, so this is not really "pop"
 ---@generic V
 ---@param org V[]
 ---@return V
----@nodiscard
 function TABLE.popRandom(org)
     local l=#org
     if l>0 then
