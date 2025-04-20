@@ -71,7 +71,7 @@ local MSG=setmetatable({},{
     end,
     __metatable=true,
 })
----@cast MSG +fun(icon:Zenitha.MessageType | love.Canvas, str:string, time?:number)
+---@cast MSG +fun(icon:Zenitha.MessageType | love.Canvas, str:string | table, time?:number)
 
 ---Add a new icon (and color) for message popup
 ---@param name string
@@ -85,7 +85,7 @@ function MSG.addCategory(name,backColor,textColor,canvas)
 end
 
 ---@param icon Zenitha.MessageType | love.Canvas
----@param str string
+---@param str string | table
 ---@param time? number
 function MSG._(icon,str,time)
     local backColor=msgStyle.other.backColor
