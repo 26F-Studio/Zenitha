@@ -109,6 +109,7 @@ function MSG._(icon,str,time)
         backColor=backColor,
         textColor=textColor,
         text=text,icon=icon,
+        iconK=icon and 32/math.max(icon:getDimensions()),
         w=w,h=h,k=k,
         y=-h,
     })
@@ -195,7 +196,7 @@ function MSG._draw()
             GC.setColor(1,1,1,a)
             local x=10
             if m.icon then
-                GC.mDraw(m.icon,24,24,nil,.8)
+                GC.mDraw(m.icon,24,24,nil,m.iconK)
                 x=x+40
             end
 
