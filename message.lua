@@ -66,12 +66,12 @@ local startY=0
 ---Last 3 seconds by default
 ---@class Zenitha.Message
 local MSG=setmetatable({},{
-    __call=function(_,icon,str,time)
-        MSG._(icon,str,time)
+    __call=function(_,icon,str,time,last)
+        MSG._(icon,str,time,last)
     end,
     __metatable=true,
 })
----@cast MSG +fun(icon:Zenitha.MessageType | love.Canvas, str:string | table, time?:number)
+---@cast MSG +fun(icon:Zenitha.MessageType | love.Canvas, str:string | table, time?:number, last?: true)
 
 ---Add a new icon (and color) for message popup
 ---@param name string
@@ -87,7 +87,8 @@ end
 ---@param icon Zenitha.MessageType | love.Canvas
 ---@param str string | table
 ---@param time? number
-function MSG._(icon,str,time)
+---@param last? true message will appear at the bottom, not top
+function MSG._(icon,str,time,last)
     local backColor=msgStyle.other.backColor
     local textColor=msgStyle.other.textColor
     if type(icon)=='string' then
@@ -101,7 +102,7 @@ function MSG._(icon,str,time)
     h=math.max(h+12,50)
     local k=h>400 and 1/math.min(h/400,2.6) or 1
 
-    table.insert(mesList,1,{
+    table.insert(mesList,last and #mesList+1 or 1,{
         startTime=.26,
         endTime=.26,
         time=time or 3,
