@@ -15,7 +15,7 @@ local getColor,setColor,setShader=gc.getColor,gc.setColor,gc.setShader
 local prints,printf,draw,drawL=gc.print,gc.printf,gc.draw,gc.drawLayer
 local newText=gc.newText
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
-local rectangle,circle=gc.rectangle,gc.circle
+local rectangle,circle,ellipse=gc.rectangle,gc.circle,gc.ellipse
 local applyTransform=gc.applyTransform
 local sin,cos=math.sin,math.cos
 local type,pcall=type,pcall
@@ -581,6 +581,38 @@ end
 function GC.stc_circ(x,y,r,seg)
     circ_x,circ_y,circ_r,circ_seg=x,y,r,seg
     gc_stencil(stencil_circle,stc_action,stc_value,true)
+end
+
+local elps_x,elps_y,elps_rx,elps_ry,elps_seg
+local function stencil_ellipse()
+    ellipse('fill',elps_x,elps_y,elps_rx,elps_ry,elps_seg)
+end
+---Draw a circle as stencil
+---@param x number
+---@param y number
+---@param rx number
+---@param ry number
+---@param seg? number
+function GC.stc_elps(x,y,rx,ry,seg)
+    elps_x,elps_y,elps_rx,elps_ry,elps_seg=x,y,rx,ry,seg
+    gc_stencil(stencil_ellipse,stc_action,stc_value,true)
+end
+
+local arc_type,arc_x,arc_y,arc_r,arc_a1,arc_a2,arc_seg
+local function stencil_arc()
+    arc('fill',arc_type,arc_x,arc_y,arc_r,arc_a1,arc_a2,arc_seg)
+end
+---Draw a circle as stencil
+---@param arcType love.ArcType
+---@param x number
+---@param y number
+---@param a1 number
+---@param a2 number
+---@param r number
+---@param seg? number
+function GC.stc_arc(arcType,x,y,a1,a2,r,seg)
+    arc_type,arc_x,arc_y,arc_r,arc_a1,arc_a2,arc_seg=arcType,x,y,r,a1,a2,seg
+    gc_stencil(stencil_arc,stc_action,stc_value,true)
 end
 
 --------------------------------------------------------------
