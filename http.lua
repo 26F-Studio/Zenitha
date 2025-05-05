@@ -174,7 +174,7 @@ function HTTP.reset()
 end
 
 ---Set thread count
----@param n number 1~26
+---@param n number 1-26
 function HTTP.setThreadCount(n)
     assert(type(n)=='number' and n>=1 and n<=26 and n%1==0,"HTTP.setThreadCount(n): Need int in [1,26]")
     if n>threadCount then

@@ -195,7 +195,7 @@ local maxErrorCount=3
 ---@field touchUp       fun(x:number, y:number, id?:lightuserdata, pressure?:number): boolean? Able to interrupt scene event
 ---@field touchMove     fun(x:number, y:number, id?:lightuserdata, pressure?:number): boolean? Able to interrupt scene event
 ---@field touchClick    fun(x:number, y:number, id?:lightuserdata, dist?:number): boolean? Able to interrupt scene event
----@field keyDown       fun(key:string, isRep?:boolean, scancode?:string): boolean? Able to interrupt scene event and widget interaction. Default to a debugging tool, switch on/off with F8, then use it with F1~F12
+---@field keyDown       fun(key:string, isRep?:boolean, scancode?:string): boolean? Able to interrupt scene event and widget interaction. Default to a debugging tool, switch on/off with F8, then use it with F1-F12
 ---@field keyUp         fun(key:string, scancode?:string): boolean? Able to interrupt scene event
 ---@field textInput     fun(texts:string): boolean? Able to interrupt scene event and widget interaction
 ---@field imeChange     fun(texts:string): boolean? Able to interrupt scene event and var `EDIT` updating

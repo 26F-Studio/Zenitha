@@ -75,7 +75,7 @@ function TABLE.sub(org,start,stop)
     return L
 end
 
----Create a copy of [1~#] elements
+---Create a copy of [1-#] elements
 ---@generic V
 ---@param org V[] original table
 ---@param depth? integer how many layers will be recreate, default to inf
@@ -273,7 +273,7 @@ TABLE.rotate=TABLE.rotateNew
 --------------------------------------------------------------
 -- Set operation
 
----Check if two table have same elements in [1~#]
+---Check if two table have same elements in [1-#]
 ---@param a any[]
 ---@param b any[]
 ---@return boolean
@@ -302,7 +302,7 @@ function TABLE.equalAll(a,b)
     return true
 end
 
----**Append** [1~#] elements of new to the end of org
+---**Append** [1-#] elements of new to the end of org
 ---For **Creating** a new table, use `TABLE.combine`
 ---@generic T1, T2
 ---@param org T1[] original list
@@ -316,7 +316,7 @@ function TABLE.append(org,new)
     return org
 end
 
----Delete items in [1~#] of org which also in [1~#] of sub
+---Delete items in [1-#] of org which also in [1-#] of sub
 ---@generic V
 ---@param org V[]
 ---@param sub table
@@ -433,7 +433,7 @@ function TABLE.clearAll(org)
     return org
 end
 
----Clear [1~#] of a table (pure lua implementation)
+---Clear [1-#] of a table (pure lua implementation)
 ---@generic V
 ---@param org V[]
 ---@return V[]
@@ -459,7 +459,7 @@ function TABLE.clearRecursive(org)
     return org
 end
 
----Remove a specific value of [1~#]
+---Remove a specific value of [1-#]
 ---@generic V
 ---@param org V[]
 ---@return V[]
@@ -485,7 +485,7 @@ function TABLE.deleteAll(org,value)
     return org
 end
 
----Remove duplicated value of [1~#]
+---Remove duplicated value of [1-#]
 ---@generic V
 ---@param org V[]
 ---@return V[]
@@ -521,7 +521,7 @@ function TABLE.removeDuplicateAll(org)
     return org
 end
 
----Reverse [1~#]
+---Reverse [1-#]
 ---@generic V
 ---@param org V[]
 ---@return V[]
@@ -533,7 +533,7 @@ function TABLE.reverse(org)
     return org
 end
 
----Get random [1~#] of table
+---Get random [1-#] of table
 ---@generic V
 ---@param org V[]
 ---@return V
@@ -547,7 +547,7 @@ function TABLE.getRandom(org)
     end
 end
 
----Delete & return random [1~#] of table  
+---Delete & return random [1-#] of table  
 ---**Warning**: last element will be moved to fill in the hole, so this is not really "pop"
 ---@generic V
 ---@param org V[]
@@ -564,7 +564,7 @@ function TABLE.popRandom(org)
     end
 end
 
----Sort [1~#] elements
+---Sort [1-#] elements
 ---Just normal table.sort, but return the original table for convenience
 ---@generic V
 ---@param org V[]
@@ -576,7 +576,7 @@ function TABLE.sort(org,comp)
     return org
 end
 
----Shuffle [1~#]
+---Shuffle [1-#]
 ---@generic V
 ---@param org V[]
 ---@return V[]
@@ -648,7 +648,7 @@ end
 --------------------------------------------------------------
 -- Find & Replace
 
----Find value in [1~#], like string.find
+---Find value in [1-#], like string.find
 ---@param org any[]
 ---@param val any
 ---@param start? integer
@@ -689,7 +689,7 @@ function TABLE.findAll(org,val)
     return nil
 end
 
----Replace value in [1~#], like string.gsub
+---Replace value in [1-#], like string.gsub
 ---@generic T1, T2
 ---@param org T1[]
 ---@param v_old T1
@@ -911,7 +911,7 @@ function TABLE.getSize(org)
     return size
 end
 
----Count value repeating time in [1~#]
+---Count value repeating time in [1-#]
 ---@param org any[]
 ---@param val any
 ---@return integer
@@ -941,7 +941,7 @@ function TABLE.countAll(org,val)
     return count
 end
 
----Return next value of [1~#] (by value), like _G.next
+---Return next value of [1-#] (by value), like _G.next
 ---Return nil if input is the last value
 ---Return list[1] if input is nil
 ---@generic K, V
@@ -960,7 +960,7 @@ function TABLE.next(org,val,loop)
     return nil
 end
 
----Return previous value of [1~#] (by value), like TABLE.next but reversed
+---Return previous value of [1-#] (by value), like TABLE.next but reversed
 ---Return nil if input is the first value
 ---Return list[#list] if input is nil
 ---@generic K, V
@@ -982,7 +982,7 @@ end
 --------------------------------------------------------------
 -- (Utility) Foreach
 
----Execute func(table[i],i) in [1~#], and optional element removing
+---Execute func(table[i],i) in [1-#], and optional element removing
 ---@generic V
 ---@param org V[]
 ---@param f fun(v:V, i:integer): boolean return `true` to remove element (do this in reverse mode for better performance)
@@ -1019,7 +1019,7 @@ function TABLE.foreachAll(org,f)
     return org
 end
 
----Apply a function to value in [1~#]
+---Apply a function to value in [1-#]
 ---@generic V1, V2
 ---@param org V1[]
 ---@param f fun(v:V1): V2

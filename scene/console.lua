@@ -422,7 +422,7 @@ local commands={} do
             if n and n%1==0 and n>=1 and n<=24 then
                 love.keypressed("f"..n)
             else
-                log{COLOR.I,"Usage: fn [1~24]"}
+                log{COLOR.I,"Usage: fn [1-24]"}
             end
         end,
         description="Simulates a Function key press",

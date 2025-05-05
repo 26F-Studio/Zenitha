@@ -72,7 +72,7 @@ function MATH.vecDir(x,y,z)
     end
 end
 
----Sum table in [1~#]
+---Sum table in [1-#]
 ---@param data number[]
 ---@param s? integer start pos (default 1)
 ---@param e? integer end pos (default #t)
@@ -173,7 +173,7 @@ function MATH.roundLog(x,base)
 end
 
 ---Get a random boolean with specified chance, 50% if not given
----@param chance? number 0~1
+---@param chance? number [0,1]
 ---@return boolean
 ---@nodiscard
 function MATH.roll(chance)

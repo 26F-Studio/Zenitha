@@ -65,7 +65,7 @@ local SCN={
         target=false,     -- Swapping target
         swapStyle=false,  -- Swapping style
         draw=false,       -- Swap draw func
-        time=false,       -- Swap time (0~1)
+        time=false,       -- Swap time ([0,1])
         duration=false,   -- Swap time (total)
         transPoint=false, -- Transition time
     },

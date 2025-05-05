@@ -182,7 +182,7 @@ function SFX.setVol(vol)
 end
 
 ---Set the stereo of SFX module
----@param s number 0~1
+---@param s number [0,1]
 function SFX.setStereo(s)
     assert(type(s)=='number' and s>=0 and s<=1,"SFX.setStereo(s): Need in [0,1]")
     stereo=s
@@ -194,7 +194,7 @@ end
 ---SFX.playSample('piano', .7,'C4','E4', .9,'G4')
 ---```
 ---@param pack string
----@param ... string | number 0~1 number for volume, big integer and string for tune
+---@param ... string | number [0,1] number for volume, big integer and string for tune
 function SFX.playSample(pack,...)
     if ... then
         local arg={...}
@@ -221,8 +221,8 @@ end
 
 ---Play a SFX
 ---@param name string
----@param vol? number 0~1, default to 1
----@param pos? number -1~1, default to 0
+---@param vol? number [0,1], default to 1
+---@param pos? number [-1,1], default to 0
 ---@param pitch? number 0 = default, 12 = an Octave higher
 function SFX.play(name,vol,pos,pitch)
     vol=(vol or 1)*volume
