@@ -8,6 +8,15 @@ if not love.graphics then
     })
 end
 
+---@class Zenitha.MessageData
+---@field [1]? Zenitha.MessageType | love.Canvas
+---@field [2]? string | table
+---@field cat? Zenitha.MessageType | love.Canvas
+---@field str? string | table
+---@field time? number
+---@field last? true message will appear at the bottom, not top
+---@field alpha? number [0,1]
+
 ---@alias Zenitha.MessageType Zenitha._MessageType | string
 ---@enum (key) Zenitha._MessageType
 local msgStyle={
@@ -59,6 +68,7 @@ local msgStyle={
     },
 }
 
+---@type Zenitha.MessageObject[]
 local mesList={}
 local startY=0
 
@@ -66,12 +76,17 @@ local startY=0
 ---Last 3 seconds by default
 ---@class Zenitha.Message
 local MSG=setmetatable({},{
-    __call=function(_,icon,str,time,last)
-        MSG._(icon,str,time,last)
+    __call=function(_,cat,str,time)
+        if type(cat)=='table' then
+            MSG._new(cat)
+        else
+            MSG._new{cat=cat,str=str,time=time}
+        end
     end,
     __metatable=true,
 })
----@cast MSG +fun(icon:Zenitha.MessageType | love.Canvas, str:string | table, time?:number, last?: true)
+---@cast MSG +fun(type:Zenitha.MessageType | love.Canvas, str:string | table, time?:number)
+---@cast MSG +fun(msg:Zenitha.MessageData)
 
 ---Add a new icon (and color) for message popup
 ---@param name string
@@ -84,38 +99,42 @@ function MSG.addCategory(name,backColor,textColor,canvas)
     msgStyle[name]={backColor=backColor,textColor=textColor,canvas=canvas}
 end
 
----@param icon Zenitha.MessageType | love.Canvas
----@param str string | table
----@param time? number
----@param last? true message will appear at the bottom, not top
-function MSG._(icon,str,time,last)
-    local backColor=msgStyle.other.backColor
-    local textColor=msgStyle.other.textColor
-    if type(icon)=='string' then
-        backColor=msgStyle[icon].backColor or backColor
-        textColor=msgStyle[icon].textColor or textColor
-        icon=msgStyle[icon].canvas
+---@param data Zenitha.MessageData
+function MSG._new(data)
+    local backColor,textColor
+    if not data.cat then data.cat=data[1] end
+    if not data.str then data.str=data[2] end
+    if type(data.cat)=='string' then
+        backColor=msgStyle[data.cat].backColor or msgStyle.other.backColor
+        textColor=msgStyle[data.cat].textColor or msgStyle.other.textColor
+        data.cat=msgStyle[data.cat].canvas
+    else
+        backColor=msgStyle.other.backColor
+        textColor=msgStyle.other.textColor
     end
-    local text=GC.newText(FONT.get(30),str)
+    local text=GC.newText(FONT.get(30),data.str)
     local w,h=text:getDimensions()
-    w=math.max(w+(icon and 45 or 5),200)+15
+    w=math.max(w+(data.cat and 45 or 5),200)+15
     h=math.max(h+12,50)
     local k=h>400 and 1/math.min(h/400,2.6) or 1
 
-    table.insert(mesList,last and #mesList+1 or 1,{
+    ---@class Zenitha.MessageObject
+    local obj={
         startTime=.26,
         endTime=.26,
-        time=time or 3,
+        time=data.time or 3,
 
         backColor=backColor,
         textColor=textColor,
-        text=text,icon=icon,
-        iconK=icon and 32/math.max(icon:getDimensions()),
+        alpha=data.alpha or .9,
+        text=text,icon=data.cat,
+        iconK=data.cat and 32/math.max(data.cat:getDimensions()),
         w=w,h=h,k=k,
         y=-h,
-    })
+    }
+    table.insert(mesList,data.last and #mesList+1 or 1,obj)
 end
-local _new=MSG._
+local _new=MSG._new
 
 ---Set the y position of message popup
 ---@param y number
@@ -131,10 +150,10 @@ function MSG.traceback()
         :gsub(': in function',', in')
         :gsub(':',' ')
         :gsub('\t','')
-    _new('error',msg:sub(
+    _new({cat='error',str=msg:sub(
         msg:find("\n",2)+1,
         msg:find("\n%[C%], in 'xpcall'")
-    ),5)
+    ),time=5})
 end
 
 ---Clear all messages
@@ -143,12 +162,12 @@ function MSG.clear()
 end
 
 ---Log an info message both in console and with popup, with non ASCII filter
----@param mode 'info' | 'warn' | 'error'
+---@param category 'info' | 'warn' | 'error'
 ---@param info string
 ---@param time? number
-function MSG.log(mode,info,time)
-    LOG(mode,info)
-    _new(mode,STRING.filterASCII(info),time or (mode=='warn' and 6 or mode=='error' and 10 or 4.2))
+function MSG.log(category,info,time)
+    LOG(category,info)
+    _new{category,STRING.filterASCII(info),time=time or (category=='warn' and 6 or category=='error' and 10 or 4.2)}
 end
 
 ---Update all messages (called by Zenitha)
@@ -175,38 +194,46 @@ function MSG._update(dt)
     end
 end
 
+local gc=love.graphics
+local gc_push,gc_pop=gc.push,gc.pop
+local gc_translate,gc_scale=gc.translate,gc.scale
+local gc_setColor,gc_setLineWidth=gc.setColor,gc.setLineWidth
+local gc_draw,gc_rectangle=gc.draw,gc.rectangle
+local gc_mDraw=GC.mDraw
+
 ---Draw all messages (called by Zenitha)
 function MSG._draw()
     if mesList[1] then
-        GC.translate(0,startY)
-        GC.setLineWidth(2)
+        gc_translate(0,startY)
+        gc_setLineWidth(2)
         for i=1,#mesList do
             local m=mesList[i]
-            local a=3.846*(m.endTime-m.startTime)
-            GC.push('transform')
-            GC.translate(3+SCR.safeX,m.y)
-            GC.scale(m.k)
+            local a=(1/0.26)*(m.endTime-m.startTime)*m.alpha
+            gc_push('transform')
+            gc_translate(3+SCR.safeX,m.y)
+            gc_scale(m.k)
 
             local c=m.backColor
-            GC.setColor(c[1]*1.26,c[2]*1.26,c[3]*1.26,a*.042)
-            GC.setLineWidth(15) GC.rectangle('line',0,0,m.w,m.h,8)
-            GC.setLineWidth(10) GC.rectangle('line',0,0,m.w,m.h,8)
-            GC.setLineWidth(6)  GC.rectangle('line',0,0,m.w,m.h,8)
-            GC.setColor(c[1],c[2],c[3],a)
-            GC.rectangle('fill',0,0,m.w,m.h,8)
-            GC.setColor(1,1,1,a)
+            gc_setColor(c[1]*1.26,c[2]*1.26,c[3]*1.26,a*.042)
+            gc_setLineWidth(15) gc_rectangle('line',0,0,m.w,m.h,8)
+            gc_setLineWidth(10) gc_rectangle('line',0,0,m.w,m.h,8)
+            gc_setLineWidth(6)  gc_rectangle('line',0,0,m.w,m.h,8)
+            gc_setColor(c[1],c[2],c[3],a)
+            gc_rectangle('fill',0,0,m.w,m.h,8)
+            gc_setColor(1,1,1,a)
             local x=10
             if m.icon then
-                GC.mDraw(m.icon,24,24,nil,m.iconK)
+                gc_mDraw(m.icon,24,24,nil,m.iconK)
                 x=x+40
             end
 
             local tc=m.textColor
-            GC.setColor(tc[1],tc[2],tc[3],a)
-            GC.draw(m.text,x,6)
-            GC.pop()
+            gc_setColor(tc[1],tc[2],tc[3],a)
+            gc_draw(m.text,x,6)
+            gc_pop()
+            print(a)
         end
-        GC.translate(0,-startY)
+        gc_translate(0,-startY)
     end
 end
 
