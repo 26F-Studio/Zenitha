@@ -785,6 +785,7 @@ end
 --------------------------------------------------------------
 -- Dump
 
+local strRep={['"']=[[\"]],["\\"]=[[\]]}
 do -- function TABLE.dumpDeflate(org,depth)
     local function dump(L,t,lim)
         local s='{'
@@ -803,7 +804,7 @@ do -- function TABLE.dumpDeflate(org,depth)
                 if k:match("^[a-zA-Z_][a-zA-Z0-9_]*$") then
                     k=k..'='
                 else
-                    k='["'..gsub(k,'"',[[\"]])..'"]='
+                    k='["'..gsub(k,'.',strRep)..'"]='
                 end
             elseif T=='boolean' then
                 k='['..k..']='
@@ -816,7 +817,7 @@ do -- function TABLE.dumpDeflate(org,depth)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
             elseif T=='string' then
-                v='"'..gsub(v,'"',[[\"]])..'"'
+                v='"'..gsub(v,'.',strRep)..'"'
             elseif T=='table' then
                 if t>=lim then v=tostring(v) else v=dump(v,t+1,lim) end
             else
@@ -864,7 +865,7 @@ do -- function TABLE.dump(org,depth)
                 if k:match("^[a-zA-Z_][a-zA-Z0-9_]*$") then
                     k=k..'='
                 else
-                    k='["'..gsub(k,'"',[[\"]])..'"]='
+                    k='["'..gsub(k,'.',strRep)..'"]='
                 end
             elseif T=='boolean' then
                 k='['..k..']='
@@ -877,7 +878,7 @@ do -- function TABLE.dump(org,depth)
             if T=='number' or T=='boolean' then
                 v=tostring(v)
             elseif T=='string' then
-                v='"'..gsub(v,'"',[[\"]])..'"'
+                v='"'..gsub(v,'.',strRep)..'"'
             elseif T=='table' then
                 if t>=lim then v=tostring(v) else v=dump(v,t+1,lim) end
             else
