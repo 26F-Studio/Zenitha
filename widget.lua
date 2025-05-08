@@ -348,6 +348,7 @@ function Widgets.base:reset(init)
 
     self:resetPos()
 
+    if type(self._text)=='userdata' and type(self._text.type)=='function' and self._text:type()=='Text' then self._text:release() end
     local content=self.text or self.name and ("["..self.name.."]")
     if content then
         if type(content)=='function' then

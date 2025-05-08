@@ -182,7 +182,7 @@ function MSG._update(dt)
         elseif m.endTime>0 then
             m.endTime=m.endTime-dt
         else
-            table.remove(mesList,i)
+            table.remove(mesList,i).text:release()
         end
         if i>1 then
             local _m=mesList[i-1]

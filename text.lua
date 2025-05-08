@@ -199,7 +199,7 @@ function TEXT:update(dt)
         local T=list[i]
         T._t=T._t+dt/T.duration
         if T._t>1 then
-            rem(list,i)
+            rem(list,i).text:release()
         end
     end
 end

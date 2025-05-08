@@ -985,7 +985,7 @@ end
 ---Execute func(table[i],i) in [1-#], and optional element removing
 ---@generic V
 ---@param org V[]
----@param f fun(v:V, i:integer): boolean return `true` to remove element (do this in reverse mode for better performance)
+---@param f fun(v:V, i:integer): boolean? return `true` to remove element (do this in reverse mode for better performance)
 ---@param rev? boolean Reverse the iterating order
 ---@return V[]
 function TABLE.foreach(org,f,rev)
@@ -1010,7 +1010,7 @@ end
 ---Execute func(table[k],k) in whole table, and optional element removing
 ---@generic K, V
 ---@param org {[K]:V}
----@param f fun(v:V, k:K): boolean return `true` to remove element (**Warning**: Won't shrink the list part when removing list element)
+---@param f fun(v:V, k:K): boolean? return `true` to remove element (**Warning**: Won't shrink the list part when removing list element)
 ---@return {[K]:V}
 function TABLE.foreachAll(org,f)
     for k,v in next,org do
