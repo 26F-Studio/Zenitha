@@ -326,7 +326,7 @@ end
 
 ---Inverse function of MATH.lerp (not clamped)
 ---@param v1 number
----@param v2 number
+---@param v2 number MUSTN'T equal to v1
 ---@param value number
 ---@return number
 ---@nodiscard
@@ -349,7 +349,7 @@ end
 
 ---Inverse function of MATH.cLerp (clamped)
 ---@param v1 number
----@param v2 number
+---@param v2 number MUSTN'T equal to v1
 ---@param value number
 ---@return number
 ---@nodiscard
@@ -378,7 +378,7 @@ function MATH.lLerp(list,t)
 end
 
 ---Inverse function of MATH.lLerp (clamped)
----@param list number[] need #list>2 and ascending, otherwise result is undefined
+---@param list number[] need #list>2 and STRICTLY ascending, otherwise result is undefined
 ---@param value number
 ---@return number
 ---@nodiscard
