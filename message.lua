@@ -231,7 +231,6 @@ function MSG._draw()
             gc_setColor(tc[1],tc[2],tc[3],a)
             gc_draw(m.text,x,6)
             gc_pop()
-            print(a)
         end
         gc_translate(0,-startY)
     end
