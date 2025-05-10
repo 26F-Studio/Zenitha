@@ -785,7 +785,7 @@ end
 --------------------------------------------------------------
 -- Dump
 
-local strRep={['"']=[[\"]],["\\"]=[[\]]}
+local strRep={['"']=[[\"]],["\\"]=[[\\]]}
 do -- function TABLE.dumpDeflate(org,depth)
     local function dump(L,t,lim)
         local s='{'
