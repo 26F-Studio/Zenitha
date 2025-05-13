@@ -492,10 +492,10 @@ local commands={} do
                 log{COLOR.Y,"已经进入最高权限模式了, 请使用 # 执行任意lua代码"}
             elseif code=="7126" then
                 sumode=true
-                log{COLOR.Y,"* SU MODE ON - DO NOT RUN ANY CODES IF YOU DO NOT KNOW WHAT THEY DO *"}
-                log{COLOR.Y,"* Now you should use the _CL(message) function to print into this console *"}
+                log{COLOR.Y,"* SU MODE ON - DO NOT RUN ANY CODE THAT YOU DON'T KNOW WHAT THEY EXACTLY DO *"}
+                log{COLOR.Y,"* Use # to run ANY lua code. To print into this console, use _CL() *"}
                 log{COLOR.Y,"* 最高权限模式开启, 请不要执行任何自己不懂确切含义的代码 *"}
-                log{COLOR.Y,"* 从现在开始请使用_CL(信息)函数在控制台打印信息 *"}
+                log{COLOR.Y,"* 使用 # 执行任意lua代码. 在控制台内打印信息需要改用 _CL() *"}
             else
                 log{COLOR.Y,"Password incorrect"}
             end
