@@ -82,6 +82,7 @@ local function task_setPitch(obj,pe,time)
         end
     end
 end
+local _gainTemp={type='bandpass',volume=1}
 ---@async
 local function task_setLowgain(obj,pe,time)
     local ps=obj.lowgain
@@ -90,7 +91,9 @@ local function task_setLowgain(obj,pe,time)
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
         local p=MATH.lerp(ps,pe,t)
         obj.lowgain=p
-        obj.source:setFilter{type='bandpass',lowgain=obj.lowgain^9.42,highgain=obj.highgain^9.42,volume=1}
+        _gainTemp.lowgain=obj.lowgain^9.42
+        _gainTemp.highgain=obj.highgain^9.42
+        obj.source:setFilter(_gainTemp)
         if t==1 then
             obj.lowgainChanging=false
             return true
@@ -105,7 +108,9 @@ local function task_setHighgain(obj,pe,time)
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
         local p=MATH.lerp(ps,pe,t)
         obj.highgain=p
-        obj.source:setFilter{type='bandpass',lowgain=obj.lowgain^9.42,highgain=obj.highgain^9.42,volume=1}
+        _gainTemp.lowgain=obj.lowgain^9.42
+        _gainTemp.highgain=obj.highgain^9.42
+        obj.source:setFilter(_gainTemp)
         if t==1 then
             obj.highgainChanging=false
             return true
@@ -312,6 +317,7 @@ function BGM.stop(time)
     end
 end
 
+local _temp={}
 ---Set current playing BGM(s) states
 ---@param bgms 'all' | string | string[]
 ---@param mode 'volume' | 'lowgain' | 'highgain' | 'volume' | 'pitch' | 'seek'
@@ -321,7 +327,8 @@ function BGM.set(bgms,mode,...)
         if bgms=='all' then
             bgms=nowPlay
         else
-            bgms={srcLib[bgms]}
+            _temp[1]=srcLib[bgms]
+            bgms=_temp
         end
     elseif type(bgms)=='table' then
         bgms=TABLE.copy(bgms)
