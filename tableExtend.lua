@@ -155,7 +155,7 @@ function TABLE.getValues(org)
     return L
 end
 
----Set all values to k
+---Get a table with all old values as keys, and `true` or specified value as values
 ---@generic T1, T2
 ---@param org {[any]:T1}
 ---@param val? T2 default to `true`
