@@ -175,6 +175,7 @@ local bigCanvases=setmetatable({},{
 -- User-changeable values
 local appName='Zenitha'
 local versionText='V0.1'
+local showVersionText=true
 local firstScene='_zenitha'
 local discardCanvas=false
 local showFPS=true
@@ -1185,11 +1186,13 @@ function love.run()
                     end
                 gc_replaceTransform(SCR.xOy_ul)
                     MSG._draw()
-                gc_replaceTransform(SCR.xOy_d)
+                if showVersionText then
                     -- Version string
+                    gc_replaceTransform(SCR.xOy_d)
                     gc_setColor(.9,.9,.9,.42)
                     setFont(15,'_norm')
                     gc_printf(versionText,-2600,-20,5200,'center')
+                end
                 gc_replaceTransform(SCR.xOy_dl)
                     local safeX=SCR.safeX/SCR.k
 
@@ -1290,6 +1293,10 @@ end
 ---Get the application version text
 ---@return string
 function ZENITHA.getVersionText() return versionText end
+
+---Get the application version text
+---@param bool boolean
+function ZENITHA.setShowVersionText(bool) showVersionText=bool end
 
 ---Get the joysticks' state table
 function ZENITHA.getJsState() return jsState end
