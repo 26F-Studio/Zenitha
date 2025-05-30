@@ -572,7 +572,6 @@ function love.touchpressed(id,x,y,_,_,pressure)
     if not SCN.mainTouchID then
         SCN.mainTouchID=id
         WIDGET.unFocus(true)
-        love.touchmoved(id,x,y,0,0,pressure)
     end
 
     -- Transform to designing coord
