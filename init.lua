@@ -1205,6 +1205,7 @@ function love.run()
                     -- Debug info.
                     if devMode then
                         -- Debug infos at left-down
+                        setFont(15,'_norm')
                         gc_setColor(devColor[devMode])
 
                         -- Text infos
