@@ -12,6 +12,10 @@ if not (love.audio and love.sound) then
     })
 end
 
+-- When sources fail to play with single BGM.play() called,
+-- some methods like BGM:tell() is not 100% reliable.
+-- This can happen when there are already too many sources playing.
+
 ---@class Zenitha.BgmObj
 ---@field name string
 ---@field path string
@@ -49,33 +53,43 @@ local volume=1
 
 ---@async
 local function task_setVolume(obj,ve,time,stop)
+    local src=obj.source
+    if not src then
+        obj.volChanging=false
+        return false
+    end
     local vs=obj.vol
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
         local v=MATH.lerp(vs,ve,t)
         obj.vol=v
-        obj.source:setVolume(v*volume)
+        src:setVolume(v*volume)
         if t==1 then
             obj.volChanging=false
             break
         end
     end
     if stop then
-        obj.source:stop()
+        src:stop()
     end
     obj.volChanging=false
     return true
 end
 ---@async
 local function task_setPitch(obj,pe,time)
+    local src=obj.source
+    if not src then
+        obj.pitchChanging=false
+        return false
+    end
     local ps=obj.pitch
     local t=0
     while true do
         t=time~=0 and math.min(t+coroutine.yield()/time,1) or 1
         local p=MATH.lerp(ps,pe,t)
         obj.pitch=p
-        obj.source:setPitch(p)
+        src:setPitch(p)
         if t==1 then
             obj.pitchChanging=false
             return true
@@ -85,6 +99,11 @@ end
 local _gainTemp={type='bandpass',volume=1}
 ---@async
 local function task_setLowgain(obj,pe,time)
+    local src=obj.source
+    if not src then
+        obj.lowgainChanging=false
+        return false
+    end
     local ps=obj.lowgain
     local t=0
     while true do
@@ -93,7 +112,7 @@ local function task_setLowgain(obj,pe,time)
         obj.lowgain=p
         _gainTemp.lowgain=obj.lowgain^9.42
         _gainTemp.highgain=obj.highgain^9.42
-        obj.source:setFilter(_gainTemp)
+        src:setFilter(_gainTemp)
         if t==1 then
             obj.lowgainChanging=false
             return true
@@ -102,6 +121,11 @@ local function task_setLowgain(obj,pe,time)
 end
 ---@async
 local function task_setHighgain(obj,pe,time)
+    local src=obj.source
+    if not src then
+        obj.highgainChanging=false
+        return false
+    end
     local ps=obj.highgain
     local t=0
     while true do
@@ -110,7 +134,7 @@ local function task_setHighgain(obj,pe,time)
         obj.highgain=p
         _gainTemp.lowgain=obj.lowgain^9.42
         _gainTemp.highgain=obj.highgain^9.42
-        obj.source:setFilter(_gainTemp)
+        src:setFilter(_gainTemp)
         if t==1 then
             obj.highgainChanging=false
             return true
@@ -207,7 +231,7 @@ function BGM.setVol(vol)
     volume=vol
     for i=1,#nowPlay do
         local bgm=nowPlay[i]
-        if not bgm.volChanging then
+        if not bgm.volChanging and bgm.source then
             bgm.source:setVolume(bgm.vol*vol)
         end
     end
@@ -305,7 +329,7 @@ function BGM.stop(time)
             local obj=nowPlay[i]
             _clearTask(obj,'volume')
             if time==0 then
-                obj.source:stop()
+                if obj.source then obj.source:stop() end
                 obj.volChanging=false
             else
                 TASK.new(task_setVolume,obj,0,time or .626,true)
@@ -413,28 +437,39 @@ end
 ---Get if BGM playing now
 ---@return boolean
 function BGM.isPlaying()
-    return nowPlay[1] and nowPlay[1].source:isPlaying()
+    for i=1,#nowPlay do
+        if nowPlay[i].source and nowPlay[i].source:isPlaying() then
+            return true
+        end
+    end
+    return false
 end
 
 ---Get time of BGM playing now, 0 if not exists
 ---@return number | 0
 function BGM.tell()
-    local src=nowPlay[1] and nowPlay[1].source
-    if src then
-        return src:tell()%src:getDuration() -- bug of love2d, tell() may return value greater than duration
-    else
-        return 0
+    for i=1,#nowPlay do
+        local src=nowPlay[i].source
+        if src and src:isPlaying() then
+            return src:tell() % src:getDuration() -- bug of love2d, tell() may return value greater than duration
+        end
     end
+    return 0
 end
 
 ---Get duration of BGM playing now, 0 if not exists
----@return number | 0
+---@return number | 0 minDuration, number | 0 maxDuration
 function BGM.getDuration()
-    if nowPlay[1] then
-        return nowPlay[1].source:getDuration()
-    else
-        return 0
+    local minDur, maxDur=math.huge,0
+    for i=1,#nowPlay do
+        local src=nowPlay[i].source
+        if src then
+            local dur=src:getDuration()
+            minDur=math.min(minDur,dur)
+            maxDur=math.max(maxDur,dur)
+        end
     end
+    return minDur,maxDur
 end
 
 BGM._srcLib=srcLib
