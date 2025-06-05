@@ -421,7 +421,15 @@ end
 ---@return number
 ---@nodiscard
 function MATH.clampInterpolate(x1,y1,x2,y2,t)
-    return t<=x1 and y1 or t>=x2 and y2 or y1+(t-x1)*(y2-y1)/(x2-x1)
+    return x1<x2 and (
+        t<=x1 and y1 or
+        t>=x2 and y2 or
+        y1+(t-x1)*(y2-y1)/(x2-x1)
+    ) or (
+        t<=x2 and y2 or
+        t>=x1 and y1 or
+        y1+(t-x1)*(y2-y1)/(x2-x1)
+    )
 end
 
 ---Get a closer value from a to b with difference d
