@@ -91,7 +91,7 @@ local MSG=setmetatable({},{
 ---Add a new icon (and color) for message popup
 ---@param name string
 ---@param backColor Zenitha.Color
----@param canvas? love.Canvas
+---@param canvas? love.Canvas | love.Texture
 function MSG.addCategory(name,backColor,textColor,canvas)
     assert(type(name)=='string',"MSG.addType: name need string")
     assert(type(backColor)=='table' and #backColor>=3,"MSG.addType: color need {r,g,b}")
