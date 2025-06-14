@@ -403,9 +403,12 @@ function BGM.set(bgms,mode,...)
                     assert(type(lowgain)=='number' and lowgain>=0 and lowgain<=1,"BGM.set(...,lowgain): Need in [0,1]")
                     assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
-                    TASK.new(task_setLowgain,obj,lowgain,timeUse)
-                    obj.lowgain=lowgain
-                    obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
+                    if timeUse==0 then
+                        obj.lowgain=lowgain
+                        obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
+                    else
+                        TASK.new(task_setLowgain,obj,lowgain,timeUse)
+                    end
                 end
             elseif mode=='highgain' then
                 if effectsSupported then
@@ -417,9 +420,12 @@ function BGM.set(bgms,mode,...)
                     assert(type(highgain)=='number' and highgain>=0 and highgain<=1,"BGM.set(...,highgain): Need in [0,1]")
                     assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
-                    TASK.new(task_setHighgain,obj,highgain,timeUse)
-                    obj.highgain=highgain
-                    obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
+                    if timeUse==0 then
+                        obj.highgain=highgain
+                        obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
+                    else
+                        TASK.new(task_setHighgain,obj,highgain,timeUse)
+                    end
                 end
             else
                 error("BGM.set(...,mode): Need 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'")
