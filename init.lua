@@ -1199,7 +1199,8 @@ function love.run()
                     if showFPS then
                         setFont(15,'_norm')
                         gc_setColor(COLOR.L)
-                        gc_print(FPS(),safeX+5,-20)
+                        local fps=FPS()
+                        gc_print(fps.." - "..floor(fps*drawFreq/100).." - "..floor(fps*updateFreq/100),safeX+5,-20)
                     end
 
                     -- Debug info.
