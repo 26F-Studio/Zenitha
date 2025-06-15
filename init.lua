@@ -258,11 +258,11 @@ local globalEvent={
                 else
                     MSG('warn',"Failed to open Console")
                 end
-            elseif key=='f8'  then ZENITHA.setDevMode(false) MSG('info',"DEBUG OFF",.2)      return true
-            elseif key=='f9'  then ZENITHA.setDevMode(1)     MSG('info',"DEBUG 1 (Basic)")   return true
-            elseif key=='f10' then ZENITHA.setDevMode(2)     MSG('info',"DEBUG 2 (Widget)")  return true
-            elseif key=='f11' then ZENITHA.setDevMode(3)     MSG('info',"DEBUG 3 (Slow)")    return true
-            elseif key=='f12' then ZENITHA.setDevMode(4)     MSG('info',"DEBUG 4 (Sloooow)") return true
+            elseif key=='f8'  then ZENITHA.setDevMode(false) return true
+            elseif key=='f9'  then ZENITHA.setDevMode(1)     return true
+            elseif key=='f10' then ZENITHA.setDevMode(2)     return true
+            elseif key=='f11' then ZENITHA.setDevMode(3)     return true
+            elseif key=='f12' then ZENITHA.setDevMode(4)     return true
             elseif devMode==2 then -- Adjust Widget
                 local W=WIDGET.sel ---@type table
                 if not W then return end
