@@ -26,6 +26,42 @@ local NULL=NULL
 local GC=TABLE.copyAll(gc,0)
 
 --------------------------------------------------------------
+-- Mesh
+
+---Create a new 9-patch mesh cropped from a texture with specified viewport
+---@param meshW number
+---@param meshH number
+---@param me number Mesh Edge width
+---@param ve number Source Edge width
+---@param texture love.Texture
+---@param x number viewport x
+---@param y number viewport y
+---@param w number viewport w
+---@param h number viewport h
+function GC.new9mesh(meshW,meshH,me,ve,texture,x,y,w,h)
+    local tw,th=texture:getDimensions()
+    local meshMap={}
+    for _y=0,3 do
+        for _x=0,3 do
+            table.insert(meshMap, {
+                _x==0 and 0 or _x==1 and me or _x==2 and meshW-me or _x==3 and meshW,
+                _y==0 and 0 or _y==1 and me or _y==2 and meshH-me or _y==3 and meshH,
+                (_x==0 and x or _x==1 and x+ve or _x==2 and x+w-ve or _x==3 and x+w)/tw,
+                (_y==0 and y or _y==1 and y+ve or _y==2 and y+h-ve or _y==3 and y+h)/th,
+            })
+        end
+    end
+    local mesh=GC.newMesh(meshMap, 'strip', 'static')
+    mesh:setTexture(texture)
+    mesh:setVertexMap({
+        1,5,2,6,3,7,4,8,
+        12,7,11,6,10,5,9,
+        13,10,14,11,15,12,16,
+    })
+    return mesh
+end
+
+--------------------------------------------------------------
 -- Aligning Draw
 
 ---Printf a string with 'center' option
