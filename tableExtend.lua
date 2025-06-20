@@ -615,16 +615,18 @@ end
 -----[[ Now T is
 ---{
 ---    ['a']=1,
----    ['b/c']=2
----    ['d/e/f']=3
+---    ['b.c']=2
+---    ['d.e.f']=3
 ---}
 ---]]
 ---```
 ---@param org table
 ---@param depth? integer how many layer will be entered and flattened, default to inf
+---@param sep? string separator, default to `.`
 ---@return table
-function TABLE.flatten(org,depth)
+function TABLE.flatten(org,depth,sep)
     if not depth then depth=1e99 end
+    if not sep then sep='.' end
     while depth>0 do
         local tKeyList={}
         for k,v in next,org do
@@ -636,11 +638,40 @@ function TABLE.flatten(org,depth)
         for i=1,#tKeyList do
             local key=tKeyList[i]
             for k,v in next,org[key] do
-                org[key..'/'..k]=v
+                org[key..sep..k]=v
             end
             org[key]=nil
         end
         depth=depth-1
+    end
+    return org
+end
+
+--------------------------------------------------------------
+-- Indexing
+
+---Get value in a table by a index list
+---@param org table
+---@param indexes any[]
+---@return any
+---@nodiscard
+function TABLE.listIndex(org,indexes)
+    for i=1,#indexes do
+        org=org[indexes[i]]
+    end
+    return org
+end
+
+---Get value in a table by a path-like string
+---@param org table
+---@param str string
+---@param sep? char Single-byte separator string (no need to consider escape), default to '.'
+---@return any
+---@nodiscard
+function TABLE.pathIndex(org,str,sep)
+    local pattern=sep and '[^%'..sep..']+' or '[^%.]+'
+    for k in gmatch(str,pattern) do
+        org=org[k]
     end
     return org
 end
@@ -1091,7 +1122,7 @@ end
 --------------------------------------------------------------
 -- (Utility) Lazy loading
 
----Make a table to be able to auto filled from a source
+---Make a table to be able to be auto filled from a source (not recursive)
 ---@generic T
 ---@param org T
 ---@param source table
@@ -1138,7 +1169,7 @@ do -- function TABLE.linkSource(src,loadFunc)
     ---@generic T
     ---@param lib T lib table to be linked
     ---@param src table resourceID table
-    ---@param loadFunc fun(resID:any): any Will receive resourceID from src table, must return a non-nil value
+    ---@param loadFunc fun(resID:any): any Will receive resourceID from src table, must return a non-nil value as loaded result
     ---@param noLazy? boolean
     ---@return T
     function TABLE.linkSource(lib,src,loadFunc,noLazy)
@@ -1175,23 +1206,6 @@ function TABLE.getlastValue(...)
             return t[i]
         end
     end
-end
-
---------------------------------------------------------------
--- (Utility) PathIndex
-
----Get value in a table by a path-like string
----@param org table
----@param str string
----@param sep? char Single-byte separator string (no need to consider escape), default to '.'
----@return any
----@nodiscard
-function TABLE.pathIndex(org,str,sep)
-    local pattern=sep and '[^%'..sep..']+' or '[^%.]+'
-    for k in gmatch(str,pattern) do
-        org=org[k]
-    end
-    return org
 end
 
 return TABLE
