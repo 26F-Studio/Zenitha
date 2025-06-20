@@ -676,6 +676,32 @@ function TABLE.pathIndex(org,str,sep)
     return org
 end
 
+---Set value in a table by a index list
+---@param org table
+---@param indexes any[]
+---@param value any
+function TABLE.listIndexSet(org,indexes,value)
+    for i=1,#indexes do
+        org=org[indexes[i]]
+    end
+    org[indexes[#indexes]]=value
+end
+
+---Set value in a table by a path-like string
+---@param org table
+---@param str string
+---@param value any
+---@param sep? char Single-byte separator string (no need to consider escape), default to '.'
+function TABLE.pathIndexSet(org,str,value,sep)
+    local lastT,lastK
+    local pattern=sep and '[^%'..sep..']+' or '[^%.]+'
+    for k in gmatch(str,pattern) do
+        lastT,lastK=org,k
+        org=org[k]
+    end
+    lastT[lastK]=value
+end
+
 --------------------------------------------------------------
 -- Find & Replace
 
