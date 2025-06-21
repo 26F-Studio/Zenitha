@@ -607,7 +607,8 @@ function TABLE.reIndex(org)
     return org
 end
 
----Flatten a nested table to a flat table (no table type value included)
+---Flatten a nested table to a flat table (no table type value included)  
+---**Warning**: number keys may collide with string keys: both [1] and ['1'] will be converted to `'.1'`
 ---### Example
 ---```
 ---local T={a=1,b={c=2},d={e={f=3}}}
@@ -662,7 +663,8 @@ function TABLE.listIndex(org,indexes)
     return org
 end
 
----Get value in a table by a path-like string
+---Get value in a table by a path-like string  
+---**Warning**: `pathIndex(t,"a.1")` will return t.a["1"], not t.a[1]
 ---@param org table
 ---@param str string
 ---@param sep? char Single-byte separator string (no need to consider escape), default to '.'
@@ -687,7 +689,8 @@ function TABLE.listIndexSet(org,indexes,value)
     org[indexes[#indexes]]=value
 end
 
----Set value in a table by a path-like string
+---Set value in a table by a path-like string  
+---**Warning**: `pathIndexSet(t,"a.1",2)` equals to `t.a["1"]=2`, not `t.a[1]=2`
 ---@param org table
 ---@param str string
 ---@param value any
