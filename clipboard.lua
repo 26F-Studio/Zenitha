@@ -1,8 +1,7 @@
 local function _sanitize(content)
     if type(content)=='string' then
         return content
-    end
-    if type(content)=='number' then
+    elseif type(content)=='number' then
         return tostring(content)
     elseif type(content)=='boolean' then
         return content and 'true' or 'false'
