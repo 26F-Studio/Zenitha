@@ -1936,7 +1936,7 @@ function Widgets.textBox:reset(init)
     self._capacity=ceil(self.h/self.lineHeight)
     self._scrollPos1=-2*self.h
 end
-function Widgets.textBox:replaceTexts(newList)
+function Widgets.textBox:setTextList(newList)
     self._texts=newList
     self._scrollPos=0
 end
