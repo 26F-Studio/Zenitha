@@ -92,7 +92,7 @@
 ---@field yOffset? number [textBox]
 ---@field editable? boolean [textBox]
 ---
----@field drawFunc? function [listBox]
+---@field drawFunc? fun(item:any, id:integer, selected:boolean) [listBox]
 ---@field releaseDist? number [listBox]
 ---@field stencilMode? 'total' | 'single' | false [listBox]
 ---@field sound_click? string | false [listBox]
