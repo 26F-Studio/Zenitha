@@ -5,9 +5,9 @@ local JSON=require((...)..'json')
 local function printf(str,...) print(str:format(...)) end
 
 local C_confCHN=love.thread.getChannel("tcp_c_config")
+local C_rspsCHN=love.thread.getChannel("tcp_c_response")
 local C_sendCHN=love.thread.getChannel("tcp_c_send")
 local C_recvCHN=love.thread.getChannel("tcp_c_receive")
-local C_recvBusCHN=love.thread.getChannel("tcp_c_receiveBus")
 
 ---@type LuaSocket.client
 local client
@@ -34,12 +34,10 @@ local function clientLoop()
                 client:close()
                 printf("[TCP_C] Disconnected from server")
                 return
-            elseif cfg.action=='bus.get' then
-                sendMessage{config='bus.get'}
-            elseif cfg.action=='bus.join' then
-                sendMessage{config='bus.join',bus=cfg.bus}
-            elseif cfg.action=='bus.quit' then
-                sendMessage{config='bus.quit'}
+            elseif cfg.action=='subTopic' then
+                sendMessage{req='topic.sub',data=cfg.data}
+            elseif cfg.action=='unsubTopic' then
+                sendMessage{req='topic.unsub',data=cfg.data}
             end
         end
 
@@ -55,7 +53,7 @@ local function clientLoop()
             partialDataBuffer=''
             local suc,recvPack=pcall(JSON.decode,message) ---@type boolean, Zenitha.TCP.MsgPack
             if suc then
-                (recvPack.bus and C_recvBusCHN or C_recvCHN):push(recvPack)
+                C_recvCHN:push(recvPack)
             else
                 printf("[TCP_C] Error in decoding message: %s",recvPack)
             end
@@ -76,14 +74,14 @@ while true do
     local err
     client,err=socket.connect(ip,port)
     if err then
-        C_recvCHN:push{
+        C_rspsCHN:push{
             success=false,
             message=("Cannot bind to %s:%s, reason: %s"):format(ip,port,err),
         }
     else
         printf("[TCP_C] Connected to %s:%s",ip,port)
         client:settimeout(0.01)
-        C_recvCHN:push{success=true}
+        C_rspsCHN:push{success=true}
         clientLoop()
     end
 end
