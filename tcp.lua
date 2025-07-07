@@ -18,6 +18,16 @@ end
 ---@alias Zenitha.TCP.Request
 ---| 'topic.sub' recv: sender=client id
 ---| 'topic.unsub' recv: sender=client id
+---@alias Zenitha.TCP.ConfigMsgAction
+---| 'close'
+---| 'kick'
+---| 'setPermission'
+---| 'setMaxTopic'
+---| 'getTopicInfo'
+---| 'createTopic'
+---| 'closeTopic'
+---| 'subTopic' (client only)
+---| 'unsubTopic' (client only)
 
 ---@class Zenitha.TCP.Client
 ---@field conn LuaSocket.client
@@ -240,19 +250,9 @@ function TCP.C_receive()
 end
 
 --------------------------------------------------------------
--- Use the following pub/sub features when you need more scalable communication.
+-- Use the following topic features when you need more scalable communication.
 
----@alias Zenitha.TCP.topicID string [0-9A-Za-z_]+
----@alias Zenitha.TCP.ConfigMsgAction # from local
----| 'close'
----| 'kick'
----| 'setPermission'
----| 'setMaxTopic'
----| 'getTopicInfo'
----| 'createTopic'
----| 'closeTopic'
----| 'subTopic' (client)
----| 'unsubTopic' (client)
+---@alias Zenitha.TCP.topicID string [0-9A-Za-z_]+ but not starting with digit
 
 ---@class Zenitha.TCP.Topic
 ---@field name string
@@ -271,7 +271,7 @@ end
 ---@param name Zenitha.TCP.topicID
 ---@param maxSub? number default to 26 subscribers
 ---@param maxAliveTime? number default to 26s
----@return boolean #Success or not, will fail when reached max count
+---@return boolean # Success or not, will fail when reached max count
 function TCP.S_createTopic(name,maxSub,maxAliveTime)
     if not S_running then return false end
     if not pcall(checkTopicName,name) then return false end
@@ -292,7 +292,7 @@ function TCP.S_closeTopic(name)
     S_pushConf{action='closeTopic',data=checkTopicName(name)}
 end
 
----@return string[] #List of Topic names
+---@return string[] # List of Topic names
 function TCP.S_getTopicInfo()
     if not S_running then return {} end
     S_pushConf{action='getTopicInfo'}

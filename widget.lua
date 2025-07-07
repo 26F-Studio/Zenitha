@@ -2642,6 +2642,7 @@ function WIDGET.newClass(name,parent)
     Widgets[name]=setmetatable({type=name},{__index=Widgets[parent],__metatable=true})
     return Widgets[name]
 end
+
 WIDGET._alignDraw=alignDraw
 WIDGET._alignDrawQ=alignDrawQ
 
