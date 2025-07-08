@@ -281,6 +281,8 @@ local function serverLoop()
                         -- Common message
                         sendMessage(recvPack,id)
                     end
+                    recvPack.sender=id
+                    S_recvCHN:push(recvPack)
                 else
                     printf("Error in encoding data to json: %s",recvPack)
                     return
