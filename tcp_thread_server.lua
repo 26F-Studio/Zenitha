@@ -277,7 +277,7 @@ local function serverLoop()
                         else
                             printException("unknown req from client %s: %s",id,tostring(recvPack.req))
                         end
-                    else
+                    elseif recvPack.receiver~='0' then
                         -- Common message
                         sendMessage(recvPack,id)
                     end

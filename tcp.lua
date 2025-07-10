@@ -7,8 +7,8 @@ if not love.thread then
     })
 end
 
----@alias Zenitha.TCP.sendID string? target id, must be: `nil` (to/from server) broadcast, `'1' '2'...` client id
----@alias Zenitha.TCP.recvID Zenitha.TCP.sendID | Zenitha.TCP.sendID[] | nil client id (list), nil for broadcast
+---@alias Zenitha.TCP.sendID string? target id, must be: `nil` server broadcast, `'1' '2'...` client id
+---@alias Zenitha.TCP.recvID '0' | Zenitha.TCP.sendID | Zenitha.TCP.sendID[] | nil `'0'` server-only, `nil` broadcast, `'1' '2'...` client id
 ---@alias Zenitha.TCP.MsgEvent
 ---| 'client.connect' recv: sender=client id
 ---| 'client.disconnect' recv: sender=client id
