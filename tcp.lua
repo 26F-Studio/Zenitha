@@ -47,17 +47,23 @@ end
 ---@field action Zenitha.TCP.ConfigMsgAction
 ---@field data? any
 
+---@param id Zenitha.TCP.recvID
 local function checkRecvID(id)
-    if id==nil then return end
-    if type(id)=='string' then id={id}
-    elseif type(id)=='number' then id={tostring(id)}
-    end
-    for i=#id,1,-1 do
-        if id[i]:find('[^0-9A-Za-z_]') then
-            table.remove(id,i)
+    if id==nil then
+        return
+    elseif type(id)=='string' then
+        if not (id=='' or id:find('[^0-9]')) then
+            return id
         end
+    elseif type(id)=='table' then
+        for i=#id,1,-1 do
+            if id[i]=='' or id[i]:find('[^0-9]') then
+                table.remove(id,i)
+            end
+        end
+        return id
     end
-    return id
+    return false
 end
 
 local function checkTopicName(name)
@@ -103,6 +109,7 @@ function TCP.S_start(port)
     assert(type(port)=='number' and port>=1 and port<=65535 and port%1==0,"TCP.S_start(port): Need 0~65535")
     TASK.removeTask_code(S_daemonFunc)
     TASK.new(S_daemonFunc)
+    S_confCHN:clear()
     S_confCHN:push(port)
     local result=S_rspsCHN:demand()
     if result.success then
@@ -125,7 +132,10 @@ end
 ---@param id Zenitha.TCP.recvID
 function TCP.S_kick(id)
     if not S_running then return end
-    S_pushConf{action='kick',data=checkRecvID(id)}
+    local _id=checkRecvID(id)
+    if _id~=false then
+        S_pushConf{action='kick',data=_id}
+    end
 end
 
 local function checkBoolean(v) if v==true then return true elseif v==false then return false end end
@@ -133,6 +143,7 @@ local function checkBoolean(v) if v==true then return true elseif v==false then 
 ---Set whether Broadcast / Message / Topic are allowed or not, default to all `true`
 ---@param flag {broadcast:boolean, message:boolean, topic:boolean} non-boolean values will be ignored
 function TCP.S_setPermission(flag)
+    if not S_running then return end
     S_pushConf{action='setPermission',data={
         broadcast=checkBoolean(flag.broadcast),
         message=checkBoolean(flag.message),
@@ -153,11 +164,14 @@ function TCP.S_send(data,id)
             topic=checkTopicName(id),
         }
     else
-        ---@type Zenitha.TCP.MsgPack
-        pack={
-            data=data,
-            receiver=checkRecvID(id),
-        }
+        local _id=checkRecvID(id)
+        if _id~=false then
+            ---@type Zenitha.TCP.MsgPack
+            pack={
+                data=data,
+                receiver=_id,
+            }
+        end
     end
     S_sendCHN:push(pack)
 end
@@ -234,11 +248,14 @@ function TCP.C_send(data,id)
             topic=checkTopicName(id),
         }
     else
-        ---@type Zenitha.TCP.MsgPack
-        pack={
-            data=data,
-            receiver=checkRecvID(id),
-        }
+        local _id=checkRecvID(id)
+        if _id~=false then
+            ---@type Zenitha.TCP.MsgPack
+            pack={
+                data=data,
+                receiver=_id,
+            }
+        end
     end
     C_sendCHN:push(pack)
 end
@@ -265,6 +282,7 @@ end
 
 ---@param count number
 function TCP.S_setMaxTopicCount(count)
+    if not S_running then return end
     assert(type(count)=='number' and count>0 and count%1==0,"TCP.S_setMaxTopicCount(count): Need positive int")
     S_pushConf{action='setMaxTopic',data=count}
 end
@@ -289,7 +307,7 @@ end
 
 ---@param name Zenitha.TCP.topicID
 function TCP.S_closeTopic(name)
-    if not S_running then return false end
+    if not S_running then return end
     S_pushConf{action='closeTopic',data=checkTopicName(name)}
 end
 

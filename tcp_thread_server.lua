@@ -114,16 +114,16 @@ end
 local function setPermission(flags)
     if flags.broadcast~=nil then
         allowBroadcast=flags.broadcast
-        printEvent("Allow Broadcast: ",tostring(allowBroadcast))
+        printEvent("Allow Broadcast: %s",allowBroadcast)
     end
     if flags.message~=nil then
         allowMessage=flags.message
-        printEvent("Allow Direct Message: ",tostring(allowMessage))
+        printEvent("Allow Direct Message: %s",allowMessage)
     end
     if flags.topic~=nil then
         allowTopic=flags.topic
         for _,topic in next,topicList do topic.sub={} end
-        printEvent("Allow Topic: ",tostring(allowTopic))
+        printEvent("Allow Topic: %s",allowTopic)
     end
 end
 local function createTopic(data)
