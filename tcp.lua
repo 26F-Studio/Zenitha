@@ -7,7 +7,7 @@ if not love.thread then
     })
 end
 
----@alias Zenitha.TCP.sendID string? client id, nil=server broadcast
+---@alias Zenitha.TCP.sendID string? target id, must be: `nil` (to/from server) broadcast, `'1' '2'...` client id
 ---@alias Zenitha.TCP.recvID Zenitha.TCP.sendID | Zenitha.TCP.sendID[] | nil client id (list), nil for broadcast
 ---@alias Zenitha.TCP.MsgEvent
 ---| 'client.connect' recv: sender=client id
@@ -250,7 +250,8 @@ function TCP.C_receive()
 end
 
 --------------------------------------------------------------
--- Use the following topic features when you need more scalable communication.
+-- Simple Publish-Subscribe Pattern model
+-- Use the following Topic features when you need more scalable communication.
 
 ---@alias Zenitha.TCP.topicID string [0-9A-Za-z_]+ but not starting with digit
 
