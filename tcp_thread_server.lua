@@ -335,4 +335,5 @@ while true do
         S_rspsCHN:push{success=true}
         serverLoop()
     end
+    S_rspsCHN:push(false)
 end

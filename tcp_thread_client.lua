@@ -84,4 +84,5 @@ while true do
         C_rspsCHN:push{success=true}
         clientLoop()
     end
+    C_rspsCHN:push(false)
 end

@@ -99,17 +99,19 @@ end
 
 ---Get client connection status
 function TCP.S_isRunning()
+    if S_rspsCHN:pop()==false then S_running=false end
     return S_running
 end
 
 ---Start server
 ---@param port number 0~65535
 function TCP.S_start(port)
-    if S_running then return end
+    if TCP.S_isRunning() then return end
     assert(type(port)=='number' and port>=1 and port<=65535 and port%1==0,"TCP.S_start(port): Need 0~65535")
     TASK.removeTask_code(S_daemonFunc)
     TASK.new(S_daemonFunc)
     S_confCHN:clear()
+    S_rspsCHN:clear()
     S_confCHN:push(port)
     local result=S_rspsCHN:demand()
     if result.success then
@@ -121,7 +123,7 @@ end
 
 ---Stop the TCP server
 function TCP.S_stop()
-    if not S_running then return end
+    if not TCP.S_isRunning() then return end
     S_pushConf{action='close'}
     S_sendCHN:clear()
     S_recvCHN:clear()
@@ -131,7 +133,7 @@ end
 ---Disconnect a client
 ---@param id Zenitha.TCP.recvID
 function TCP.S_kick(id)
-    if not S_running then return end
+    if not TCP.S_isRunning() then return end
     local _id=checkRecvID(id)
     if _id~=false then
         S_pushConf{action='kick',data=_id}
@@ -143,7 +145,7 @@ local function checkBoolean(v) if v==true then return true elseif v==false then 
 ---Set whether Broadcast / Message / Topic are allowed or not, default to all `true`
 ---@param flag {broadcast:boolean, message:boolean, topic:boolean} non-boolean values will be ignored
 function TCP.S_setPermission(flag)
-    if not S_running then return end
+    if not TCP.S_isRunning() then return end
     S_pushConf{action='setPermission',data={
         broadcast=checkBoolean(flag.broadcast),
         message=checkBoolean(flag.message),
@@ -155,7 +157,7 @@ end
 ---@param data any must be lua or love object
 ---@param id Zenitha.TCP.recvID | Zenitha.TCP.topicID
 function TCP.S_send(data,id)
-    if not S_running then return end
+    if not TCP.S_isRunning() then return end
     ---@type Zenitha.TCP.MsgPack
     local pack
     if type(id)=='string' and id:byte()>=65 then
@@ -207,6 +209,7 @@ end
 
 ---Get client connection status
 function TCP.C_isRunning()
+    if C_rspsCHN:pop()==false then C_running=false end
     return C_running
 end
 
@@ -214,7 +217,7 @@ end
 ---@param ip string
 ---@param port number
 function TCP.C_connect(ip,port)
-    if C_running then return end
+    if TCP.C_isRunning() then return end
     TASK.removeTask_code(C_daemonFunc)
     TASK.new(C_daemonFunc)
     C_confCHN:push(ip)
@@ -229,7 +232,7 @@ end
 
 ---Disconnect from the server
 function TCP.C_disconnect()
-    if not C_running then return end
+    if not TCP.C_isRunning() then return end
     C_confCHN:push{action='close'}
     C_sendCHN:clear()
     C_recvCHN:clear()
@@ -240,6 +243,7 @@ end
 ---@param data any must be lua or love object
 ---@param id Zenitha.TCP.recvID | Zenitha.TCP.topicID
 function TCP.C_send(data,id)
+    if not TCP.C_isRunning() then return end
     ---@type Zenitha.TCP.MsgPack
     local pack
     if type(id)=='string' and id:byte()>=65 then
@@ -263,6 +267,7 @@ end
 ---Receive data from server
 ---@return Zenitha.TCP.MsgPack?
 function TCP.C_receive()
+    if not TCP.C_isRunning() then return end
     return C_recvCHN:pop()
 end
 
@@ -282,7 +287,7 @@ end
 
 ---@param count number
 function TCP.S_setMaxTopicCount(count)
-    if not S_running then return end
+    if not TCP.S_isRunning() then return end
     assert(type(count)=='number' and count>0 and count%1==0,"TCP.S_setMaxTopicCount(count): Need positive int")
     S_pushConf{action='setMaxTopic',data=count}
 end
@@ -292,8 +297,9 @@ end
 ---@param maxAliveTime? number default to 26s
 ---@return boolean # Success or not, will fail when reached max count
 function TCP.S_createTopic(name,maxSub,maxAliveTime)
-    if not S_running then return false end
+    if not TCP.S_isRunning() then return false end
     if not pcall(checkTopicName,name) then return false end
+    S_rspsCHN:clear()
     S_pushConf{
         action='createTopic',
         data={
@@ -307,20 +313,21 @@ end
 
 ---@param name Zenitha.TCP.topicID
 function TCP.S_closeTopic(name)
-    if not S_running then return end
+    if not TCP.S_isRunning() then return end
     S_pushConf{action='closeTopic',data=checkTopicName(name)}
 end
 
 ---@return string[] # List of Topic names
 function TCP.S_getTopicInfo()
-    if not S_running then return {} end
+    if not TCP.S_isRunning() then return {} end
+    S_rspsCHN:clear()
     S_pushConf{action='getTopicInfo'}
     return S_rspsCHN:demand()
 end
 
 ---@param name Zenitha.TCP.topicID
 function TCP.C_subTopic(name)
-    if not C_running then return end
+    if not TCP.C_isRunning() then return end
     C_pushConf{
         action='subTopic',
         data=checkTopicName(name),
@@ -329,7 +336,7 @@ end
 
 ---@param name Zenitha.TCP.topicID
 function TCP.C_unsubTopic(name)
-    if not C_running then return end
+    if not TCP.C_isRunning() then return end
     C_pushConf{
         action='unsubTopic',
         data=checkTopicName(name),
