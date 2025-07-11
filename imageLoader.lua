@@ -45,13 +45,13 @@ end
 ---```
 --- By the way, the index table **CAN** include non-string value, they won't be loaded as a path string, but just keep the value as it is.
 ---
----Advanced usage: `IMG.init(index)` is overload of `IMG.init(IMG,index)`, so you can create your own lib with `lib=IMG.init(index,true)`, in this way you can help language server doing auto-completion for you.
+---Advanced usage: `IMG.init(index)` is overload of `IMG.init(index,IMG)`, so you can create your own lib with `lib=IMG.init(index,true)`, in this way you can help language server doing auto-completion for you.
 ---
----Interesting fact: This is actually a simple wrap of `TABLE.linkSource` + `IMG._loader`. Explore the cool implementation yourself!
+---Interesting fact: This is actually a simple wrapping of `TABLE.linkSource` + `IMG._loader`
 ---@overload fun(index: Map<string | table>)
 ---@generic T
 ---@param index T
----@param export? boolean
+---@param export? true
 ---@return T
 function IMG.init(index,export)
     local lib=export and {} or IMG
