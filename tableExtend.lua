@@ -683,7 +683,7 @@ end
 ---@param indexes any[]
 ---@param value any
 function TABLE.listIndexSet(org,indexes,value)
-    for i=1,#indexes do
+    for i=1,#indexes-1 do
         org=org[indexes[i]]
     end
     org[indexes[#indexes]]=value
