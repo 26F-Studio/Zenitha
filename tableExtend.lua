@@ -1237,4 +1237,26 @@ function TABLE.getlastValue(...)
     end
 end
 
+--------------------------------------------------------------
+-- (Utility) Pool
+
+local pool={} for i=1,26 do pool[i]={} end
+
+---Get a new empty table from pool. It should be recycled later with `TABLE.free` but not necessary
+---@return table
+---@nodiscard
+function TABLE.alloc()
+    local r
+    r,pool[#pool]=pool[#pool]
+    return r or {}
+end
+
+local clear=TABLE.clear
+---Recycle a table to pool (can be not created from `TABLE.alloc`) so it can be reused later with `TABLE.alloc`
+---@param obj table
+function TABLE.free(obj)
+    clear(obj)
+    pool[#pool+1]=obj
+end
+
 return TABLE
