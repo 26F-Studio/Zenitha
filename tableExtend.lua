@@ -1241,6 +1241,7 @@ end
 -- (Utility) Pool
 
 local pool={} for i=1,26 do pool[i]={} end
+local poolMax=26
 
 ---Get a new empty table from pool. It should be recycled later with `TABLE.free` but not necessary
 ---@return table
@@ -1255,8 +1256,22 @@ local clear=TABLE.clear
 ---Recycle a table to pool (can be not created from `TABLE.alloc`) so it can be reused later with `TABLE.alloc`
 ---@param obj table
 function TABLE.free(obj)
-    clear(obj)
-    pool[#pool+1]=obj
+    if #pool<poolMax then
+        clear(obj)
+        pool[#pool+1]=obj
+    end
+end
+
+---Set the maximum size of pool, default to 26
+---@param n number non-negative
+function TABLE.setMaxPoolSize(n)
+    assert(type(n)=='number' and n>=0,"TABLE.setMaxPoolSize: n must be a non-negative number")
+    poolMax=n
+end
+
+---Create a new pool table
+function TABLE.resetPool()
+    pool={}
 end
 
 return TABLE
