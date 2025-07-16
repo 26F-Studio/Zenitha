@@ -70,4 +70,9 @@ function UTIL.openConsole()
     return false
 end
 
+---Try to open the save directory
+function UTIL.openSaveDirectory()
+    love.system.openURL(love.filesystem.getSaveDirectory())
+end
+
 return UTIL
