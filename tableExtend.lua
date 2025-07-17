@@ -205,7 +205,7 @@ function TABLE.transpose(matrix)
                 matrix[y][x],matrix[x][y]=matrix[x][y],matrix[y][x]
             end
         end
-        for y=h+1,w do matrix[y]=nil end
+        for y=w+1,h do matrix[y]=nil end
     end
     return matrix
 end
