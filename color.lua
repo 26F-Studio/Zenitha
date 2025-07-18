@@ -236,6 +236,16 @@ end
 
 COLOR.HEX=HEX
 
+function COLOR.toHEX(r,g,b,a)
+    if a then
+        r,g,b,a=r*255,g*255,b*255,a*255
+        return string.format("%02X%02X%02X%02X",r,g,b,a)
+    else
+        r,g,b=r*255,g*255,b*255
+        return string.format("%02X%02X%02X",r,g,b)
+    end
+end
+
 ---Convert HSV to RGB
 ---@param h number Color type
 ---@param s number Color amount
