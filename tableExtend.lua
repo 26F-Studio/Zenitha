@@ -680,7 +680,7 @@ end
 
 ---Set value in a table by a index list
 ---@param org table
----@param indexes any[]
+---@param indexes any[] Need at least one index
 ---@param value any
 function TABLE.listIndexSet(org,indexes,value)
     for i=1,#indexes-1 do
@@ -692,7 +692,7 @@ end
 ---Set value in a table by a path-like string  
 ---**Warning**: `pathIndexSet(t,"a.1",2)` equals to `t.a["1"]=2`, not `t.a[1]=2`
 ---@param org table
----@param str string
+---@param str string Need at least one index
 ---@param value any
 ---@param sep? char Single-byte separator string (no need to consider escape), default to '.'
 function TABLE.pathIndexSet(org,str,value,sep)
