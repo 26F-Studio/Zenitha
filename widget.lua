@@ -1,6 +1,7 @@
----@class Zenitha.WidgetArg: table
----
+---@class Zenitha.WidgetArg: Zenitha._WidgetArg
 ---@field type 'text' | 'image' | 'button' | 'hint' | 'checkBox' | 'switch' | 'slider' | 'slider_fill' | 'slider_progress' | 'selector' | 'inputBox' | 'textBox' | 'listBox' | string
+
+---@class Zenitha._WidgetArg
 ---@field name? string [All]
 ---@field pos? table [All]
 ---
@@ -2564,7 +2565,7 @@ function WIDGET.new(args)
 end
 
 ---Adjust default widget option
----@param opt Map<Zenitha.WidgetArg>
+---@param opt Map<Zenitha._WidgetArg> | any
 function WIDGET.setDefaultOption(opt)
     for t,data in next,opt do
         assertf(Widgets[t],"Widget type '%s' does not exist",t)
