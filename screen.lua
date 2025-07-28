@@ -37,11 +37,11 @@ end
 local SCR={
     w0=800, -- Designing Rect width
     h0=600, -- Designing Rect height
-    w=0, -- Current Full width (for graphic action)
-    h=0, -- Current Full height (for graphic action)
+    w=0, -- Window width (for normal graphical actions)
+    h=0, -- Window height
     diam=0, -- Diameter, equal to sqrt(w^2+h^2)
-    W=0, -- Current Full width (for shader only)
-    H=0, -- Current Full height (for shader only)
+    W=0, -- Window width (for shader only, could be different from SCR.w on mobile devices)
+    H=0, -- Window height
     safeX=0, -- Safe area X position
     safeY=0, -- Safe area Y position
     safeW=0, -- Safe area width
