@@ -77,12 +77,15 @@ local tasks={}
 ---Update all tasks (called by Zenitha)
 ---@param dt number
 function TASK._update(dt)
-    for i=#tasks,1,-1 do
+    local i,n=1,#tasks
+    while i<=n do
         local T=tasks[i]
-        if status(T.thread)=='dead' then
+        if not T or status(T.thread)=='dead' then
             rem(tasks,i)
+            n=n-1
         else
             assert(resume(T.thread,dt))
+            i=i+1
         end
     end
 end
@@ -104,7 +107,8 @@ function TASK.new(code,...)
     end
 end
 
----Get the number of tasks
+---Get the number of tasks  
+---Warning: the result is not accurate during TASK._update, tasks removed during the update still count
 ---@return number
 function TASK.getCount()
     return #tasks
@@ -113,9 +117,9 @@ end
 ---Remove task(s) by specified code(the function which created the task)
 ---@param code function
 function TASK.removeTask_code(code)
-    for i=#tasks,1,-1 do
-        if tasks[i].code==code then
-            rem(tasks,i)
+    for i=1,#tasks do
+        if tasks[i] and tasks[i].code==code then
+            tasks[i]=false
         end
     end
 end
@@ -124,9 +128,9 @@ end
 ---@param func function
 ---@param ... any Arguments passed to the given function
 function TASK.removeTask_iterate(func,...)
-    for i=#tasks,1,-1 do
-        if func(tasks[i],...) then
-            rem(tasks,i)
+    for i=1,#tasks do
+        if tasks[i] and func(tasks[i],...) then
+            tasks[i]=false
         end
     end
 end
