@@ -108,6 +108,25 @@ end
 
 ---STATISTIC
 ---@param data number[]
+---@param pow number 0: geometric mean, 1: arithmetic mean, -1: harmonic mean, etc.
+function MATH.pAverage(data,pow)
+    if pow==0 then
+        local product=1
+        for i=1,#data do
+            product=product*data[i]
+        end
+        return product^(1/#data)
+    else
+        local sum=0
+        for i=1,#data do
+            sum=sum+data[i]^pow
+        end
+        return (sum/#data)^(1/pow)
+    end
+end
+
+---STATISTIC
+---@param data number[]
 ---@param s? integer start pos (default 1)
 ---@param e? integer end pos (default #t)
 ---@return number
