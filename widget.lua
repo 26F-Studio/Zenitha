@@ -2,11 +2,11 @@
 ---@field type 'text' | 'image' | 'button' | 'hint' | 'checkBox' | 'switch' | 'slider' | 'slider_fill' | 'slider_progress' | 'selector' | 'inputBox' | 'textBox' | 'listBox' | string
 
 ---@class Zenitha._WidgetArg
----@field name? string [All]
----@field pos? table [All]
+---@field name string [All]
+---@field pos table [All]
 ---
----@field x? number [All]
----@field y? number [All]
+---@field x number [All]
+---@field y number [All]
 ---@field w? number [EXCEPT text & switch]
 ---@field h? number [EXCEPT text & checkBox & slider & selector]
 ---@field widthLimit? number [EXCEPT image & button & *Box]
@@ -28,8 +28,8 @@
 ---@field code? function [checkBox & switch & sliders & selector & listBox] Called 'When triggered'
 ---@field onPress? function [button & hint] Called 'When pressed down'
 ---@field onClick? function [button] Called 'When pressed and release'
----@field visibleFunc? function [All] Used to change widget's visibility when scene changed
----@field visibleTick? function [All] Used to update widget's visibility every frame
+---@field visibleFunc function [All] Used to change widget's visibility when scene changed
+---@field visibleTick function [All] Used to update widget's visibility every frame
 ---
 ---@field lineWidth? number [EXCEPT text & image & selector]
 ---@field cornerR? number [EXCEPT text & image & slider_fill & slider_progress & switch & selector] Round corner ratio
