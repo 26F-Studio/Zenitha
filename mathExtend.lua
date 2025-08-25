@@ -254,8 +254,9 @@ function MATH.randFreq(fList)
 end
 
 ---Get a random key with specified frequency table
----@param fList Map<number> positive numbers
----@return integer
+---@generic K
+---@param fList {[K]:number} positive numbers
+---@return K
 ---@nodiscard
 function MATH.randFreqAll(fList)
     local sum=MATH.sumAll(fList)
