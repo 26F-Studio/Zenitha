@@ -588,4 +588,19 @@ function MATH.gcd(a,b)
     return a
 end
 
+---Calculate the area of a polygon with the Shoelace formula
+---@param points number[] {x1,y1,x2,y2,...}
+function MATH.polygonArea(points)
+    local area=0
+    local len=#points
+    local x1,y1,x2,y2
+    x2,y2=points[len-1],points[len]
+    for i=1,len,2 do
+        x1,y1=x2,y2
+        x2,y2=points[i],points[i+1]
+        area=area+x1*y2-x2*y1
+    end
+    return abs(area/2)
+end
+
 return MATH
