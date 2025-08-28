@@ -1235,12 +1235,8 @@ function love.run()
         end
 
         -- Slow devmode
-        if devMode then
-            if devMode==3 then
-                SLEEP(.1)
-            elseif devMode==4 then
-                SLEEP(.5)
-            end
+        if devMode and devMode>=3 then
+            SLEEP(devMode==3 and .1 or .5)
         end
 
         local timeRemain=loopT+mainLoopInterval-timer()
