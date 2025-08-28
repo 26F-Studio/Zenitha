@@ -118,8 +118,6 @@ local MSisDown,KBisDown=ZENITHA.mouse.isDown,ZENITHA.keyboard.isDown
 
 local gc=ZENITHA.graphics
 local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
-local gc_setColor,gc_circle=gc.setColor,gc.circle
-local gc_print,gc_printf=gc.print,gc.printf
 
 local max,min=math.max,math.min
 local floor,abs=math.floor,math.abs
@@ -164,7 +162,7 @@ local lastClicks={} ---@type Zenitha.Click[]
 local jsState={} ---@type Zenitha.JoystickState[]
 local errData={} ---@type Zenitha.Exception[]
 ---@type Map<love.Canvas>
-local bigCanvases=setmetatable({},{
+ZENITHA.bigCanvas=setmetatable({},{
     __index=function(self,k)
         ---@diagnostic disable-next-line
         self[k]=gc.newCanvas(GC.getWidth(),GC.getHeight(),love.window and {msaa=select(3,love.window.getMode()).msaa} or nil)
@@ -174,17 +172,25 @@ local bigCanvases=setmetatable({},{
 
 -- User-changeable values
 local appName='Zenitha'
-local versionText='V0.1'
-local showVersionText=true
+local appVer='V0.1' ---@type string?
 local firstScene='_zenitha'
 local discardCanvas=false
-local showFPS=true
 local updateFreq=100
 local drawFreq=100
 local mainLoopInterval=1/60
 local sleepDurationError=0
 local clickDist2=62
 local maxErrorCount=3
+
+local frameTimeList={}
+local lastDrawTime=0
+---@type (fun():string)[]
+local debugInfo={
+    function () return "DEV@"..ZENITHA.getDevMode() end,
+    function () local fps=ZENITHA.timer.getFPS() return "FPS = "..fps.." ("..updateFreq.."% "..drawFreq.."%)" end,
+    function () return "Cache = "..gcinfo() end,
+    function () return "Audios = "..love.audio.getActiveSourceCount() end
+}
 
 ---@class Zenitha.GlobalEvent
 ---@field mouseDown     fun(mx:number, my:number, k?:number, presses?:number): boolean? Able to interrupt scene event and widget interaction
@@ -211,8 +217,9 @@ local maxErrorCount=3
 ---@field resize        fun(w:number, h:number): boolean? Able to interrupt scene event
 ---@field focus         fun(f:boolean): boolean? Able to interrupt scene event
 ---
----@field drawSysInfo   fun() System info function (like time and battery power) drawing function (default transform is SCR.xOy_ul)
+---@field drawExtra     fun() A global drawing function (above cursor, below scene swapping, default to SCR.xOy)
 ---@field drawCursor    fun(x:number, y:number, time:number) Cursor drawing function
+---@field drawDebugInfo fun() A global drawing function (above everything, no default position, contains many info so it's not recommended to change it)
 ---@field clickFX       fun(x:number, y:number, k:number) Called when "Click Event" triggered
 ---
 ---@field sceneSwap     fun(state:'start' | 'swap' | 'finish', style?:string) Called when scene swapping start
@@ -305,11 +312,56 @@ local globalEvent={
     resize=NULL,
     focus=NULL,
 
-    drawSysInfo=NULL,
+    drawExtra=NULL,
     drawCursor=function(x,y)
-        gc_setColor(1,1,1)
+        gc.setColor(1,1,1)
         gc.setLineWidth(2)
-        gc_circle(MSisDown(1) and 'fill' or 'line',x,y,6)
+        gc.circle(MSisDown(1) and 'fill' or 'line',x,y,6)
+    end,
+    drawDebugInfo=function()
+        if appVer then
+            gc_replaceTransform(SCR.xOy_d)
+            gc.setColor(.9,.9,.9,.42)
+            FONT.set(15,'_norm')
+            gc.printf(appVer,-2600,-20,5200,'center')
+        end
+
+        if devMode then
+            gc_replaceTransform(SCR.xOy_dl)
+            local safeX=SCR.safeX/SCR.k
+
+            -- Frame time graph
+            local t=ZENITHA.timer.getTime()
+            table.insert(frameTimeList,1,t-lastDrawTime)
+            lastDrawTime=t
+            table.remove(frameTimeList,260)
+            gc.setColor(.62,.62,.62,.62)
+            for i=1,#frameTimeList do
+                gc.rectangle('fill',2*i,-2,2,-frameTimeList[i]*4000)
+            end
+
+            -- Texts
+            FONT.set(15,'_norm')
+            for i=1,#debugInfo do
+                local str=debugInfo[i]()
+                gc.setColor(COLOR.D); gc.print(str,safeX+6,-20*i+1)
+                gc.setColor(COLOR.L); gc.print(str,safeX+5,-20*i)
+            end
+
+            -- Cursor
+            gc_replaceTransform(SCR.origin)
+            local x,y=SCR.xOy:transformPoint(mx,my)
+            gc.setLineWidth(6)
+            gc.setColor(0,0,0,.26)
+            gc.line(x,0,x,SCR.h)
+            gc.line(0,y,SCR.w,y)
+            gc.setLineWidth(2)
+            gc.setColor(1,1,1,.62)
+            gc.line(x,0,x,SCR.h)
+            gc.line(0,y,SCR.w,y)
+            GC.strokePrint('full',1,COLOR.D,COLOR.L,floor(mx+.5)..","..floor(my+.5),x+26,y-22)
+            GC.strokePrint('full',1,COLOR.D,COLOR.L,floor(mx+.5)..","..floor(my+.5),x-88,y+6)
+        end
     end,
     clickFX=function(x,y,_) SYSFX.tap(.26,x,y) end,
 
@@ -380,7 +432,6 @@ VOC=        require'voice'
 local TASK,HTTP,SCN,SCR,TEXT,SYSFX,TWEEN,WAIT,MSG,BG,WIDGET,VOC=TASK,HTTP,SCN,SCR,TEXT,SYSFX,TWEEN,WAIT,MSG,BG,WIDGET,VOC
 local xOy=SCR.xOy
 local ITP=xOy.inverseTransformPoint
-local setFont=FONT.set
 
 -- Set default font
 FONT.load({
@@ -936,6 +987,7 @@ function love.lowmemory()
     end
 end
 
+local bigCanvases=ZENITHA.bigCanvas
 ---@type love.resize
 ---@param w number
 ---@param h number
@@ -1010,7 +1062,7 @@ function love.errorhandler(msg)
         if love.filesystem then
             love.filesystem.append('error.log',
                 os.date("%Y/%m/%d %A %H:%M:%S\n")..
-                #errData.." crash(es) "..SYSTEM.."-"..versionText.."  scene: "..sceneStack.."\n"..
+                #errData.." crash(es) "..SYSTEM.."-"..appVer.."  scene: "..sceneStack.."\n"..
                 table.concat(err,"\n",1,c-2).."\n\n"
             )
         end
@@ -1043,13 +1095,13 @@ function love.errorhandler(msg)
             gc.replaceTransform(SCR.origin)
             local k=min(SCR.h/720,1)
             gc.scale(k)
-            setFont(100,'_norm') gc_print(":(",100,0,0,1.2)
-            setFont(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
-            setFont(20,'_norm') gc.printf(err[1],100,330,SCR.w/k-200)
-            gc.print(SYSTEM.."-"..versionText.."\nScene stack:"..sceneStack,100,640)
+            FONT.set(100,'_norm') gc.print(":(",100,0,0,1.2)
+            FONT.set(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
+            FONT.set(20,'_norm') gc.printf(err[1],100,330,SCR.w/k-200)
+            gc.print(SYSTEM.."-"..appVer.."\nScene stack:"..sceneStack,100,640)
             gc.print("TRACEBACK",100,430)
             for i=4,#err-2 do
-                gc_print(err[i],100,380+20*i)
+                gc.print(err[i],100,380+20*i)
             end
             gc.pop()
             gc.present()
@@ -1063,16 +1115,6 @@ love.threaderror=nil
 love.draw=nil
 love.update=nil
 
-local devColor={
-    COLOR.L,
-    COLOR.lM,
-    COLOR.lG,
-    COLOR.lB,
-}
-
-local debugInfos={
-    {"Cache",gcinfo},
-}
 ---@type love.run
 ---@return function #The main loop function
 function love.run()
@@ -1080,13 +1122,11 @@ function love.run()
 
     local SCN_swapUpdate=SCN._swapUpdate
     local STEP,SLEEP=ZENITHA.timer.step,ZENITHA.timer.sleep
-    local FPS,MINI=ZENITHA.timer.getFPS,love.window and love.window.isMinimized or FALSE
+    local MINI=love.window and love.window.isMinimized or FALSE
     local PUMP,POLL=love.event and love.event.pump or NULL,love.event.poll
     local timer=ZENITHA.timer.getTime
 
-    local frameTimeList={}
     local lastUpdateTime=timer()
-    local lastDrawTime=lastUpdateTime
     local lastScreenCheckTime=lastUpdateTime
 
     -- counters range from 0 to 99, trigger at 100
@@ -1156,9 +1196,6 @@ function love.run()
             if drawCounter>=100 then
                 drawCounter=drawCounter-100
 
-                local drawDT=loopT-lastDrawTime
-                lastDrawTime=loopT
-
                 gc_replaceTransform(SCR.origin)
                     BG._draw()
                 gc_replaceTransform(xOy)
@@ -1172,67 +1209,18 @@ function love.run()
                 gc_replaceTransform(xOy)
                     SYSFX._draw()
                     TEXT:draw()
-                    if SCN.overDraw then
-                        SCN.overDraw()
-                    end
+                    if SCN.overDraw then SCN.overDraw() end
+                gc_replaceTransform(xOy)
+                    globalEvent.drawExtra()
                 gc_replaceTransform(xOy)
                     if mouseShow then globalEvent.drawCursor(mx,my,loopT) end
-                gc_replaceTransform(SCR.xOy_ul)
-                    globalEvent.drawSysInfo()
                 gc_replaceTransform(SCR.origin)
-                    if SCN.swapping then
-                        SCN.swapState.draw(SCN.swapState.time)
-                    end
+                    if SCN.swapping then SCN.swapState.draw(SCN.swapState.time) end
                 gc_replaceTransform(SCR.xOy_ul)
                     MSG._draw()
-                if showVersionText then
-                    -- Version string
-                    gc_replaceTransform(SCR.xOy_d)
-                    gc_setColor(.9,.9,.9,.42)
-                    setFont(15,'_norm')
-                    gc_printf(versionText,-2600,-20,5200,'center')
-                end
-                gc_replaceTransform(SCR.xOy_dl)
-                    local safeX=SCR.safeX/SCR.k
-
-                    -- FPS
-                    if showFPS then
-                        setFont(15,'_norm')
-                        gc_setColor(COLOR.L)
-                        local fps=FPS()
-                        gc_print(fps.." - "..floor(fps*drawFreq/100).." - "..floor(fps*updateFreq/100),safeX+5,-20)
-                    end
-
-                    -- Debug info.
-                    if devMode then
-                        -- Debug infos at left-down
-                        setFont(15,'_norm')
-                        gc_setColor(devColor[devMode])
-
-                        -- Text infos
-                        for i=1,#debugInfos do
-                            gc_print(debugInfos[i][1],safeX+5,-20-20*i)
-                            gc_print(debugInfos[i][2](),safeX+62.6,-20-20*i)
-                        end
-
-                        -- Update & draw frame time
-                        table.insert(frameTimeList,1,drawDT)
-                        table.remove(frameTimeList,126)
-                        gc_setColor(1,1,1,.26)
-                        for i=1,#frameTimeList do
-                            gc.rectangle('fill',150+2*i,-20,2,-frameTimeList[i]*4000)
-                        end
-
-                        -- Cursor position info
-                        gc_replaceTransform(SCR.origin)
-                            local x,y=xOy:transformPoint(mx,my)
-                            gc.setLineWidth(1)
-                            gc.line(x,0,x,SCR.h)
-                            gc.line(0,y,SCR.w,y)
-                            GC.strokePrint('full',1,COLOR.D,COLOR.L,floor(mx+.5)..","..floor(my+.5),x,y)
-                    end
                 gc_replaceTransform(SCR.origin)
                     WAIT._draw()
+                globalEvent.drawDebugInfo()
                 gc_present()
 
                 -- Speed up a bit on mobile device, maybe
@@ -1275,29 +1263,16 @@ end
 
 ---Set the application name string
 ---@param name string
-function ZENITHA.setAppName(name)
-    assert(type(name)=='string',"ZENITHA.setAppName(name): Need string")
-    appName=name
+---@param ver? string
+function ZENITHA.setAppInfo(name,ver)
+    assert(type(name)=='string',"ZENITHA.setAppInfo: need string")
+    assert(ver==nil or type(ver)=='string',"ZENITHA.setAppInfo: version need string or nil")
+    appName,appVer=name,ver
 end
 
 ---Get the application name
----@return string
-function ZENITHA.getAppName() return appName end
-
----Set the application version text
----@param text string
-function ZENITHA.setVersionText(text)
-    assert(type(text)=='string',"ZENITHA.setVersionText(text): Need string")
-    versionText=text
-end
-
----Get the application version text
----@return string
-function ZENITHA.getVersionText() return versionText end
-
----Get the application version text
----@param bool boolean
-function ZENITHA.setShowVersionText(bool) showVersionText=bool end
+---@return string, string?
+function ZENITHA.getAppInfo() return appName,appVer end
 
 ---Get the joysticks' state table
 function ZENITHA.getJsState() return jsState end
@@ -1314,18 +1289,6 @@ function ZENITHA.getErr(i)
     else
         return errData
     end
-end
-
----Set the debug info list
----@param list {[1]:string, [2]:fun(): any}[]
-function ZENITHA.setDebugInfo(list)
-    assert(type(list)=='table',"ZENITHA.setDebugInfo(list): Need table")
-    for i=1,#list do
-        assert(type(list[i][1])=='string',"ZENITHA.setDebugInfo: need {str,function}[]")
-        assert(type(list[i][2])=='function',"ZENITHA.setDebugInfo: need {str,function}[]")
-    end
-    debugInfos=TABLE.copy(list)
-    TABLE.reverse(debugInfos)
 end
 
 ---Set the first scene to load, normally this must be used, or you wlil enter the demo scene
@@ -1355,8 +1318,8 @@ end
 ---| Mode \| | Value |
 ---| -: | :-: |
 ---| Accuracy \| | 🪟1.0, 🐧0.5 |
----| Normal \| | 0 |
----| Performance \| | -0.5 |
+---| Default \| | 0 |
+---| Economy \| | -0.5 |
 ---| Power-Saving \| | -1.0 |
 ---
 ---How this works: Because `love.timer.sleep(t)` is not accurate enough (always a bit more time), so we can sleep `[setting value] LESS`, then busy-wait to obtain the exact time interval.  
@@ -1384,13 +1347,6 @@ end
 function ZENITHA.setRenderRate(rate)
     assert(type(rate)=='number' and rate>0 and rate<=100,"ZENITHA.setRenderRate(rate): Need in (0,100]")
     drawFreq=rate
-end
-
----Set whether to show FPS at left-down corner
----@param bool boolean
-function ZENITHA.setShowFPS(bool)
-    assert(type(bool)=='boolean',"ZENITHA.setShowFPS(b): Need boolean")
-    showFPS=bool
 end
 
 ---Set click distance threshold
@@ -1442,7 +1398,7 @@ ZENITHA.globalEvent=setmetatable(globalEvent,{
     __metatable=true,
 })
 
-ZENITHA.bigCanvas=bigCanvases
+ZENITHA._debugInfo=debugInfo
 
 --------------------------------------------------------------
 

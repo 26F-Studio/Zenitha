@@ -95,8 +95,8 @@ function LOG.getString()
     local L={}
     for i=1,#logs do L[i]=dumpLog(logs[i]) end
     return ("%s %s  logs  %s\n%s"):format(
-        ZENITHA.getAppName(),
-        ZENITHA.getVersionText(),
+        ZENITHA.getAppInfo(),
+        select(2,ZENITHA.getAppInfo()),
         os.date("%Y/%m/%d %A",startTime),
         table.concat(L,"\n")
     )

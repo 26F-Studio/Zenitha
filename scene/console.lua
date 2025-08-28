@@ -281,7 +281,7 @@ local commands={} do
                 commands.clear.code()
                 outputBox:clear()
                 outputBox.h=SCR.h0-140
-                local button=WIDGET.new{type='button',name='bye',text=ZENITHA.getAppName().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,onPress=function()
+                local button=WIDGET.new{type='button',name='bye',text=ZENITHA.getAppInfo().." is fun. Bye.",pos={.5,1},x=0,y=-60,w=426,h=100,onPress=function()
                     WIDGET.active.bye:setVisible(false)
                     outputBox.h=SCR.h0-20
                     TASK.new(function()
