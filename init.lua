@@ -172,7 +172,7 @@ ZENITHA.bigCanvas=setmetatable({},{
 
 -- User-changeable values
 local appName='Zenitha'
-local appVer='V0.1' ---@type string?
+local appVer ---@type string?
 local firstScene='_zenitha'
 local discardCanvas=false
 local updateFreq=100
@@ -1062,7 +1062,7 @@ function love.errorhandler(msg)
         if love.filesystem then
             love.filesystem.append('error.log',
                 os.date("%Y/%m/%d %A %H:%M:%S\n")..
-                #errData.." crash(es) "..SYSTEM.."-"..appVer.."  scene: "..sceneStack.."\n"..
+                #errData.." crash(es) "..SYSTEM.."-"..(appVer or "noVer").."  scene: "..sceneStack.."\n"..
                 table.concat(err,"\n",1,c-2).."\n\n"
             )
         end
@@ -1098,7 +1098,7 @@ function love.errorhandler(msg)
             FONT.set(100,'_norm') gc.print(":(",100,0,0,1.2)
             FONT.set(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
             FONT.set(20,'_norm') gc.printf(err[1],100,330,SCR.w/k-200)
-            gc.print(SYSTEM.."-"..appVer.."\nScene stack:"..sceneStack,100,640)
+            gc.print(SYSTEM.."-"..(appVer or "noVer").."\nScene stack:"..sceneStack,100,640)
             gc.print("TRACEBACK",100,430)
             for i=4,#err-2 do
                 gc.print(err[i],100,380+20*i)
