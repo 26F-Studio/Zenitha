@@ -110,7 +110,7 @@ function Tween:setDo(doFunc)
 end
 
 ---Set onRepeat callback function `onRepeat(finishedLoopCount)`
----@param func function
+---@param func fun(loopCount:number)
 ---@return Zenitha.Tween
 function Tween:setOnRepeat(func)
     assert(type(func)=='function',"[tween]:setOnRepeat(onRepeat): Need function")
@@ -178,9 +178,9 @@ function Tween:setLoop(loopMode,totalLoop)
     assert(not totalLoop or type(totalLoop)=='number' and totalLoop>=0,"[tween]:setLoop(loopMode,totalLoop): totalLoop need >=0")
     -- assert(not self.running,"[tween]:setLoop(loopMode): Can't set loop when running")
     self.loop=loopMode
-    self.loopCount=1
     self.totalLoop=totalLoop or 1e99
-    self.flipMode=false
+    -- self.loopCount=1 -- will be set on :run()
+    -- self.flipMode=false
     return self
 end
 
@@ -232,6 +232,10 @@ function Tween:run(timeFunc)
     else
         self.time=0
     end
+    if self.loop then
+        self.loopCount=1
+        self.flipMode=false
+    end
     self:update(0);
     (duringUpdate and preAnimSet or updAnimSet)[self]=true
     return self
@@ -247,17 +251,20 @@ function Tween:skip(simBound)
         self:update(0)
     else
         if simBound then
+            assert(self.totalLoop<1e99,"[tween]:skip(): Can't simulate an infinite animation")
+            repeat
+                self.time=self.duration
+                self:update(0)
+            until not self.running
         else
+            self.time=self.duration
+            self.loopCount=self.totalLoop
             if self.loop=='repeat' then
-                self.time=self.duration
-                self.loopCount=self.totalLoop
-                self:update(0)
+                -- Do nothing
             elseif self.loop=='yoyo' then
-                self.time=self.duration
-                self.flipMode=self.loopCount%2==1==self.flipMode
-                self.loopCount=self.totalLoop
-                self:update(0)
+                self.flipMode=self.totalLoop%2==1==self.flipMode
             end
+            self:update(0)
         end
     end
     return self
@@ -297,7 +304,7 @@ function Tween:update(dt)
         end
     else
         self.time=self.time+dt
-        local t=min(self.time/self.duration,1)
+        local t=self.duration<=0 and 1 or min(self.time/self.duration,1)
         self.doFunc(curveValue(self.flipMode and 1-t or t,self.ease),self.loopCount)
         if t>=1 then
             if self.loop and self.loopCount<self.totalLoop then
