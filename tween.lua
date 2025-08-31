@@ -270,6 +270,7 @@ function Tween:kill()
     tagAnimSet[self]=nil
     if self.unqTag then unqAnimMap[self.unqTag]=nil end
     self.onKill()
+    self.running=false
 end
 
 ---@param t number
