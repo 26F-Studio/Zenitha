@@ -33,6 +33,7 @@ local max,min=math.max,math.min
 ---Convert hex string to color
 ---@param str string
 ---@return number, number, number, number?
+---@nodiscard
 local function HEX(str)
     assert(type(str)=='string',"COLOR.HEX(str): Need string")
     str=str:match('#?(%x%x?%x?%x?%x?%x?%x?%x?)') or '000000'
@@ -236,6 +237,13 @@ end
 
 COLOR.HEX=HEX
 
+---Convert color to hex string
+---@param r number [0,1]
+---@param g number [0,1]
+---@param b number [0,1]
+---@param a? number alpha
+---@return string hex the 6 or 8 digits string
+---@nodiscard
 function COLOR.toHEX(r,g,b,a)
     if a then
         r,g,b,a=r*255,g*255,b*255,a*255
@@ -246,12 +254,15 @@ function COLOR.toHEX(r,g,b,a)
     end
 end
 
+
+
 ---Convert HSV to RGB
 ---@param h number Color type
 ---@param s number Color amount
 ---@param v number Value
 ---@param a? number Alpha
 ---@return number, number, number, number?
+---@nodiscard
 function COLOR.HSV(h,s,v,a)
     if s<=0 then return v,v,v,a end
     h=h*6
@@ -265,11 +276,14 @@ function COLOR.HSV(h,s,v,a)
     else            return v,v-p,x+v-p,a
     end
 end
+
+---Convert RGB to HSV
 ---@param r number [0,1]
 ---@param g number [0,1]
 ---@param b number [0,1]
 ---@param a? number alpha
 ---@return number, number, number, number? #All [0,1]
+---@nodiscard
 function COLOR.toHSV(r,g,b,a)
     local M=max(r,g,b)
     local m=min(r,g,b)
@@ -288,6 +302,8 @@ function COLOR.toHSV(r,g,b,a)
         a
 end
 
+
+
 local function hue2rgb(p,q,t)
     t=t%1
     if t<1/6 then return p+(q-p)*6*t end
@@ -301,6 +317,7 @@ end
 ---@param l number Lightness
 ---@param a? number Alpha
 ---@return number, number, number, number?
+---@nodiscard
 function COLOR.HSL(h,s,l,a)
     if s<=0 then return l,l,l,a end
 
@@ -312,11 +329,14 @@ function COLOR.HSL(h,s,l,a)
         hue2rgb(p,q,h-1/3),
         a
 end
+
+---Convert RGB to HSL
 ---@param r number [0,1]
 ---@param g number [0,1]
 ---@param b number [0,1]
 ---@param a? number alpha
 ---@return number, number, number, number? #All [0,1]
+---@nodiscard
 function COLOR.toHSL(r,g,b,a)
     local M=max(r,g,b)
     local m=min(r,g,b)
@@ -335,10 +355,13 @@ function COLOR.toHSL(r,g,b,a)
         a
 end
 
+
+
 ---Get Rainbow color with phase
 ---@param phase number cycle in 2pi
 ---@param a? number alpha
 ---@return number, number, number, number?
+---@nodiscard
 function COLOR.rainbow(phase,a)
     return
         sin(phase)*.4+.6,
@@ -346,10 +369,12 @@ function COLOR.rainbow(phase,a)
         sin(phase-2.0944)*.4+.6,
         a
 end
+
 ---Variant of COLOR.rainbow
 ---@param phase number cycle in 2pi
 ---@param a? number alpha
 ---@return number, number, number, number?
+---@nodiscard
 function COLOR.rainbow_light(phase,a)
     return
         sin(phase)*.2+.7,
@@ -357,10 +382,12 @@ function COLOR.rainbow_light(phase,a)
         sin(phase-2.0944)*.2+.7,
         a
 end
+
 ---Variant of COLOR.rainbow
 ---@param phase number cycle in 2pi
 ---@param a? number alpha
 ---@return number, number, number, number?
+---@nodiscard
 function COLOR.rainbow_dark(phase,a)
     return
         sin(phase)*.2+.4,
@@ -368,10 +395,12 @@ function COLOR.rainbow_dark(phase,a)
         sin(phase-2.0944)*.2+.4,
         a
 end
+
 ---Variant of COLOR.rainbow
 ---@param phase number cycle in 2pi
 ---@param a? number alpha
 ---@return number, number, number, number?
+---@nodiscard
 function COLOR.rainbow_gray(phase,a)
     return
         sin(phase)*.16+.5,
@@ -380,10 +409,34 @@ function COLOR.rainbow_gray(phase,a)
         a
 end
 
-COLOR.colorSets={'Reds','Flames','Oranges','Yellows','Apples','Kellys','Greens','Jungles','Cyans','Ices','Seas','Blues','Purples','Violets','Magentas','Wines'}
 
+
+local sets={'Reds','Flames','Oranges','Yellows','Apples','Kellys','Greens','Jungles','Cyans','Ices','Seas','Blues','Purples','Violets','Magentas','Wines'}
+---Get a random standard color
+---@param brightness? number 1~5, blank for random brightness
+---@return Zenitha.Color
+---@nodiscard
 function COLOR.random(brightness)
-    return COLOR[COLOR.colorSets[rnd(#COLOR.colorSets)]][brightness or rnd(5)]
+    return COLOR[sets[rnd(#sets)]][brightness or rnd(5)]
 end
+COLOR.colorSets=sets
+
+
+
+---Get mix value (linear) of two colors with a ratio (not clamped) in vararg
+---@param c1 Zenitha.Color
+---@param c2 Zenitha.Color
+---@param t number
+---@return number, number, number, number
+---@nodiscard
+function COLOR.lerp(c1,c2,t)
+    return
+        c1[1]*t+c2[1]*(1-t),
+        c1[2]*t+c2[2]*(1-t),
+        c1[3]*t+c2[3]*(1-t),
+        (c1[4] or 1)*t+(c2[4] or 1)*(1-t)
+end
+
+
 
 return COLOR
