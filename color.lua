@@ -427,14 +427,15 @@ COLOR.colorSets=sets
 ---@param c1 Zenitha.Color
 ---@param c2 Zenitha.Color
 ---@param t number
+---@param a? number alpha
 ---@return number, number, number, number
 ---@nodiscard
-function COLOR.lerp(c1,c2,t)
+function COLOR.lerp(c1,c2,t,a)
     return
         c1[1]*t+c2[1]*(1-t),
         c1[2]*t+c2[2]*(1-t),
         c1[3]*t+c2[3]*(1-t),
-        (c1[4] or 1)*t+(c2[4] or 1)*(1-t)
+        a or (c1[4] or 1)*t+(c2[4] or 1)*(1-t)
 end
 
 
