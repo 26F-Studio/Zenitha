@@ -797,7 +797,7 @@ local upperData,lowerData,diaData do
     diaData=parseStrPair(ZENITHA.path..'diacritics.txt')
 end
 
----string.upper with utf8 support, warning: very low performance, 
+---string.upper with utf8 support, warning: very low performance
 ---@param str string
 ---@return string
 ---@nodiscard
@@ -809,7 +809,7 @@ function STRING.upperUTF8(str)
     return str
 end
 
----string.lower with utf8 support, warning: very low performance, 
+---string.lower with utf8 support, warning: very low performance
 ---@param str string
 ---@return string
 ---@nodiscard
