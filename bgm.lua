@@ -404,8 +404,10 @@ function BGM.set(bgms,mode,...)
                     assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
                     if timeUse==0 then
-                        obj.lowgain=lowgain
-                        obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
+                        obj.lowgain,obj.highgain=lowgain,1
+                        _gainTemp.lowgain=obj.lowgain^9.42
+                        _gainTemp.highgain=obj.highgain^9.42
+                        obj.source:setFilter(_gainTemp)
                     else
                         TASK.new(task_setLowgain,obj,lowgain,timeUse)
                     end
@@ -421,8 +423,10 @@ function BGM.set(bgms,mode,...)
                     assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
                     if timeUse==0 then
-                        obj.highgain=highgain
-                        obj.source:setFilter{type='bandpass',lowgain=obj.lowgain,highgain=obj.highgain,volume=1}
+                        obj.lowgain,obj.highgain=1,highgain
+                        _gainTemp.lowgain=obj.lowgain^9.42
+                        _gainTemp.highgain=obj.highgain^9.42
+                        obj.source:setFilter(_gainTemp)
                     else
                         TASK.new(task_setHighgain,obj,highgain,timeUse)
                     end
