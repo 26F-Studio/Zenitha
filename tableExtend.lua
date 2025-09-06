@@ -543,7 +543,7 @@ function TABLE.getRandom(org)
     if l>0 then
         return org[rnd(l)]
     else
-        error("TABLE.popRandom(org): Table is empty")
+        error("TABLE.getRandom(org): Table is empty")
     end
 end
 
