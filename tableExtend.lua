@@ -113,7 +113,7 @@ function TABLE.copyAll(org,depth)
     return L
 end
 
----Get a new table which keys and values are swapped
+---Create a new table which keys and values are swapped
 ---@generic K, V
 ---@param org {[K]:V}
 ---@return {[V]:K}
@@ -125,7 +125,7 @@ function TABLE.inverse(org)
     return T
 end
 
----Get keys of a table as a list
+---Create a list of keys of a table
 ---@generic K
 ---@param org {[K]:any}
 ---@return K[]
@@ -140,7 +140,7 @@ function TABLE.getKeys(org)
     return L
 end
 
----Get values of a table as a list
+---Create a list of values of a table
 ---@generic V
 ---@param org {[any]:V}
 ---@return V[]
@@ -155,7 +155,7 @@ function TABLE.getValues(org)
     return L
 end
 
----Get a table with all old values as keys, and `true` or specified value as values
+---Create a table with all values (in org) as keys, and `true` or specified value as values
 ---@generic T1, T2
 ---@param org {[any]:T1}
 ---@param val? T2 default to `true`
@@ -170,7 +170,7 @@ function TABLE.getValueSet(org,val)
     return T
 end
 
----**Create** a table of two lists combined
+---Create a table of two lists combined
 ---For **Appending** a table, use `TABLE.append`
 ---@generic T1, T2
 ---@param L1 T1[] list 1
@@ -185,33 +185,8 @@ function TABLE.combine(L1,L2)
     return L
 end
 
----Transpose a matrix
----@generic V
----@param matrix Mat<V>
----@return Mat<V>
-function TABLE.transpose(matrix)
-    if #matrix==0 then return matrix end
-    local w,h=#matrix[1],#matrix
-    if w>h then
-        for y=h+1,w do matrix[y]={} end
-        for y=2,w do
-            for x=1,y-1 do
-                matrix[y][x],matrix[x][y]=matrix[x][y],matrix[y][x]
-            end
-        end
-    else
-        for y=2,h do
-            for x=1,y-1 do
-                matrix[y][x],matrix[x][y]=matrix[x][y],matrix[y][x]
-            end
-        end
-        for y=w+1,h do matrix[y]=nil end
-    end
-    return matrix
-end
-
 ---Create a transposed copy of a matrix
----This one is faster then `TABLE.transpose` but creates new table
+---Note: this is faster than `TABLE.transpose`
 ---@generic V
 ---@param matrix Mat<V>
 ---@return Mat<V>
@@ -227,10 +202,10 @@ function TABLE.transposeNew(matrix)
     return newMat
 end
 
----Create a rotated copy of a matrix
+---**Create** a rotated copy of a matrix
 ---@generic V
 ---@param matrix Mat<V>
----@param direction 'R' | 'L' | 'F' | '0' CW, CCW, 180 deg, 0 deg (copy)
+---@param direction 'R' | 'L' | 'F' | '0' clockwise, counter-clockwise, 180 deg, 0 deg (copy)
 ---@return Mat<V>
 ---@nodiscard
 function TABLE.rotateNew(matrix,direction)
@@ -646,6 +621,31 @@ function TABLE.flatten(org,depth,sep)
         depth=depth-1
     end
     return org
+end
+
+---Transpose a matrix
+---@generic V
+---@param matrix Mat<V>
+---@return Mat<V>
+function TABLE.transpose(matrix)
+    if #matrix==0 then return matrix end
+    local w,h=#matrix[1],#matrix
+    if w>h then
+        for y=h+1,w do matrix[y]={} end
+        for y=2,w do
+            for x=1,y-1 do
+                matrix[y][x],matrix[x][y]=matrix[x][y],matrix[y][x]
+            end
+        end
+    else
+        for y=2,h do
+            for x=1,y-1 do
+                matrix[y][x],matrix[x][y]=matrix[x][y],matrix[y][x]
+            end
+        end
+        for y=w+1,h do matrix[y]=nil end
+    end
+    return matrix
 end
 
 --------------------------------------------------------------
@@ -1165,7 +1165,7 @@ function TABLE.setAutoFill(org,source)
     })
 end
 
-do -- function TABLE.linkSource(src,loadFunc)
+do -- function TABLE.linkSource(lib,src,loadFunc,noLazy)
     local function lazyLoadMF(self,k)
         local mt=getmetatable(self)
         local res=mt.__loader(mt.__source[k])
@@ -1194,16 +1194,16 @@ do -- function TABLE.linkSource(src,loadFunc)
             end
         end
     end
-    ---Create a new table with lazy load feature
+    ---Feature the lib table with lazy load ability
     ---@generic T
-    ---@param lib T lib table to be linked
-    ---@param src table resourceID table
+    ---@param lib T the lib table to be linked, normally just {}
+    ---@param idLib table the resourceID table, could be multi-layered
     ---@param loadFunc fun(resID:any): any Will receive resourceID from src table, must return a non-nil value as loaded result
     ---@param noLazy? boolean
     ---@return T
-    function TABLE.linkSource(lib,src,loadFunc,noLazy)
-        link(lib,src,loadFunc)
-        if noLazy then wakeLazyTable(src,lib) end
+    function TABLE.linkSource(lib,idLib,loadFunc,noLazy)
+        link(lib,idLib,loadFunc)
+        if noLazy then wakeLazyTable(idLib,lib) end
         return lib
     end
 end
