@@ -12,9 +12,8 @@ local floor,ceil=math.floor,math.ceil
 local sin,cos=math.sin,math.cos
 local max,min=math.max,math.min
 local rnd=math.random
-local exp,log=math.exp,math.log
+local log=math.log
 local abs=math.abs
-local tau=MATH.tau
 
 ---Check if a number is NaN
 ---@param n number
@@ -279,7 +278,7 @@ function MATH.randNorm()
         randNormBF=nil
         return res
     else
-        local r=rnd()*tau
+        local r=rnd()*6.283185307179586
         local d=(-2*log(1-rnd()))^.5
         randNormBF=sin(r)*d
         return cos(r)*d
@@ -452,8 +451,7 @@ function MATH.clampInterpolate(x1,y1,x2,y2,t)
     )
 end
 
----Get a closer value from a to b with difference d
----
+---Get a closer value from a to b with difference d  
 ---Automatically choose +d or -d, then clamped at b
 ---@param a number
 ---@param b number
@@ -464,9 +462,9 @@ function MATH.linearApproach(a,b,d)
     return b>a and min(a+d,b) or max(a-d,b)
 end
 
----Get a closer value from a to b with "exponential speed" k
----
----Can be called multiple times, you'll get same result for same sum of k
+---Get a closer value from a to b with "exponential speed" k  
+---Can be called multiple times, you'll get same result for same sum of k  
+---Reference: K=.1 -> 10%, K=.3 -> 26%, K=.7 -> 50%, K=2 -> 86%, K=4 -> 98%
 ---@param a number
 ---@param b number
 ---@param k number
@@ -541,8 +539,7 @@ function MATH.mDistV(p,v1,v2)
     end
 end
 
----Check if a point is in a polygon
----
+---Check if a point is in a polygon  
 ---By Pedro Gimeno, donated to the public domain
 ---@param x number
 ---@param y number
