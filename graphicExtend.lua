@@ -493,7 +493,7 @@ end
 ---@class Zenitha.Curve.Point
 ---@field [1] number
 ---@field [2] number
----@field [3] boolean
+---@field [3]? boolean
 ---@field x? number
 ---@field y? number
 ---@field ctrl? boolean
