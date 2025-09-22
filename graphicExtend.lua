@@ -864,8 +864,9 @@ do -- function GC.load(L), GC.execute(t)
     ---```
     ---@param list {w:number, h:number, [number]:Zenitha.drawingCommand}
     function GC.load(list)
-        local w,h=tonumber(list.w),tonumber(list.h)
-        assert(w and h and w>0 and h>0 and w%1==0 and h%1==0,"GC.load(L): L[1] and L[2] need int >=1")
+        local w=tonumber(list.w)
+        local h=tonumber(list.h) or w
+        assert(w and h and w>0 and h>0 and w%1==0 and h%1==0,"GC.load(L): L.w (and L.h) must be positive integer")
         gc.push()
             local canvas
             while true do
