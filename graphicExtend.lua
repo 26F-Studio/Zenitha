@@ -855,7 +855,7 @@ do -- function GC.load(L), GC.execute(t)
     ---Similar to GC.execute, but draw on a canvas.
     ---### Example
     ---```
-    ---GC.load{w=100,h=100 -- size of canvas
+    ---GC.load{w=100,h=100 -- size of canvas, h is optional (default to w)
     ---    {'setCL',1,0,0},
     ---    {'dRect','fill',0,0,100,100},
     ---    {'setCL',1,1,0},

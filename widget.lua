@@ -196,11 +196,11 @@ local function parseImgPath(path)
     return _img or PAPER
 end
 
-local leftAngle=GC.load{w=20,h=20,
+local leftAngle=GC.load{w=20,
     {'setLW',5},
     {'line', 18,2,1,10,18,18},
 }
-local rightAngle=GC.load{w=20,h=20,
+local rightAngle=GC.load{w=20,
     {'setLW',5},
     {'line', 2,2,19,10,2,18},
 }

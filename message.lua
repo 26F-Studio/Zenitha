@@ -23,7 +23,7 @@ local msgStyle={
     info={
         backColor={COLOR.HEX"3575F0"},
         textColor={COLOR.HEX"FFFFFF"},
-        canvas=GC.load{w=40,h=40,
+        canvas=GC.load{w=40,
             {'setCL',1,1,1},
             {'setLW',2},
             {'dCirc',20,20,19},
@@ -34,7 +34,7 @@ local msgStyle={
     check={
         backColor={COLOR.HEX"4FB666"},
         textColor={COLOR.HEX"FFFFFF"},
-        canvas=GC.load{w=40,h=40,
+        canvas=GC.load{w=40,
             {'setLW',6},
             {'setCL',1,1,1},
             {'line',5,20,15,30,35,10},
@@ -43,7 +43,7 @@ local msgStyle={
     warn={
         backColor={COLOR.HEX"D2A100"},
         textColor={COLOR.HEX"FFFFFF"},
-        canvas=GC.load{w=40,h=40,
+        canvas=GC.load{w=40,
             {'setCL',1,1,1},
             {'setLW',3},
             {'dPoly',20.5,1,0,38,40,38},
@@ -55,7 +55,7 @@ local msgStyle={
     error={
         backColor={COLOR.HEX"CF4949"},
         textColor={COLOR.HEX"FFFFFF"},
-        canvas=GC.load{w=40,h=40,
+        canvas=GC.load{w=40,
             {'setLW',6},
             {'setCL',1,1,1},
             {'line',8,8,32,32},
