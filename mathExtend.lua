@@ -85,8 +85,7 @@ function MATH.rand(a,b)
 end
 
 local randNormBF
----Get a random numbers in gaussian distribution (Box-Muller algorithm + stream buffer)  
----Mean = 0, Standard Deviation = 1
+---Get a random numbers follows normal distribution (μ=0, σ=1, Box-Muller algorithm + stream buffer)
 ---@return number
 ---@nodiscard
 function MATH.randNorm()
@@ -267,20 +266,20 @@ function MATH.clampInterpolate(x1,y1,x2,y2,t)
     )
 end
 
----Get a closer value from a to b with difference d  
----Automatically choose +d or -d, then clamped at b
----@param a number
----@param b number
+---Get a closer value from a to b with difference d until reach b
+---@param s number
+---@param e number
 ---@param d number
 ---@return number
 ---@nodiscard
-function MATH.linearApproach(a,b,d)
-    return b>a and min(a+d,b) or max(a-d,b)
+function MATH.linearApproach(s,e,d)
+    return s<e and min(s+d,e) or max(s-d,e)
 end
 
----Get a closer value from a to b with "exponential speed" k  
+---Get a closer value from a to b with "exponential speed" k
+---
 ---Can be called multiple times, you'll get same result for same sum of k  
----Reference: K=.1 -> 10%, K=.3 -> 26%, K=.7 -> 50%, K=2 -> 86%, K=4 -> 98%
+---Reference: k=.1 -> 10%, k=.3 -> 26%, k=.7 -> 50%, k=2 -> 86%, k=4 -> 98%
 ---@param a number
 ---@param b number
 ---@param k number
@@ -401,8 +400,7 @@ end
 --------------------------------------------------------------
 -- Polygon
 
----Check if a point is in a polygon  
----By Pedro Gimeno, donated to the public domain
+---Check if a point is in a polygon (By Pedro Gimeno, donated to the public domain)
 ---@param x number
 ---@param y number
 ---@param poly number[] {x1,y1,x2,y2,...}
@@ -464,7 +462,7 @@ function MATH.sum(data,s,e)
     return sum
 end
 
----Sum all values in a table  
+---Sum all values in a table
 ---@param t Map<number>
 ---@return number
 ---@nodiscard
@@ -503,7 +501,7 @@ function MATH.pAverage(data,pow)
     end
 end
 
----warning: very low performance
+---**Warning:** very low performance
 ---@param data number[]
 ---@param quant number [0,1]
 ---@return number
@@ -575,6 +573,7 @@ function MATH.between(v,low,high)
 end
 
 ---Find which interval the number is in
+---
 ---### Example
 ---```
 ---MATH.selectFreq(50,{10,20,30,40}) -- 3, because 50 will drop into the 3rd interval [30,60)
@@ -586,19 +585,6 @@ function MATH.selectFreq(v,fList)
     for i=1,#fList do
         v=v-fList[i]
         if v<0 then return i end
-    end
-    error("WTF")
-end
-
----Same to MATH.selectFreq but with any table  
----warning: keys order is undefined
----@param v number
----@param fList Map<number> positive numbers
----@nodiscard
-function MATH.selectFreqAll(v,fList)
-    for k,f in next,fList do
-        v=v-f
-        if v<0 then return k end
     end
     error("WTF")
 end

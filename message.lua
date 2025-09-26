@@ -72,8 +72,7 @@ local msgStyle={
 local mesList={}
 local startY=0
 
----Directly call to create a new message popup at up-left corner  
----Last 3 seconds by default
+---Directly call `MSG` to create a popup at up-left corner, default to last 3s
 ---@class Zenitha.Message
 local MSG=setmetatable({},{
     __call=function(_,cat,str,time)

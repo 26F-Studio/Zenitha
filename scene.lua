@@ -246,7 +246,7 @@ function SCN._pop()
     table.remove(SCN.stack)
 end
 
----Swap to a sceene without add current scene to stack (cannot go back)
+---Swap to a scene. You should use `SCN.go` in most cases so you can go back with `SCN.back`
 ---@param tar string
 ---@param swapStyle? Zenitha.SceneSwapStyle
 ---@param ... any Arguments passed to new scene
@@ -282,7 +282,7 @@ function SCN.swapTo(tar,swapStyle,...)
     end
 end
 
----Go to a scene
+---Push current scene to stack, then swap to the target scene
 ---@param tar string
 ---@param swapStyle? Zenitha.SceneSwapStyle
 ---@param ... any Arguments passed to new scene

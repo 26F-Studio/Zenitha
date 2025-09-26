@@ -126,14 +126,21 @@ function SFX.load(_1,_2,_3)
     table.sort(nameList)
 end
 
----Load SFX samples from specified directory  
----Files should be 1.ogg, 2.ogg, ..., and 1 semitone higher then previous one  
----shrink: drop a bit of samples at the end of each clip, to avoid error due to compressing
+---Load SFX samples from specified directory or file
+---
+---Directory mode:  
+---path: directory (no dot after last "/") containing sample files named with 1.ogg, 2.ogg, ..., and 1 semitone higher then previous one
+---
+---File mode:  
+---path: file (dot+letters after last "/") containing multiple samples with **exactly** same duration, and 1 semitone higher then previous one  
+---count: how many samples in the file  
+---shrink: drop [shrink] percentage of samples at the end of each clip to avoid error due to compressing
+---
 ---### Example
 ---```
 ---SFX.loadSample{name='bass',path='assets/sample/bass',base='A2',shrink=0.01}
 ---```
----@param pack {name:string, path:string, base:string, count:number, shrink?:number}
+---@param pack {name:string, path:string, base:string, count?:number, shrink?:number}
 function SFX.loadSample(pack)
     assert(type(pack)=='table',"Usage: SFX.loadsample(table)")
     assert(pack.name,"SFX.loadSample: need field 'name'")
@@ -189,6 +196,7 @@ function SFX.setStereo(s)
 end
 
 ---Play a sample
+---
 ---### Example
 ---```
 ---SFX.playSample('piano', .7,'C4','E4', .9,'G4')

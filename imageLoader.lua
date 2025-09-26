@@ -23,6 +23,7 @@ function IMG._loader(path)
 end
 
 ---Initialize IMG lib (only once)
+---
 ---### Example
 ---```
 ----- Initialize the IMG lib with a index table
@@ -45,7 +46,7 @@ end
 ---```
 --- By the way, the index table **CAN** include non-string value, they won't be loaded as a path string, but just keep the value as it is.
 ---
----Advanced usage: `IMG.init(index)` is overload of `IMG.init(index,IMG)`, so you can create your own lib with `lib=IMG.init(index,true)`, in this way you can help language server doing auto-completion for you.
+---Advanced usage: `IMG.init(index)` is overload of `IMG.init(index,false)`. You can create your own lib with `lib=IMG.init(index,true)`, in this way you can help language server doing auto-completion for you.
 ---
 ---Interesting fact: This is actually a simple wrapping of `TABLE.linkSource` + `IMG._loader`
 ---@overload fun(index: Map<string | table>)

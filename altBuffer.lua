@@ -1,6 +1,5 @@
----In case luajit's string.buffer cannot be load successfully,  
----use this alternative implementation to keep Zenitha working  
----only a minimized implementation which is enough for Zenitha's usage, check the code below for more details
+---In case luajit's string.buffer cannot be load successfully, use this alternative implementation to keep Zenitha working with
+---a minimized implementation which is enough for Zenitha's usage, check the code below for more details
 ---@class Zenitha.AltBuffer
 local altBuffer=setmetatable({},{__index=function(_,k) error("Zenitha.AltBuffer: Invalid method '"..tostring(k).."'") end})
 altBuffer.__index=altBuffer

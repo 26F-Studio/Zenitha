@@ -13,8 +13,7 @@ local rep,rev=string.rep,string.reverse
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
 
----If you are sure that you won't need STRING.install() to use things like `str:trim()`,  
----you can delete the next line (---@class stringlib) to prevent this strEx lib extending the methods for class string
+---If you are sure that you won't call STRING.install() to use `str:trim()`, you can delete the next line (---@class stringlib) to prevent this lib extending string class which could confuse your code editor's LS
 ---@class stringlib
 local STRING={}
 
@@ -73,7 +72,8 @@ function STRING.installIndex()
     end
 end
 
----Install stringPath syntax. Warning: conflict with normal auto-tonumber operation
+---Install stringPath syntax  
+---**Warning:** conflict with normal auto-tonumber operation
 ---
 ---`- "script/main.lua"` Get the file name from path  
 ---`"script" / "main.lua"` Combine folder and file name
@@ -129,18 +129,17 @@ function STRING.time(t)
 end
 
 local byteUnits={[0]=" B"," KB"," MB"," GB"," TB"," PB"," EB"," ZB"," YB"}
----Convert a file size number to readable string  
----input `2^26` --> `"64 MB"`
----@param s number number in byte
+---Convert a file size number (byte) to readable string, like `2^26` -> `"64 MB"`
+---@param B number
 ---@nodiscard
-function STRING.fileSize(s)
-    if s<=0 then
+function STRING.fileSize(B)
+    if B<=0 then
         return "0 B"
     else
-        local u=floor(log(s,1024)+1e-6)
+        local u=floor(log(B,1024)+1e-6)
         local n=1024^u
-        local digits=floor(lg(s/n))+1
-        return format('%g%s',floor(s/n*10^(3-digits))/10^(3-digits),byteUnits[u])
+        local digits=floor(lg(B/n))+1
+        return format('%g%s',floor(B/n*10^(3-digits))/10^(3-digits),byteUnits[u])
     end
 end
 
@@ -351,8 +350,8 @@ function STRING.filterASCII(str)
     return (gsub(str,'[^%z%s\x21-\x7E]',''))
 end
 
----Trim spaces and tabs at the beginning of all lines, useful for inline multi-line strings  
----(Will remove ending \n)
+---Trim spaces and tabs at the beginning of all lines, useful for inline multi-line strings (remove ending \n)
+---
 ---### Example
 ---```
 ---do
@@ -403,7 +402,7 @@ function STRING.after(str,sep,regex)
     if p then return sub(str,p+1) end
 end
 
----**Warning:** don't support number format like .26, must have digits before the dot, like 0.26
+---**Warning:** doesn't support number format like .26, must have digits before decimal point (like 0.26)
 ---@param str string
 ---@return integer | nil, string | nil
 ---@nodiscard
@@ -450,6 +449,7 @@ function STRING.readLine(str)
 end
 
 ---Shorten a path by cutting off long directory name
+---
 ---### Example
 ---```
 ---STRING.simplifyPath('Documents/Project/xxx.lua') --> 'D/P/xxx.lua'
@@ -604,8 +604,7 @@ function STRING.toBase(num,base,len)
     return rev(buf_get(buf))
 end
 
----Convert a integer to binary string  
----Short cut, `STRING.toBase(num,2,len)`
+---Just `STRING.toBase(num,2,len)`, convert a integer to binary string
 ---@param num number
 ---@param len? integer
 ---@return string
@@ -614,8 +613,7 @@ function STRING.toBin(num,len)
     return STRING.toBase(num,2,len)
 end
 
----Convert a integer to octal string  
----Short cut, `STRING.toBase(num,8,len)`
+---Just `STRING.toBase(num,8,len)`, convert a integer to octal string
 ---@param num number
 ---@param len? integer
 ---@return string
@@ -624,8 +622,7 @@ function STRING.toOct(num,len)
     return STRING.toBase(num,8,len)
 end
 
----Convert an integer to hexadecimal string  
----Short cut, `STRING.toBase(num,16,len)`
+---Just `STRING.toBase(num,16,len)`, convert an integer to hexadecimal string
 ---@param num number
 ---@param len? integer
 ---@return string
@@ -797,7 +794,8 @@ local upperData,lowerData,diaData do
     diaData=parseStrPair(ZENITHA.path..'diacritics.txt')
 end
 
----string.upper with utf8 support, warning: very low performance
+---string.upper with utf8 support  
+---**Warning:** very low performance
 ---@param str string
 ---@return string
 ---@nodiscard
@@ -809,7 +807,8 @@ function STRING.upperUTF8(str)
     return str
 end
 
----string.lower with utf8 support, warning: very low performance
+---string.lower with utf8 support  
+---**Warning:** very low performance
 ---@param str string
 ---@return string
 ---@nodiscard
@@ -821,7 +820,8 @@ function STRING.lowerUTF8(str)
     return str
 end
 
----remove diacritics, warning: low performance
+---Remove diacritics  
+---**Warning:** low performance
 ---@param str string
 ---@return string
 ---@nodiscard

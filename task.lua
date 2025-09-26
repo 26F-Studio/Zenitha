@@ -108,7 +108,7 @@ function TASK.new(code,...)
 end
 
 ---Get the number of tasks  
----Warning: the result is not accurate during TASK._update, tasks removed during the update still count
+---**Warning:** the result is not accurate during TASK._update, tasks removed during the update still count
 ---@return number
 function TASK.getCount()
     return #tasks

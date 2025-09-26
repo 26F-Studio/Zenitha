@@ -262,8 +262,8 @@ function TABLE.equal(a,b)
     return true
 end
 
----Check if two whole table have same elements
----**Warning**: won't check whether two table have same keys of hash part
+---Check if two whole table have same elements  
+---**Warning:** won't check whether two table have same keys of hash part
 ---@param a table
 ---@param b table
 ---@return boolean
@@ -541,7 +541,7 @@ function TABLE.getRandomAll(org)
 end
 
 ---Delete & return random [1-#] of table  
----**Warning**: last element will be moved to fill in the hole, so this is not really "pop"
+---**Warning:** last element will be moved to fill in the hole, so this is not really "pop"
 ---@generic V
 ---@param org V[]
 ---@return V
@@ -582,6 +582,7 @@ function TABLE.shuffle(org)
 end
 
 ---Re-index string value as key
+---
 ---### Example
 ---```
 ---local t={a=print,b='a'}
@@ -601,7 +602,8 @@ function TABLE.reIndex(org)
 end
 
 ---Flatten a nested table to a flat table (no table type value included)  
----**Warning**: number keys may collide with string keys: both [1] and ['1'] will be converted to `'.1'`
+---**Warning:** number keys may collide with string keys: both [1] and ['1'] will be converted to `'.1'`
+---
 ---### Example
 ---```
 ---local T={a=1,b={c=2},d={e={f=3}}}
@@ -682,7 +684,7 @@ function TABLE.listIndex(org,indexes)
 end
 
 ---Get value in a table by a path-like string  
----**Warning**: `pathIndex(t,"a.1")` will return t.a["1"], not t.a[1]
+---**Warning:** `pathIndex(t,"a.1")` will return t.a["1"], not t.a[1]
 ---@param org table
 ---@param str string
 ---@param sep? char Single-byte separator string (no need to consider escape), default to '.'
@@ -708,7 +710,7 @@ function TABLE.listIndexSet(org,indexes,value)
 end
 
 ---Set value in a table by a path-like string  
----**Warning**: `pathIndexSet(t,"a.1",2)` equals to `t.a["1"]=2`, not `t.a[1]=2`
+---**Warning:** `pathIndexSet(t,"a.1",2)` equals to `t.a["1"]=2`, not `t.a[1]=2`
 ---@param org table
 ---@param str string Need at least one index
 ---@param value any
@@ -1089,7 +1091,7 @@ end
 ---Execute func(table[k],k) in whole table, and optional element removing
 ---@generic K, V
 ---@param org {[K]:V}
----@param f fun(v:V, k:K): boolean? return `true` to remove element (**Warning**: Won't shrink the list part when removing list element)
+---@param f fun(v:V, k:K): boolean? return `true` to remove element (**Warning:** Won't shrink the list part when removing list element)
 ---@return {[K]:V}
 function TABLE.foreachAll(org,f)
     for k,v in next,org do

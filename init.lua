@@ -44,13 +44,11 @@ _G.ZENITHA=ZENITHA
 
 -- Useful global constants & functions
 
----Just `{}`  
----Empty table used as placeholder
+---Just `{}`, an empty table used as placeholder
 ---@type table
 NONE=setmetatable({},{__newindex=function() error("NONE: Attempt to modify constant table") end,__metatable=true})
 
----Just `function() end`  
----Empty function used as placeholder
+---Just `function() end`, an empty function used as placeholder
 function NULL(...) end
 
 ---Just `function() return true end`
@@ -1318,9 +1316,9 @@ end
 ---| Economy \| | -0.5 |
 ---| Power-Saving \| | -1.0 |
 ---
----How this works: Because `love.timer.sleep(t)` is not accurate enough (always a bit more time), so we can sleep `[setting value] LESS`, then busy-wait to obtain the exact time interval.  
+---How this works: Because `love.timer.sleep(t)` is not accurate enough (always a bit more time), so we can sleep `[setting value] LESS`, then busy-wait to obtain the exact time interval.
 ---
----But `sleep()` actually only accept integer microsecond value, so when we need to sleep 1.5ms, doing `sleep(1.5ms)` is same as `sleep(1ms)`, so busy-wait will still work for ~0.5ms.  
+---But `sleep()` actually only accept integer microsecond value, so when we need to sleep 1.5ms, doing `sleep(1.5ms)` is same as `sleep(1ms)`, so busy-wait will still work for ~0.5ms.
 ---That's why we accept negative number. Setting error to -1ms means we will do `sleep(2.5ms)` when we need 1.5, so busy-wait is guaranteed not to be triggered, saving more resource.
 ---@param ms number in [-1,1], default to 0 (ms)
 function ZENITHA.setSleepDurationError(ms)

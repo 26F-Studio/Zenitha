@@ -227,7 +227,7 @@ function GC.strokeDraw(strokeMode,d,obj,x,y,r,sx,sy,ox,oy,kx,ky)
     end
 end
 
----Print text with stroke (extended love.gc.printf)  
+---Print text with stroke (extended love.gc.printf)
 ---@param strokeMode? 'side' | 'corner' | 'full' other values will be treated as 'full'
 ---@param d number
 ---@param strokeColor? Zenitha.Color Stroke color (default to white)
@@ -524,7 +524,8 @@ end
 
 local ucsMode,ucsD1,ucsD2
 
----Move/Scale/Rotate the coordinate system and remember the movement (ONLY ONE TIME)  
+---Move/Scale/Rotate the coordinate system and remember the movement (ONLY ONE TIME)
+---
 ---Only useful when there's only one step, or you should use classical way (`push('transform')`+`pop()`) instead
 ---@param mode 'm' | 's' | 'r'
 ---@param d1 number
@@ -838,7 +839,8 @@ do -- function GC.load(L), GC.execute(t)
     end
     ---Run a set of graphics commands in table-format
     ---
-    ---See commands list by going to declaration of this function, then scroll up.
+    ---See commands list by going to declaration of this function, then scroll up
+    ---
     ---### Example
     ---```
     ---GC.execute{
@@ -852,7 +854,8 @@ do -- function GC.load(L), GC.execute(t)
     function GC.execute(t) GC_execute(t) end
 
     local sizeLimit=gc.getSystemLimits().texturesize
-    ---Similar to GC.execute, but draw on a canvas.
+    ---Similar to GC.execute, but draw on a canvas
+    ---
     ---### Example
     ---```
     ---GC.load{w=100,h=100 -- size of canvas, h is optional (default to w)

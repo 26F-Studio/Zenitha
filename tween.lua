@@ -211,8 +211,7 @@ function Tween:copy()
     return anim
 end
 
----Start the animation animate with time (again), or custom timeFunc
----
+---Start the animation animate with time (again), or custom timeFunc  
 ---**Warning:** you still have full access to animation after [tween]:run(), but don't touch it unless you know what you're doing
 ---@param timeFunc? fun(): number Custom the timeFunc (return a number in duration)
 ---@return Zenitha.Tween
