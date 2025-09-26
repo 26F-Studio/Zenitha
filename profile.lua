@@ -149,7 +149,7 @@ function profile.switch()
     if not switch then
         profile.stop()
         local res=profile.report()
-        print(profile.report())
+        print(res)
         CLIPBOARD.set(res)
         profile.reset()
         return false
