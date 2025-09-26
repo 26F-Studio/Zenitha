@@ -3,43 +3,70 @@ local getInfo=debug.getinfo
 
 local profile={}
 
-local _labeled={}  -- function labels
-local _defined={}  -- function definitions
-local _tcalled={}  -- time of last call
-local _telapsed={} -- total execution time
-local _ncalls={}   -- number of calls
-local _internal={} -- list of internal profiler functions
+---@class Zenitha.Profile.FuncInfo
+---@field name string | "?" function name
+---@field src string source file and line no.
 
-local function _hooker(event,line,info)
-    info=info or getInfo(2,'fnS')
+-- Registered information of functions
+---@type table<function, Zenitha.Profile.FuncInfo>
+local _reg={}
+-- Time of last call
+---@type table<function, number>
+local _tCall={}
+-- Total execution time
+---@type table<function, number>
+local _tRun={}
+-- Number of calls
+---@type table<function, number>
+local _callCnt={}
+
+-- Internal functions, to be ignored by profiler
+---@type table<function, true>
+local _internal={}
+
+local function _hooker(event,info)
+    if not info then info=getInfo(2,'fnS') end
     local f=info.func
-    if _internal[f] then return end -- ignore the profiler itself
-    if info.name then _labeled[f]=info.name end -- get the function name if available
+    if _internal[f] then return end
 
-    -- find the line definition
-    if not _defined[f] then
-        _defined[f]=info.short_src..":"..info.linedefined
-        _ncalls[f]=0
-        _telapsed[f]=0
+    -- Record definition
+    if not _reg[f] then
+        local pack={
+            name=info.name,
+            src=info.short_src,
+        }
+        if not pack.name then
+            if info.linedefined>0 then
+                pack.name="[anonymous]"
+            elseif info.what=='main' then
+                pack.name="[file]"
+            else
+                pack.name="?"
+            end
+        end
+        if pack.src:sub(1,9)==[[[string "]] then pack.src=pack.src:sub(9,-2) end
+        if info.linedefined>0 then pack.src=pack.src..":"..info.linedefined end
+        _reg[f]=pack
+        _callCnt[f]=0
+        _tRun[f]=0
     end
-    if _tcalled[f] then
-        local dt=clock()-_tcalled[f]
-        _telapsed[f]=_telapsed[f]+dt
-        _tcalled[f]=nil
+
+    if _tCall[f] then
+        _tRun[f]=_tRun[f]+(clock()-_tCall[f])
+        _tCall[f]=nil
     end
     if event=='tail call' then
-        local prev=getInfo(3,'fnS')
-        _hooker('return',line,prev)
-        _hooker('call',line,info)
+        _hooker('return',getInfo(3,'fnS'))
+        _hooker('call',info)
     elseif event=='call' then
-        _tcalled[f]=clock()
-    else
-        _ncalls[f]=_ncalls[f]+1
+        _tCall[f]=clock()
+    else -- event=='return'
+        _callCnt[f]=_callCnt[f]+1
     end
 end
 local function _comp(a,b)
-    local dt=_telapsed[b]-_telapsed[a]
-    return dt==0 and _ncalls[b]<_ncalls[a] or dt<0
+    local dt=_tRun[b]-_tRun[a]
+    return dt==0 and _callCnt[b]<_callCnt[a] or dt<0
 end
 
 function profile.start()
@@ -52,21 +79,20 @@ end
 
 function profile.stop()
     debug.sethook()
-    for f in next,_tcalled do
-        local dt=clock()-_tcalled[f]
-        _telapsed[f]=_telapsed[f]+dt
-        _tcalled[f]=nil
+    for f in next,_tCall do
+        local dt=clock()-_tCall[f]
+        _tRun[f]=_tRun[f]+dt
+        _tCall[f]=nil
     end
     -- merge closures
     local lookup={}
-    for f,d in next,_defined do
-        local id=(_labeled[f] or "?")..d
+    for f,info in next,_reg do
+        local id=info.name..info.src
         local f2=lookup[id]
         if f2 then
-            _ncalls[f2]=_ncalls[f2]+(_ncalls[f] or 0)
-            _telapsed[f2]=_telapsed[f2]+(_telapsed[f] or 0)
-            _defined[f],_labeled[f]=nil,nil
-            _ncalls[f],_telapsed[f]=nil,nil
+            _callCnt[f2]=_callCnt[f2]+(_callCnt[f] or 0)
+            _tRun[f2]=_tRun[f2]+(_tRun[f] or 0)
+            _reg[f],_callCnt[f],_tRun[f]=nil,nil,nil
         else
             lookup[id]=f
         end
@@ -75,10 +101,10 @@ function profile.stop()
 end
 
 function profile.reset()
-    for f in next,_ncalls do
-        _ncalls[f]=0
-        _telapsed[f]=0
-        _tcalled[f]=nil
+    for f in next,_callCnt do
+        _callCnt[f]=0
+        _tRun[f]=0
+        _tCall[f]=nil
     end
     collectgarbage()
 end
@@ -86,54 +112,64 @@ end
 ---Iterates all functions that have been called since the profile was started.
 ---@param limit? number limit the number of functions to return
 function profile.query(limit)
-    local t={}
-    for f,n in next,_ncalls do
+    local report={}
+    for f,n in next,_callCnt do
         if n>0 then
-            t[#t+1]=f
+            report[#report+1]=f
         end
     end
-    table.sort(t,_comp)
+    table.sort(report,_comp)
+    if limit then for i=#report,limit+1 do report[i]=nil end end
 
-    if limit then while #t>limit do table.remove(t) end end
-
-    for i,f in ipairs(t) do
-        local dt=0
-        if _tcalled[f] then
-            dt=clock()-_tcalled[f]
-        end
-        t[i]={i,_labeled[f] or "?",math.floor((_telapsed[f]+dt)*1e6)/1e6,_ncalls[f],_defined[f]}
+    for i=1,#report do
+        local f=report[i]
+        -- local dt=_tCall[f] and clock()-_tCall[f] or 0 -- should add this to _tElapsed[f], but we don't need query while profiler is still running
+        report[i]={i,_reg[f].name,string.format("%.6f",_tRun[f]):sub(1,8),_callCnt[f],_reg[f].src}
     end
-    return t
+    return report
 end
 
-local cols={3,20,8,6,32}
+local headStr={"#","Name","Time","Calls","Source"}
 ---Generate the datasheet
 ---@param limit? number limit the number of functions to return
----@return string
+---@return string #a huge multi-line string
 function profile.report(limit)
-    local out={}
     local report=profile.query(limit)
-    for i,row in ipairs(report) do
-        for j=1,5 do
-            local s=tostring(row[j])
-            local l1,l2=#s,cols[j]
-            if l1<l2 then
-                s=s..(" "):rep(l2-l1)
-            elseif l1>l2 then
-                s=s:sub(l1-l2+1,l1)
-            end
-            row[j]=s
+    local maxLen={}
+    for c=1,#headStr do maxLen[c]=#headStr[c] end
+    for r=1,#report do
+        for c=1,#headStr do
+            maxLen[c]=math.max(maxLen[c],#tostring(report[r][c]))
         end
-        out[i]=table.concat(row," | ")
     end
 
-    local rowSep=" +-----+----------------------+----------+--------+----------------------------------+ \n"
-    local header=" | #   | Function             | Time     | Calls  | Code                             | \n"
-    local sheet=rowSep..header..rowSep
-    if out[1] then
-        sheet=sheet.." | "..table.concat(out," | \n | ").." | \n"
+    local rowSep,header
+    do
+        for i=1,#headStr do
+            maxLen[i]=math.max(maxLen[i],#headStr[i])
+            local s=tostring(headStr[i])
+            headStr[i]=s..(" "):rep(maxLen[i]-#s)
+        end
+        header=" | "..table.concat(headStr," | ").." | "
+
+        local _rowSep={" +-"}
+        for i=1,#headStr do
+            table.insert(_rowSep,("-"):rep(maxLen[i]))
+            table.insert(_rowSep,i<#maxLen and "-+-" or "-+ ")
+        end
+        rowSep=table.concat(_rowSep)
     end
-    return "\n"..sheet..rowSep
+    local output={rowSep,header,rowSep}
+
+    for i=1,#report do
+        local line={}
+        for j=1,#headStr do
+            local s=tostring(report[i][j])
+            line[j]=s..(" "):rep(maxLen[j]-#s)
+        end
+        table.insert(output," | "..table.concat(line," | ").." | ")
+    end
+    return table.concat(output,"\n")
 end
 
 local switch=false
