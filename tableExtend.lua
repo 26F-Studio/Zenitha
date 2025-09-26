@@ -522,6 +522,24 @@ function TABLE.getRandom(org)
     end
 end
 
+---Get random [1-#] of table
+---@generic V
+---@param org V[]
+---@return V
+---@nodiscard
+function TABLE.getRandomAll(org)
+    local count=0
+    for _ in next,org do
+        count=count+1
+    end
+    local r=rnd()*count
+    for _,v in next,org do
+        r=r-1
+        if r<=0 then return v end
+    end
+    error("WTF")
+end
+
 ---Delete & return random [1-#] of table  
 ---**Warning**: last element will be moved to fill in the hole, so this is not really "pop"
 ---@generic V
@@ -861,7 +879,7 @@ do -- function TABLE.dumpDeflate(org,depth)
                     k='['..k..']='
                 end
             elseif T=='string' then
-                if k:match("^[a-zA-Z_][a-zA-Z0-9_]*$") then
+                if match(k,"^[a-zA-Z_][a-zA-Z0-9_]*$") then
                     k=k..'='
                 else
                     k='["'..gsub(k,'.',strRep)..'"]='
@@ -922,7 +940,7 @@ do -- function TABLE.dump(org,depth)
                     k='['..k..']='
                 end
             elseif T=='string' then
-                if k:match("^[a-zA-Z_][a-zA-Z0-9_]*$") then
+                if match(k,"^[a-zA-Z_][a-zA-Z0-9_]*$") then
                     k=k..'='
                 else
                     k='["'..gsub(k,'.',strRep)..'"]='

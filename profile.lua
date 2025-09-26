@@ -1,4 +1,5 @@
 local clock=os.clock
+local getInfo=debug.getinfo
 
 local profile={}
 
@@ -9,7 +10,6 @@ local _telapsed={} -- total execution time
 local _ncalls={}   -- number of calls
 local _internal={} -- list of internal profiler functions
 
-local getInfo=debug.getinfo
 local function _hooker(event,line,info)
     info=info or getInfo(2,'fnS')
     local f=info.func
@@ -42,7 +42,6 @@ local function _comp(a,b)
     return dt==0 and _ncalls[b]<_ncalls[a] or dt<0
 end
 
----Starts collecting data.
 function profile.start()
     if jit then
         jit.off()
@@ -51,7 +50,6 @@ function profile.start()
     debug.sethook(_hooker,'cr')
 end
 
----Stops collecting data.
 function profile.stop()
     debug.sethook()
     for f in next,_tcalled do
@@ -76,7 +74,6 @@ function profile.stop()
     collectgarbage()
 end
 
----Resets all collected data.
 function profile.reset()
     for f in next,_ncalls do
         _ncalls[f]=0
@@ -130,13 +127,13 @@ function profile.report(limit)
         out[i]=table.concat(row," | ")
     end
 
-    local row=" +-----+----------------------+----------+--------+----------------------------------+ \n"
-    local col=" | #   | Function             | Time     | Calls  | Code                             | \n"
-    local sz=row..col..row
+    local rowSep=" +-----+----------------------+----------+--------+----------------------------------+ \n"
+    local header=" | #   | Function             | Time     | Calls  | Code                             | \n"
+    local sheet=rowSep..header..rowSep
     if out[1] then
-        sz=sz.." | "..table.concat(out," | \n | ").." | \n"
+        sheet=sheet.." | "..table.concat(out," | \n | ").." | \n"
     end
-    return "\n"..sz..row
+    return "\n"..sheet..rowSep
 end
 
 local switch=false
@@ -161,7 +158,9 @@ end
 
 -- store all internal profiler functions
 for _,v in next,profile do
-    _internal[v]=type(v)=='function'
+    if type(v)=='function' then
+        _internal[v]=true
+    end
 end
 
 return profile
