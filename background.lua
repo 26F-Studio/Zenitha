@@ -13,7 +13,7 @@ end
 ---@field resize? function
 ---@field update? function
 ---@field draw? function
----@field event? function
+---@field event? fun(...)
 ---@field discard? function
 
 local gc_clear=love.graphics.clear
