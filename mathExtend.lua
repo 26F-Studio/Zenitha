@@ -134,10 +134,11 @@ end
 -- Lerp, Clamp, Interpolate
 
 ---Restrict a number in a range
----@param v number
----@param low number
----@param high number
----@return number
+---@generic T
+---@param v T
+---@param low T
+---@param high T
+---@return T
 ---@nodiscard
 function MATH.clamp(v,low,high)
     return v<=low and low or v>=high and high or v
@@ -563,9 +564,9 @@ function MATH.gcd(a,b)
 end
 
 ---Check if a number is in a range
----@param v number
----@param low number
----@param high number
+---@param v number | string
+---@param low number | string
+---@param high number | string
 ---@return boolean
 ---@nodiscard
 function MATH.between(v,low,high)
