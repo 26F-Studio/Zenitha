@@ -258,9 +258,9 @@ end
 
 
 ---Convert HSV to RGB
----@param h number Color type
----@param s number Color amount
----@param v number Value
+---@param h number Color type (0 red, 1/3 green, 2/3 blue)
+---@param s number Color amount (0 black-white, 1 rainbow)
+---@param v number Value (0 black, 1 white/rainbow)
 ---@param a? number Alpha
 ---@return number, number, number, number?
 ---@nodiscard
@@ -313,9 +313,9 @@ local function hue2rgb(p,q,t)
     return p
 end
 ---Convert HSL to RGB
----@param h number Color type
----@param s number Color amount
----@param l number Lightness
+---@param h number Color type (0 red, 1/3 green, 2/3 blue)
+---@param s number Color amount (0 grey, 1 rainbow)
+---@param l number Lightness (0 black, 0.5 grey/rainbow, 1 white)
 ---@param a? number Alpha
 ---@return number, number, number, number?
 ---@nodiscard
