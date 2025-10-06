@@ -262,7 +262,7 @@ function TABLE.equal(a,b)
     return true
 end
 
----Check if two whole table have same elements  
+---Check if two whole table have same elements
 ---**Warning:** won't check whether two table have same keys of hash part
 ---@param a table
 ---@param b table
@@ -298,7 +298,7 @@ end
 ---@return V[]
 function TABLE.subtract(org,sub)
     for i=#org,1,-1 do
-        for j=#sub,1,-1 do
+        for j=1,#sub do
             if org[i]==sub[j] then
                 rem(org,i)
                 break
@@ -540,7 +540,7 @@ function TABLE.getRandomAll(org)
     error("WTF")
 end
 
----Delete & return random [1-#] of table  
+---Delete & return random [1-#] of table
 ---**Warning:** last element will be moved to fill in the hole, so this is not really "pop"
 ---@generic V
 ---@param org V[]
@@ -601,7 +601,7 @@ function TABLE.reIndex(org)
     return org
 end
 
----Flatten a nested table to a flat table (no table type value included)  
+---Flatten a nested table to a flat table (no table type value included)
 ---**Warning:** number keys may collide with string keys: both [1] and ['1'] will be converted to `'.1'`
 ---
 ---### Example
@@ -683,7 +683,7 @@ function TABLE.listIndex(org,indexes)
     return org
 end
 
----Get value in a table by a path-like string  
+---Get value in a table by a path-like string
 ---**Warning:** `pathIndex(t,"a.1")` will return t.a["1"], not t.a[1]
 ---@param org table
 ---@param str string
@@ -709,7 +709,7 @@ function TABLE.listIndexSet(org,indexes,value)
     org[indexes[#indexes]]=value
 end
 
----Set value in a table by a path-like string  
+---Set value in a table by a path-like string
 ---**Warning:** `pathIndexSet(t,"a.1",2)` equals to `t.a["1"]=2`, not `t.a[1]=2`
 ---@param org table
 ---@param str string Need at least one index
@@ -1260,7 +1260,8 @@ end
 --------------------------------------------------------------
 -- (Utility) Pool
 
-local pool={} for i=1,26 do pool[i]={} end
+local pool={}
+for i=1,26 do pool[i]={} end
 local poolMax=26
 
 ---Get a new empty table from pool. It should be recycled later with `TABLE.free` but not necessary
