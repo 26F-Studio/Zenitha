@@ -85,7 +85,8 @@ function FONT.load(name,path)
     end
 end
 
----Get font object with font size, use default font name if not given  
+---Get font object with font size, use default font name if not given
+---
 ---**Warning:** any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
 ---@param size number
 ---@param name? string
@@ -113,7 +114,8 @@ local function _get(size,name)
 end
 FONT.get=_get
 
----Set font with font size, use default font name if not given  
+---Set font with font size, use default font name if not given
+---
 ---**Warning:** any numbers not appeared before will cause a new font object to be created, so don't call this with too many different font sizes
 ---@param size number
 ---@param name? string

@@ -128,13 +128,13 @@ end
 
 ---Load SFX samples from specified directory or file
 ---
----Directory mode:  
----path: directory (no dot after last "/") containing sample files named with 1.ogg, 2.ogg, ..., and 1 semitone higher then previous one
+---Directory mode
+---- **path**: directory (no dot after last "/") containing sample files named with 1.ogg, 2.ogg, ..., and 1 semitone higher then previous one
 ---
----File mode:  
----path: file (dot+letters after last "/") containing multiple samples with **exactly** same duration, and 1 semitone higher then previous one  
----count: how many samples in the file  
----shrink: drop [shrink] percentage of samples at the end of each clip to avoid error due to compressing
+---File mode
+---- **path**: file (dot+letters after last "/") containing multiple samples with **exactly** same duration, and 1 semitone higher then previous one
+---- **count**: how many samples in the file
+---- **shrink**: drop [shrink] percentage of samples at the end of each clip to avoid error due to compressing
 ---
 ---### Example
 ---```

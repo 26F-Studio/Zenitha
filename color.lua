@@ -30,7 +30,8 @@
 local rnd,sin,abs=math.random,math.sin,math.abs
 local max,min=math.max,math.min
 
----Convert hex string to color  
+---Convert hex string to color
+---
 ---**Warning:** low performance
 ---@param str string
 ---@return number, number, number, number?

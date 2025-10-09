@@ -6,20 +6,18 @@ local function timeUnit(t)
     ("%7.2f s"):format(t)
 end
 local timeList,lastTime={},love.timer.getTime()
----`UTIL.time()` to start a timer (and clear the log)  
----`UTIL.time(msg)` to print a message plus time since previous call  
----`UTIL.time(msg,true)` doesn't print, print later with `UTIL.showTimeLog()`
+---- `UTIL.time()` to start a timer (and clear the log)
+---- `UTIL.time(msg)` to print a message plus time since previous call
+---- `UTIL.time(msg,true)` doesn't print, print later with `UTIL.showTimeLog()`
 ---@param msg? string
 ---@param log? boolean
 function UTIL.time(msg,log)
     if not msg then
         timeList={}
+    elseif log then
+        timeList[#timeList+1]={msg=msg,time=love.timer.getTime()-lastTime}
     else
-        if log then
-            timeList[#timeList+1]={msg=msg,time=love.timer.getTime()-lastTime}
-        else
-            LOG('debug',("%s : %s"):format(msg,timeUnit(love.timer.getTime()-lastTime)))
-        end
+        LOG('debug',("%s : %s"):format(msg,timeUnit(love.timer.getTime()-lastTime)))
     end
     lastTime=love.timer.getTime()
 end

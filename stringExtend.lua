@@ -72,13 +72,14 @@ function STRING.installIndex()
     end
 end
 
----Install stringPath syntax  
+---Install stringPath syntax
+---
 ---**Warning:** conflict with normal auto-tonumber operation
 ---
----`- "script/main.lua"` Get the file name from path  
----`"script" / "main.lua"` Combine folder and file name
----`"script/main.lua" - n` Get the level n directory name
----`"script/main.lua" % "lua,js"` Check if the file match the postfix
+---- `- "script/main.lua"` Get the file name from path
+---- `"script" / "main.lua"` Combine folder and file name
+---- `"script/main.lua" - n` Get the level n directory name
+---- `"script/main.lua" % "lua,js"` Check if the file match the postfix
 function STRING.installPath()
     function STRING.installPath() error("STRING.installPath: Attempt to install stringPath syntax twice") end
     local meta=getmetatable('')
@@ -794,7 +795,8 @@ local upperData,lowerData,diaData do
     diaData=parseStrPair(ZENITHA.path..'diacritics.txt')
 end
 
----string.upper with utf8 support  
+---string.upper with utf8 support
+---
 ---**Warning:** very low performance
 ---@param str string
 ---@return string
@@ -807,7 +809,8 @@ function STRING.upperUTF8(str)
     return str
 end
 
----string.lower with utf8 support  
+---string.lower with utf8 support
+---
 ---**Warning:** very low performance
 ---@param str string
 ---@return string
@@ -820,7 +823,8 @@ function STRING.lowerUTF8(str)
     return str
 end
 
----Remove diacritics  
+---Remove diacritics
+---
 ---**Warning:** low performance
 ---@param str string
 ---@return string

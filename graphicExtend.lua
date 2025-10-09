@@ -561,9 +561,9 @@ local gc_stencil,gc_setStencilTest=gc.stencil,gc.setStencilTest
 
 local stc_action,stc_value='replace',1
 
----Reset stencil states, set default stencil states:  
----draw: 'replace', 1  
----test: 'equal', 1
+---Reset stencil states, set default stencil states:
+---- draw: 'replace', 1
+---- test: 'equal', 1
 function GC.stc_reset()
     stc_action,stc_value='replace',1
     gc_setStencilTest('equal',1)

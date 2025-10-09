@@ -279,7 +279,8 @@ end
 
 ---Get a closer value from a to b with "exponential speed" k
 ---
----Can be called multiple times, you'll get same result for same sum of k  
+---Can be called multiple times, you'll get same result for same sum of k
+---
 ---Reference: k=.1 -> 10%, k=.3 -> 26%, k=.7 -> 50%, k=2 -> 86%, k=4 -> 98%
 ---@param a number
 ---@param b number

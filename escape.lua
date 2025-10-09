@@ -2,9 +2,13 @@
 ## ANSI Escape module
 ***Create ANSI Escape Code Easier***
 
-Lua has a feature: calling function with only one string or table argument doesn't need parentheses:  
-`print("hello")` **==** `print"hello"`  
-`table.concat({"tech","mino"})` **==** `table.concant{"tech","mino"}`  
+Lua has a feature: calling function with only one string or table argument doesn't need parentheses:
+
+```
+print"hello"
+table.concant{"tech","mino"}
+```
+
 I'll use this feature below to make final result cleaner.
 
 ## Usage:
