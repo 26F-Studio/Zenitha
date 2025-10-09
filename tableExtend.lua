@@ -738,7 +738,7 @@ function TABLE.find(org,val,start)
     for i=start or 1,#org do if org[i]==val then return i end end
 end
 
----TABLE.find for ordered list only, faster (binary search)
+---Faster TABLE.find for ordered list only (binary search)
 ---@param org any[]
 ---@param val any
 ---@return integer | nil key
@@ -775,11 +775,15 @@ end
 ---@param v_old T1
 ---@param v_new T2
 ---@param start? integer
+---@param n? integer max replacing count, default to inf
 ---@return (T1 | T2)[]
-function TABLE.replace(org,v_old,v_new,start)
+function TABLE.replace(org,v_old,v_new,start,n)
+    local count=0
     for i=start or 1,#org do
         if org[i]==v_old then
             org[i]=v_new
+            count=count+1
+            if count>=(n or 1e99) then break end
         end
     end
     return org
@@ -790,11 +794,15 @@ end
 ---@param org {[K]:V1}
 ---@param v_old V1
 ---@param v_new V2
+---@param n? integer max replacing count, default to inf
 ---@return {[K]:V1|V2}
-function TABLE.replaceAll(org,v_old,v_new)
+function TABLE.replaceAll(org,v_old,v_new,n)
+    local count=0
     for k,v in next,org do
         if v==v_old then
             org[k]=v_new
+            count=count+1
+            if count>=(n or 1e99) then break end
         end
     end
     return org
