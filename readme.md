@@ -261,10 +261,12 @@ print(AE.b"Bold"..AE.i.."Underline Italic")
 print(AE'r;d;_M'.."reset, delete, magenta "..AE.."and reset format manually")
 ```
 
+## Other
+
 And some useful utility functions like `ZENITHA.setMainLoopSpeed` `ZENITHA.setDebugInfo` `ZENITHA.setVersionText`.
 
 Experimental modules:
-`WAIT`, `DEBUG`, `SYSFX`, `TEXT`, `VIB`, `WHEELMOV`, `LOADLIB`, `MIDI`
+`WAIT`, `DEBUG`, `SYSFX`, `TEXT`, `VIB`, `WHEELMOV`, `LOADLIB`, `MIDI`, `COMPILE`
 
 Exterior modules:
 `JSON`, json.lua by rxi;
