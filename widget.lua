@@ -355,7 +355,7 @@ function Widgets.base:reset(init)
         if type(content)=='function' then
             content=content()
         end
-        assert(type(content)=='string',"[widget].text need string|fun():string")
+        assert(type(content)=='string' or type(content)=='table',"[widget].text need colorstring|fun():colorstring")
         self._text=GC.newText(getFont(self.fontSize,self.fontType),content)
     else
         self._text=PAPER
@@ -703,7 +703,7 @@ function Widgets.hint:reset(init)
         else
             self._floatText=self.floatText
         end
-        assert(type(self._floatText)=='string',"[hint].floatText need string|fun():string")
+        assert(type(self._floatText)=='string' or type(self._floatText)=='table',"[hint].floatText need colorstring|fun():colorstring")
         self._floatText=GC.newText(getFont(self.floatFontSize,self.floatFontType),self._floatText)
     end
     if not self.floatFontSize then self.floatFontSize=self.fontSize end
