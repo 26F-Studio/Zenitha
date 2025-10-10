@@ -32,11 +32,7 @@ local function compileFile(inPath,outPath)
     local file=fs.read('string',inPath)
     ---@cast file string
 
-    if inPath=='main.lua' then
-        local count
-        file,count=file:gsub("%srequire.*Zenitha%.compile.*$","")
-        if count>0 then print("Removed compiler requirement from main.lua") end
-    end
+    if inPath=='main.lua' then file=file:gsub("\nrequire%S+Zenitha%.compile.*$","") end
 
     local func,res=loadstring(file)
     if func then
