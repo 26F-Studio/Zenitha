@@ -49,8 +49,8 @@ function FILE.load(path,args,venv)
         'string'
 
     if mode=='luaon' then
-        local lackReturn=s:match("^%s*[{]")
-        local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..(lackReturn and ']]return' or ']]')..s)
+        if s:sub(1,1)~='\27' then s="--[["..STRING.simplifyPath(path)..']]'..(s:match("^%s*[{]") and 'return' or '')..s end
+        local func,err_mes=loadstring(s)
         if func then
             setfenv(func,venv or {})
             local res=func()
@@ -59,7 +59,7 @@ function FILE.load(path,args,venv)
             error("FILE.load: Decode error: "..err_mes)
         end
     elseif mode=='lua' then
-        if s:sub(1,4)~='\033Lua' then s="--[["..STRING.simplifyPath(path)..']]'..s end
+        if s:sub(1,1)~='\27' then s="--[["..STRING.simplifyPath(path)..']]'..s end
         local func,err_mes=loadstring(s)
         if func then
             local res=func()
