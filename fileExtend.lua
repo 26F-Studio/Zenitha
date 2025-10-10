@@ -59,7 +59,8 @@ function FILE.load(path,args,venv)
             error("FILE.load: Decode error: "..err_mes)
         end
     elseif mode=='lua' then
-        local func,err_mes=loadstring("--[["..STRING.simplifyPath(path)..']]'..s)
+        if s:sub(1,4)~='\033Lua' then s="--[["..STRING.simplifyPath(path)..']]'..s end
+        local func,err_mes=loadstring(s)
         if func then
             local res=func()
             return assert(res,"FILE.load: run error")
