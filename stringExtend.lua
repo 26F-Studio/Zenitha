@@ -377,7 +377,7 @@ function STRING.trimIndent(str,keep)
         end
         return table.concat(list,'\n')
     else
-        return (gsub('\n'..str,'\n[ \t]+','\n'):sub(2))
+        return (gsub('\n'..str,'\n[ \t]+','\n'):sub(2):gsub('\n$',''))
     end
 end
 
