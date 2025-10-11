@@ -371,11 +371,10 @@ function STRING.trimIndent(str,keep)
         local list=STRING.split(str,'\n')
         local s=keep==nil and 1e99 or type(keep)=='number' and keep+1 or #list[1]:match('^%s*')+1
         if s==1 then return str end
-
         for i=1,#list do
             list[i]=sub(list[i],min(s,find(list[i],'%S') or #list[i]+1))
         end
-        return table.concat(list,'\n')
+        return table.concat(list,'\n',1,list[#list]=='' and #list-1 or #list)
     else
         return (gsub('\n'..str,'\n[ \t]+','\n'):sub(2):gsub('\n$',''))
     end
