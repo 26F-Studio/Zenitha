@@ -1,4 +1,6 @@
---[[ DEVELOPMENT PURPOSE ONLY
+--[[
+DEVELOPMENT PURPOSE ONLY
+
 This module helps you compile your whole love2d project to lua bytecode, so this file is not loaded in Zenitha/init.lua.
 
 How to use (IMPORTANT):
@@ -24,54 +26,63 @@ end
 
 local fs=love.filesystem
 
-local function compileFile(inPath,outPath)
-    if fs.getRealDirectory(inPath)==fs.getSaveDirectory() then
-        return false,"Skipped file in save directory: "..inPath
+local _compileSelf=true
+local _stripDebugInfo=true
+
+local function compileFile(path)
+    if fs.getRealDirectory(path)==fs.getSaveDirectory() then
+        return false,"Skipped file in save directory: "..path
     end
 
-    local file=fs.read('string',inPath)
+    local file=fs.read('string',path)
     ---@cast file string
 
-    if inPath=='main.lua' then file=file:gsub("\nrequire%S+Zenitha%.compile.*$","") end
+    if path=='main.lua' then file=file:gsub('\nrequire%S+Zenitha%.compile.*?$','') end
 
     local func,res=loadstring(file)
     if func then
-        fs.write(outPath,string.dump(func,true))
+        fs.write(path,string.dump(func,_stripDebugInfo))
         return true
     else
         return false,res
     end
 end
 
----Compile all .lua files into bytecodes
----@param inputFile? string specific file to compile
----@param outputFile? string specific output filename
-local function compile(inputFile,outputFile)
-    if not inputFile then inputFile='' end
-    if inputFile:sub(1,1)=='.' then
-        print("Skipped hidden file/directory: "..inputFile)
+---@param path string
+local function compileObj(path)
+    if path:sub(1,1)=='.' then
+        print("Skipped hidden file/directory: "..path)
         return
     end
-    local t=fs.getInfo(inputFile).type
+    local t=fs.getInfo(path).type
     if t=='file' then
-        if inputFile:sub(-4)==".lua" then
-            local suc,msg=compileFile(inputFile,outputFile or inputFile)
+        if path:sub(-4)=='.lua' then
+            local suc,msg=compileFile(path)
             if suc then
-                print("Compiled "..inputFile)
+                print("Compiled "..path)
             else
-                print("Failed to compile "..inputFile..": "..msg)
+                print("Failed to compile "..path..": "..msg)
             end
         end
-    elseif t=='directory' and inputFile~='Zenitha' then
-        local contents=fs.getDirectoryItems(inputFile)
+    elseif t=='directory' and (_compileSelf or path~='Zenitha') then
+        local contents=fs.getDirectoryItems(path)
         if next(contents) then
-            if #inputFile>0 then fs.createDirectory(inputFile) end
+            if #path>0 then fs.createDirectory(path) end
             for _,name in next,contents do
-                compile((#inputFile>0 and inputFile..'/' or '')..name)
+                compileObj((#path>0 and path..'/' or '')..name)
             end
         end
     end
-    if inputFile=='' then os.exit() end
 end
 
-return compile
+---Compile all .lua files into bytecodes
+---@param compileSelf? true default to true
+---@param stripDebugInfo? true default to true
+local function start(compileSelf,stripDebugInfo)
+    _compileSelf=not not compileSelf
+    _stripDebugInfo=not not stripDebugInfo
+    compileObj('')
+    os.exit()
+end
+
+return start
