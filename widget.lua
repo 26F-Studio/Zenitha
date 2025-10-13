@@ -371,6 +371,7 @@ function Widgets.base:reset(init)
         assert(type(self.quad)=='userdata' and self.quad:type()=='Quad',"[widget].quad need love.Quad")
     end
 
+    self._pressed=false
     self._hoverTime=0
 
     if self._visible==nil then
