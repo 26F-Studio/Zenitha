@@ -1,6 +1,6 @@
 local debugPrint=false
 
-local confCHN,sendCHN,readCHN
+local zPath,confCHN,sendCHN,readCHN=...
 
 local connTimeout,pongTimeout=16,2.6
 local sleepInterval,pingInterval=6,0.26
@@ -14,9 +14,9 @@ local CHN_push,CHN_pop,CHN_peek=confCHN.push,confCHN.pop,confCHN.peek
 
 local SOCK=require'socket'.tcp()
 ---@type Zenitha.Json
-local JSON=require((...)..'json')
+local JSON=require(zPath..'json')
 
-do-- Connect
+do -- Connect
     local conf=CHN_demand(confCHN)
     local host=conf.host
     local port=conf.port
@@ -38,7 +38,7 @@ do-- Connect
         'Connection: Upgrade\r\n'..
         'Upgrade: websocket\r\n'..
         'Sec-WebSocket-Version: 13\r\n'..
-        'Sec-WebSocket-Key: osT3F7mvlojIvf3/8uIsJQ==\r\n'..-- secKey
+        'Sec-WebSocket-Key: osT3F7mvlojIvf3/8uIsJQ==\r\n'.. -- secKey
         headers..
         '\r\n'
     if debugPrint then
@@ -151,7 +151,7 @@ end
 local readThread=coroutine.wrap(function()
     local res,err
     local op,fin
-    local lBuffer=""-- Long multi-pack buffer
+    local lBuffer="" -- Long multi-pack buffer
     while true do
         -- Byte 0-1
         res,err=_receive(SOCK,2)
@@ -177,22 +177,22 @@ local readThread=coroutine.wrap(function()
         assert(res,err)
 
         -- React
-        if op==8 then-- 8=close
-            CHN_push(readCHN,8)-- close
+        if op==8 then -- 8=close
+            CHN_push(readCHN,8) -- close
             if type(res)=='string' then
-                CHN_push(readCHN,res:sub(3))--[Warning] 2 bytes close code at start so :sub(3)
+                CHN_push(readCHN,res:sub(3)) --[Warning] 2 bytes close code at start so :sub(3)
             else
                 CHN_push(readCHN,"WS closed")
             end
             error("Server Close")
-        elseif op==0 then-- 0=continue
+        elseif op==0 then -- 0=continue
             lBuffer=lBuffer..res
             if fin then
                 CHN_push(readCHN,lBuffer)
                 if debugPrint then print('mMes<',lBuffer) end
                 lBuffer=""
             end
-        elseif op==9 then-- 9=ping
+        elseif op==9 then -- 9=ping
             _send(10,res)
         else
             CHN_push(readCHN,op)
@@ -210,7 +210,7 @@ end)
 
 local suc,err
 
-while true do-- Running
+while true do -- Running
     while CHN_peek(confCHN) do
         local c=CHN_pop(confCHN)
         local n=c[1]
@@ -239,6 +239,6 @@ while true do-- Running
 end
 
 SOCK:close()
-CHN_push(readCHN,8)-- close
+CHN_push(readCHN,8) -- close
 CHN_push(readCHN,err or "Disconnected")
 error()
