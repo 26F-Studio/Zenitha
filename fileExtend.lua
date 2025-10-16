@@ -49,7 +49,12 @@ function FILE.load(path,args,venv)
         'string'
 
     if mode=='luaon' then
-        if s:sub(1,1)~='\27' then s="--[["..STRING.simplifyPath(path)..']]'..(s:match("^%s*[{]") and 'return' or '')..s end
+        local lackReturn=s:match("^%s*{")
+        if s:sub(1,1)~='\27' then
+            s="--[["..STRING.simplifyPath(path)..']]'..(lackReturn and 'return' or '')..s
+        else
+            s=(lackReturn and 'return' or '')..s
+        end
         local func,err_mes=loadstring(s)
         if func then
             setfenv(func,venv or {})
