@@ -49,13 +49,8 @@ function FILE.load(path,args,venv)
         'string'
 
     if mode=='luaon' then
-        local lackReturn=s:match("^%s*{")
-        if s:sub(1,1)~='\27' then
-            s="--[["..STRING.simplifyPath(path)..']]'..(lackReturn and 'return' or '')..s
-        else
-            s=(lackReturn and 'return' or '')..s
-        end
-        local func,err_mes=loadstring(s)
+        s=(s:match("^%s*{") and "return" or "")..s
+        local func,err_mes=loadstring(s,STRING.simplifyPath(path))
         if func then
             setfenv(func,venv or {})
             local res=func()
@@ -64,8 +59,7 @@ function FILE.load(path,args,venv)
             error("FILE.load: Decode error: "..err_mes)
         end
     elseif mode=='lua' then
-        if s:sub(1,1)~='\27' then s="--[["..STRING.simplifyPath(path)..']]'..s end
-        local func,err_mes=loadstring(s)
+        local func,err_mes=loadstring(s,STRING.simplifyPath(path))
         if func then
             local res=func()
             return assert(res,"FILE.load: run error")
@@ -93,8 +87,10 @@ function FILE.save(data,path,args)
     if type(data)=='table' then
         local suc
         if STRING.sArg(args,'-luaon') then
-            suc,data=pcall(STRING.sArg(args,'-expand') and TABLE.dump or TABLE.dumpDeflate,data)
+            local expand=STRING.sArg(args,'-expand')
+            suc,data=pcall(expand and TABLE.dump or TABLE.dumpDeflate,data)
             assert(suc,"FILE.save: Luaon-encoding error: "..data)
+            data=(expand and "return " or "return")..data
         else
             suc,data=pcall(JSON.encode,data)
             assert(suc,"FILE.save: Json-encoding error: "..data)
