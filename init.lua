@@ -155,6 +155,7 @@ end
 -- Inside values
 local mainLoopStarted=false
 local devMode=false ---@type false | 1 | 2 | 3 | 4
+local devClick={0,0} ---@type number[]
 local mx,my,mouseShow,cursorSpd=640,360,false,0
 local lastClicks={} ---@type Zenitha.Click[]
 local jsState={} ---@type Zenitha.JoystickState[]
@@ -187,7 +188,8 @@ local debugInfo={
     function () return "DEV@"..ZENITHA.getDevMode() end,
     function () local fps=ZENITHA.timer.getFPS() return "FPS = "..fps.." ("..updateFreq.."% "..drawFreq.."%)" end,
     function () return "Cache = "..gcinfo() end,
-    function () return "Audios = "..love.audio.getActiveSourceCount() end
+    function () return "Audios = "..love.audio.getActiveSourceCount() end,
+    function () return "Cursor "..floor(mx)..", "..floor(my) end,
 }
 
 ---@class Zenitha.GlobalEvent
@@ -225,7 +227,17 @@ local debugInfo={
 ---@field quit          fun() Called when exactly before quiting
 ---@field error         false | fun(msg:string): any When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'.
 local globalEvent={
-    mouseDown=NULL,
+    mouseDown=function(x,y,k)
+        if devMode then
+            print(("%d@(%d,%d) Diff<%d,%d>\tapprox(%d,%d)<%d,%d>"):format(
+                k,x,y,
+                x-devClick[1],y-devClick[2],
+                floor(x/10)*10,floor(y/10)*10,
+                floor((x-devClick[1])/10)*10,floor((y-devClick[2])/10)*10
+            ))
+            devClick[1],devClick[2]=x,y
+        end
+    end,
     mouseMove=NULL,
     mouseUp=NULL,
     mouseClick=NULL,
@@ -357,8 +369,8 @@ local globalEvent={
             gc.setColor(1,1,1,.62)
             gc.line(x,0,x,SCR.h)
             gc.line(0,y,SCR.w,y)
-            GC.strokePrint('full',1,COLOR.D,COLOR.L,floor(mx+.5)..","..floor(my+.5),x+26,y-22)
-            GC.strokePrint('full',1,COLOR.D,COLOR.L,floor(mx+.5)..","..floor(my+.5),x-88,y+6)
+            local xMode=mx/SCR.w0<.33 and 'left' or mx/SCR.w0>.67 and 'right' or 'center'
+            GC.strokePrint('full',1,COLOR.D,COLOR.L,floor(mx+.5)..","..floor(my+.5),x,y-26,nil,xMode)
         end
     end,
     clickFX=function(x,y,_) SYSFX.tap(.26,x,y) end,
@@ -456,17 +468,6 @@ local function _updateMousePos(x,y,dx,dy)
     end
 end
 local function _triggerMouseDown(x,y,k,presses)
-    -- Debug info
-    if devMode==1 then
-        if not lastClicks[k] then lastClicks[k]={x=0,y=0} end
-        print(("(%d,%d)<-%d,%d ~~(%d,%d)<-%d,%d"):format(
-            x,y,
-            x-lastClicks[k].x,y-lastClicks[k].y,
-            floor(x/10)*10,floor(y/10)*10,
-            floor((x-lastClicks[k].x)/10)*10,floor((y-lastClicks[k].y)/10)*10
-        ))
-    end
-
     -- Interrupt by scene swapping
     if SCN.swapping then return end
 
@@ -477,7 +478,6 @@ local function _triggerMouseDown(x,y,k,presses)
             WIDGET._press(x,y,k)
         else
             if SCN.mouseDown then SCN.mouseDown(x,y,k,presses) end
-            lastClicks[k]={x=x,y=y}
         end
     end
     globalEvent.clickFX(x,y,k)
@@ -534,6 +534,7 @@ function love.mousepressed(x,y,k,touch,presses)
     mouseShow=true
     mx,my=ITP(xOy,x,y)
 
+    lastClicks[k]={x=x,y=y}
     _triggerMouseDown(mx,my,k,presses)
 end
 ---@type love.mousemoved
@@ -1368,18 +1369,21 @@ function ZENITHA.setDevMode(m)
     if m==false then
         devMode=false
         MSG('info',"DEBUG OFF",1)
-    elseif m==1 then
-        devMode=1
-        MSG('info',"DEBUG 1 (Basic)",1)
-    elseif m==2 then
-        devMode=2
-        MSG('info',"DEBUG 2 (Widget)",1)
-    elseif m==3 then
-        devMode=3
-        MSG('info',"DEBUG 3 (Slow)",1)
-    elseif m==4 then
-        devMode=4
-        MSG('info',"DEBUG 4 (Sloooow)",1)
+    else
+        devClick[1],devClick[2]=0,0
+        if m==1 then
+            devMode=1
+            MSG('info',"DEBUG 1 (Basic)",1)
+        elseif m==2 then
+            devMode=2
+            MSG('info',"DEBUG 2 (Widget)",1)
+        elseif m==3 then
+            devMode=3
+            MSG('info',"DEBUG 3 (Slow)",1)
+        elseif m==4 then
+            devMode=4
+            MSG('info',"DEBUG 4 (Sloooow)",1)
+        end
     end
 end
 ---Global event callback function table, they will be called earlier than scene event (if exist)
