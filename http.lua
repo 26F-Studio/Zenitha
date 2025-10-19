@@ -17,7 +17,7 @@ local printRecv=false
 ---@field headers? table
 ---@field url? string default to the url set with HTTP.setHost
 ---@field path? string append to url
----@field _poolPtr? string internal use only
+---@field _poolPtr? string internal use only (stringnified pointer of the pool table)
 ---@field _destroy? true internal use only
 ---@field printSend? true
 ---@field printRecv? true
