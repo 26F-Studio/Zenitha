@@ -3,7 +3,7 @@ if not love.filesystem then
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use FILE."..k..", but FILE lib is not loaded (need love.filesystem)")
-        end
+        end,
     })
 end
 

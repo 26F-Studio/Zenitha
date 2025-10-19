@@ -3,7 +3,7 @@ if not love.graphics then
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use WAIT."..k..", but WAIT lib is not loaded (need love.graphics)")
-        end
+        end,
     })
 end
 

@@ -3,7 +3,7 @@ if not love.graphics then
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use TEXT."..k..", but TEXT lib is not loaded (need love.graphics)")
-        end
+        end,
     })
 end
 

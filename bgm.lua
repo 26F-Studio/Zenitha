@@ -3,12 +3,12 @@ if not (love.audio and love.sound) then
     return setmetatable({
         load=function()
             error("attempt to use BGM.load, but BGM lib is not loaded (need love.audio & love.sound)")
-        end
+        end,
     },{
         __index=function(t,k)
             t[k]=NULL
             return t[k]
-        end
+        end,
     })
 end
 
@@ -461,7 +461,7 @@ function BGM.tell()
     for i=1,#nowPlay do
         local src=nowPlay[i].source
         if src and src:isPlaying() then
-            return src:tell() % src:getDuration() -- bug of love2d, tell() may return value greater than duration
+            return src:tell()%src:getDuration()   -- bug of love2d, tell() may return value greater than duration
         end
     end
     return 0
@@ -470,7 +470,7 @@ end
 ---Get duration of BGM playing now, 0 if not exists
 ---@return number | 0 minDuration, number | 0 maxDuration
 function BGM.getDuration()
-    local minDur, maxDur=math.huge,0
+    local minDur,maxDur=math.huge,0
     for i=1,#nowPlay do
         local src=nowPlay[i].source
         if src then

@@ -3,7 +3,7 @@ if not love.thread then
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use TCP."..k..", but TCP lib is not loaded (need love.thread)")
-        end
+        end,
     })
 end
 

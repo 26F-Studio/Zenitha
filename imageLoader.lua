@@ -3,7 +3,7 @@ if not love.graphics then
     return setmetatable({},{
         __index=function(_)
             error("attempt to use IMG lib, but IMG lib is not loaded (need love.graphics)")
-        end
+        end,
     })
 end
 

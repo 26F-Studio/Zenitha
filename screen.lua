@@ -28,7 +28,7 @@ if not love.graphics then
     },{
         __index=function(_,k)
             error("attempt to use SCR."..k..", but SCR lib is not loaded (need love.graphics & love.window)")
-        end
+        end,
     })
 end
 

@@ -39,7 +39,7 @@ if not (love.filesystem and love.audio and love.sound) then
         __index=function(t,k)
             t[k]=NULL
             return t[k]
-        end
+        end,
     })
 end
 

@@ -3,7 +3,7 @@ if not love.thread then
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use WS."..k..", but WS lib is not loaded (need love.thread)")
-        end
+        end,
     })
 end
 
@@ -147,7 +147,7 @@ local OPcode={
 function WS:send(message,op)
     assert(type(message)=='string','WS.send: message must be string')
     if self.state=='running' then
-        self.sendCHN:push(op and OPcode[op] or 2)-- 2=binary
+        self.sendCHN:push(op and OPcode[op] or 2) -- 2=binary
         self.sendCHN:push(message)
     end
     self:update()
@@ -158,7 +158,7 @@ function WS:receive()
     self:update()
     if self.state~='connecting' and self.readCHN:getCount()>=2 then
         local op,message=self.readCHN:pop(),self.readCHN:pop()
-        if op==8 then-- 8=close
+        if op==8 then -- 8=close
             self.state='dead'
         end
         return message,OPname[op] or op
@@ -166,7 +166,7 @@ function WS:receive()
 end
 
 function WS:close()
-    self.sendCHN:push(8)-- 8=close
+    self.sendCHN:push(8) -- 8=close
     self.sendCHN:push("")
 end
 

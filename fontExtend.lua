@@ -4,7 +4,7 @@ if not (love.graphics and love.font) then
         __index=function(t,k)
             t[k]=NULL
             return t[k]
-        end
+        end,
     })
 end
 

@@ -20,7 +20,7 @@ if not love.filesystem then
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use COMPILE."..k..", but COMPILE lib is not loaded (need love.filesystem)")
-        end
+        end,
     })
 end
 

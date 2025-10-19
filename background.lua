@@ -4,7 +4,7 @@ if not love.graphics then
         __index=function(t,k)
             t[k]=NULL
             return t[k]
-        end
+        end,
     })
 end
 

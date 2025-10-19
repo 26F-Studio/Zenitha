@@ -5,7 +5,7 @@ if not (love.audio and love.sound) then
     },{
         __index=function(_,k)
             error("attempt to use VOC."..k..", but VOC lib is not loaded (need love.audio & love.sound)")
-        end
+        end,
     })
 end
 
@@ -17,7 +17,7 @@ local crossTime=.08
 local diversion=0
 
 local voiceQueue={}
-local voiceSet={} -- {vocSet1={'voc1_1', 'voc1_2', ...}, vocSet2={'voc2_1', ...}, ...}
+local voiceSet={}   -- {vocSet1={'voc1_1', 'voc1_2', ...}, vocSet2={'voc2_1', ...}, ...}
 local sourceBank={} -- {vocName1={SRC1s}, vocName2={SRC2s}, ...}
 
 local VOC={}

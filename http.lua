@@ -3,7 +3,7 @@ if not love.thread then
     return setmetatable({},{
         __index=function(_,k)
             error("attempt to use HTTP."..k..", but HTTP lib is not loaded (need love.thread)")
-        end
+        end,
     })
 end
 
@@ -140,16 +140,20 @@ function HTTP.request(arg)
     end
     assertf(arg.headers==nil or type(arg.headers)=='table',"HTTP.request(arg): arg.headers need table, got %s",arg.headers)
 
-    if arg.body~=nil then
-        assertf(type(arg.body)=='table',"HTTP.request(arg): arg.body need table, got %s",arg.body)
-        local suc
-        suc,arg.body=pcall(JSON.encode,arg.body)
-        assert(suc,"HTTP.request(arg): arg.body json-encoding error")
+    if arg.body then
         if not arg.headers then arg.headers={} end
-        TABLE.update(arg.headers,{
-            ['Content-Type']="application/json",
-            ['Content-Length']=#arg.body,
-        })
+        if type(arg.body)=='table' then
+            local suc
+            suc,arg.body=pcall(JSON.encode,arg.body)
+            assert(suc,"HTTP.request(arg): arg.body json-encoding error")
+            arg.headers['Content-Type']='application/json'
+            arg.headers['Content-Length']=#arg.body
+        elseif type(arg.body)=='string' then
+            arg.headers['Content-Type']='text/plain'
+            arg.headers['Content-Length']=#arg.body
+        else
+            error("HTTP.request(arg): arg.body need table or string")
+        end
     end
 
     if arg.pool==nil then arg.pool='_default' end
@@ -253,7 +257,7 @@ setmetatable(HTTP,{
     __call=function(self,arg)
         return self.request(arg)
     end,
-    __metatable=true
+    __metatable=true,
 })
 
 HTTP.reset()
