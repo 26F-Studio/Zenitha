@@ -218,12 +218,13 @@ end
 ---@param pool string | nil pool name
 ---@return table?
 function HTTP.pollMsg(pool)
+    if HTTP._msgCount==0 then return nil end
     if pool~=nil and type(pool)~='string' then error("HTTP.pollMsg(pool): Need string|nil") end
     HTTP._update()
     local p=msgPool[pool or '_default']
     if p[1] then
         HTTP._msgCount=HTTP._msgCount-1
-        return table.remove(p)
+        return table.remove(p,1)
     end
 end
 
