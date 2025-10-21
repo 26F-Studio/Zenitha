@@ -263,6 +263,7 @@ function TABLE.equal(a,b)
 end
 
 ---Check if two whole table have same elements
+---
 ---**Warning:** won't check whether two table have same keys of hash part
 ---@param a table
 ---@param b table
@@ -278,6 +279,7 @@ function TABLE.equalAll(a,b)
 end
 
 ---**Append** [1-#] elements of new to the end of org
+---
 ---For **Creating** a new table, use `TABLE.combine`
 ---@generic T1, T2
 ---@param org T1[] original list
@@ -386,7 +388,6 @@ end
 ---`table.clear` from luajit extension, clear the whole table but preserve the allocated array/hash sizes
 ---
 ---Fallback to `TABLE.clearAll` if failed to require `table.clear`
----
 ---@param org table
 function TABLE.clear(org)
     for k in next,org do
@@ -541,6 +542,7 @@ function TABLE.getRandomAll(org)
 end
 
 ---Delete & return random [1-#] of table
+---
 ---**Warning:** last element will be moved to fill in the hole, so this is not really "pop"
 ---@generic V
 ---@param org V[]
@@ -558,6 +560,7 @@ function TABLE.popRandom(org)
 end
 
 ---Sort [1-#] elements
+---
 ---Just normal table.sort, but return the original table for convenience
 ---@generic V
 ---@param org V[]
@@ -602,6 +605,7 @@ function TABLE.reIndex(org)
 end
 
 ---Flatten a nested table to a flat table (no table type value included)
+---
 ---**Warning:** number keys may collide with string keys: both [1] and ['1'] will be converted to `'.1'`
 ---
 ---### Example
@@ -684,6 +688,7 @@ function TABLE.listIndex(org,indexes)
 end
 
 ---Get value in a table by a path-like string
+---
 ---**Warning:** `pathIndex(t,"a.1")` will return t.a["1"], not t.a[1]
 ---@param org table
 ---@param str string
@@ -710,6 +715,7 @@ function TABLE.listIndexSet(org,indexes,value)
 end
 
 ---Set value in a table by a path-like string
+---
 ---**Warning:** `pathIndexSet(t,"a.1",2)` equals to `t.a["1"]=2`, not `t.a[1]=2`
 ---@param org table
 ---@param str string Need at least one index
