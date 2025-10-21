@@ -423,6 +423,7 @@ TCP=        require'tcp'
 MIDI=       require'midi'
 
 -- Love-based modules (complex, with update/draw)
+ASYNC=      require'async'
 HTTP=       require'http'
 WS=         require'websocket'
 SCN=        require'scene'

@@ -141,6 +141,24 @@ list=STRING.split("Welcome;to;Zenitha",";") -- {"Welcome","to","Zenitha"}
 t2=TABLE.copyAll(t1)
 ```
 
+## ASYNC
+
+Asynchronous luaCode / systemCmd execution module using Love2D threads.
+
+```lua
+ASYNC.runLua('resultKey1',[[
+    return "Hello"
+]])
+
+ASYNC.get('resultKey1') -- "Hello", or nil if not finished yet
+
+ASYNC.runCmd('resultKey2',[[
+    echo "World"
+]])
+
+ASYNC.get('resultKey2') -- "World", or nil if not finished yet
+```
+
 ## TASK
 
 a pseudo-async module allow you run a function asynchronously (as coroutine which must yield itself periodically, be continued once per main loop cycle).
