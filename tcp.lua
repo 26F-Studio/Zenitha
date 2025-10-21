@@ -78,10 +78,10 @@ local TCP={}
 
 local S_thread=love.thread.newThread(ZENITHA.path..'tcp_thread_server.lua'); S_thread:start(ZENITHA.path)
 local S_running=false
-local S_confCHN=love.thread.getChannel('tcp_s_config')
-local S_rspsCHN=love.thread.getChannel('tcp_s_response')
-local S_sendCHN=love.thread.getChannel('tcp_s_send')
-local S_recvCHN=love.thread.getChannel('tcp_s_receive')
+local S_confCHN=love.thread.getChannel('TCP_s_config')
+local S_rspsCHN=love.thread.getChannel('TCP_s_response')
+local S_sendCHN=love.thread.getChannel('TCP_s_send')
+local S_recvCHN=love.thread.getChannel('TCP_s_receive')
 
 ---@param pack Zenitha.TCP.ConfigMsg
 local function S_pushConf(pack) S_confCHN:push(pack) end
@@ -188,10 +188,10 @@ end
 
 local C_thread=love.thread.newThread(ZENITHA.path..'tcp_thread_client.lua'); C_thread:start(ZENITHA.path)
 local C_running=false
-local C_confCHN=love.thread.getChannel('tcp_c_config')
-local C_rspsCHN=love.thread.getChannel('tcp_c_response')
-local C_sendCHN=love.thread.getChannel('tcp_c_send')
-local C_recvCHN=love.thread.getChannel('tcp_c_receive')
+local C_confCHN=love.thread.getChannel('TCP_c_config')
+local C_rspsCHN=love.thread.getChannel('TCP_c_response')
+local C_sendCHN=love.thread.getChannel('TCP_c_send')
+local C_recvCHN=love.thread.getChannel('TCP_c_receive')
 
 ---@param pack Zenitha.TCP.ConfigMsg
 local function C_pushConf(pack) C_confCHN:push(pack) end

@@ -4,10 +4,10 @@ local JSON=require((...)..'json')
 
 local function printf(str,...) print(str:format(...)) end
 
-local C_confCHN=love.thread.getChannel("tcp_c_config")
-local C_rspsCHN=love.thread.getChannel("tcp_c_response")
-local C_sendCHN=love.thread.getChannel("tcp_c_send")
-local C_recvCHN=love.thread.getChannel("tcp_c_receive")
+local C_confCHN=love.thread.getChannel('TCP_c_config')
+local C_rspsCHN=love.thread.getChannel('TCP_c_response')
+local C_sendCHN=love.thread.getChannel('TCP_c_send')
+local C_recvCHN=love.thread.getChannel('TCP_c_receive')
 
 ---@type LuaSocket.client
 local client

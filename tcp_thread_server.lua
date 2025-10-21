@@ -12,10 +12,10 @@ local printEvent=true and function(str,...) printf("[TCP_S EVNT] "..str,...) end
 local printMsg=false and function(str,...) printf("[TCP_S MESG] "..str,...) end or function()end
 local printException=true and function(str,...) printf("[TCP_S WARN] "..str,...) end or function()end
 
-local S_confCHN=love.thread.getChannel("tcp_s_config")
-local S_rspsCHN=love.thread.getChannel("tcp_s_response")
-local S_sendCHN=love.thread.getChannel("tcp_s_send")
-local S_recvCHN=love.thread.getChannel("tcp_s_receive")
+local S_confCHN=love.thread.getChannel('TCP_s_config')
+local S_rspsCHN=love.thread.getChannel('TCP_s_response')
+local S_sendCHN=love.thread.getChannel('TCP_s_send')
+local S_recvCHN=love.thread.getChannel('TCP_s_receive')
 
 local server ---@type LuaSocket.server
 local clients ---@type table<string, Zenitha.TCP.Client>

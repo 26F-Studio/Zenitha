@@ -22,9 +22,8 @@ local printRecv=false
 ---@field printSend? true
 ---@field printRecv? true
 
-local sendCHN=love.thread.getChannel('inputChannel')
-local recvCHN=love.thread.getChannel('outputChannel')
-
+local sendCHN=love.thread.newChannel()
+local recvCHN=love.thread.newChannel()
 local getCount=sendCHN.getCount
 
 local threads={}
@@ -32,14 +31,11 @@ local threadCount=0
 
 ---@language LUA
 local threadCode=[[
-    local id=...
+    local id,sendCHN,recvCHN=...
     local printSend,printRecv
 
     local http=require'socket.http'
     local ltn12=require'ltn12'
-
-    local sendCHN=love.thread.getChannel('inputChannel')
-    local recvCHN=love.thread.getChannel('outputChannel')
 
     while true do
         local arg=sendCHN:demand()
@@ -103,7 +99,7 @@ local function addThread(num)
         if num<=0 then break end
         if not threads[i] then
             threads[i]=love.thread.newThread(threadCode)
-            threads[i]:start(i)
+            threads[i]:start(i,sendCHN,recvCHN)
             threadCount=threadCount+1
             num=num-1
         end
