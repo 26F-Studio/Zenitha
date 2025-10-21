@@ -20,10 +20,6 @@ local threads={}
 local function refreshThreads()
     for k,v in next,threads do
         if not v:isRunning() then
-            local err=v:getError()
-            if err then
-                LOG('error',"ASYNC error: "..err)
-            end
             threads[k]=nil
         end
     end
@@ -31,14 +27,28 @@ end
 
 ---@language LUA
 local thread_lua=[[
-    local resCHN,rtn,cmd,args=...
+    local resCHN,rtn,cmd,args,traceback=...
 
-    local res=assert(loadstring(cmd))(args)
-
-    resCHN:push({
-        rtn=rtn,
-        res=res,
-    })
+    local func,err=loadstring(cmd,"<async>"..tostring(rtn))
+    if func then
+        local suc, res = pcall(func, args)
+        if suc then
+            resCHN:push({
+                rtn=rtn,
+                res=res,
+            })
+        else
+            resCHN:push({
+                rtn=rtn,
+                err=traceback:gsub('@@@',res),
+            })
+        end
+    else
+        resCHN:push({
+            rtn=rtn,
+            err=traceback:gsub('@@@',err),
+        })
+    end
 ]]
 ---Run a Lua function asynchronously in another love2d thread
 ---@param rtn string | any Use ASYNC.get(rtn) to get the result later
@@ -53,7 +63,8 @@ function ASYNC.runLua(rtn,cmd,args)
         resCHN,
         rtn,
         cmd,
-        args
+        args,
+        debug.traceback('@@@',2)
     )
     return true
 end
@@ -62,9 +73,9 @@ end
 local thread_cmd=[[
     local resCHN,rtn,cmd=...
 
-    local handle=io.popen(cmd,"r")
-    local res=handle:read("*a")
-    handle:close()
+    local f=io.popen(cmd,'r')
+    local res=f:read('*a')
+    f:close()
 
     resCHN:push{
         rtn=rtn,
@@ -93,7 +104,11 @@ function ASYNC.get(rtn)
     refreshThreads()
     while getCount(resCHN)>0 do
         local m=resCHN:pop()
-        resPool[m.rtn]=m.res
+        if m.err then
+            LOG('error',m.err)
+        else
+            resPool[m.rtn]=m.res
+        end
     end
 
     if resPool[rtn]~=nil then
