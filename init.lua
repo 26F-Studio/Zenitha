@@ -450,7 +450,6 @@ FONT.load({
     _mono=(...)..'/mono.ttf',
 })
 FONT.setDefaultFont('_norm')
-FONT.setDefaultFallback('_norm')
 
 --------------------------------------------------------------
 
