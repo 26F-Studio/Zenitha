@@ -344,7 +344,7 @@ end
 local _temp={}
 ---Set current playing BGM(s) states
 ---@param bgms 'all' | string | string[]
----@param mode 'volume' | 'lowgain' | 'highgain' | 'volume' | 'pitch' | 'seek'
+---@param mode 'volume' | 'lowgain' | 'highgain' | 'pitch' | 'seek'
 ---@param ... any
 function BGM.set(bgms,mode,...)
     if type(bgms)=='string' then
@@ -432,7 +432,7 @@ function BGM.set(bgms,mode,...)
                     end
                 end
             else
-                error("BGM.set(...,mode): Need 'volume'|'lowgain'|'highgain'|'volume'|'pitch'|'seek'")
+                error("BGM.set(...,mode): Need 'volume'|'lowgain'|'highgain'|'pitch'|'seek'")
             end
         end
     end
