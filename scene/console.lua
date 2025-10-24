@@ -628,7 +628,7 @@ function scene.keyDown(key,isRep)
         if input:byte()==35 then
             -- Execute lua code
             log{COLOR.lC,"> "..input}
-            local code,err=loadstring(input:sub(2))
+            local code,err=loadstring(input:sub(2),"CMD")
             if code then
                 local resultColor
                 if sumode then

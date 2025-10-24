@@ -39,7 +39,7 @@ local function compileFile(path)
 
     if path=='main.lua' then file=file:gsub('\nrequire%S+Zenitha%.compile.*?$','') end
 
-    local func,res=loadstring(file)
+    local func,res=loadstring(file,path)
     if func then
         fs.write(path,string.dump(func,_stripDebugInfo))
         return true
