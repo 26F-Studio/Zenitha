@@ -1391,7 +1391,7 @@ end
 ---**Return `true` as "INTERRUPT" signal**, to prevent calling scene event and other process (see each function for details)
 ZENITHA.globalEvent=setmetatable(globalEvent,{
     __newindex=function()
-        error("ZENITHA.globalEvent: You shall not add field to this table")
+        error("ZENITHA.globalEvent: You shall not add new field")
     end,
     __metatable=true,
 })
