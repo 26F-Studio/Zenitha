@@ -804,12 +804,12 @@ do -- function GC.load(L), GC.execute(t)
         fPoly=function(...) polygon('fill',...) end,
         dPoly=function(...) polygon('line',...) end,
 
-        dPie=function(...) arc('line',...) end,
-        dArc=function(...) arc('line','open',...) end,
-        dBow=function(...) arc('line','closed',...) end,
         fPie=function(...) arc('fill',...) end,
+        dPie=function(...) arc('line',...) end,
         fArc=function(...) arc('fill','open',...) end,
+        dArc=function(...) arc('line','open',...) end,
         fBow=function(...) arc('fill','closed',...) end,
+        dBow=function(...) arc('line','closed',...) end,
 
         fMRect=function(...) GC.mRect('fill',...) end,
         dMRect=function(...) GC.mRect('line',...) end,
