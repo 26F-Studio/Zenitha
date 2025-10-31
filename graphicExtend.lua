@@ -408,7 +408,7 @@ end
 ---@param canvas love.Canvas
 ---@param fileName string
 ---@param format? love.ImageFormat
----@param ... number param for canvas:newImageData, normally `x,y,w,h`
+---@param ... number params for canvas:newImageData, should be `slice(0),mipmapLv(1),x,y,w,h`
 function GC.saveCanvas(canvas,fileName,format,...)
     canvas:newImageData(...):encode(format or 'png',fileName)
 end
