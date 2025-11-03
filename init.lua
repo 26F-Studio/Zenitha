@@ -156,7 +156,13 @@ end
 local mainLoopStarted=false
 local devMode=false ---@type false | 1 | 2 | 3 | 4
 local devClick={0,0} ---@type number[]
-local mx,my,mouseShow,cursorSpd=640,360,false,0
+local mx,my -- cursor X/Y, using local variables for better performance
+local cursor={
+    vis='auto', ---@type 'auto' | 'always' | 'never'
+    active=false,
+    spd=0, -- Moving speed
+    acc=0, -- Moving acceleration
+}
 local lastClicks={} ---@type Zenitha.Click[]
 local jsState={} ---@type Zenitha.JoystickState[]
 local errData={} ---@type Zenitha.Exception[]
@@ -485,10 +491,10 @@ end
 local function mouse_update(dt)
     if not KBisDown('lctrl','rctrl') and KBisDown('up','down','left','right') then
         local dx,dy=0,0
-        if KBisDown('up')    then dy=dy-cursorSpd end
-        if KBisDown('down')  then dy=dy+cursorSpd end
-        if KBisDown('left')  then dx=dx-cursorSpd end
-        if KBisDown('right') then dx=dx+cursorSpd end
+        if KBisDown('up')    then dy=dy-cursor.spd end
+        if KBisDown('down')  then dy=dy+cursor.spd end
+        if KBisDown('left')  then dx=dx-cursor.spd end
+        if KBisDown('right') then dx=dx+cursor.spd end
         if dx==0 and dy==0 then return end
 
         mx=max(min(mx+dx,SCR.w0),0)
@@ -498,17 +504,17 @@ local function mouse_update(dt)
             WIDGET._drag(0,0,0,-dy)
         end
         _updateMousePos(mx,my,dx,dy)
-        cursorSpd=min(cursorSpd+dt*26,12.6)
+        cursor.spd=min(cursor.spd+dt*cursor.acc,12.6)
     else
-        cursorSpd=6
+        cursor.spd=6
     end
 end
 local function gp_update(js,dt)
     local sx,sy=js._jsObj:getGamepadAxis('leftx'),js._jsObj:getGamepadAxis('lefty')
     if abs(sx)>.1 or abs(sy)>.1 then
         local dx,dy=0,0
-        if abs(sy)>.1 then dy=dy+2*sy*cursorSpd end
-        if abs(sx)>.1 then dx=dx+2*sx*cursorSpd end
+        if abs(sy)>.1 then dy=dy+2*sy*cursor.spd end
+        if abs(sx)>.1 then dx=dx+2*sx*cursor.spd end
         if dx==0 and dy==0 then return end
 
         mx=max(min(mx+dx,SCR.w0),0)
@@ -518,9 +524,9 @@ local function gp_update(js,dt)
             WIDGET._drag(0,0,0,-dy)
         end
         _updateMousePos(mx,my,dx,dy)
-        cursorSpd=min(cursorSpd+dt*26,12.6)
+        cursor.spd=min(cursor.spd+dt*26,12.6)
     else
-        cursorSpd=6
+        cursor.spd=6
     end
 end
 ---@type love.mousepressed
@@ -531,7 +537,7 @@ end
 ---@param presses? number
 function love.mousepressed(x,y,k,touch,presses)
     if touch or WAIT.state then return end
-    mouseShow=true
+    cursor.active=true
     mx,my=ITP(xOy,x,y)
 
     lastClicks[k]={x=x,y=y}
@@ -545,7 +551,7 @@ end
 ---@param touch? boolean
 function love.mousemoved(x,y,dx,dy,touch)
     if touch then return end
-    mouseShow=true
+    cursor.active=true
 
     x,y=ITP(xOy,x,y)
     mx,my=x,y
@@ -613,7 +619,7 @@ end
 ---@param pressure? number
 function love.touchpressed(id,x,y,_,_,pressure)
     -- Hide cursor when key pressed
-    mouseShow=false
+    cursor.active=false
 
     -- Interrupt by scene swapping & WAIT module
     if SCN.swapping or WAIT.state then return end
@@ -710,7 +716,7 @@ end
 ---@param isRep? boolean
 function love.keypressed(key,scancode,isRep)
     -- Hide cursor when key pressed
-    if not isRep then mouseShow=false end
+    if not isRep then cursor.active=false end
 
     -- Interrupt by scene swapping
     if SCN.swapping then return end
@@ -738,12 +744,12 @@ function love.keypressed(key,scancode,isRep)
         if KBisDown('lctrl','rctrl') then
             if W and W.arrowKey then W:arrowKey(key) end
         else
-            mouseShow=true
+            cursor.active=true
         end
     elseif W and W.keypress then
         W:keypress(key)
     elseif key=='space' or key=='return' then
-        mouseShow=true
+        cursor.active=true
         if not isRep then
             globalEvent.clickFX(mx,my,1)
             _triggerMouseDown(mx,my,1)
@@ -901,7 +907,7 @@ end
 ---@param key love.GamepadButton | string
 function love.gamepadpressed(JS,key)
     -- Hide cursor when gamepad pressed
-    mouseShow=false
+    cursor.active=false
 
     -- Interrupt by scene swapping
     if SCN.swapping then return end
@@ -917,15 +923,15 @@ function love.gamepadpressed(JS,key)
     end
     if not interruptCursor then
         local keyboardKey=dPadToKey[key] or key
-        mouseShow=true
+        cursor.active=true
         local W=WIDGET.sel
         if keyboardKey=='back' then
             SCN.back()
         elseif keyboardKey=='up' or keyboardKey=='down' or keyboardKey=='left' or keyboardKey=='right' then
-            mouseShow=true
+            cursor.active=true
             if W and W.arrowKey then W:arrowKey(keyboardKey) end
         elseif keyboardKey=='return' then
-            mouseShow=true
+            cursor.active=true
             globalEvent.clickFX(mx,my,1)
             _triggerMouseDown(mx,my,1)
             WIDGET._release(mx,my,1)
@@ -1173,7 +1179,7 @@ function love.run()
                 CLIPBOARD._update(updateDT)
             end
 
-            if mouseShow then mouse_update(updateDT) end
+            if cursor.vis=='always' or cursor.vis=='auto' and cursor.active then mouse_update(updateDT) end
             if next(jsState) then gp_update(jsState[1],updateDT) end
             VOC._update()
             BG._update(updateDT)
@@ -1212,7 +1218,7 @@ function love.run()
                 gc_replaceTransform(xOy)
                     globalEvent.drawExtra()
                 gc_replaceTransform(xOy)
-                    if mouseShow then globalEvent.drawCursor(mx,my,loopT) end
+                    if cursor.vis=='always' or cursor.vis=='auto' and cursor.active then globalEvent.drawCursor(mx,my,loopT) end
                 gc_replaceTransform(SCR.origin)
                     if SCN.swapping then SCN.swapState.draw(SCN.swapState.time) end
                 gc_replaceTransform(SCR.xOy_ul)
@@ -1358,9 +1364,18 @@ function ZENITHA.setMaxErrorCount(n)
     maxErrorCount=n
 end
 
----Set cursor's visibility
----@param b? boolean
-function ZENITHA.setCursorVis(b) mouseShow=b and true or false end
+---Set cursor's visibility (default to 'auto')
+---@param mode 'auto' | 'always' | 'never'
+function ZENITHA.setCursorVisible(mode)
+    if mode=='always' then
+        cursor.active=true
+    elseif mode=='never' then
+        cursor.active=false
+    elseif mode~='auto' then
+        error("ZENITHA.setCursorVisible(mode): mode must be 'always', 'never' or 'auto'")
+    end
+    cursor.vis=mode
+end
 
 function ZENITHA.getDevMode()
     return devMode
