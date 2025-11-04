@@ -1,10 +1,11 @@
+---@class Zenitha.MathExt: mathlib
 local MATH={}
 
 for k,v in next,math do MATH[k]=v end
 
 MATH.e=math.exp(1)
 MATH.tau=2*math.pi
-MATH.phi=(1+math.sqrt(5))/2
+MATH.phi=(1+5^.5)/2
 MATH.inf=1/0
 MATH.nan=0/0
 
@@ -14,6 +15,21 @@ local max,min=math.max,math.min
 local rnd=math.random
 local log=math.log
 local abs=math.abs
+
+--------------------------------------------------------------
+--- Hyperbolic functions
+
+function MATH.asinh(x)
+    return log(x+(x^2+1)^.5)
+end
+
+function MATH.acosh(x)
+    return log(x+(x^2-1)^.5)
+end
+
+function MATH.atanh(x)
+    return .5*log((1+x)/(1-x))
+end
 
 --------------------------------------------------------------
 --- Round
@@ -527,10 +543,29 @@ function MATH.totalSquareSum(data)
     return sum
 end
 
-function MATH.variance(data)       return MATH.totalSquareSum(data)/#data     end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
-function MATH.sampleVariance(data) return MATH.totalSquareSum(data)/(#data-1) end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
-function MATH.stdDev(data)         return MATH.variance(data)^.5              end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
-function MATH.sampleStdDev(data)   return MATH.sampleVariance(data)^.5        end --[[STATISTIC]]--[[@param data number[] ]]--[[@return number]]--[[@nodiscard]]
+---STATISTIC
+---@param data number[]
+---@return number
+---@nodiscard
+function MATH.variance(data) return MATH.totalSquareSum(data)/#data end
+
+---STATISTIC
+---@param data number[]
+---@return number
+---@nodiscard
+function MATH.sampleVariance(data) return MATH.totalSquareSum(data)/(#data-1) end
+
+---STATISTIC
+---@param data number[]
+---@return number
+---@nodiscard
+function MATH.stdDev(data) return MATH.variance(data)^.5 end
+
+---STATISTIC
+---@param data number[]
+---@return number
+---@nodiscard
+function MATH.sampleStdDev(data) return MATH.sampleVariance(data)^.5 end
 
 --------------------------------------------------------------
 -- Misc

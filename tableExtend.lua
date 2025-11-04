@@ -3,7 +3,7 @@ local gsub,match,gmatch=string.gsub,string.match,string.gmatch
 local rem=table.remove
 local next,type,select=next,type,select
 
----@class Zenitha.TableExt
+---@class Zenitha.TableExt: tablelib
 local TABLE={}
 
 for k,v in next,table do TABLE[k]=v end

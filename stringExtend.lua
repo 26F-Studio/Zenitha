@@ -13,9 +13,12 @@ local rep,rev=string.rep,string.reverse
 local upper,lower=string.upper,string.lower
 local char,byte=string.char,string.byte
 
----If you are sure that you won't call STRING.install() to use `str:trim()`, you can delete the next line (---@class stringlib) to prevent this lib extending string class which could confuse your code editor's LS
+---If you are sure that you won't call STRING.install() to use grammars like `str:trim()`,
+---you can delete the next line (---@class stringlib) to prevent this lib extending string class,
+---which could confuse your code editor's Language Server.
 ---@class stringlib
 local STRING={}
+-- ---@class Zenitha.StringExt: stringlib
 
 for k,v in next,string do STRING[k]=v end
 
