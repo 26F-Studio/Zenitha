@@ -140,9 +140,16 @@ function errorf(str,...) error(str:format(...)) end
 ---@diagnostic disable-next-line
 function assertf(v,str,...) return v or error(str:format(...)) end
 
----Use `local require=requirePath(...)` to require modules in simpler way
----@param path string
----@overload fun(loader:function): unknown
+---Use `local require=simpRequire(...)` to require modules in simpler way
+---
+---### Example
+---```
+---local require=simpRequire('path.to.scripts.')
+---mod1=require('mod1') -- Same to require('path.to.scripts.mod1')
+---mod2=require('mod2')
+---mod3=require('mod3')
+---```
+---@param path string | fun(path:any):unknown
 ---@diagnostic disable-next-line
 function simpRequire(path)
     return type(path)=='function' and
