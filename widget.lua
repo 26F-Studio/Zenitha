@@ -296,7 +296,9 @@ Widgets.base={
 function Widgets.base:getInfo()
     local str=''
     for _,v in next,self.buildArgs do
-        str=str..v..'='..tostring(self[v])..'\n'
+        if type(self[v])=='number' or type(self[v])=='string' or type(self[v])=='boolean' then
+            str=str..v..'='..tostring(self[v])..'\n'
+        end
     end
     return str
 end
