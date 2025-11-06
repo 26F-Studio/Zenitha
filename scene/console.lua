@@ -6,7 +6,7 @@ local inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,
 
 -- Console Log
 local function log(str) outputBox:push(str) end
-_CL=log
+PRINT=log
 
 log{COLOR.lP,"Zenitha Console"}
 log{COLOR.lC,"© Copyright 2019–2025 26F Studio. Some rights reserved."}
@@ -493,9 +493,9 @@ local commands={} do
             elseif code=="7126" then
                 sumode=true
                 log{COLOR.Y,"* SU MODE ON - DO NOT RUN ANY CODE THAT YOU DON'T KNOW WHAT THEY EXACTLY DO *"}
-                log{COLOR.Y,"* Use # to run ANY lua code. To print into this console, use _CL() *"}
+                log{COLOR.Y,"* Use # to run ANY lua code. To print into this console, use PRINT() *"}
                 log{COLOR.Y,"* 最高权限模式开启, 请不要执行任何自己不懂确切含义的代码 *"}
-                log{COLOR.Y,"* 使用 # 执行任意lua代码. 在控制台内打印信息需要改用 _CL() *"}
+                log{COLOR.Y,"* 使用 # 执行任意lua代码. 在控制台内打印信息需要改用 PRINT() *"}
             else
                 log{COLOR.Y,"Password incorrect"}
             end
