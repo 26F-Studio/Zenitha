@@ -495,27 +495,6 @@ local function _triggerMouseDown(x,y,k,presses)
     end
     globalEvent.clickFX(x,y,k)
 end
-local function mouse_update(dt)
-    if not KBisDown('lctrl','rctrl') and KBisDown('up','down','left','right') then
-        local dx,dy=0,0
-        if KBisDown('up')    then dy=dy-cursor.spd end
-        if KBisDown('down')  then dy=dy+cursor.spd end
-        if KBisDown('left')  then dx=dx-cursor.spd end
-        if KBisDown('right') then dx=dx+cursor.spd end
-        if dx==0 and dy==0 then return end
-
-        mx=max(min(mx+dx,SCR.w0),0)
-        my=max(min(my+dy,SCR.h0),0)
-        if my==0 or my==SCR.h0 and dy~=0 then
-            WIDGET.sel=false
-            WIDGET._drag(0,0,0,-dy)
-        end
-        _updateMousePos(mx,my,dx,dy)
-        cursor.spd=min(cursor.spd+dt*cursor.acc,12.6)
-    else
-        cursor.spd=6
-    end
-end
 local function gp_update(js,dt)
     local sx,sy=js._jsObj:getGamepadAxis('leftx'),js._jsObj:getGamepadAxis('lefty')
     if abs(sx)>.1 or abs(sy)>.1 then
@@ -1186,7 +1165,6 @@ function love.run()
                 CLIPBOARD._update(updateDT)
             end
 
-            if cursor.vis=='always' or cursor.vis=='auto' and cursor.active then mouse_update(updateDT) end
             if next(jsState) then gp_update(jsState[1],updateDT) end
             VOC._update()
             BG._update(updateDT)
