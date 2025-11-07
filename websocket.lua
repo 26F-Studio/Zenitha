@@ -55,13 +55,13 @@ function WS.switchHost(host,port,path)
     assert(port==nil or type(port)=='string','WS.switchHost: need string (if exist)')
     assert(path==nil or type(path)=='string','WS.switchHost: need string (if exist)')
 
-    WS.closeAll()
     defaultHost=host or defaultHost
     defaultPort=port or defaultPort
     defaultPath=path or defaultPath
 end
 
 ---@param args Zenitha.WebSocket.ConnectArgs
+---@return Zenitha.WebSocket
 function WS.new(args)
     assert(args.host==nil or type(args.host)=='string','WS.new: arg.host must be string (if exist)')
     assert(args.port==nil or type(args.port)=='string','WS.new: arg.port must be string (if exist)')
@@ -143,11 +143,11 @@ local OPcode={
 }
 
 ---@param message string
----@param op? Zenitha.WebSocket.OPcode leave nil for binary
+---@param op? Zenitha.WebSocket.OPcode | number leave nil for binary
 function WS:send(message,op)
     assert(type(message)=='string','WS.send: message must be string')
     if self.state=='running' then
-        self.sendCHN:push(op and OPcode[op] or 2) -- 2=binary
+        self.sendCHN:push(OPcode[op] or op or 2) -- 2=binary
         self.sendCHN:push(message)
     end
     self:update()
