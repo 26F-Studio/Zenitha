@@ -129,9 +129,11 @@ local OPname={
     [0]='continue',
     [1]='text',
     [2]='binary',
+    -- 3-7 reserved
     [8]='close',
     [9]='ping',
     [10]='pong',
+    -- 11-15 reserved
 }
 local OPcode={
     continue=0,
