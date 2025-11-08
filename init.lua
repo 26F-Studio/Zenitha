@@ -1397,6 +1397,7 @@ ZENITHA.globalEvent=setmetatable(globalEvent,{
 })
 
 ZENITHA._debugInfo=debugInfo
+ZENITHA._cursor=cursor
 
 --------------------------------------------------------------
 
