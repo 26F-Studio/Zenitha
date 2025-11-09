@@ -54,8 +54,9 @@ function UTIL.setCollectGarbageVisible()
 end
 
 ---Shortcut for `print(debug.traceback())`
-function UTIL.trace()
-    print(debug.traceback("DEBUG",2))
+---@param msg? string A message to print before the traceback
+function UTIL.trace(msg)
+    print(debug.traceback(msg or "DEBUG",2))
 end
 
 ---Try to open the console
