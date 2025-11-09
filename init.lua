@@ -726,21 +726,8 @@ function love.keypressed(key,scancode,isRep)
     local W=WIDGET.sel
     if key=='escape' and not isRep then
         SCN.back()
-    elseif key=='up' or key=='down' or key=='left' or key=='right' then
-        if KBisDown('lctrl','rctrl') then
-            if W and W.arrowKey then W:arrowKey(key) end
-        else
-            cursor.active=true
-        end
     elseif W and W.keypress then
         W:keypress(key)
-    elseif key=='space' or key=='return' then
-        cursor.active=true
-        if not isRep then
-            globalEvent.clickFX(mx,my,1)
-            _triggerMouseDown(mx,my,1)
-            WIDGET._release(mx,my,1)
-        end
     end
 end
 ---@type love.keyreleased
