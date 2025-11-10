@@ -495,7 +495,8 @@ local function _triggerMouseDown(x,y,k,presses)
     end
     globalEvent.clickFX(x,y,k)
 end
-local function gp_update(js,dt)
+---@param js Zenitha.JoystickState
+local function _gpCursorUpdate(js,dt)
     local sx,sy=js._jsObj:getGamepadAxis('leftx'),js._jsObj:getGamepadAxis('lefty')
     if abs(sx)>.1 or abs(sy)>.1 then
         local dx,dy=0,0
@@ -1149,7 +1150,7 @@ function love.run()
                 CLIPBOARD._update(updateDT)
             end
 
-            if next(jsState) then gp_update(jsState[1],updateDT) end
+            if next(jsState) then _gpCursorUpdate(jsState[1],updateDT) end
             VOC._update()
             BG._update(updateDT)
             TEXT:update(updateDT)
@@ -1347,6 +1348,8 @@ function ZENITHA.setCursorVisible(mode)
 end
 
 ---Set cursor's position (will trigger mousemoved event)
+---
+---Note: you can get/set cursor's speed through ZENITHA._cursor.speed
 ---@param x number
 ---@param y number
 ---@param dx? number
