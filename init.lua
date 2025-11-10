@@ -1197,7 +1197,7 @@ function love.run()
                     MSG._draw()
                 gc_replaceTransform(SCR.origin)
                     WAIT._draw()
-                globalEvent.drawDebugInfo()
+                    globalEvent.drawDebugInfo()
                 gc_present()
 
                 -- Speed up a bit on mobile device, maybe
