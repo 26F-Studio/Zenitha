@@ -10,6 +10,7 @@
 ---@class Zenitha.Main
 local ZENITHA={path=(...)..'/'}
 
+-- Export to global
 _G.ZENITHA=ZENITHA
 
 --------------------------------------------------------------
@@ -1407,3 +1408,6 @@ SCN.add('_test',require'scene.test')
 
 -- Every little bit helps in saving resources (maybe)
 collectgarbage()
+
+-- In case someone need it
+return ZENITHA
