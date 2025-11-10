@@ -167,8 +167,7 @@ local mx,my -- cursor X/Y, using local variables for better performance
 local cursor={
     vis='auto', ---@type 'auto' | 'always' | 'never'
     active=false,
-    spd=0, -- Moving speed
-    acc=0, -- Moving acceleration
+    speed=260, -- Moving speed
 }
 local lastClicks={} ---@type Zenitha.Click[]
 local jsState={} ---@type Zenitha.JoystickState[]
@@ -455,6 +454,7 @@ VOC=        require'voice'
 
 local TASK,HTTP,SCN,SCR,TEXT,SYSFX,TWEEN,WAIT,MSG,BG,WIDGET,VOC=TASK,HTTP,SCN,SCR,TEXT,SYSFX,TWEEN,WAIT,MSG,BG,WIDGET,VOC
 local xOy=SCR.xOy
+local TP=xOy.transformPoint
 local ITP=xOy.inverseTransformPoint
 
 -- Set default font
@@ -499,8 +499,8 @@ local function gp_update(js,dt)
     local sx,sy=js._jsObj:getGamepadAxis('leftx'),js._jsObj:getGamepadAxis('lefty')
     if abs(sx)>.1 or abs(sy)>.1 then
         local dx,dy=0,0
-        if abs(sy)>.1 then dy=dy+2*sy*cursor.spd end
-        if abs(sx)>.1 then dx=dx+2*sx*cursor.spd end
+        if abs(sy)>.1 then dy=dy+dt*sy*cursor.speed end
+        if abs(sx)>.1 then dx=dx+dt*sx*cursor.speed end
         if dx==0 and dy==0 then return end
 
         mx=max(min(mx+dx,SCR.w0),0)
@@ -510,9 +510,6 @@ local function gp_update(js,dt)
             WIDGET._drag(0,0,0,-dy)
         end
         _updateMousePos(mx,my,dx,dy)
-        cursor.spd=min(cursor.spd+dt*26,12.6)
-    else
-        cursor.spd=6
     end
 end
 ---@type love.mousepressed
@@ -1347,6 +1344,18 @@ function ZENITHA.setCursorVisible(mode)
         error("ZENITHA.setCursorVisible(mode): mode must be 'always', 'never' or 'auto'")
     end
     cursor.vis=mode
+end
+
+---Set cursor's position (will trigger mousemoved event)
+---@param x number
+---@param y number
+---@param dx? number
+---@param dy? number
+function ZENITHA.setCursorPos(x,y,dx,dy)
+    x,y=TP(xOy,x,y)
+    x=MATH.clamp(x,0,SCR.w)
+    y=MATH.clamp(y,0,SCR.h)
+    love.mousemoved(x,y,dx or 0,dy or 0)
 end
 
 function ZENITHA.getDevMode()
