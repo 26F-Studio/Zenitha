@@ -84,7 +84,7 @@ function BG.set(name)
 end
 
 ---Get the current background name
----@return string | false
+---@return string
 function BG.get() return BG.cur end
 
 ---Trigger when resize
