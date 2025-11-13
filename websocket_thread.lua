@@ -29,7 +29,7 @@ do -- Connect
 
     SOCK:settimeout(connTimeout)
     local res,err=SOCK:connect(host,port)
-    if debugPrint then print('Conn<',res,err) end
+    if debugPrint then print("Conn<",res,err) end
     assert(res,err)
 
     -- WebSocket handshake
@@ -39,17 +39,13 @@ do -- Connect
         'Upgrade: websocket\r\n'..
         'Sec-WebSocket-Version: 13\r\n'..
         'Sec-WebSocket-Key: osT3F7mvlojIvf3/8uIsJQ==\r\n'.. -- secKey
-        headers..
-        '\r\n'
-    if debugPrint then
-        print('Send>')
-        print(sendMes)
-    end
+        headers..'\r\n'
+    if debugPrint then print("Send>",sendMes) end
     SOCK:send(sendMes)
 
     -- First line of HTTP
     res,err=SOCK:receive('*l')
-    if debugPrint then print('Headers<',res,err) end
+    if debugPrint then print("Headers<",res,err) end
     assert(res,err)
     local code,ctLen
     code=res:find(' ')
@@ -58,7 +54,7 @@ do -- Connect
     -- Get body length from headers and remove headers
     repeat
         res,err=SOCK:receive('*l')
-        if debugPrint then print('Body<',res,err) end
+        if debugPrint then print("Body<",res,err) end
         assert(res,err)
         if not ctLen and res:find('content-length') then
             ctLen=tonumber(res:match('%d+')) or 0
@@ -73,7 +69,7 @@ do -- Connect
     -- Content(?)
     if ctLen then
         res,err=SOCK:receive(ctLen)
-        if debugPrint then print('Extra<',res,err) end
+        if debugPrint then print("Extra<",res,err) end
         if code~='101' then
             res=JSON.decode(assert(res,err))
             error((code or "XXX")..":"..(res and res.reason or "Server Error"))
@@ -89,9 +85,11 @@ local byte,char=string.byte,string.char
 local band,bor,bxor=bit.band,bit.bor,bit.bxor
 local shl,shr=bit.lshift,bit.rshift
 
-local mask_key={1,14,5,14}
+local mask_key={math.random(0,255),math.random(0,255),math.random(0,255),math.random(0,255)}
 local mask_str=char(unpack(mask_key))
 local function _send(op,message)
+    if debugPrint then print("Send("..op..")>",message) end
+
     lastSendTime=timer()
 
     -- Message type
@@ -179,6 +177,7 @@ local readThread=coroutine.wrap(function()
         -- React
         if op==8 then -- 8=close
             CHN_push(readCHN,8) -- close
+            if debugPrint then print("Close<",res) end
             if type(res)=='string' then
                 CHN_push(readCHN,res:sub(3)) --[Warning] 2 bytes close code at start so :sub(3)
             else
@@ -189,16 +188,17 @@ local readThread=coroutine.wrap(function()
             lBuffer=lBuffer..res
             if fin then
                 CHN_push(readCHN,lBuffer)
-                if debugPrint then print('mMes<',lBuffer) end
+                if debugPrint then print("mMes<",lBuffer) end
                 lBuffer=""
             end
         elseif op==9 then -- 9=ping
+            if debugPrint then print("Ping<",res) end
             _send(10,res)
         else
             CHN_push(readCHN,op)
             if fin then
                 CHN_push(readCHN,res)
-                if debugPrint then print('Mes<',res) end
+                if debugPrint then print("Mes<",res) end
                 lBuffer=""
             else
                 lBuffer=res
