@@ -236,8 +236,10 @@ function Tween:run(timeFunc)
         self.loopCount=1
         self.flipMode=false
     end
-    self:update(0);
-    (duringUpdate and preAnimSet or updAnimSet)[self]=true
+    self:update(0)
+    if self.running then
+        (duringUpdate and preAnimSet or updAnimSet)[self]=true
+    end
     return self
 end
 
