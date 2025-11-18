@@ -30,7 +30,7 @@ local scene={
         {type='checkBox',    text='checkBox3', x=260,y=450,w=40,disp=function() return testVal_1[3] end,code=function() testVal_1[3]=not testVal_1[3] end},
 
         {type='slider',      text='slider1',   x=460,y=350,w=260,axis={10,26,4},              disp=function() return testVal_2[1] end,code=function(v) testVal_2[1]=v end},
-        {type='slider',      text='slider2',   x=460,y=400,w=260,axis={0,620,10},smooth=true, disp=function() return testVal_2[2] end,code=function(v) testVal_2[2]=v end},
+        {type='slider',      text='slider2',   x=460,y=400,w=260,axis={0,620,10},unit=false,  disp=function() return testVal_2[2] end,code=function(v) testVal_2[2]=v end},
         {type='slider_fill', text='slider3',   x=460,y=450,w=260,                             disp=function() return testVal_2[3] end,code=function(v) testVal_2[3]=v end},
 
         {type='selector',    text='selector1', x=330,y=510,w=200,list={'medium','large','ex-large'},disp=function() return testVal_3[1] end,code=function(v) testVal_3[1]=v end},

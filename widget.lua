@@ -64,7 +64,7 @@
 ---@field numFontSize? number [sliders]
 ---@field numFontType? string [sliders]
 ---@field axis? {minVal:number, maxVal:number, step?:number} [slider & slider_fill]
----@field smooth? boolean [sliders] Unit point visibility
+---@field unit? number [sliders] Unit shown on the axis (default to axis[3])
 ---@field valueShow? false | 'int' | 'float' | 'percent' | function [sliders] Value showing mode or function [called with widgetObj)
 ---@field lineDist? number [slider_fill] Outline dist from the bat
 ---@field soundInterval? number [sliders] Minimum interval between two sounds
@@ -1058,14 +1058,13 @@ end
 ---@field _rangeR number
 ---@field _rangeWidth number
 ---@field _unit number
----@field _smooth boolean
 ---@field _textShowTime number
 ---@field _lastSoundTime number
 Widgets.slider=setmetatable({
     type='slider',
     w=100,
     axis={0,1},
-    smooth=false,
+    unit=nil,
 
     frameColor='DL',
     text=false,
@@ -1087,8 +1086,8 @@ Widgets.slider=setmetatable({
     _rangeL=false,
     _rangeR=false,
     _rangeWidth=false, -- just _rangeR-_rangeL, for convenience
-    _unit=false,
-    _smooth=false,
+    _rangeUnit=false, -- actual unit of value step
+    _unit=false, -- visual unit on slider
     _textShowTime=false,
     _approachSpeed=26,
     _lastSoundTime=0,
@@ -1099,7 +1098,7 @@ Widgets.slider=setmetatable({
         'x','y','w',
         'lineWidth','cornerR',
 
-        'axis','smooth',
+        'axis','unit',
         'labelPos',
         'labelDist',
         'color','fillColor','frameColor','textColor',
@@ -1149,7 +1148,7 @@ function Widgets.slider:reset(init)
         (not self.axis[3] or type(self.axis[3])=='number'),
         "[slider].axis need {low,high} or {low,high,unit}"
     )
-    assert(self.smooth==nil or type(self.smooth)=='boolean',"[slider].smooth need boolean")
+    assert(not self.unit or type(self.unit)=='number' and self.unit>0,"[slider].unit need number")
     assert(not self.sound_drag or type(self.sound_drag)=='string',"[slider].sound_drag need string")
     assert(type(self.soundInterval)=='number',"[slider].soundInterval need number")
     assert(type(self.soundPitchRange)=='number',"[slider].soundPitchRange need number")
@@ -1157,11 +1156,11 @@ function Widgets.slider:reset(init)
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
     self._rangeWidth=self._rangeR-self._rangeL
-    self._unit=self.axis[3]
-    if self.smooth==nil then
-        self._smooth=not self.axis[3]
+    self._rangeUnit=self.axis[3]
+    if self.unit==nil then
+        self._unit=self.axis[3]
     else
-        self._smooth=self.smooth
+        self._unit=self.unit
     end
     self._pos=self._rangeL
     self._pos0=self._rangeL
@@ -1219,7 +1218,7 @@ function Widgets.slider:draw()
     local frameC=self.frameColor
 
     -- Axis Units
-    if not self._smooth and self._unit then
+    if self._unit then
         gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*.26)
         gc_setLineWidth(self.lineWidth)
         for p=rangeL,rangeR,self._unit do
@@ -1271,7 +1270,7 @@ function Widgets.slider:trigger(x,mode)
     if not x then return end
     local pos=clamp((x-self._x)/self.w,0,1)
     local newVal=
-        self._unit and self._rangeL+floor(pos*self._rangeWidth/self._unit+.5)*self._unit
+        self._rangeUnit and self._rangeL+floor(pos*self._rangeWidth/self._rangeUnit+.5)*self._rangeUnit
         or (1-pos)*self._rangeL+pos*self._rangeR
     if mode~='release' and self.sound_drag and timer()-self._lastSoundTime>self.soundInterval and newVal~=self.disp() then
         SFX.play(self.sound_drag,nil,nil,(pos*2-1)*self.soundPitchRange)
@@ -1291,10 +1290,10 @@ function Widgets.slider:release(x)
     self:trigger(x,'release')
 end
 function Widgets.slider:scroll(dx,dy)
-    local n=updateWheel(self,(dx+dy)*self._rangeWidth/(self._unit or .01)/20)
+    local n=updateWheel(self,(dx+dy)*self._rangeWidth/(self._rangeUnit or .01)/20)
     if n then
         local p=self._pos0
-        local u=self._unit or .01
+        local u=self._rangeUnit or .01
         local P=clamp(p+u*n,self._rangeL,self._rangeR)
         if P and p~=P then
             self.code(P)
