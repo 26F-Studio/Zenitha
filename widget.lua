@@ -64,7 +64,7 @@
 ---@field numFontSize? number [sliders]
 ---@field numFontType? string [sliders]
 ---@field axis? {minVal:number, maxVal:number, step?:number} [slider & slider_fill]
----@field unit? number [sliders] Unit shown on the axis (default to axis[3])
+---@field unit? false | number [sliders] Unit shown on the axis (default to axis[3])
 ---@field valueShow? false | 'int' | 'float' | 'percent' | function [sliders] Value showing mode or function [called with widgetObj)
 ---@field lineDist? number [slider_fill] Outline dist from the bat
 ---@field soundInterval? number [sliders] Minimum interval between two sounds
