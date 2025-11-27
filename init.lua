@@ -113,7 +113,7 @@ end
 PAPER=ZENITHA.graphics.newCanvas(1,1)
 
 -- #define
-local MSisDown,KBisDown=ZENITHA.mouse.isDown,ZENITHA.keyboard.isDown
+local MSisDown=ZENITHA.mouse.isDown
 
 local gc=ZENITHA.graphics
 local gc_replaceTransform,gc_translate,gc_present=gc.replaceTransform,gc.translate,gc.present
