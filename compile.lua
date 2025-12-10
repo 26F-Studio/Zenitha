@@ -1,11 +1,11 @@
 --[[
 DEVELOPMENT PURPOSE ONLY
 
-This module helps you compile your whole love2d project to lua bytecode, so this file is not loaded in Zenitha/init.lua.
+This module helps you compile your whole love2d project to lua bytecode (love2d exclusive), so this file is not loaded in Zenitha/init.lua.
 
 How to use (IMPORTANT):
 1. Make sure the saving folder is empty, or at least not having same filename to your project folder (will be overwritten)
-2. Add `require'Zenitha.compile'()` to THE LAST LINE of main.lua (everything after this line will be ignored)
+2. Add `require("Zenitha.compile")()` to THE LAST LINE of main.lua (everything after this line will be stripped)
 3. Run your project, and the process will exit immediately after compiling.
 4. Check outputs in console, and check saving folder for compiled files.
 5. Copy all compiled files to your project folder and choose "replacing all"
@@ -37,7 +37,11 @@ local function compileFile(path)
     local file=fs.read('string',path)
     ---@cast file string
 
-    if path=='main.lua' then file=file:gsub('\nrequire%S+Zenitha%.compile.*?$','') end
+    if path=='main.lua' then
+        local requirePos=file:find("require[^\n]*Zenitha[./]compile")
+        assert(requirePos,"Failed to find the fixed require statement in main.lua, please read instructions carefully.")
+        file=file:sub(1,requirePos-1)
+    end
 
     local func,res=loadstring(file,path)
     if func then
@@ -76,8 +80,8 @@ local function compileObj(path)
 end
 
 ---Compile all .lua files into bytecodes
----@param compileSelf? true default to true
----@param stripDebugInfo? true default to true
+---@param compileSelf? boolean default to true
+---@param stripDebugInfo? boolean default to true
 local function start(compileSelf,stripDebugInfo)
     _compileSelf=not not compileSelf
     _stripDebugInfo=not not stripDebugInfo
