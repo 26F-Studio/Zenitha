@@ -32,7 +32,7 @@ end
 ---@return any
 function FILE.load(path,args,venv)
     if not args then args='' end
-    if not fs.getInfo(path) then return end
+    assert(fs.getInfo(path),"FILE.load: File not exist")
 
     local F=fs.newFile(path)
     assert(F:open'r',"FILE.load: Open error")
@@ -61,8 +61,7 @@ function FILE.load(path,args,venv)
     elseif mode=='lua' then
         local func,err_mes=loadstring(s,STRING.simplifyPath(path))
         if func then
-            local res=func()
-            return assert(res,"FILE.load: run error")
+            return func()
         else
             error("FILE.load: Compile error: "..err_mes)
         end
