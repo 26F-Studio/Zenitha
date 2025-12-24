@@ -13,11 +13,11 @@
 ---
 ---@field color? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & *Box] fallback of other color options
 ---@field text? string | function [EXCEPT image & listBox]
----@field textScale? number [same as text]
----@field fontSize? number [same as text]
----@field fontType? string [same as text]
+---@field textScale? number [EXCEPT image & listBox]
+---@field fontSize? number [EXCEPT image & listBox]
+---@field fontType? string [EXCEPT image & listBox]
 ---@field image? string | love.Drawable [image & button] Can use slash-path to read from IMG lib
----@field quad? love.Quad [same as image] Optional
+---@field quad? love.Quad [image & button] Optional
 ---@field alignX? 'left' | 'right' | 'center' [text & image & button]
 ---@field alignY? 'top' | 'bottom' | 'center' [text & image & button]
 ---@field marginX? number [button & hint]
