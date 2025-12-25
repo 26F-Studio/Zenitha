@@ -25,7 +25,10 @@ function FILE.isSafe(file)
 end
 
 ---Load a file with a specified mode
----(Auto detect if mode not given, not accurate)
+---
+---(Auto detect if mode not given, may not accurate)
+---
+---Note: crash on any error
 ---@param path string
 ---@param args? string | '-luaon' | '-lua' | '-json' | '-string'
 ---@param venv? table Used as environment for LuaON
@@ -72,8 +75,23 @@ function FILE.load(path,args,venv)
     end
 end
 
+---Same with FILE.load but returns nil on any type of error
+---
+---Note: in -lua mode, only first return value is returned
+---@param path string
+---@param args? string | '-luaon' | '-lua' | '-json' | '-string'
+---@param venv? table Used as environment for LuaON
+---@return any
+function FILE.safeLoad(path,args,venv)
+    local suc,res=pcall(FILE.load,path,args,venv)
+    if suc then return res end
+end
+
 ---Save table(string) to a file
+---
 ---(Default dump method for table is JSON)
+---
+---Note: crash on any error
 ---@param data any
 ---@param path string
 ---@param args? string | '-json' | '-luaon' | '-expand'
@@ -100,6 +118,16 @@ function FILE.save(data,path,args)
     F:write(data)
     F:flush()
     F:close()
+end
+
+---Same with FILE.save but returns error message on any type of error
+---@param data any
+---@param path string
+---@param args? string | '-json' | '-luaon' | '-expand'
+---@return string? errorMessage
+function FILE.safeSave(data,path,args)
+    local suc,err=pcall(FILE.save,data,path,args)
+    if not suc then return err end
 end
 
 ---@enum (key) Zenitha.folderDeleteMode
