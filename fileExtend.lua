@@ -63,8 +63,8 @@ function FILE.load(path,args,venv)
         end
     elseif mode=='lua' then
         local func,err_mes=loadstring(s,STRING.simplifyPath(path))
-        assert(func,"FILE.load: Compile error: "..err_mes)
-        return func()
+        if func then return func() end
+        error("FILE.load: Compile error: "..err_mes)
     elseif mode=='json' then
         local suc,res=pcall(JSON.decode,s)
         return suc and res or error("FILE.load: Decode error")
