@@ -475,7 +475,7 @@ local function _updateMousePos(x,y,dx,dy)
     if globalEvent.mouseMove(mx,my,dx,dy)==true then return end
 
     if SCN.mouseMove then SCN.mouseMove(x,y,dx,dy) end
-    if MSisDown(1) then
+    if MSisDown(1,2,3) then
         WIDGET._drag(x,y,dx,dy)
     else
         WIDGET._cursorMove(x,y,'move')
