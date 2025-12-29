@@ -38,7 +38,7 @@ function FILE.load(path,args,venv)
     assert(fs.getInfo(path),"FILE.load: File not exist")
 
     local F=fs.newFile(path)
-    assert(F:open'r',"FILE.load: Open error")
+    assert(F:open('r'),"FILE.load: Open error")
     local s=F:read()
     F:close()
     local mode=
