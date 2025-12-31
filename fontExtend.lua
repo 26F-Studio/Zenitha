@@ -24,7 +24,7 @@ local curFont=nil -- Current using font object
 
 local FONT={_cache=fontCache}
 
----Set default font type
+---Set default font type, use when no font name is given in FONT.get / FONT.set
 ---@param name? string
 function FONT.setDefaultFont(name)
     defaultFont=name
