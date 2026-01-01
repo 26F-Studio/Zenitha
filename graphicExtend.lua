@@ -759,6 +759,7 @@ end
 function GC.initCanvas(w,h,drawFunc)
     local c=gc.newCanvas(w,h)
     gc.push()
+    gc.origin()
     gc.setCanvas(c)
     drawFunc()
     gc.pop()
