@@ -758,6 +758,9 @@ end
 ---Create a canvas with specified size, and draw on it with given function
 ---
 ---Starting from empty canvas with origin transform. Will restore previous graphics state after done
+---@param w number
+---@param h number
+---@param drawFunc function
 ---@return love.Canvas
 function GC.initCanvas(w,h,drawFunc)
     local c=gc.newCanvas(w,h)
