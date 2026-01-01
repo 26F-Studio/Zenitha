@@ -755,21 +755,24 @@ end
 --------------------------------------------------------------
 -- Canvas
 
+local initCanvasSetup={stencil=false}
 ---Create a canvas with specified size, and draw on it with given function
 ---
 ---Starting from empty canvas with origin transform. Will restore previous graphics state after done
 ---@param w number
 ---@param h number
 ---@param drawFunc function
+---@param stencil? true
 ---@return love.Canvas
-function GC.initCanvas(w,h,drawFunc)
-    local c=gc.newCanvas(w,h)
+function GC.initCanvas(w,h,drawFunc,stencil)
+    initCanvasSetup[1]=gc.newCanvas(w,h)
+    initCanvasSetup.stencil=not not stencil
     gc.push()
     gc.origin()
-    gc.setCanvas(c)
+    gc.setCanvas(initCanvasSetup)
     drawFunc()
     gc.pop()
-    return c
+    return initCanvasSetup[1]
 end
 
 do -- function GC.load(L), GC.execute(t)
