@@ -375,7 +375,7 @@ local fillShader=gc.newShader[[
     }
 ]] fillShader:send('fill',.5)
 ---(Shader Implementation) Draw a filled circle with blurring edge
----@param solid? number .5=sharp, .5-1/r=natural, 0=light, nil=last value
+---@param solid? number `0`=light, `[1/R,0.5)`=natural (R = blur width in pixel), `[0.5, inf)`=inverted circle (more blurred on larger), `nil`=last value
 ---@param x number
 ---@param y number
 ---@param r number
