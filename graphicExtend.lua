@@ -753,6 +753,17 @@ function GC.wrapText(font,str,width)
 end
 
 --------------------------------------------------------------
+-- Canvas
+
+---Create a canvas and draw on it with given function
+function GC.initCanvas(w,h,drawFunc)
+    local c=gc.newCanvas(w,h)
+    gc.push()
+    gc.setCanvas(c)
+    drawFunc()
+    gc.pop()
+    return c
+end
 
 do -- function GC.load(L), GC.execute(t)
     ---@alias Zenitha.drawingCommand {_help?:Zenitha.Graphics.drawingCommandType, [1]:Zenitha.Graphics.drawingCommandType, [number]:any}
