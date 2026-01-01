@@ -50,9 +50,9 @@ local thread_lua=[[
         })
     end
 ]]
----Run a Lua function asynchronously in another love2d thread
+---Run a Lua function asynchronously in another Love2D thread
 ---@param rtn string | any Use ASYNC.get(rtn) to get the result later
----@param cmd string Lua code string (cannot be function because cannot pass non-data objects to love2d thread)
+---@param cmd string Lua code string (cannot be function because cannot pass non-data objects to Love2D thread)
 ---@param args? any parameter to pass to the Lua code
 ---@return boolean success whether the thread was started
 function ASYNC.runLua(rtn,cmd,args)
@@ -82,7 +82,7 @@ local thread_cmd=[[
         res=res,
     }
 ]]
----Run a system command asynchronously in another love2d thread
+---Run a system command asynchronously in another Love2D thread
 ---@param rtn string | any Use ASYNC.get(rtn) to get the result later
 ---@param cmd string command to run with io.popen
 ---@return boolean success whether the thread was started

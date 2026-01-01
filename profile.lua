@@ -5,7 +5,7 @@ local profile={}
 
 ---@class Zenitha.Profile.FuncInfo
 ---@field name string | "?" function name
----@field src string source file and line no.
+---@field src string source file and line number
 
 -- Registered information of functions
 ---@type table<function, Zenitha.Profile.FuncInfo>
@@ -109,7 +109,7 @@ function profile.reset()
     collectgarbage()
 end
 
----Iterates all functions that have been called since the profile was started.
+---Iterates all functions that have been called since the profile was started
 ---@param limit? number limit the number of functions to return
 function profile.query(limit)
     local report={}

@@ -2402,7 +2402,7 @@ end
 
 ---Unfocus widget
 ---
----soft unfocus like moving mouse, won't unfocus some widget with `keepFocus` tag, like inputBox.
+---soft unfocus like moving mouse, won't unfocus some widget with `keepFocus` tag, like inputBox
 ---@param force? boolean
 function WIDGET.unFocus(force)
     local W=WIDGET.sel

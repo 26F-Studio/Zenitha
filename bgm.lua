@@ -461,7 +461,7 @@ function BGM.tell()
     for i=1,#nowPlay do
         local src=nowPlay[i].source
         if src and src:isPlaying() then
-            return src:tell()%src:getDuration()   -- bug of love2d, tell() may return value greater than duration
+            return src:tell()%src:getDuration()   -- bug of Love2D, tell() may return value greater than duration
         end
     end
     return 0

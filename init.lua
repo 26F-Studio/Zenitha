@@ -238,7 +238,7 @@ local debugInfo={
 ---@field sceneSwap     fun(state:'start' | 'swap' | 'finish', style?:string) Called when scene swapping start
 ---@field requestQuit   fun(): boolean? Called when request quiting with ZENITHA._quit()
 ---@field quit          fun() Called when exactly before quiting
----@field error         false | fun(msg:string): any When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'.
+---@field error         false | fun(msg:string): any When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'
 local globalEvent={
     mouseDown=function(x,y,k)
         if devMode then
@@ -1297,6 +1297,7 @@ end
 ---How this works: Because `love.timer.sleep(t)` is not accurate enough (always a bit more time), so we can sleep `[setting value] LESS`, then busy-wait to obtain the exact time interval.
 ---
 ---But `sleep()` actually only accept integer microsecond value, so when we need to sleep 1.5ms, doing `sleep(1.5ms)` is same as `sleep(1ms)`, so busy-wait will still work for ~0.5ms.
+---
 ---That's why we accept negative number. Setting error to -1ms means we will do `sleep(2.5ms)` when we need 1.5, so busy-wait is guaranteed not to be triggered, saving more resource.
 ---@param ms number in [-1,1], default to 0 (ms)
 function ZENITHA.setSleepDurationError(ms)

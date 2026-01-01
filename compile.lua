@@ -1,7 +1,7 @@
 --[[
 DEVELOPMENT PURPOSE ONLY
 
-This module helps you compile your whole love2d project to lua bytecode (love2d exclusive), so this file is not loaded in Zenitha/init.lua.
+This module helps you compile your whole Love2D project to lua bytecode (Love2D exclusive), so this file is not loaded in Zenitha/init.lua.
 
 How to use (IMPORTANT):
 1. Make sure the saving folder is empty, or at least not having same filename to your project folder (will be overwritten)

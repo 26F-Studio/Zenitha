@@ -394,7 +394,7 @@ end
 
 do -- function GC.getScreenShot(table,key) -- Save screenshot as image object to a table
     local _t,_k
-    local function _captureFunc(imageData) -- Actually triggered by engine a bit later after calling GC.getScreenShot, because love2d's capture function doesn't effect instantly
+    local function _captureFunc(imageData) -- Actually triggered by engine a bit later after calling GC.getScreenShot, because Love2D's capture function doesn't effect instantly
         _t[_k]=gc.newImage(imageData)
     end
     ---@param t table
@@ -755,7 +755,10 @@ end
 --------------------------------------------------------------
 -- Canvas
 
----Create a canvas and draw on it with given function
+---Create a canvas with specified size, and draw on it with given function
+---
+---Starting from empty canvas with origin transform. Will restore previous graphics state after done
+---@return love.Canvas
 function GC.initCanvas(w,h,drawFunc)
     local c=gc.newCanvas(w,h)
     gc.push()

@@ -273,7 +273,7 @@ end
 
 --------------------------------------------------------------
 -- Simple Publish-Subscribe Pattern model
--- Use the following Topic features when you need more scalable communication.
+-- Use the following Topic features when you need more scalable communication
 
 ---@alias Zenitha.TCP.topicID string [0-9A-Za-z_]+ but not starting with digit
 

@@ -368,9 +368,9 @@ function MIDI:update(dt)
     end
 end
 
----A shortcut to play the song with TASK object.
+---A shortcut to play the song with TASK object
 ---
----You can also manually call `:update(dt)` until `.eof` to do excatly the same thing.
+---You can also manually call `:update(dt)` until `.eof` to do excat same thing
 function MIDI:play()
     TASK.new(function()
         local yield,upd=coroutine.yield,MIDI.update

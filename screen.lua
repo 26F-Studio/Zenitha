@@ -74,20 +74,21 @@ local SCR={
 SCR.w0,SCR.h0=love.graphics.getDimensions()
 
 ---Set `Designing Rect` size
-
+---
 ---`Designing Rect` is the largest rectangular area centered on the screen
 ---with the same proportions you specify.
 ---
----Then, you can consider all drawing operations as being performed within this specified area,
----without concerning the real window size which can be adjusted to any value.
+---In Zenitha, *ALMOST ALL* operations related to screen size use `Designing Rect` rather than
+---Love2D's original coordinate system. Then you can consider *ALMOST ALL* operations as being
+---performed within this specified area, without concerning the real window size, which is variable.
 ---
----If you want to make self-adaption ui, you can use `gc.replaceTranformation(SCR.xOy_ul)` things to
----makes some elements stick to the upper-left corner, etc.
+---If necessary, you must manually set the transform back to origin with `gc.origin()` in *ALMOST ALL*
+---callback events before drawing, and `SCR.xOy:inverseTransformPoint(x,y)` for mouse position.
+---If you want to make self-adaption UI, you can use `gc.replaceTransform(SCR.xOy_ul)` to
+---draw elements sticking to the upper-left corner, etc. (you won't consider scaling, only translation).
 ---
----In Zenitha, all operations related to screen size use `Designing Rect`
----rather than the engine's original coordinate system.
----If necessary, you must manually transform the coordinate values back to the origin in all callback events,
----and `gc.replaceTransform(SCR.origin)` at the beginning of each draw function.
+---*ALMOST ALL*: all cursor positions & drawing operations, except: drawing function of BG module,
+---scene swapping cutscene of SCN module, waiting screen of WAIT module.
 ---@param w number
 ---@param h number
 function SCR.setSize(w,h)
