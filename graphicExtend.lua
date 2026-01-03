@@ -771,6 +771,7 @@ function GC.initCanvas(w,h,drawFunc,stencil)
     gc.origin()
     gc.setCanvas(initCanvasSetup)
     drawFunc()
+    gc.setCanvas()
     gc.pop()
     return initCanvasSetup[1]
 end
