@@ -626,4 +626,54 @@ function MATH.selectFreq(v,fList)
     error("WTF")
 end
 
+local function qmul(a,b,mod)
+    local c=floor(a/mod*b)
+    return (a*b-c*mod)%mod
+end
+local function qpow(a,n,mod)
+    local res=1
+    while n>0 do
+        if n%2==1 then
+            res=qmul(res,a,mod)
+        end
+        a=qmul(a,a,mod)
+        n=floor(n/2)
+    end
+    return res
+end
+local ud={2,7,61}
+---Miller-Rabin primality test
+---
+---Guaranteed correct for n<2^32
+---@param n integer
+---@return boolean
+function MATH.MRtest(n)
+    n=abs(n)
+    if n==2 or n==3 then return true end
+    if n%1~=0 or n<=1 or n%2==0 then return false end
+
+    local u,t=n-1,0
+    while u%2==0 do
+        u=u/2
+        t=t+1
+    end
+    for i=1,#ud do
+        local v=qpow(ud[i],u,n)
+        if not (v==1 or v==n-1 or v==0) then
+            local con=false
+            for j=1,t do
+                v=qmul(v,v,n)
+                if v==n-1 and j~=t then
+                    con=true
+                    break
+                elseif v==1 then
+                    return false
+                end
+            end
+            if not con and v~=1 then return false end
+        end
+    end
+    return true
+end
+
 return MATH
