@@ -673,6 +673,7 @@ function scene.keyDown(key,isRep)
 
         -- Insert empty line
         log""
+        return true
     elseif key=='up' or key=='down' then
         hisPtr=
             key=='up' and (hisPtr and math.max(hisPtr-1,1) or #history) or
@@ -683,24 +684,21 @@ function scene.keyDown(key,isRep)
             inputBox:clear()
         end
         return true
-    elseif key=='left' then
-        return true
-    elseif key=='right' then
+    elseif key=='left' or key=='right' then
         return true
     elseif key=='tab' then
         local str=inputBox:getText()
-        if str~='' and not str:find("%s") then
+        if #str>0 and not str:find("%s") then
             local res={}
             for c in next,commands do
-                if c:find(str,nil,true)==1 then
+                if c:match("^"..str) then
                     ins(res,c)
                 end
             end
 
             if #res>1 then
                 log(">Commands that start with '"..str.."' :")
-                table.sort(res)
-                for i=1,#res do log{COLOR.LD,res[i]} end
+                log{COLOR.LD,table.concat(TABLE.sort(res),", ")}
             elseif #res==1 then
                 inputBox:setText(res[1])
             end
