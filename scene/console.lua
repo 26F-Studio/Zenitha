@@ -619,8 +619,10 @@ function scene.keyDown(key,isRep)
         if input:byte()==33 then
             -- Execute lua code
             log{COLOR.lC,"> "..input}
-            local code,err=loadstring(input:sub(2),"CMD")
-            if code then
+            local code,err=loadstring(input:sub(2),"")
+            if not code then
+                log{COLOR.R,"[SyntaxErr] ",COLOR.R,err:sub(13)}
+            else
                 local resultColor
                 if sumode then
                     resultColor=COLOR.lY
@@ -629,17 +631,15 @@ function scene.keyDown(key,isRep)
                     resultColor=COLOR.lG
                 end
                 local suc,res=pcall(code)
-                if suc then
+                if not suc then
+                    log{COLOR.R,res:sub(13)}
+                else
                     if res~=nil then
                         log{resultColor,">> "..tostring(res)}
                     else
                         log{resultColor,"done"}
                     end
-                else
-                    log{COLOR.R,res}
                 end
-            else
-                log{COLOR.R,"[SyntaxErr] ",COLOR.R,err}
             end
         else
             -- Execute builtin command
