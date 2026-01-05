@@ -433,6 +433,22 @@ local commands={} do
             "Usage: fn <1-24>",
         },
     }
+    commands.sfx={
+        code=function(sfx)
+            if sfx~='' then
+                SFX.play(sfx)
+            else
+                log{COLOR.I,"Usage: sfx [sfxName]"}
+            end
+        end,
+        description="Play SFX",
+        details={
+            "Play a SFX.",
+            "",
+            "Usage:",
+            "sfx [sfxName]",
+        },
+    }
     commands.bgm={
         code=function(bgm)
             if bgm~='' then
