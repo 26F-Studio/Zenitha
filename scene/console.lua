@@ -660,15 +660,8 @@ function scene.keyDown(key,isRep)
         else
             -- Execute builtin command
             log{COLOR.lS,"> "..input}
-            local p=input:find(" ")
-            local cmd,arg
-            if p then
-                cmd=input:sub(1,p-1):lower()
-                arg=input:sub(input:find("%S",p+1) or -1)
-            else
-                cmd=input
-                arg=''
-            end
+            local cmd=input:match("^(%S+)"):lower()
+            local arg=input:match("%s+(.*)$") or ''
             if commands[cmd] then
                 commands[cmd].code(arg)
             else
