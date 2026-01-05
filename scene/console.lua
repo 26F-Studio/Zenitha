@@ -69,12 +69,12 @@ local commands={} do
             "help [command_name]",
         },
     }commands["?"]="help"
-    commands["#"]={
+    commands["!"]={
         description="Run arbitrary Lua code",
         details={
             "Run arbitrary Lua code.",
             "",
-            "Usage: #[lua_source_code]",
+            "Usage: ![lua_source_code]",
             "",
             "print() can be used to print text into this window.",
         },
@@ -488,14 +488,14 @@ local commands={} do
     commands.su={
         code=function(code)
             if sumode then
-                log{COLOR.Y,"You are already in su mode. Use # to run any lua code"}
-                log{COLOR.Y,"已经进入最高权限模式了, 请使用 # 执行任意lua代码"}
+                log{COLOR.Y,"You are already in su mode. Use ! to run any lua code"}
+                log{COLOR.Y,"已经进入最高权限模式了, 请使用 ! 执行任意lua代码"}
             elseif code=="7126" then
                 sumode=true
                 log{COLOR.Y,"* SU MODE ON - DO NOT RUN ANY CODE THAT YOU DON'T KNOW WHAT THEY EXACTLY DO *"}
-                log{COLOR.Y,"* Use # to run ANY lua code. To print into this console, use PRINT() *"}
+                log{COLOR.Y,"* Use ! to run ANY lua code. To print into this console, use PRINT() *"}
                 log{COLOR.Y,"* 最高权限模式开启, 请不要执行任何自己不懂确切含义的代码 *"}
-                log{COLOR.Y,"* 使用 # 执行任意lua代码. 在控制台内打印信息需要改用 PRINT() *"}
+                log{COLOR.Y,"* 使用 ! 执行任意lua代码. 在控制台内打印信息需要改用 PRINT() *"}
             else
                 log{COLOR.Y,"Password incorrect"}
             end
@@ -570,18 +570,9 @@ local userG={
     debug={},package={},io={},os={},
 }
 function userG.print(...)
-    local args,L={...},{}
-    for k,v in next,args do ins(L,{k,v}) end
-    table.sort(L,function(a,b) return a[1]<b[1] end)
-    local i=1
-    while L[1] do
-        if i==L[1][1] then
-            log(tostring(L[1][2]))
-            rem(L,1)
-        else
-            log("nil")
-        end
-        i=i+1
+    local args={...}
+    for i=1,select('#',...) do
+        log(tostring(args[i]))
     end
 end
 userG._G=userG
@@ -625,7 +616,7 @@ function scene.keyDown(key,isRep)
         hisPtr=false
 
         -- Execute
-        if input:byte()==35 then
+        if input:byte()==33 then
             -- Execute lua code
             log{COLOR.lC,"> "..input}
             local code,err=loadstring(input:sub(2),"CMD")
