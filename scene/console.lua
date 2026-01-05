@@ -12,7 +12,8 @@ log{COLOR.lP,"Zenitha Console"}
 log{COLOR.lC,"© Copyright 2019–2025 26F Studio. Some rights reserved."}
 log{COLOR.dR,"WARNING: DO NOT RUN ANY CODE THAT YOU DON'T UNDERSTAND."}
 
-local history,hisPtr={"?"},false
+local history={"?"}
+local hisPtr=false ---@type boolean|integer
 local sumode=false
 
 local commands={} do
@@ -672,26 +673,14 @@ function scene.keyDown(key,isRep)
 
         -- Insert empty line
         log""
-    elseif key=='up' then
-        if not hisPtr then
-            hisPtr=#history
-            if hisPtr>0 then
-                inputBox:setText(history[hisPtr])
-            end
-        elseif hisPtr>1 then
-            hisPtr=hisPtr-1
-            inputBox:setText(history[hisPtr])
-        end
-        return true
-    elseif key=='down' then
+    elseif key=='up' or key=='down' then
+        hisPtr=
+            key=='up' and (hisPtr and math.max(hisPtr-1,1) or #history) or
+            key=='down' and hisPtr and history[hisPtr+1] and hisPtr+1
         if hisPtr then
-            hisPtr=hisPtr+1
-            if history[hisPtr] then
-                inputBox:setText(history[hisPtr])
-            else
-                hisPtr=false
-                inputBox:clear()
-            end
+            inputBox:setText(history[hisPtr])
+        else
+            inputBox:clear()
         end
         return true
     elseif key=='left' then
