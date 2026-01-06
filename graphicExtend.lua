@@ -17,6 +17,7 @@ local newText=gc.newText
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
 local rectangle,circle,ellipse=gc.rectangle,gc.circle,gc.ellipse
 local applyTransform=gc.applyTransform
+local translate,scale,rotate=gc.translate,gc.scale,gc.rotate
 local sin,cos=math.sin,math.cos
 local type,pcall=type,pcall
 local lerp=MATH.lerp
@@ -522,35 +523,44 @@ end
 --------------------------------------------------------------
 -- User Coordinate System
 
-local ucsMode,ucsD1,ucsD2
+local ucsMode ---@type 1 | 2 | 3 1: move, 2: scale, 3: rotate
+local ucsD1,ucsD2
 
----Move/Scale/Rotate the coordinate system and remember the movement (ONLY ONE TIME)
+---Move the coordinate system and remember the movement (DOES NOT STACK!!!)
 ---
----Only useful when there's only one step, or you should use classical way (`push('transform')`+`pop()`) instead
----@param mode 'm' | 's' | 'r'
----@param d1 number
----@param d2? number not needed for mode 'r'
-function GC.ucs_move(mode,d1,d2)
-    if mode=='m' then
-        gc.translate(d1,d2)
-    elseif mode=='s' then
-        gc.scale(d1,d2)
-    elseif mode=='r' then
-        gc.rotate(d1)
-    else
-        error("GC.ucs_move(mode,...): mode need 'm' | 's' | 'r'")
-    end
-    ucsMode,ucsD1,ucsD2=mode,d1,d2
+---For better performance when only one step requires undo, or you should use classical solution: `push('transform')`+`pop()`
+---
+---Around 30% faster than classical solution (both well optimized)
+---@param dx number
+---@param dy number
+function GC.ucs_move(dx,dy)
+    translate(dx,dy)
+    ucsMode,ucsD1,ucsD2=1,dx,dy
 end
 
----Revert ONE STEP of the coordinate system movement, which remembered by GC.ucs_move
+---Scale version of GC.ucs_move
+---@param dx number
+---@param dy number
+function GC.ucs_scale(dx,dy)
+    scale(dx,dy)
+    ucsMode,ucsD1,ucsD2=2,dx,dy
+end
+
+---Rotate version of GC.ucs_move
+---@param da number
+function GC.ucs_rotate(da)
+    rotate(da)
+    ucsMode,ucsD1=3,da
+end
+
+---Undo last GC.ucs_xxx(...) called
 function GC.ucs_back()
-    if ucsMode=='m' then
-        gc.translate(-ucsD1,-ucsD2)
-    elseif ucsMode=='s' then
-        gc.scale(1/ucsD1,1/ucsD2)
-    elseif ucsMode=='r' then
-        gc.rotate(-ucsD1)
+    if ucsMode==1 then
+        translate(-ucsD1,-ucsD2)
+    elseif ucsMode==2 then
+        scale(1/ucsD1,1/ucsD2)
+    else
+        rotate(-ucsD1)
     end
 end
 
