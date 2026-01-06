@@ -164,7 +164,7 @@ end
 local mainLoopStarted=false
 local devMode=false ---@type false | 1 | 2 | 3 | 4
 local devClick={0,0} ---@type number[]
-local mx,my -- cursor X/Y, using local variables for better performance
+local mx,my=0,0 -- cursor X/Y, using local variables for better performance
 local cursor={
     vis='auto', ---@type 'auto' | 'always' | 'never'
     active=false,
