@@ -638,7 +638,7 @@ function scene.keyDown(key,isRep)
             log{COLOR.lC,"> "..input}
             local code,err=loadstring(input:sub(2),"")
             if not code then
-                log{COLOR.R,"[SyntaxErr] ",COLOR.R,err:sub(13)}
+                log{COLOR.R,"[SyntaxErr] ",err:sub(13)}
             else
                 local resultColor
                 if sumode then
@@ -649,7 +649,7 @@ function scene.keyDown(key,isRep)
                 end
                 local suc,res=pcall(code)
                 if not suc then
-                    log{COLOR.R,res:sub(13)}
+                    log{COLOR.R,type(res)=='string' and res:sub(13) or "[UnknownErr] ",tostring(res)}
                 else
                     if res~=nil then
                         log{resultColor,">> "..tostring(res)}
