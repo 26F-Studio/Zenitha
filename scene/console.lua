@@ -649,7 +649,8 @@ function scene.keyDown(key,isRep)
                 end
                 local suc,res=pcall(code)
                 if not suc then
-                    log{COLOR.R,type(res)=='string' and res:sub(13) or "[UnknownErr] ",tostring(res)}
+                    if type(res)=='string' and res:sub(1,12)=="[string \"\"]:" then res=res:sub(13) end
+                    log{COLOR.R,res}
                 else
                     if res~=nil then
                         log{resultColor,">> "..tostring(res)}
