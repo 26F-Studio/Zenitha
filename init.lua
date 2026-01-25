@@ -983,7 +983,7 @@ function love.resize(w,h)
         if SCN.resize then SCN.resize(w,h) end
     end
 
-    WIDGET._reset()
+    WIDGET._reset('resize')
 end
 
 ---@type love.focus

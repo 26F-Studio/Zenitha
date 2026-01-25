@@ -237,16 +237,16 @@ local Widgets={}
 ---@field _pressTimeMax number
 ---@field _visible boolean | nil
 ---
----@field reset function
----@field press function
----@field release function
----@field scroll function
----@field drag function
----@field update function
----@field draw function
----@field isAbove function
----@field arrowKey function
----@field keypress function
+---@field reset fun(self:Zenitha.Widget.base, mode?:'create' | 'activate' | 'resize')
+---@field press fun(self:Zenitha.Widget.base, x:number, y:number, key:any)
+---@field release fun(self:Zenitha.Widget.base, x:number, y:number, key:any)
+---@field scroll fun(self:Zenitha.Widget.base, d:number)
+---@field drag fun(self:Zenitha.Widget.base, x:number, y:number)
+---@field update fun(self:Zenitha.Widget.base, dt:number)
+---@field draw fun(self:Zenitha.Widget.base)
+---@field isAbove fun(self:Zenitha.Widget.base, x:number, y:number):boolean
+---@field arrowKey fun(self:Zenitha.Widget.base, dir:'up' | 'down' | 'left' | 'right')
+---@field keypress fun(self:Zenitha.Widget.base, key:string)
 ---@field code function
 Widgets.base={
     _widget=true,
@@ -312,7 +312,7 @@ function Widgets.base:resetPos()
     end
 end
 local colorKeys={'color','textColor','fillColor','frameColor','imageColor','activeColor','scrollBarColor'}
-function Widgets.base:reset(init)
+function Widgets.base:reset(mode)
     assert(not self.name or type(self.name)=='string',"[widget].name need string")
 
     assert(type(self.x)=='number',"[widget].x need number")
@@ -379,7 +379,7 @@ function Widgets.base:reset(init)
     if self._visible==nil then
         self._visible=true
     end
-    if not init then
+    if mode~='create' then
         if self.visibleFunc then
             self._visible=self.visibleFunc()
         elseif self.visibleTick then
@@ -437,11 +437,11 @@ Widgets.text=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.text:reset(init)
+function Widgets.text:reset(mode)
     if self.color then
         self.textColor=self.color
     end
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
 end
 function Widgets.text:draw()
     if self._text then
@@ -477,8 +477,8 @@ Widgets.image=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.image:reset(init)
-    Widgets.base.reset(self,init)
+function Widgets.image:reset(mode)
+    Widgets.base.reset(self,mode)
     assert(not self.k or not (self.w or self.h),"[image].w/h and .k cannot appear at the same time")
     if not self._image then return end
 
@@ -539,11 +539,11 @@ Widgets.button=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.button:reset(init)
+function Widgets.button:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number',"[button].w need number")
     assert(self.h and type(self.h)=='number',"[button].h need number")
@@ -678,11 +678,11 @@ Widgets.hint=setmetatable({
     },
 },{__index=Widgets.base,__metatable=true})
 local colorKeys_hint={'floatFillColor','floatFrameColor','floatTextColor'}
-function Widgets.hint:reset(init)
+function Widgets.hint:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number',"[hint].w need number")
     assert(self.h and type(self.h)=='number',"[hint].h need number")
@@ -868,11 +868,11 @@ Widgets.checkBox=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.checkBox:reset(init)
+function Widgets.checkBox:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
     assert(legalLabelPos.norm[self.labelPos],"[checkBox].labelPos need 'left', 'right', 'top', or 'bottom'")
 
     assert(type(self.disp)=='function',"[checkBox].disp need function")
@@ -943,7 +943,6 @@ end
 
 
 ---@class Zenitha.Widget.switch: Zenitha.Widget.checkBox
----@field _slideTime number
 Widgets.switch=setmetatable({
     type='switch',
     h=30,
@@ -955,7 +954,7 @@ Widgets.switch=setmetatable({
     disp=false, -- function return a boolean
     code=NULL,
 
-    _slideTime=false,
+    _slideTime=0,
 
     buildArgs={
         'name',
@@ -975,16 +974,18 @@ Widgets.switch=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.checkBox,__metatable=true})
-function Widgets.switch:reset(init)
+function Widgets.switch:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
     assert(legalLabelPos.norm[self.labelPos],"[switch].labelPos need 'left', 'right', 'top', or 'bottom'")
 
     assert(type(self.disp)=='function',"[switch].disp need function")
 
-    self._slideTime=0
+    if mode=='activate' then
+        self._slideTime=0
+    end
     self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
     self.alignY=self.labelPos=='top' and 'bottom' or self.labelPos=='bottom' and 'top' or 'center'
 end
@@ -1130,11 +1131,11 @@ local sliderShowFunc={
         return floor(S._pos0*100+.5)..'%'
     end,
 }
-function Widgets.slider:reset(init)
+function Widgets.slider:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
     assert(legalLabelPos.noTop[self.labelPos],"[slider].labelPos need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[slider].w need number")
@@ -1162,12 +1163,19 @@ function Widgets.slider:reset(init)
     else
         self._unit=self.unit
     end
-    self._pos=self._rangeL
-    self._pos0=self._rangeL
     self._textShowTime=3
+
+    if mode=='activate' then
+        self._pos0=self._rangeL
+    else
+        local suc,res=pcall(self.disp)
+        if suc then self._pos0=res end
+    end
+    self._pos=self._pos0
 
     if self.valueShow then
         if type(self.valueShow)=='function' then
+            ---@diagnostic disable-next-line
             self._showFunc=self.valueShow
         elseif type(self.valueShow)=='string' then
             self._showFunc=sliderShowFunc[self.valueShow] or error("[slider].valueShow need function, or 'int', 'float', or 'percent'")
@@ -1341,9 +1349,9 @@ Widgets.slider_fill=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
-function Widgets.slider_fill:reset(init)
+function Widgets.slider_fill:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
     assert(legalLabelPos.noTop[self.labelPos],"[slider_fill].labelPos need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[slider_fill].w need number")
@@ -1469,9 +1477,9 @@ Widgets.slider_progress=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
-function Widgets.slider_progress:reset(init)
+function Widgets.slider_progress:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
     assert(legalLabelPos.noTop[self.labelPos],"[slider_progress].labelPos need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[slider_progress].w need number")
@@ -1576,10 +1584,10 @@ Widgets.selector=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.selector:reset(init)
+function Widgets.selector:reset(mode)
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
-    Widgets.base.reset(self,init)
+    Widgets.base.reset(self,mode)
     assert(legalLabelPos.norm[self.labelPos],"[selector].labelPos need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[selector].w need number")
@@ -1747,8 +1755,8 @@ Widgets.inputBox=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.inputBox:reset(init)
-    Widgets.base.reset(self,init)
+function Widgets.inputBox:reset(mode)
+    Widgets.base.reset(self,mode)
     assert(legalLabelPos.norm[self.labelPos],"[inputBox].labelPos need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[inputBox].w need number")
@@ -1926,8 +1934,8 @@ Widgets.textBox=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.textBox:reset(init)
-    Widgets.base.reset(self,init)
+function Widgets.textBox:reset(mode)
+    Widgets.base.reset(self,mode)
     assert(self.w and type(self.w)=='number',"[textBox].w need number")
     assert(self.h and type(self.h)=='number',"[textBox].h need number")
     assert(not self.sound_clear or type(self.sound_clear)=='string',"[textBox].sound_clear need string")
@@ -2012,6 +2020,7 @@ function Widgets.textBox:draw()
     local scroll=self._scrollPos1
 
     local frameC=WIDGET.sel==self and self.activeColor or self.frameColor
+    ---@cast frameC Zenitha.Color
 
     -- Background
     gc_setColor(self.fillColor)
@@ -2120,8 +2129,8 @@ Widgets.listBox=setmetatable({
         'visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
-function Widgets.listBox:reset(init)
-    Widgets.base.reset(self,init)
+function Widgets.listBox:reset(mode)
+    Widgets.base.reset(self,mode)
     assert(not self.sound_click or type(self.sound_click)=='string',"[listBox].sound_click need string")
     assert(not self.sound_select or type(self.sound_select)=='string',"[listBox].sound_select need string")
     assert(self.w and type(self.w)=='number',"[listBox].w need number")
@@ -2331,9 +2340,10 @@ WIDGET.active={} -- Table contains all active widgets
 WIDGET.sel=false -- Selected widget
 
 ---Reset all widgets (called by Zenitha when scene changed and window resized or something)
-function WIDGET._reset()
+---@param mode? 'activate' | 'resize'
+function WIDGET._reset(mode)
     for i=1,#WIDGET.active do
-        WIDGET.active[i]:reset()
+        WIDGET.active[i]:reset(mode)
     end
 end
 
@@ -2352,7 +2362,7 @@ function WIDGET._setWidgetList(list)
     if list then
         local x,y=xOy:inverseTransformPoint(ZENITHA.mouse.getPosition())
         WIDGET._cursorMove(x,y,'init')
-        WIDGET._reset()
+        WIDGET._reset('activate')
     end
 end
 
@@ -2384,6 +2394,7 @@ function WIDGET.focus(W,reason)
     end
     if W and W._visible then
         if W.type=='inputBox' then
+            ---@cast W Zenitha.Widget.inputBox
             if reason~='move' and reason~='init' then
                 WIDGET.sel=W
                 if not kb.hasTextInput() then
@@ -2490,9 +2501,9 @@ end
 ---Update widget states with drag event (called by Zenitha)
 ---@param texts string
 function WIDGET._textinput(texts)
-    ---@type Zenitha.Widget.inputBox
     local W=WIDGET.sel
     if W and W.type=='inputBox' then
+        ---@cast W Zenitha.Widget.inputBox
         if not W.regex or texts:match(W.regex) then
             W._value=W._value..texts
             W:_cutTooLong()
@@ -2561,7 +2572,7 @@ function WIDGET.new(args)
             errorf("WIDGET.new(args): Illegal argument %s for widget %s",k,t)
         end
     end
-    w:reset(true)
+    w:reset('create')
 
     return w
 end
