@@ -5,7 +5,10 @@ local outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fo
 local inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
 
 -- Console Log
-local function log(str) outputBox:push(str) end
+local function log(str)
+    if str==nil or str==true or str==false then str=tostring(str) end
+    outputBox:push(str)
+end
 PRINT=log
 
 log{COLOR.lP,"Zenitha Console"}
