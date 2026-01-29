@@ -768,7 +768,7 @@ end
 local initCanvasSetup={stencil=false}
 ---Create a canvas with specified size, and draw on it with given function
 ---
----Starting from empty canvas with origin transform. Will restore previous graphics state after done
+---Setup: empty canvas, origin transform, #FFFFFF color. Will restore previous graphics state after done
 ---@param w number
 ---@param h number
 ---@param drawFunc function
@@ -777,12 +777,13 @@ local initCanvasSetup={stencil=false}
 function GC.initCanvas(w,h,drawFunc,stencil)
     initCanvasSetup[1]=gc.newCanvas(w,h)
     initCanvasSetup.stencil=not not stencil
+    gc.setCanvas(initCanvasSetup)
     gc.push()
     gc.origin()
-    gc.setCanvas(initCanvasSetup)
+    setColor(1,1,1)
     drawFunc()
-    gc.setCanvas()
     gc.pop()
+    gc.setCanvas()
     return initCanvasSetup[1]
 end
 
