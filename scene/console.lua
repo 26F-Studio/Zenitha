@@ -508,14 +508,14 @@ local commands={} do
     commands.su={
         code=function(code)
             if sumode then
-                log{COLOR.Y,"You are already in su mode. Use ! to run any lua code"}
+                log{COLOR.Y,"You are already in su mode. Use ! as prefix to run any lua code"}
                 log{COLOR.Y,"已经进入最高权限模式了, 请使用 ! 执行任意lua代码"}
             elseif code=="7126" then
                 sumode=true
                 log{COLOR.Y,"* SU MODE ON - DO NOT RUN ANY CODE THAT YOU DON'T KNOW WHAT THEY EXACTLY DO *"}
                 log{COLOR.Y,"* Use ! to run ANY lua code. To print into this console, use PRINT() *"}
                 log{COLOR.Y,"* 最高权限模式开启, 请不要执行任何自己不懂确切含义的代码 *"}
-                log{COLOR.Y,"* 使用 ! 执行任意lua代码. 在控制台内打印信息需要改用 PRINT() *"}
+                log{COLOR.Y,"* 使用 ! 作为前缀执行任意lua代码. 在控制台内打印信息需要改用 PRINT() *"}
             else
                 log{COLOR.Y,"Password incorrect"}
             end
