@@ -1,17 +1,16 @@
-local resume,status=coroutine.resume,coroutine.status
-local assert,rawset=assert,rawset
+local resume,yield,status=coroutine.resume,coroutine.yield,coroutine.status
 local rem=table.remove
+local assert=assert
 local timer=ZENITHA.timer.getTime
 
 local TASK={}
 
 -- Locks
 ---@type Map<number>
-local locks=setmetatable({},{
-    __index=function(self,k) rawset(self,k,-1e99) return -1e99 end,
-    __newindex=function(self,k) rawset(self,k,-1e99) end,
-})
-
+local locks=setmetatable({},{__index=function(self,k)
+    self[k]=-1e99
+    return -1e99
+end})
 ---Attempt to set a labeled lock
 ---
 ---Can only succeed if the same-name lock is not set or has expired
@@ -23,7 +22,7 @@ local locks=setmetatable({},{
 ---```
 ---@param name any
 ---@param time? number
----@return boolean 
+---@return boolean success
 function TASK.lock(name,time)
     if timer()>=locks[name] then
         locks[name]=timer()+(time or 1e99)
@@ -36,7 +35,7 @@ end
 ---Same as `TASK.lock`, but lock will be forced set even if the lock is not expired
 ---@param name any
 ---@param time? number
----@return boolean succeed
+---@return boolean wasExpired
 function TASK.forceLock(name,time)
     local res=timer()>=locks[name]
     locks[name]=timer()+(time or 1e99)
@@ -46,7 +45,7 @@ end
 ---Invalidate a lock
 ---@param name any
 function TASK.unlock(name)
-    locks[name]=-1e99
+    locks[name]=nil
 end
 
 ---Get the time remaining of a lock, false if not locked or expired
@@ -57,13 +56,6 @@ function TASK.getLock(name)
     return v>0 and v
 end
 
----Remove the locks which are already expired
-function TASK.freshLock()
-    for k,v in next,locks do
-        if timer()>v then locks[k]=nil end
-    end
-end
-
 ---Invalidate all locks
 function TASK.clearLock()
     for k in next,locks do
@@ -71,6 +63,12 @@ function TASK.clearLock()
     end
 end
 
+---Remove the locks which are already expired **(unnecessary)**
+function TASK.purgeLock()
+    for k,v in next,locks do
+        if timer()>v then locks[k]=nil end
+    end
+end
 
 local tasks={}
 
@@ -143,8 +141,6 @@ function TASK.clear()
         tasks[k]=nil
     end
 end
-
-local yield=coroutine.yield
 
 ---Yield for some times
 ---@param count number
