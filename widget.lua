@@ -40,11 +40,11 @@
 ---@field imageColor? Zenitha.ColorStr | Zenitha.Color [image & button]
 ---@field activeColor? Zenitha.ColorStr | Zenitha.Color [*Box]
 ---
----@field sound_press? string|false [button & checkBox & switch & selector & inputBox]
----@field sound_release? string|false [button]
----@field sound_hover? string|false [EXCEPT text & image]
+---@field sound_press? string | false [button & checkBox & switch & selector & inputBox]
+---@field sound_release? string | false [button]
+---@field sound_hover? string | false [EXCEPT text & image]
 ---
----@field floatText? string | function [hint]
+---@field floatText? string | table | function [hint]
 ---@field floatFontSize? number [hint]
 ---@field floatFontType? string [hint]
 ---@field floatImage? string | love.Drawable [hint]
