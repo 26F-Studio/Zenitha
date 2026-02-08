@@ -115,7 +115,7 @@ function MSG._new(data)
     local w,h=text:getDimensions()
     w=math.max(w+(data.cat and 45 or 5),200)+15
     h=math.max(h+12,50)
-    local k=h>400 and 1/math.min(h/400,2.6) or 1
+    local k=1/math.min(math.max(w/(SCR.w0-6), h/400, 1), 2.6)
 
     ---@class Zenitha.MessageObject
     local obj={
