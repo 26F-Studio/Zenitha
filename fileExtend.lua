@@ -53,7 +53,7 @@ function FILE.load(path,args,venv)
 
     if mode=='luaon' then
         s=(s:match("^%s*{") and "return" or "")..s
-        local func,err_mes=loadstring(s,STRING.simplifyPath(path))
+        local func,err_mes=loadstring(s,path)
         if func then
             setfenv(func,venv or {})
             local res=func()
@@ -62,7 +62,7 @@ function FILE.load(path,args,venv)
             error("FILE.load: Decode error: "..err_mes)
         end
     elseif mode=='lua' then
-        local func,err_mes=loadstring(s,STRING.simplifyPath(path))
+        local func,err_mes=loadstring(s,path)
         if func then return func() end
         error("FILE.load: Compile error: "..err_mes)
     elseif mode=='json' then
