@@ -757,15 +757,16 @@ function Widgets.hint:reset(mode)
         box[1]=box[1]-(self.w+box[3])*.5-self.labelDist
         box[2]=-box[4]+self.h*.5
     end
-    if self._x+box[1]<0 then
-        box[1]=-self._x
-    elseif self._x+box[1]+box[3]>SCR.w0 then
-        box[1]=SCR.w0-self._x-box[3]
+    local biasX,biasY=SCR.x/SCR.k,SCR.y/SCR.k
+    if self._x+box[1]<-biasX then
+        box[1]=-biasX-self._x
+    elseif self._x+box[1]+box[3]>SCR.w0+biasX then
+        box[1]=SCR.w0+biasX-self._x-box[3]
     end
-    if self._y+box[2]<0 then
-        box[2]=-self._y
-    elseif self._y+box[2]+box[4]>SCR.h0 then
-        box[2]=SCR.h0-self._y-box[4]
+    if self._y+box[2]<-biasY then
+        box[2]=-biasY-self._y
+    elseif self._y+box[2]+box[4]>SCR.h0+biasY then
+        box[2]=SCR.h0+biasY-self._y-box[4]
     end
     self._floatBox=box
 
