@@ -393,15 +393,20 @@ function GC.blurCircle(solid,x,y,r)
     setShader()
 end
 
-do -- function GC.getScreenShot(table,key) -- Save screenshot as image object to a table
+do -- function GC.getScreenShot(table,key)
     local _t,_k
-    local function _captureFunc(imageData) -- Actually triggered by engine a bit later after calling GC.getScreenShot, because Love2D's capture function doesn't effect instantly
+    local function _captureFunc(imageData)
         _t[_k]=gc.newImage(imageData)
     end
-    ---@param t table
-    ---@param k any
-    function GC.getScreenShot(t,k)
-        _t,_k=t,k
+    ---Capture screenshot as image object, and save it to `tbl[key]`
+    ---
+    ---**Warning:** Love2D's capture function doesn't take effect instantly.
+    ---You can use this in the middle of drawing, but you won't get the result until the next frame.
+    ---The image will be saved to `tbl[key]` a bit later when the current frame is done.
+    ---@param tbl table
+    ---@param key any
+    function GC.getScreenShot(tbl,key)
+        _t,_k=tbl,key
         gc.captureScreenshot(_captureFunc)
     end
 end
