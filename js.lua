@@ -54,7 +54,7 @@ end
 
 --The call will store in the webDB the return value from the function passed it timeouts
 local function retrieveJS(funcToCall,filename)
-    --Used for retrieveData function
+    -- used for retrieveData function
     JS.callJS(("FS.writeFile('%s/%s',%s);"):format(love.filesystem.getSaveDirectory(),filename,funcToCall))
 end
 
