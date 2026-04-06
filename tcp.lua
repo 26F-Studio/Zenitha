@@ -295,7 +295,7 @@ end
 ---@param name Zenitha.TCP.topicID
 ---@param maxSub? number default to 26 subscribers
 ---@param maxAliveTime? number default to 26s
----@return boolean # Success or not, will fail when reached max count
+---@return boolean success (will fail when reached max count)
 function TCP.S_createTopic(name,maxSub,maxAliveTime)
     if not TCP.S_isRunning() then return false end
     if not pcall(checkTopicName,name) then return false end
@@ -317,7 +317,7 @@ function TCP.S_closeTopic(name)
     S_pushConf{action='closeTopic',data=checkTopicName(name)}
 end
 
----@return string[] # List of Topic names
+---@return string[] topicList
 function TCP.S_getTopicInfo()
     if not TCP.S_isRunning() then return {} end
     S_rspsCHN:clear()
