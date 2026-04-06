@@ -255,8 +255,8 @@ end
 
 ---Play BGM(s), stop previous playing BGM(s) if exists
 ---Multi-channel BGMs must be exactly same length, all sources will be set to loop mode
----@param bgms string | string[]
----@param args? string | '-preLoad' | '-noloop' | '-sdin'
+---@param bgms string | string[] string ID loaded with `BGM.load()`, or a list of them
+---@param args? string | '-preLoad' | '-noloop' | '-sdin' `-preLoad` load-only, `-noloop` no loop, `-sdin` sudden in (not fade in)
 function BGM.play(bgms,args)
     if type(bgms)=='string' then bgms={bgms} end
     assert(type(bgms)=='table',"BGM.play(bgms,args): bgms need string|string[]")
