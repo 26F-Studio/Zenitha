@@ -14,6 +14,7 @@ for k,v in next,table do TABLE[k]=v end
 ---Create a new filled table
 ---
 ---You can also use `TABLE.newSize`, which is alias of `table.new` from luajit:
+---
 ---https://luajit.org/extensions.html
 ---@generic V
 ---@param val V value to fill
@@ -171,6 +172,7 @@ function TABLE.getValueSet(org,val)
 end
 
 ---Create a table of two lists combined
+---
 ---For **Appending** a table, use `TABLE.append`
 ---@generic T1, T2
 ---@param L1 T1[] list 1
@@ -186,6 +188,7 @@ function TABLE.combine(L1,L2)
 end
 
 ---Create a transposed copy of a matrix
+---
 ---Note: this is faster than `TABLE.transpose`
 ---@generic V
 ---@param matrix Mat<V>
@@ -815,6 +818,7 @@ function TABLE.replaceAll(org,v_old,v_new,n)
 end
 
 ---Find the minimum value (and key)
+---
 ---if you don't need the key and the list is short, use `math.min(unpack(t))` for better performance
 ---@generic V
 ---@param org V[]
@@ -846,6 +850,7 @@ function TABLE.minAll(org)
 end
 
 ---Find the maximum value (and key)
+---
 ---if you don't need the key and the list is short, use `math.max(unpack(t))` for better performance
 ---@generic V
 ---@param org V[]
@@ -1037,7 +1042,9 @@ function TABLE.countAll(org,val)
 end
 
 ---Return next value of [1-#] (by value), like _G.next
+---
 ---Return nil if input is the last value
+---
 ---Return list[1] if input is nil
 ---@generic K, V
 ---@param org {[K]:V}
@@ -1056,7 +1063,9 @@ function TABLE.next(org,val,loop)
 end
 
 ---Return previous value of [1-#] (by value), like TABLE.next but reversed
+---
 ---Return nil if input is the first value
+---
 ---Return list[#list] if input is nil
 ---@generic K, V
 ---@param org {[K]:V}
