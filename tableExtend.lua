@@ -1077,7 +1077,7 @@ function TABLE.prev(org,val,loop)
     if val==nil then return org[#org] end
     for i=#org,1,-1 do
         if org[i]==val then
-            return org[loop and i==1 and 1 or i-1]
+            return org[loop and i==1 and #org or i-1]
         end
     end
     return nil
