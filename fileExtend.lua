@@ -24,6 +24,30 @@ function FILE.isSafe(file)
     return fs.getRealDirectory(file)~=fs.getSaveDirectory()
 end
 
+---Prepare directory(ies) for future use.
+---
+---1. If it doesn't exist, create a directory
+---2. If there's a file with the name, **DELETE** it and create a directory
+---3. (Else) do nothing (it might be a directory/symlink/device)
+---@param name string | string[]
+function FILE.createDirectory(name)
+    if type(name)=='table' then
+        for i=1,#name do
+            if type(name[i])=='string' then
+                FILE.createDirectory(name[i])
+            end
+        end
+    elseif type(name)=='string' then
+        local info=love.filesystem.getInfo(name)
+        if not info then
+            love.filesystem.createDirectory(name)
+        elseif info.type=='file' then
+            love.filesystem.remove(name)
+            love.filesystem.createDirectory(name)
+        end
+    end
+end
+
 ---Load a file with a specified mode
 ---
 ---(Auto detect if mode not given, may not accurate)
