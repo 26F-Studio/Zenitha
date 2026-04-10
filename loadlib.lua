@@ -1,4 +1,4 @@
-local loadlib={}
+local LOADLIB={}
 
 package.cpath=
     package.cpath..                                           -- Windows, .\?.dll; .\loadall.dll
@@ -27,7 +27,7 @@ local pkgLoaded={}
 
 ---A more powerful require function using package.loadlib
 ---@param libName string
-function loadlib.pkg(libName)
+function LOADLIB.pkg(libName)
     local _require=require
     if SYSTEM=='macOS' then
         _require=package.loadlib(libName..'.dylib','luaopen_'..libName)
@@ -50,17 +50,13 @@ function loadlib.pkg(libName)
     end
 end
 
+LOADLIB.ffi=NULL
 local suc,ffi=pcall(require,'ffi')
 if suc then
     local ffiPath={
         '$1',
         love.filesystem.getSaveDirectory().."/lib/$1",
     }
-    if SYSTEM=='Linux' then
-        for i=1,#ffiPath do
-            ffiPath[i]=ffiPath[i]:gsub('$1','lib$1.so')
-        end
-    end
 
     local function defaultErrorHandler(errInfo)
         for i=1,#errInfo do
@@ -72,22 +68,23 @@ if suc then
     ---@param libName string name of the library, 'xxx' for 'xxx.dll' | 'libxxx.so'
     ---@param handler? fun(errLog:string[]) will call this if loading failed
     ---@return ffi.namespace* | false
-    function loadlib.ffi(libName,handler)
+    function LOADLIB.ffi(libName,handler)
         local errLog={}
         for i=1,#ffiPath do
+            local path=ffiPath[i]
+            if SYSTEM=='linux' then path=STRING.repD(path,'lib$1.so') end -- IDK why but my arch linux only works with manual filename completion
+
             local res
-            suc,res=pcall(ffi.load,STRING.repD(ffiPath[i],libName))
-            if suc then
-                return res
-            else
-                table.insert(errLog,STRING.repD("ffi.load('$1'): $2",libName,res))
-            end
+            suc,res=pcall(ffi.load,STRING.repD(path,libName))
+            if suc then return res end
+            table.insert(errLog,STRING.repD("ffi.load('$1'): $2",libName,res))
         end
-        (type(handler)=='function' and handler or defaultErrorHandler)(errLog)
+        if type(handler)=='function' then handler(errLog) else defaultErrorHandler(errLog) end
         return false
     end
-else
-    loadlib.ffi=NULL
+
+    -- Insert extra path if you really need
+    LOADLIB._ffiPath=ffiPath
 end
 
-return loadlib
+return LOADLIB
