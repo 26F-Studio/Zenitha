@@ -314,7 +314,7 @@ function BGM.play(bgms,args)
         for i=1,#sourceReadyToPlay do
             sourceReadyToPlay[i]:play()
         end
-        lastPlay=bgms
+        lastPlay=TABLE.copy(bgms)
     end
 
     _updateSources()
@@ -439,10 +439,13 @@ function BGM.set(bgms,mode,...)
     end
 end
 
----Get current playing BGM(s) name list (from last called `BGM.play(THIS,...)`)
----@return string[]
+---Get current playing BGM(s) name list
+---
+---Note: the list is created & cached when BGM.play() succeeds.
+---It's only used to check if you are trying to play the same BGM(s) again, so it won't hurt much even you change it
+---@return string[] #only 1 element for single-file music
 function BGM.getPlaying()
-    return TABLE.copy(lastPlay)
+    return lastPlay
 end
 
 ---Get if BGM playing now
@@ -462,7 +465,7 @@ function BGM.tell()
     for i=1,#nowPlay do
         local src=nowPlay[i].source
         if src and src:isPlaying() then
-            return src:tell()%src:getDuration()   -- bug of Love2D, tell() may return value greater than duration
+            return src:tell()%src:getDuration() -- bug of Love2D, tell() may return value greater than duration
         end
     end
     return 0
