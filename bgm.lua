@@ -343,11 +343,18 @@ function BGM.stop(time)
 end
 
 local _temp={}
----Set current playing BGM(s) states
+---Set current playing BGM(s) states:
+---```
+---BGM.set('volume', volume, timeUse)
+---BGM.set('pitch', pitch, timeUse)
+---BGM.set('seek', time)
+---BGM.set('lowgain', lowgain, timeUse)
+---BGM.set('highgain', highgain, timeUse)
+---```
 ---@param bgms 'all' | string | string[]
----@param mode 'volume' | 'lowgain' | 'highgain' | 'pitch' | 'seek'
----@param ... any
-function BGM.set(bgms,mode,...)
+---@param opt 'volume' | 'pitch' | 'seek' | 'lowgain' | 'highgain'
+---@param ... any data needed for the option
+function BGM.set(bgms,opt,...)
     if type(bgms)=='string' then
         if bgms=='all' then
             bgms=nowPlay
@@ -359,17 +366,17 @@ function BGM.set(bgms,mode,...)
         bgms=TABLE.copy(bgms)
         for i=1,#bgms do
             if type(bgms[i])~='string' then
-                error("BGM.set(bgms,mode,...): bgms need string|string[]")
+                error("BGM.set(bgms,opt,...): bgms need string|string[]")
             end
             bgms[i]=srcLib[bgms[i]]
         end
     else
-        error("BGM.set(bgms,mode,...): bgms need string|string[]")
+        error("BGM.set(bgms,opt,...): bgms need string|string[]")
     end
     for i=1,#bgms do
         local obj=bgms[i]
         if obj and obj.source then
-            if mode=='volume' then
+            if opt=='volume' then
                 _clearTask(obj,'volume')
 
                 local vol,timeUse=...
@@ -379,7 +386,7 @@ function BGM.set(bgms,mode,...)
                 assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
                 TASK.new(task_setVolume,obj,vol,timeUse)
-            elseif mode=='pitch' then
+            elseif opt=='pitch' then
                 _clearTask(obj,'pitch')
 
                 local pitch,timeUse=...
@@ -390,11 +397,11 @@ function BGM.set(bgms,mode,...)
                 assert(type(timeUse)=='number' and timeUse>=0,"BGM.set(...,time): Need >=0")
 
                 TASK.new(task_setPitch,obj,pitch,timeUse)
-            elseif mode=='seek' then
+            elseif opt=='seek' then
                 local time=...
                 assert(type(time)=='number',"BGM.set(...,time): Need number")
                 obj.source:seek(MATH.clamp(time,0,obj.source:getDuration()))
-            elseif mode=='lowgain' then
+            elseif opt=='lowgain' then
                 if effectsSupported then
                     _clearTask(obj,'lowgain')
                     local lowgain,timeUse=...
@@ -413,7 +420,7 @@ function BGM.set(bgms,mode,...)
                         TASK.new(task_setLowgain,obj,lowgain,timeUse)
                     end
                 end
-            elseif mode=='highgain' then
+            elseif opt=='highgain' then
                 if effectsSupported then
                     _clearTask(obj,'highgain')
                     local highgain,timeUse=...
@@ -433,7 +440,7 @@ function BGM.set(bgms,mode,...)
                     end
                 end
             else
-                error("BGM.set(...,mode): Need 'volume'|'lowgain'|'highgain'|'pitch'|'seek'")
+                error("BGM.set(...,opt): Need 'volume'|'pitch'|'seek'|'lowgain'|'highgain'")
             end
         end
     end
