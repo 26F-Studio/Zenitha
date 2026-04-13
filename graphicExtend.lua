@@ -414,9 +414,15 @@ end
 ---@param canvas love.Canvas
 ---@param fileName string
 ---@param format? love.ImageFormat
----@param ... number params for canvas:newImageData, should be `slice(0),mipmapLv(1),x,y,w,h`
-function GC.saveCanvas(canvas,fileName,format,...)
-    canvas:newImageData(...):encode(format or 'png',fileName)
+---@param slice? number default=0
+---@param mipmapLv? number default=1
+---@param x? number default=0
+---@param y? number default=0
+---@param w? number default=[full width]
+---@param h? number default=[full height]
+function GC.saveCanvas(canvas,fileName,format,slice,mipmapLv,x,y,w,h)
+    ---@diagnostic disable-next-line
+    canvas:newImageData(slice,mipmapLv,x,y,w,h):encode(format or 'png',fileName)
 end
 
 --------------------------------------------------------------
