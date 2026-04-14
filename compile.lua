@@ -80,11 +80,11 @@ local function compileObj(path)
 end
 
 ---Compile all .lua files into bytecodes
----@param compileSelf? boolean default to true
----@param stripDebugInfo? boolean default to true
+---@param compileSelf? boolean default to false
+---@param stripDebugInfo? boolean default to false
 local function start(compileSelf,stripDebugInfo)
-    _compileSelf=not not compileSelf
-    _stripDebugInfo=not not stripDebugInfo
+    if compileSelf==nil then compileSelf=false end
+    if stripDebugInfo==nil then stripDebugInfo=false end
     compileObj('')
     os.exit()
 end
