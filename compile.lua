@@ -26,8 +26,8 @@ end
 
 local fs=love.filesystem
 
-local _compileSelf=true
-local _stripDebugInfo=true
+local _compileSelf=false
+local _stripDebugInfo=false
 
 local function compileFile(path)
     if fs.getRealDirectory(path)==fs.getSaveDirectory() then
@@ -85,6 +85,7 @@ end
 local function start(compileSelf,stripDebugInfo)
     if compileSelf==nil then compileSelf=false end
     if stripDebugInfo==nil then stripDebugInfo=false end
+    _compileSelf,_stripDebugInfo=compileSelf,stripDebugInfo
     compileObj('')
     os.exit()
 end
