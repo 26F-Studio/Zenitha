@@ -554,6 +554,14 @@ local commands={} do
             table.sort(helpCmdList)
         end
     end
+    ---Delete console command
+    ---@param name string
+    function ZENITHA.delConsoleCommand(name)
+        assert(type(name)=='string',"CMD name need string")
+        assert(commands[name],"No CMD called "..name)
+        commands[name]=nil
+        TABLE.delete(helpCmdList,name)
+    end
 end
 
 local combKey={
