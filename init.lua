@@ -198,11 +198,11 @@ local frameTimeList={}
 local lastDrawTime=0
 ---@type (fun():string)[]
 local debugInfo={
-    function () return "DEV@"..ZENITHA.getDevMode() end,
-    function () local fps=ZENITHA.timer.getFPS() return "FPS = "..fps.." ("..updateFreq.."% "..drawFreq.."%)" end,
-    function () return "Cache = "..gcinfo() end,
-    function () return "Audios = "..(love.audio and love.audio.getActiveSourceCount() or 0) end,
-    function () return "Cursor "..floor(mx)..", "..floor(my) end,
+    function() return "DEV@"..ZENITHA.getDevMode() end,
+    function() local fps=ZENITHA.timer.getFPS() return "FPS = "..fps.." ("..updateFreq.."% "..drawFreq.."%)" end,
+    function() return "Cache = "..gcinfo() end,
+    love.audio and function() return "Audios = "..love.audio.getActiveSourceCount() end or function() return "Audio not available" end,
+    function() return "Cursor "..floor(mx)..", "..floor(my) end,
 }
 
 ---@class Zenitha.GlobalEvent
