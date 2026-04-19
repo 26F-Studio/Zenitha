@@ -201,7 +201,7 @@ local debugInfo={
     function () return "DEV@"..ZENITHA.getDevMode() end,
     function () local fps=ZENITHA.timer.getFPS() return "FPS = "..fps.." ("..updateFreq.."% "..drawFreq.."%)" end,
     function () return "Cache = "..gcinfo() end,
-    function () return "Audios = "..love.audio.getActiveSourceCount() end,
+    function () return "Audios = "..(love.audio and love.audio.getActiveSourceCount() or 0) end,
     function () return "Cursor "..floor(mx)..", "..floor(my) end,
 }
 
