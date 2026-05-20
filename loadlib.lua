@@ -72,7 +72,7 @@ if suc then
         local errLog={}
         for i=1,#ffiPath do
             local path=ffiPath[i]
-            if SYSTEM=='linux' then path=STRING.repD(path,'lib$1.so') end -- IDK why but my arch linux only works with manual filename completion
+            if SYSTEM=='Linux' then path=STRING.repD(path,'lib$1.so') end -- IDK why but my arch linux only works with manual filename completion
 
             local res
             suc,res=pcall(ffi.load,STRING.repD(path,libName))
