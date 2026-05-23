@@ -163,6 +163,17 @@ local folderMode={
     __=true,
 }
 
+---@param path1 string must be a file
+---@param path2 string
+function FILE.copy(path1,path2)
+    local f1,f2=fs.newFile(path1),fs.newFile(path2)
+    assert(f1:open('r'))
+    assert(f2:open('w'))
+    f2:write(f1:read())
+    f1:close(); f1:release()
+    f2:close(); f2:release()
+end
+
 ---Deleta a file / folder / symlink (other types are ignored)
 ---@param path string
 ---@param mode? Zenitha.folderDeleteMode (only available for folder) `'all'` (default option) - delete whole folder, `'clear'` - delete everything in folder, `'keepFolder'` - keep folder structure, `'shallow'` - only delete files in first layer
