@@ -118,18 +118,43 @@ end
 
 ---Convert time (second) to seconds~year string (max 3 units)
 ---@param t number
+---@param sec? 1/2/3 number of units to show, default to 3
 ---@return string
 ---@nodiscard
-function STRING.time(t)
-    return
-        t<0 and "-0.000″" or
-        t<60 and format('%.3f″',t) or
-        t<3600 and format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100) or
-        t<86400 and format('%d:%.2d′%05.1f″',floor(t/3600),floor(t/60%60),floor(t%60*10)/10) or
-        t<2629728 and format('%dd %d:%.2d′',floor(t/86400),floor(t/3600%3600),floor(t/60%60)) or
-        t<31556736 and format('%dm%dd%dh',floor(t/2629728),floor(t/86400%86400),floor(t/3600%3600)) or
-        t<3155673600 and format('%dy%dm%dd',floor(t/31556736),floor(t/2629728%2629728),floor(t/86400%86400)) or
-        format('%.2fcentury',floor(t/3155673600))
+function STRING.time(t,sec)
+    if (sec or 3)==3 then
+        return
+            t<0 and "-0.000″" or
+            t<60 and format('%.3f″',t) or
+            t<3600 and format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100) or
+            t<86400 and format('%d:%.2d′%05.1f″',floor(t/3600),floor(t/60%60),floor(t%60*10)/10) or
+            t<2629728 and format('%dd%d:%.2d′',floor(t/86400),floor(t/3600%24),floor(t/60%60)) or
+            t<31556736 and format('%dm%dd%dh',floor(t/2629728),floor(t/86400%30),floor(t/3600%24)) or
+            t<3155673600 and format('%dy%dm%dd',floor(t/31556736),floor(t/2629728%12),floor(t/86400%30)) or
+            format('%.2fcent.',floor(t/3155673600))
+    elseif sec==2 then
+        return
+            t<0 and "-0.000″" or
+            t<60 and format('%.3f″',t) or
+            t<3600 and format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100) or
+            t<86400 and format('%dh%.2dm',floor(t/3600),floor(t/60%60)) or
+            t<2629728 and format('%dd%dh',floor(t/86400),floor(t/3600%24)) or
+            t<31556736 and format('%dmo%dd',floor(t/2629728),floor(t/86400%30)) or
+            t<3155673600 and format('%dyr%dmo',floor(t/31556736),floor(t/2629728%12)) or
+            format('%.2fcent.',floor(t/3155673600))
+    elseif sec==1 then
+        return
+            t<0 and "-0.000sec" or
+            t<60 and format('%.1fsec',t) or
+            t<3600 and format('%dmin',floor(t/60)) or
+            t<86400 and format('%dhr',floor(t/3600)) or
+            t<2629728 and format('%dday',floor(t/86400)) or
+            t<31556736 and format('%dmon',floor(t/2629728)) or
+            t<3155673600 and format('%dyear',floor(t/31556736)) or
+            format('%.2fcent.',floor(t/3155673600))
+    else
+        error("STRING.time(t,sec): sec must be 1/2/3")
+    end
 end
 
 local byteUnits={[0]=" B"," KB"," MB"," GB"," TB"," PB"," EB"," ZB"," YB"}
