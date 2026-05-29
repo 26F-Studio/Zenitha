@@ -127,7 +127,7 @@ function STRING.time(t,sec)
             t<0 and "-0.000″" or
             t<60 and format('%.3f″',t) or
             t<3600 and format('%d′%05.2f″',floor(t/60),floor(t%60*100)/100) or
-            t<86400 and format('%d:%.2d′%05.1f″',floor(t/3600),floor(t/60%60),floor(t%60*10)/10) or
+            t<86400 and format('%d:%.2d′%05.2f″',floor(t/3600),floor(t/60%60),floor(t%60*10)/10) or
             t<2629728 and format('%dd%d:%.2d′',floor(t/86400),floor(t/3600%24),floor(t/60%60)) or
             t<31556736 and format('%dm%dd%dh',floor(t/2629728),floor(t/86400%30),floor(t/3600%24)) or
             t<3155673600 and format('%dy%dm%dd',floor(t/31556736),floor(t/2629728%12),floor(t/86400%30)) or
