@@ -765,8 +765,8 @@ STRING.u8byte=utf8[('codepoint')]
 
 ---Starting from `i` byte, get the start byte of `n` utf8 characters
 ---@param str string
----@param n integer char count
----@param i? integer start byte
+---@param n integer char count, negative means backward
+---@param i? integer start byte of the 0th char, default to 1 (cannot start from middle of a char)
 ---@return integer p end byte
 ---@nodiscard
 ---@diagnostic disable-next-line
