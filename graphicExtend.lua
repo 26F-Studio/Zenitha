@@ -13,7 +13,6 @@ end
 local gc=love.graphics
 local getColor,setColor,setShader=gc.getColor,gc.setColor,gc.setShader
 local prints,printf,draw,drawL=gc.print,gc.printf,gc.draw,gc.drawLayer
-local newText=gc.newText
 local line,arc,polygon=gc.line,gc.arc,gc.polygon
 local rectangle,circle,ellipse=gc.rectangle,gc.circle,gc.ellipse
 local applyTransform=gc.applyTransform
@@ -758,20 +757,88 @@ function GC.newCamera()
 end
 
 --------------------------------------------------------------
--- TODO: text wraping
+-- Text wrapping
 
-local function measureWidth(font,str)
-    return newText(font,str):getWidth()
+do -- function GC.wrapText(font,str,width,maxGap)
+    local result={}
+    local lineBuf=""
+    local wordBuf=""
+    local _maxGap
+
+    local tempText=GC.newText(GC.getFont(),"")
+    local function measureWidth(str)
+        tempText:set(str)
+        return tempText:getWidth()
+    end
+
+    local function commitLine()
+        result[#result+1]=lineBuf
+        lineBuf=""
+    end
+
+    ---Wrap a long string into lines with specified width limit
+    ---@param font love.Font
+    ---@param str string
+    ---@param width number maximum line width in pixels
+    ---@param maxGap? number Allowed space at the end of the line, default to 10%
+    ---@return string[] #list of lines
+    function GC.wrapText(font,str,width,maxGap)
+        tempText:setFont(font)
+
+        TABLE.clear(result)
+        lineBuf,wordBuf="",""
+        if maxGap==nil then
+            _maxGap=0.1
+        else
+            assert(type(maxGap)=='number' and maxGap>=0 and maxGap<=1,"GC.wrapText(...,maxGap): need [0,1]")
+            _maxGap=maxGap
+        end
+
+        for _,cp in STRING.u8codes(str) do
+            local c=STRING.u8char(cp)
+            local latin=c:match("^[a-zA-Z0-9]$")~=nil
+            if latin then
+                if measureWidth(lineBuf..wordBuf..c)>=width then
+                    if measureWidth(lineBuf)>width*(1-_maxGap) then
+                        commitLine()
+                        wordBuf=wordBuf..c
+                    else
+                        if #wordBuf>0 then
+                            lineBuf=lineBuf..wordBuf.."-"
+                        end
+                        commitLine()
+                        wordBuf=c
+                    end
+                else
+                    wordBuf=wordBuf..c
+                end
+            elseif c=='\n' then
+                commitLine()
+            else
+                if #wordBuf>0 then
+                    lineBuf=lineBuf..wordBuf
+                    wordBuf=""
+                end
+                if measureWidth(lineBuf..c)>width then
+                    commitLine()
+                    lineBuf=c
+                else
+                    lineBuf=lineBuf..c
+                end
+            end
+        end
+
+        if #wordBuf>0 then
+            lineBuf=lineBuf..wordBuf
+        end
+        if #lineBuf>0 then
+            commitLine()
+        end
+
+        return result
+    end
 end
-function GC.wrapText(font,str,width)
-    local list={}
 
-    -- TODO:
-    -- use 'measureWidth(font,string)' to measure the width of string
-    -- return a table of strings, each of which is no longer than given width
-
-    return list
-end
 
 --------------------------------------------------------------
 -- Canvas
