@@ -4,13 +4,22 @@ An awesome, deluxe Pure-Lua game/app framework using Love2D.
 
 ## How to start
 
-Clone the repo as submodule in the root folder of your project, and require it in main.lua with one line:
+Add this repo as submodule in the root folder:
+
+```sh
+git submodule add https://github.com/26F-Studio/Zenitha.git  
+git submodule update --init  
+#In the future, update with:  
+git submodule update
+```
+
+Then load with only one line in main.lua:
 
 ```lua
 require("zenitha")
 ```
 
-Run the project and you should see the demo scene.
+Run the project and you should see the demo scene. Explore other features yourself and have fun!
 
 ## Modules
 
