@@ -162,8 +162,8 @@ end
 
 -- Inside values
 local mainLoopStarted=false
-local devMode=false ---@type false | 1 | 2 | 3 | 4
-local devClick={0,0} ---@type number[]
+local debugMode=false ---@type false | 1 | 2 | 3 | 4
+local debugClick={0,0} ---@type number[]
 local mx,my=0,0 -- cursor X/Y, using local variables for better performance
 local cursor={
     vis='auto', ---@type 'auto' | 'always' | 'never'
@@ -198,7 +198,7 @@ local frameTimeList={}
 local lastDrawTime=0
 ---@type (fun():string)[]
 local debugInfo={
-    function() return "DEV@"..ZENITHA.getDevMode() end,
+    function() return "DEBUG@"..ZENITHA.getDebugMode() end,
     function() local fps=ZENITHA.timer.getFPS() return "FPS = "..fps.." ("..updateFreq.."% "..drawFreq.."%)" end,
     function() return "Cache = "..gcinfo() end,
     love.audio and function() return "Audios = "..love.audio.getActiveSourceCount() end or function() return "Audio not available" end,
@@ -241,14 +241,14 @@ local debugInfo={
 ---@field error         false | fun(msg:string): any When exist, called when love.errorhandler is called. Normally you should handle error with scene named 'error'
 local globalEvent={
     mouseDown=function(x,y,k)
-        if devMode then
+        if debugMode then
             print(("%d@(%d,%d) Diff<%d,%d>\tapprox(%d,%d)<%d,%d>"):format(
                 k,x,y,
-                x-devClick[1],y-devClick[2],
+                x-debugClick[1],y-debugClick[2],
                 floor(x/10)*10,floor(y/10)*10,
-                floor((x-devClick[1])/10)*10,floor((y-devClick[2])/10)*10
+                floor((x-debugClick[1])/10)*10,floor((y-debugClick[2])/10)*10
             ))
-            devClick[1],devClick[2]=x,y
+            debugClick[1],debugClick[2]=x,y
         end
     end,
     mouseMove=NULL,
@@ -263,7 +263,7 @@ local globalEvent={
 
     keyDown=function(key,isRep)
         if isRep then return end
-        if devMode then
+        if debugMode then
             if     key=='f1'  then -- Show system info
                 local info=("System:%s[%s]\nLuaVer:%s\nJitVer:%s\nJitVerNum:%s"):format(SYSTEM,jit.arch,_VERSION,jit.version,jit.version_num)
                 MSG.log('info',info); return true
@@ -288,12 +288,12 @@ local globalEvent={
                 else
                     MSG('warn',"Failed to open Console")
                 end
-            elseif key=='f8'  then ZENITHA.setDevMode(false) return true
-            elseif key=='f9'  then ZENITHA.setDevMode(1)     return true
-            elseif key=='f10' then ZENITHA.setDevMode(2)     return true
-            elseif key=='f11' then ZENITHA.setDevMode(3)     return true
-            elseif key=='f12' then ZENITHA.setDevMode(4)     return true
-            elseif devMode==2 then -- Adjust Widget
+            elseif key=='f8'  then ZENITHA.setDebugMode(false) return true
+            elseif key=='f9'  then ZENITHA.setDebugMode(1)     return true
+            elseif key=='f10' then ZENITHA.setDebugMode(2)     return true
+            elseif key=='f11' then ZENITHA.setDebugMode(3)     return true
+            elseif key=='f12' then ZENITHA.setDebugMode(4)     return true
+            elseif debugMode==2 then -- Adjust Widget
                 local W=WIDGET.sel ---@type table
                 if not W then return end
                 local editted
@@ -314,7 +314,7 @@ local globalEvent={
                 end
             end
         elseif key=='f8' then
-            devMode=1
+            debugMode=1
             MSG('info',"DEBUG 1 (Basic)",.2)
             return true
         end
@@ -349,7 +349,7 @@ local globalEvent={
             gc.printf(appVer,-2600,-20,5200,'center')
         end
 
-        if devMode then
+        if debugMode then
             gc_replaceTransform(SCR.xOy_dl)
             local safeX=SCR.safeX/SCR.k
 
@@ -1097,10 +1097,9 @@ love.update=nil
 function love.run()
     mainLoopStarted=true
 
-    local SCN_swapUpdate=SCN._swapUpdate
     local STEP,SLEEP=ZENITHA.timer.step,ZENITHA.timer.sleep
     local MINI=love.window and love.window.isMinimized or FALSE
-    local PUMP,POLL=love.event and love.event.pump or NULL,love.event.poll
+    local PUMP,POLL=love.event and love.event.pump,love.event and love.event.poll
     local timer=ZENITHA.timer.getTime
 
     local lastUpdateTime=timer()
@@ -1162,7 +1161,7 @@ function love.run()
             TASK._update(updateDT)
             TWEEN._update(updateDT)
             if SCN.update then SCN.update(updateDT) end
-            if SCN.swapping then SCN_swapUpdate(updateDT) end
+            if SCN.swapping then SCN._swapUpdate(updateDT) end
             WIDGET._update(updateDT)
         end
 
@@ -1210,9 +1209,9 @@ function love.run()
             lastScreenCheckTime=loopT
         end
 
-        -- Slow devmode
-        if devMode and devMode>=3 then
-            SLEEP(devMode==3 and .1 or .5)
+        -- Slow debug mode
+        if debugMode and debugMode>=3 then
+            SLEEP(debugMode==3 and .1 or .5)
         end
 
         local timeRemain=loopT+mainLoopInterval-timer()
@@ -1263,7 +1262,7 @@ function ZENITHA.getErr(i)
     end
 end
 
----Set the first scene to load, normally this must be used, or you wlil enter the demo scene
+---Set the first scene to launch on app start, or you will enter the demo scene
 ---
 ---Add scene with `SCN.add('name',sceneTable)`
 ---@param name string | any
@@ -1366,26 +1365,26 @@ function ZENITHA.setCursorPos(x,y,dx,dy)
     love.mousemoved(x,y,dx or 0,dy or 0)
 end
 
-function ZENITHA.getDevMode()
-    return devMode
+function ZENITHA.getDebugMode()
+    return debugMode
 end
-function ZENITHA.setDevMode(m)
+function ZENITHA.setDebugMode(m)
     if m==false then
-        devMode=false
+        debugMode=false
         MSG('info',"DEBUG OFF",1)
     else
-        devClick[1],devClick[2]=0,0
+        debugClick[1],debugClick[2]=0,0
         if m==1 then
-            devMode=1
+            debugMode=1
             MSG('info',"DEBUG 1 (Basic)",1)
         elseif m==2 then
-            devMode=2
+            debugMode=2
             MSG('info',"DEBUG 2 (Widget)",1)
         elseif m==3 then
-            devMode=3
+            debugMode=3
             MSG('info',"DEBUG 3 (Slow)",1)
         elseif m==4 then
-            devMode=4
+            debugMode=4
             MSG('info',"DEBUG 4 (Sloooow)",1)
         end
     end
