@@ -1264,6 +1264,8 @@ function ZENITHA.getErr(i)
 end
 
 ---Set the first scene to load, normally this must be used, or you wlil enter the demo scene
+---
+---Add scene with `SCN.add('name',sceneTable)`
 ---@param name string | any
 function ZENITHA.setFirstScene(name)
     assert(type(name)=='string',"ZENITHA.setFirstScene(name): Need string")
