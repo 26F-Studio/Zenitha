@@ -1,8 +1,20 @@
 # Zenitha
 
-An awesome, deluxe Pure-Lua game/app framework using Love2D, with modules listed below:
+An awesome, deluxe Pure-Lua game/app framework using Love2D.
 
-## SCN (Scene)
+## How to start
+
+Clone the repo as submodule in the root folder of your project, and require it in main.lua with one line:
+
+```lua
+require("zenitha")
+```
+
+Run the project and you should see the demo scene.
+
+## Modules
+
+### SCN (Scene)
 
 allow you custom all callback functions for each scene and easily travel between them.
 
@@ -13,7 +25,7 @@ SCN.go("setting","fastFade")
 SCN.back()
 ```
 
-## BGM / SFX / VOC (Music/Effect/Voice)
+### BGM / SFX / VOC (Music/Effect/Voice)
 
 allow you play audio events simpler.
 
@@ -24,7 +36,7 @@ SFX.play("click",0.8,-1,24) -- 80% Vol, left-sided, +2 Oct effect
 -- Module will automatically create/unload idle resources.
 ```
 
-## BG (Background)
+### BG (Background)
 
 a customizable layer under the scene.
 
@@ -34,11 +46,11 @@ BG.setDefault("space")
 BG.set("galaxy")
 ```
 
-## WIDGET
+### WIDGET
 
 interactive widgets layer above the scene, has the highest priority.
 
-## MSG (Message)
+### MSG (Message)
 
 an on-screen print, can be used to show notifications or warnings.
 
@@ -46,7 +58,7 @@ an on-screen print, can be used to show notifications or warnings.
 MSG('info',"Techmino is fun!")
 ```
 
-## GC
+### GC
 
 extended lib of love.graphics.
 
@@ -76,7 +88,7 @@ GC.DO{
 }
 ```
 
-## FONT
+### FONT
 
 set font style & size easily as `GC.setColor`.
 
@@ -96,7 +108,7 @@ FONT.set(20,'consolas')
 GC.print(...)
 ```
 
-## IMG (Image)
+### IMG (Image)
 
 allow images to be lazy-loaded after first used.
 
@@ -108,7 +120,7 @@ IMG.init{
 GC.draw(IMG.bg[1])
 ```
 
-## FILE
+### FILE
 
 save/load a lua table with one function call like `FILE.save(config,'conf.json')`.
 
@@ -120,7 +132,7 @@ data=FILE.load('data.lua')
 texts=FILE.load('log.txt','-string')
 ```
 
-## LANG (Language)
+### LANG (Language)
 
 an i18n module allow you manage all strings which displayed to players/users.
 
@@ -131,7 +143,7 @@ Text=LANG.set('zh')
 print(Text.hello=="你好")
 ```
 
-## MATH / STRING / TABLE
+### MATH / STRING / TABLE
 
 extended libs of standard Lua libs.
 
@@ -141,7 +153,7 @@ list=STRING.split("Welcome;to;Zenitha",";") -- {"Welcome","to","Zenitha"}
 t2=TABLE.copyAll(t1)
 ```
 
-## ASYNC
+### ASYNC
 
 Asynchronous luaCode / systemCmd execution module using Love2D threads.
 
@@ -159,7 +171,7 @@ ASYNC.runCmd('resultKey2',[[
 ASYNC.get('resultKey2') -- "World", or nil if not finished yet
 ```
 
-## TASK
+### TASK
 
 a pseudo-async module allow you run a function asynchronously (as coroutine which must yield itself periodically, be continued once per main loop cycle).
 
@@ -177,7 +189,7 @@ function scene.keyDown(k)
 end
 ```
 
-## TCP
+### TCP
 
 allow you exchange data much easier then using LuaSocket. (Yet designed for data exchanging with TCP module itself, and using pure json only)
 
@@ -196,7 +208,7 @@ TASK.new(function()
 end)
 ```
 
-## WS (WebSocket)
+### WS (WebSocket)
 
 a simple http websocket with LuaSocket.
 
@@ -224,7 +236,7 @@ TASK.new(function()
 end)
 ```
 
-## HTTP
+### HTTP
 
 a simple http client with LuaSocket.
 
@@ -241,7 +253,7 @@ repeat res=HTTP.pollMsg('login') until res
 print(res.code,res.body) -- "200", "<html>Welcome, MrZ_26</html>"
 ```
 
-## TWEEN
+### TWEEN
 
 a simple tweening module allow you making smooth animation with several lines of codes
 
@@ -253,15 +265,15 @@ TWEEN.new(function(v) Pos=200+100*v end) -- update Pos with v which goes from 0 
 :run() -- confirm and start
 ```
 
-## PROFILE
+### PROFILE
 
 a simple debug tool allow you start/stop profiling anytime, the result will be placed into the clipboard.
 
-## COLOR
+### COLOR
 
 a set of common color tables which can be used with `COLOR.R` (red), `COLOR.dG` (dark green).
 
-## LOG
+### LOG
 
 a simple log tool allow you print fancy text to console and keep permanent log.
 
@@ -270,7 +282,7 @@ LOG('info',"26 audio assets loaded")
 LOG('warn',"This app is currently in beta!")
 ```
 
-## AE (ANSI Escape)
+### AE (ANSI Escape)
 
 a simple shortcut tool allow you create ANSI escape code super easily
 
@@ -279,7 +291,7 @@ print(AE.b"Bold"..AE.i.."Underline Italic")
 print(AE'r;d;_M'.."reset, delete, magenta "..AE.."and reset format manually")
 ```
 
-## Other
+### Other
 
 And some useful utility functions like `ZENITHA.setMainLoopSpeed` `ZENITHA.setDebugInfo` `ZENITHA.setVersionText`.
 
