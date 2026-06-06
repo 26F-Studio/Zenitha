@@ -7,9 +7,9 @@ An awesome, deluxe Pure-Lua game/app framework using Love2D.
 Add this repo as submodule in the root folder:
 
 ```sh
-git submodule add https://github.com/26F-Studio/Zenitha.git  
-git submodule update --init  
-#In the future, update with:  
+git submodule add https://github.com/26F-Studio/Zenitha.git
+git submodule update --init
+# Update in the future:
 git submodule update
 ```
 
@@ -28,7 +28,7 @@ Run the project and you should see the demo scene. Explore other features yourse
 allow you custom all callback functions for each scene and easily travel between them.
 
 ```lua
-SCN.add("menu",scene)
+SCN.add("menu",sceneTable)
 SCN.go("menu")
 SCN.go("setting","fastFade")
 SCN.back()
@@ -39,7 +39,9 @@ SCN.back()
 allow you play audio events simpler.
 
 ```lua
+BGM.load("bgm1","music/1.ogg")
 BGM.play("bgm1") -- with smooth fade-in/out
+SFX.load("click","sfx/click.ogg")
 SFX.play("click")
 SFX.play("click",0.8,-1,24) -- 80% Vol, left-sided, +2 Oct effect
 -- Module will automatically create/unload idle resources.
