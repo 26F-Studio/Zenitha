@@ -21,7 +21,8 @@ end
 ---Check if a file is safe to read (in project, not save directory)
 ---@param file string
 function FILE.isSafe(file)
-    return fs.getRealDirectory(file)~=fs.getSaveDirectory()
+    local realDir=fs.getRealDirectory(file)
+    return realDir and realDir~=fs.getSaveDirectory()
 end
 
 ---Prepare directory(ies) for future use.
