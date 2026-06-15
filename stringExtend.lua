@@ -118,7 +118,7 @@ end
 
 ---Convert time (second) to seconds~year string (max 3 units)
 ---@param t number
----@param sec? 1/2/3 number of units to show, default to 3
+---@param sec? 1 | 2 | 3 number of units to show, default to 3
 ---@return string
 ---@nodiscard
 function STRING.time(t,sec)
