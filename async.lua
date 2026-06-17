@@ -8,6 +8,7 @@ if not love.thread then
 end
 
 local resPool={}
+local flagPool={}
 
 local ASYNC={}
 
@@ -60,6 +61,7 @@ local thread_lua=[[
 function ASYNC.runLua(rtn,cmd,args)
     refreshThreads()
     if threads[rtn] then return false end
+    flagPool[rtn]=true
     threads[rtn]=love.thread.newThread(thread_lua)
     threads[rtn]:start(
         resCHN,
@@ -93,6 +95,7 @@ local thread_cmd=[[
 function ASYNC.runCmd(rtn,cmd)
     refreshThreads()
     if threads[rtn] then return false end
+    flagPool[rtn]=true
     threads[rtn]=love.thread.newThread(thread_cmd)
     threads[rtn]:start(
         resCHN,
@@ -102,24 +105,40 @@ function ASYNC.runCmd(rtn,cmd)
     return true
 end
 
----Get the result of an asynchronous operation started with ASYNC.runLua or ASYNC.runCmd
----@param rtn string | any The return key used in ASYNC.runLua or ASYNC.runCmd
-function ASYNC.get(rtn)
-    refreshThreads()
+local function update()
     while getCount(resCHN)>0 do
         local m=resCHN:pop()
         if m.err then
             LOG('error',m.err)
         else
             resPool[m.rtn]=m.res
+            flagPool[m.rtn]=true
         end
     end
+end
+
+---Get the result of an asynchronous operation started with ASYNC.runLua or ASYNC.runCmd
+---@param rtn string | any The return key used in ASYNC.runLua or ASYNC.runCmd
+function ASYNC.get(rtn)
+    refreshThreads()
+    update()
 
     if resPool[rtn]~=nil then
         local res=resPool[rtn]
         resPool[rtn]=nil
+        flagPool[rtn]=nil
         return res
     end
+end
+
+---Check if the result of an asynchronous operation is retrieved, to avoid multiple ASYNC.run('task1') overriding each other's result
+---
+---`true` since ASYNC.run(), `false` after ASYNC.get()
+---@param rtn string | any
+---@return true?
+function ASYNC.isBusy(rtn)
+    update()
+    return flagPool[rtn]
 end
 
 return ASYNC
