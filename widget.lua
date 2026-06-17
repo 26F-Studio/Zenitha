@@ -237,16 +237,16 @@ local Widgets={}
 ---@field _pressTimeMax number
 ---@field _visible boolean | nil
 ---
----@field reset fun(self:Zenitha.Widget.base, mode?:'create' | 'activate' | 'resize')
----@field press fun(self:Zenitha.Widget.base, x:number, y:number, key:any)
----@field release fun(self:Zenitha.Widget.base, x:number, y:number, key:any)
----@field scroll fun(self:Zenitha.Widget.base, d:number)
----@field drag fun(self:Zenitha.Widget.base, x:number, y:number)
----@field update fun(self:Zenitha.Widget.base, dt:number)
----@field draw fun(self:Zenitha.Widget.base)
----@field isAbove fun(self:Zenitha.Widget.base, x:number, y:number):boolean
----@field arrowKey fun(self:Zenitha.Widget.base, dir:'up' | 'down' | 'left' | 'right')
----@field keypress fun(self:Zenitha.Widget.base, key:string)
+---@field reset fun(self, mode?:'create' | 'activate' | 'resize')
+---@field press fun(self, x:number, y:number, key:any)
+---@field release fun(self, x:number, y:number, key:any)
+---@field scroll fun(self, d:number)
+---@field drag fun(self, x:number, y:number)
+---@field update fun(self, dt:number)
+---@field draw fun(self)
+---@field isAbove fun(self, x:number, y:number):boolean
+---@field arrowKey fun(self, dir:'up' | 'down' | 'left' | 'right')
+---@field keypress fun(self, key:string)
 ---@field code function
 Widgets.base={
     _widget=true,
