@@ -102,7 +102,7 @@ function SFX.load(_1,_2,_3)
         if fail>0 then
             LOG(fail.." SFX files missing")
         end
-        LOG(("%d SFX files added, total %d"):format(success,#nameList))
+        LOG(("%d SFX files loaded, total %d"):format(success,#nameList))
     elseif type(_1)=='string' and type(_2)=='table' then
         local metaDec=love.sound.newDecoder(_1)
         local duration=metaDec:getDuration()
@@ -113,6 +113,7 @@ function SFX.load(_1,_2,_3)
             metaDec:getChannelCount()/8
         metaDec:release()
         local meta=_2
+        local cntBefore=#nameList
         for n,t in next,meta do
             local dec=love.sound.newDecoder(_1,math.ceil(t[2]/duration*fullSize/4)*4)
             dec:seek(t[1])
@@ -120,6 +121,7 @@ function SFX.load(_1,_2,_3)
             srcMap[n]={love.audio.newSource(dec:decode(),'static')}
             dec:release()
         end
+        LOG(("%d SFX clips loaded from %s, total %d"):format(#nameList-cntBefore,_1,#nameList))
     else
         LOG("SFX.load: need (name,path,bool?) or ({name=path,...},bool?) or (path,{name={start,len},...})")
     end
