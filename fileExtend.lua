@@ -55,12 +55,16 @@ end
 ---
 ---Note: crash on any error
 ---@param path string
----@param args? string | '-luaon' | '-lua' | '-json' | '-string'
+---@param args? string | '-luaon' | '-lua' | '-json' | '-string' | '-project' | '-savedir'
 ---@param venv? table Used as environment for LuaON
 ---@return any
 function FILE.load(path,args,venv)
     if not args then args='' end
     assert(fs.getInfo(path),"FILE.load: File not exist")
+
+    local inProj=FILE.isSafe(path)
+    assert(not (STRING.sArg(args,'-project') and not inProj),"FILE.load: File is not in project")
+    assert(not (STRING.sArg(args,'-savedir') and inProj),"FILE.load: File is not in save directory")
 
     local F=fs.newFile(path)
     assert(F:open('r'),"FILE.load: Open error")
@@ -104,7 +108,7 @@ end
 ---
 ---Note: in -lua mode, only first return value is returned
 ---@param path string
----@param args? string | '-luaon' | '-lua' | '-json' | '-string'
+---@param args? string | '-luaon' | '-lua' | '-json' | '-string' | '-project' | '-savedir'
 ---@param venv? table Used as environment for LuaON
 ---@return any
 function FILE.safeLoad(path,args,venv)
