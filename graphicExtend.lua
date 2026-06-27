@@ -626,6 +626,19 @@ function GC.stc_rect(x,y,w,h,rx,ry,seg)
     gc_stencil(stencil_rectangle,stc_action,stc_value,true)
 end
 
+---Draw a rectangle as stencil but center aligned
+---@param x number
+---@param y number
+---@param w number
+---@param h number
+---@param rx? number
+---@param ry? number
+---@param seg? number
+function GC.stc_mRect(x,y,w,h,rx,ry,seg)
+    rect_x,rect_y,rect_w,rect_h,rect_rx,rect_ry,rect_seg=x-w/2,y-h/2,w,h,rx,ry,seg
+    gc_stencil(stencil_rectangle,stc_action,stc_value,true)
+end
+
 local circ_x,circ_y,circ_r,circ_seg
 local function stencil_circle()
     circle('fill',circ_x,circ_y,circ_r,circ_seg)
