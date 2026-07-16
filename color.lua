@@ -259,8 +259,8 @@ end
 
 
 ---Convert HSV to RGB
----@param h number Color type (0 red, 1/3 green, 2/3 blue)
----@param s number Color amount (0 black-white, 1 rainbow)
+---@param h number Hue (0 red, 1/3 green, 2/3 blue)
+---@param s number Saturation (0 grey, 1 rainbow)
 ---@param v number Value (0 black, 1 white/rainbow)
 ---@param a? number Alpha
 ---@return number, number, number, number?
@@ -304,18 +304,22 @@ function COLOR.toHSV(r,g,b,a)
         a
 end
 
+COLOR.HSB=COLOR.HSV
+COLOR.toHSB=COLOR.toHSV
 
 
-local function hue2rgb(p,q,t)
-    t=t%1
-    if t<1/6 then return p+(q-p)*6*t end
-    if t<1/2 then return q end
-    if t<2/3 then return p+(q-p)*(2/3-t)*6 end
-    return p
+
+local function hue2rgb(lo,hi,hue)
+    hue=hue%1*6
+    return
+        hue<1 and lo+(hi-lo)*hue or
+        hue<3 and hi or
+        hue<4 and lo+(hi-lo)*(4-hue) or
+        lo
 end
 ---Convert HSL to RGB
----@param h number Color type (0 red, 1/3 green, 2/3 blue)
----@param s number Color amount (0 grey, 1 rainbow)
+---@param h number Hue (0 red, 1/3 green, 2/3 blue)
+---@param s number Saturation (0 grey, 1 rainbow)
 ---@param l number Lightness (0 black, 0.5 grey/rainbow, 1 white)
 ---@param a? number Alpha
 ---@return number, number, number, number?
