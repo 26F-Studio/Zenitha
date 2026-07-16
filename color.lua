@@ -1,39 +1,40 @@
 --[[
-    Color Module (old)
-    Go check clr.lua for the new color system!
+Color Module (deprecated)
 
-    Hue letters:
-        R = Red
-        F = Flame
-        O = Orange
-        Y = Yellow
-        A = Apple
-        K = Kelly
-        G = Green
-        J = Jungle
-        C = Cyan
-        I = Ice
-        S = Sea
-        B = Blue
-        P = Purple
-        V = Violet
-        M = Magenta
-        W = Wine
-        D = Dark
-        L = Light
-        T = Translucent
-        X = Xnothing
+Go check clr.lua for the new color module!
 
-    Brightness prefix:
-        D = darkest
-        d = darker
-        l = lighter
-        L = lightest
+Hue letters:
+    R = Red
+    F = Flame
+    O = Orange
+    Y = Yellow
+    A = Apple
+    K = Kelly
+    G = Green
+    J = Jungle
+    C = Cyan
+    I = Ice
+    S = Sea
+    B = Blue
+    P = Purple
+    V = Violet
+    M = Magenta
+    W = Wine
+    D = Dark
+    L = Light
+    T = Translucent
+    X = Xnothing
 
-    Examples:
-        COLOR.R = pure red
-        COLOR.dY = yellow but a bit dark
-        COLOR.LG = lightest green
+Brightness prefix:
+    D = darkest
+    d = darker
+    l = lighter
+    L = lightest
+
+Examples:
+    COLOR.R = pure red
+    COLOR.dY = yellow but a bit dark
+    COLOR.LG = lightest green
 ]]
 
 ---@class Zenitha.Color: table READ ONLY
