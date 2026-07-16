@@ -8,17 +8,17 @@ Features:
 - `CLR.HSL`, `CLR.toHSL`
 - `CLR.OKLCH`, `CLR.OKLAB`
 
-Quick Palette:
-- `CLR"FF8000"` for orange
-- `CLR"FF8000A0"` for orange with alpha
-- `CLR[960]` for orange (see `CLR.installNumLiteral`)
-- `CLR[000]` for black
-- `CLR.llGS` for "lightness+2, green, saturation+1"
-- `CLR.dYrs` for "lightness-1, yellow (reddish), saturation-1"
 ]]
 ---@diagnostic disable-next-line
 local _hoverMouseHereToRead
 
+--[[
+Quick Palette:
+- HEX: `CLR'FF8000'` for orange (see `CLR.HEX`) (need cache)
+- RGB9: `CLR[960]` for orange (see `CLR.installNumLiteral`)
+- HEX: `CLR.llGS` for "lightness+2, green, saturation+1" (see `CLR.ZCS`)
+- HEX: `CLR.dYrs` for "lightness-1, yellow (reddish), saturation-1"
+]]
 local CLR={}
 local max,min=math.max,math.min
 local sin,cos=math.sin,math.cos
@@ -28,7 +28,7 @@ local match=string.match
 local format=string.format
 
 do -- Numeric Literal
-    ---Installs numeric color literals into CLR (e.g., CLR.installNumLiteral('RGB9') enables CLR[960] for orange).
+    ---Installs numeric color literals into CLR (e.g., `CLR.installNumLiteral('RGB9')` enables `CLR[960]` for orange).
     ---
     ---Multiple calls overwrite previous installations.
     ---To use multiple libs simultaneously, set 2nd param to true and store the returned table yourself.
@@ -272,11 +272,15 @@ do -- OKLAB & OKLCH
     end
 end
 
+do -- Zenitha Color System
+end
+
 setmetatable(CLR,{
     __call=function(_,str) return CLR.HEX(str) end,
     __index=function(_,str)
         -- TODO
     end,
 })
+---@cast CLR +fun(hexStr:string):number,number,number,number?
 
 return CLR
