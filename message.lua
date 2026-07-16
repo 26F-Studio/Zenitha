@@ -21,8 +21,8 @@ end
 ---@enum (key) Zenitha._MessageType
 local msgStyle={
     info={
-        backColor={COLOR.HEX"3575F0"},
-        textColor={COLOR.HEX"FFFFFF"},
+        backColor={CLR"3575F0"},
+        textColor={CLR"FFFFFF"},
         canvas=GC.load{w=40,
             {'setCL',1,1,1},
             {'setLW',2},
@@ -32,8 +32,8 @@ local msgStyle={
         },
     },
     check={
-        backColor={COLOR.HEX"4FB666"},
-        textColor={COLOR.HEX"FFFFFF"},
+        backColor={CLR"4FB666"},
+        textColor={CLR"FFFFFF"},
         canvas=GC.load{w=40,
             {'setLW',6},
             {'setCL',1,1,1},
@@ -41,8 +41,8 @@ local msgStyle={
         },
     },
     warn={
-        backColor={COLOR.HEX"D2A100"},
-        textColor={COLOR.HEX"FFFFFF"},
+        backColor={CLR"D2A100"},
+        textColor={CLR"FFFFFF"},
         canvas=GC.load{w=40,
             {'setCL',1,1,1},
             {'setLW',3},
@@ -53,8 +53,8 @@ local msgStyle={
         },
     },
     error={
-        backColor={COLOR.HEX"CF4949"},
-        textColor={COLOR.HEX"FFFFFF"},
+        backColor={CLR"CF4949"},
+        textColor={CLR"FFFFFF"},
         canvas=GC.load{w=40,
             {'setLW',6},
             {'setCL',1,1,1},
@@ -63,8 +63,8 @@ local msgStyle={
         },
     },
     other={
-        backColor={COLOR.HEX"787878"},
-        textColor={COLOR.HEX"FFFFFF"},
+        backColor={CLR"787878"},
+        textColor={CLR"FFFFFF"},
     },
 }
 

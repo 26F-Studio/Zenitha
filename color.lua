@@ -8,9 +8,11 @@ Features:
 - `CLR.HSL`, `CLR.toHSL`
 - `CLR.OKLCH`, `CLR.OKLAB`
 
-Palette:
-- `CLR[960]` for orange
-- `CLR[000]` for black (see `CLR.installNumLiteral`)
+Quick Palette:
+- `CLR"FF8000"` for orange
+- `CLR"FF8000A0"` for orange with alpha
+- `CLR[960]` for orange (see `CLR.installNumLiteral`)
+- `CLR[000]` for black
 - `CLR.llGS` for "lightness+2, green, saturation+1"
 - `CLR.dYrs` for "lightness-1, yellow (reddish), saturation-1"
 ]]
@@ -59,7 +61,9 @@ end
 do -- HEX
     ---Convert hex string to color
     ---
-    ---**Warning:** low performance
+    ---You can use `CLR"FF8000"` as shortcut, `CLR` has `__call=CLR.HEX` meta method
+    ---
+    ---**Warning:** low performance, do not use this directly in drawing loop
     ---@param str string
     ---@return number, number, number, number?
     ---@nodiscard
@@ -268,6 +272,11 @@ do -- OKLAB & OKLCH
     end
 end
 
-setmetatable(CLR,{})
+setmetatable(CLR,{
+    __call=function(_,str) return CLR.HEX(str) end,
+    __index=function(_,str)
+        -- TODO
+    end,
+})
 
 return CLR
