@@ -16,16 +16,14 @@ local _hoverMouseHereToRead
 Quick Palette:
 - HEX: `CLR'FF8000'` for orange (see `CLR.HEX`) (need cache)
 - RGB9: `CLR[960]` for orange (see `CLR.installNumLiteral`)
-- HEX: `CLR.llGS` for "lightness+2, green, saturation+1" (see `CLR.ZCS`)
-- HEX: `CLR.dYrs` for "lightness-1, yellow (reddish), saturation-1"
+- HEX: `CLR.llYrS` for a light orange (see `CLR.ZCS`)
 ]]
 local CLR={}
 local max,min=math.max,math.min
 local sin,cos=math.sin,math.cos
-local tonumber=tonumber
-local sub=string.sub
-local match=string.match
-local format=string.format
+local type,tonumber=type,tonumber
+local find,match=string.find,string.match
+local sub,format=string.sub,string.format
 
 do -- Numeric Literal
     ---Installs numeric color literals into CLR (e.g., `CLR.installNumLiteral('RGB9')` enables `CLR[960]` for orange).
@@ -69,7 +67,7 @@ do -- HEX
     ---@nodiscard
     function CLR.HEX(str)
         if type(str)~='string' then error("CLR.HEX(str): Need string") end
-        str=match(str,'(%x+)')
+        str=match(str,'^(%x+)')
         if not str then
             error("CLR.HEX(str): Invalid string (no hex substring found)")
         elseif #str==6 then
@@ -273,12 +271,157 @@ do -- OKLAB & OKLCH
 end
 
 do -- Zenitha Color System
+    local errMsg={
+        lightTooLong="CLR.ZCS: Lightness prefix too long",
+        hueFtTooLong="CLR.ZCS: Hue postfix too long",
+        chromaTooLong="CLR.ZCS: Chroma postfix too long",
+        wrongEnd="CLR.ZCS: junk chars at the end: ",
+    }
+    local hueFtPat={
+        '^(r*)(.*)',
+        '^(y*)(.*)',
+        '^(g*)(.*)',
+        '^(c*)(.*)',
+        '^(b*)(.*)',
+        '^(m*)(.*)',
+        '^(r*)(.*)',
+        '^(y*)(.*)',
+    }
+
+    local lightness={}; for i=1,7 do lightness[i]=.2+i/10 end
+    local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
+    local hueOffset=20/360
+    local chromaMax={}
+    for h=0,29 do
+        local H=(h/30+hueOffset)%1
+        local row={}
+        for li=1,7 do
+            local L=lightness[li]
+            local lo,hi=0,.5
+            for _=1,20 do
+                local mid=(lo+hi)*.5
+                local r,g,b=CLR.OKLCH(L,mid,H)
+                local m1,m2=min(r,g,b),max(r,g,b)
+                if m1>=0 and m2<=1 then lo=mid else hi=mid end
+            end
+            row[li]=lo
+        end
+        chromaMax[h+1]=row
+    end
+
+    ---Construct color with Zenitha Color System (ZCS), a compact color representation.
+    ---
+    ---How to construct the ZCS string (similar idea to HSL):
+    ---1. Lightness prefix: `ddd/dd/d/[empty]/l/ll/lll` for 1 to 7
+    ---2. Hue: `R/Y/G/C/B/M` for standard 6 hues.
+    ---3. Hue finetuning: add (up to 4) `r/y/g/c/b/m` after hue to shift slightly towards there (must be adjacent, shift 1/5 each).
+    ---4. Chroma postfix: `sss/ss/s/[empty]/S/SS/SSS` for saturation 1 to 7
+    ---5. Alpha postfix: `0/1/2/../9` for alpha 0 to 1 (or left empty)
+    ---
+    ---Examples:
+    ---- `"Yrr"` = Orange
+    ---- `"dGcSS"` = dark(-1) Green, vivid(+2)
+    ---- `"llMs"` = light(+2) Green, muted(-1)
+    ---- `"dd"` = darker (grey)
+    ---- `""` = default (grey)
+    ---@param str string
+    ---@return number, number, number, number?
+    ---@nodiscard
+    function CLR.ZCS(str)
+        local l=4 ---@type number  [1, 7]
+        local c=4 ---@type number  [1, 7]
+        local h ---@type number [0,29]
+        local a
+        local sec
+
+        -- Lightness
+        sec,str=match(str,'^(l*)(.*)')
+        if #sec>0 then
+            if #sec>3 then error(errMsg.lightTooLong) end
+            l=l+#sec
+            str=str
+        else
+            sec,str=match(str,'^(d*)(.*)')
+            if #sec>0 then
+                if #sec>3 then error(errMsg.lightTooLong) end
+                l=l-#sec
+                str=str
+            end
+        end
+
+        -- Hue
+        sec,str=match(str,'^([RYGCBM])(.*)')
+        if sec then
+            local hid=find('RYGCBMRY',sec,2) -- 2~7
+            local finetune=0
+
+            -- Hue finetuning
+            sec,str=match(str,hueFtPat[hid-1])
+            if #sec>0 then
+                if #sec>4 then error(errMsg.hueFtTooLong) end
+                finetune=- #sec
+            else
+                sec,str=match(str,hueFtPat[hid+1])
+                if #sec>0 then
+                    if #sec>4 then error(errMsg.hueFtTooLong) end
+                    finetune=#sec
+                end
+            end
+            h=((hid-1)*5+finetune)%30
+
+            -- Chroma
+            sec,str=match(str,'^(s*)(.*)')
+            if #sec>0 then
+                if #sec>3 then error(errMsg.chromaTooLong) end
+                c=c-#sec
+            else
+                sec,str=match(str,'^(S*)(.*)')
+                if #sec>0 then
+                    if #sec>3 then error(errMsg.chromaTooLong) end
+                    c=c+#sec
+                end
+            end
+        end
+
+        -- Alpha
+        sec,str=match(str,'^([0-9]?)(.*)')
+        if #sec>0 then a=sec/9 end
+
+        -- End parsing
+        if #str>0 then error(errMsg.wrongEnd..str) end
+
+        -- Calculate
+        if h then
+            return CLR.OKLCH(
+                lightness[l],
+                chromaRatio[c]*chromaMax[h+1][l],
+                (h/30+hueOffset)%1,
+                a
+            )
+        else
+            local _l=lightness[l]
+            return _l,_l,_l,a
+        end
+    end
+    function CLR.ZCS_test(l,c,h,a)
+        return CLR.OKLCH(
+            lightness[l],
+            chromaRatio[c]*chromaMax[h+1][l],
+            (h/30+hueOffset)%1,
+            a
+        )
+    end
 end
 
 setmetatable(CLR,{
     __call=function(_,str) return CLR.HEX(str) end,
-    __index=function(_,str)
-        -- TODO
+    __index=function(self,str)
+        if type(str)=='number' then error("CLR[num]: invalid numeric literal") end
+        if type(str)~='string' then error("CLR[str]: invalid ZCS string") end
+        assert(type(str)=='string')
+        local clr={CLR.ZCS(str)}
+        self[str]=clr
+        return clr
     end,
 })
 ---@cast CLR +fun(hexStr:string):number,number,number,number?
