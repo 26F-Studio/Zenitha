@@ -333,17 +333,17 @@ do -- Zenitha Color System
         '^(r*)(.*)',
         '^(y*)(.*)',
     }
-    local lightnessPrefix={DD=1,D=2,dd=3,d=4,_=5,l=6,ll=7,L=8,LL=9}
+    local lightnessPrefix={DDD=1,DD=2,D=3,ddd=4,dd=5,d=6,_=7,l=8,ll=9,lll=10,L=11,LL=12,LLL=13}
     local chromaPostfix={sss=1,ss=2,s=3,_=4,S=5,SS=6,SSS=7}
 
-    local lightness={}; for i=1,9 do lightness[i]=.1+i/11 end
+    local lightness={}; for i=1,13 do lightness[i]=i/14 end
     local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
     local hueOffset=20/360
     local chromaMax={}
     for h=0,29 do
         local H=(h/30+hueOffset)%1
         local row={}
-        for li=1,7 do
+        for li=1,13 do
             local L=lightness[li]
             local lo,hi=0,.5
             for _=1,20 do
@@ -357,10 +357,13 @@ do -- Zenitha Color System
         chromaMax[h+1]=row
     end
 
+
+    CLR.W={1,1,1}
+    CLR.K={0,0,0}
     ---Construct color with Zenitha Color System (ZCS), a compact color representation.
     ---
     ---How to construct the ZCS string (similar idea to HSL):
-    ---1. Lightness prefix: `DD/D/dd/d/[empty]/l/ll/L/LL` for 1 to 9
+    ---1. Lightness prefix: `DDD/DD/D/ddd/dd/d/[empty]/l/ll/lll/L/LL/LLL` for 1 to 13
     ---2. Hue: `R/Y/G/C/B/M` for standard 6 hues.
     ---3. Hue finetuning: add (up to 4) `r/y/g/c/b/m` after hue to shift slightly towards there (must be adjacent, shift 1/5 each).
     ---4. Chroma postfix: `sss/ss/s/[empty]/S/SS/SSS` for saturation 1 to 7
@@ -370,13 +373,15 @@ do -- Zenitha Color System
     ---- `"Yrr"` = Orange
     ---- `"dGcSS"` = dark(-1) Green, vivid(+2)
     ---- `"llMs"` = light(+2) Green, muted(-1)
-    ---- `"dd"` = darker (grey)
-    ---- `""` = default (grey)
+    ---- `"dd"` = dark(-2) (grey)
+    ---- `"K"` = black (special case)
+    ---- `"W"` = white (special case)
+    ---- `""` = (grey) (special case)
     ---@param str string
     ---@return number, number, number, number?
     ---@nodiscard
     function CLR.ZCS(str)
-        local l=5 ---@type number  [1, 9]
+        local l=7 ---@type number  [1, 13]
         local c=4 ---@type number  [1, 7]
         local h ---@type number [0,29]
         local a
@@ -384,7 +389,6 @@ do -- Zenitha Color System
 
         -- Lightness
         sec,str=match(str,'^([DdlL]*)(.*)')
-        print(sec,str)
         if #sec>0 then
             if lightnessPrefix[sec] then
                 l=lightnessPrefix[sec]
