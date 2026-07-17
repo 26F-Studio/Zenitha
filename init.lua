@@ -399,8 +399,8 @@ local globalEvent={
 local require=simpRequire((...)..'.')
 
 -- Pure lua modules (simple)
-COLOR=      require'color_old'
 CLR=        require'color'
+COLOR=      require'color_old'
 AE=         require'escape'
 LOG=        require'log'
 UTIL=       require'util'

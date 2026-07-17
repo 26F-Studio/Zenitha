@@ -323,17 +323,18 @@ do -- Zenitha Color System
         wrongChroma="CLR.ZCS: Chroma postfix too long",
         wrongEnd="CLR.ZCS: junk chars at the end: ",
     }
-    local hueFtPat={}; for c in string.gmatch('rygcbmry','.') do hueFtPat[#hueFtPat+1]='^('..c..'*)(.*)' end
     local lightnessPrefix={D=1,lD=3.2,LD=6.5,DL=9.8,dL=11.7,L=13.3} -- for backward compatibility only
     for i=0,7 do
         lightnessPrefix['d'..i]=7-i
         lightnessPrefix['l'..i]=min(7+i,13.5)
     end
+    local function lightness(l) return l/13.5 end -- use 1/13.5 instead of /14 to make L6 lighter
+
+    local hueFtPat={}; for c in string.gmatch('rygcbmry','.') do hueFtPat[#hueFtPat+1]='^('..c..'*)(.*)' end
     local chromaPostfix={sss=1,ss=2,s=3,_=4,S=5,SS=6,SSS=7}
     CLR.K,CLR.W={0,0,0},{1,1,1}
     CLR.DD,CLR.LL=CLR.K,CLR.W -- backward compatibility
 
-    local function lightness(l) return l/13.5 end -- not /14, to make L6 lighter
     local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
     local hueOffset=20/360
     local chromaMax={}
@@ -452,6 +453,23 @@ do -- Zenitha Color System
             (h/30+hueOffset)%1,
             a
         )
+    end
+end
+
+do -- Utils
+    ---Get mix value (linear) of two colors with a ratio (not clamped) in vararg
+    ---@param c1 Zenitha.Color
+    ---@param c2 Zenitha.Color
+    ---@param t number
+    ---@param a? number alpha
+    ---@return number, number, number, number
+    ---@nodiscard
+    function CLR.lerp(c1,c2,t,a)
+        return
+            c1[1]*(1-t)+c2[1]*t,
+            c1[2]*(1-t)+c2[2]*t,
+            c1[3]*(1-t)+c2[3]*t,
+            a or (c1[4] or 1)*(1-t)+(c2[4] or 1)*t
     end
 end
 

@@ -43,8 +43,7 @@ Examples:
 ---@field [3] number Blue
 ---@field [4]? number Alpha
 
-local rnd,sin,abs=math.random,math.sin,math.abs
-local max,min=math.max,math.min
+local rnd,sin=math.random,math.sin
 
 ---Convert hex string to color
 ---
@@ -253,131 +252,12 @@ for i=1,5 do
     }
 end
 
-COLOR.HEX=HEX
-
----Convert color to hex string
----@param r number [0,1]
----@param g number [0,1]
----@param b number [0,1]
----@param a? number alpha
----@return string hex the 6 or 8 digits string
----@nodiscard
-function COLOR.toHEX(r,g,b,a)
-    if a then
-        r,g,b,a=r*255,g*255,b*255,a*255
-        return string.format("%02X%02X%02X%02X",r,g,b,a)
-    else
-        r,g,b=r*255,g*255,b*255
-        return string.format("%02X%02X%02X",r,g,b)
-    end
-end
-
-
-
----Convert HSV to RGB
----@param h number Hue (0 red, 1/3 green, 2/3 blue)
----@param s number Saturation (0 grey, 1 rainbow)
----@param v number Value (0 black, 1 white/rainbow)
----@param a? number Alpha
----@return number, number, number, number?
----@nodiscard
-function COLOR.HSV(h,s,v,a)
-    if s<=0 then return v,v,v,a end
-    h=h*6
-    local p=v*s
-    local x=abs((h-1)%2-1)*p
-    if     h<1 then return v,x+v-p,v-p,a
-    elseif h<2 then return x+v-p,v,v-p,a
-    elseif h<3 then return v-p,v,x+v-p,a
-    elseif h<4 then return v-p,x+v-p,v,a
-    elseif h<5 then return x+v-p,v-p,v,a
-    else            return v,v-p,x+v-p,a
-    end
-end
-
----Convert RGB to HSV
----@param r number [0,1]
----@param g number [0,1]
----@param b number [0,1]
----@param a? number alpha
----@return number, number, number, number? #All [0,1]
----@nodiscard
-function COLOR.toHSV(r,g,b,a)
-    local M=max(r,g,b)
-    local m=min(r,g,b)
-    if M==m then return 0,0,M,a end
-
-    local d=M-m
-
-    return
-        (
-            M==r and ((g-b)/d+(g<b and 6 or 0)) or
-            M==g and ((b-r)/d+2) or
-            ((r-g)/d+4)
-        )/6,
-        M==0 and 0 or d/M,
-        M,
-        a
-end
-
-COLOR.HSB=COLOR.HSV
-COLOR.toHSB=COLOR.toHSV
-
-
-
-local function hue2rgb(lo,hi,hue)
-    hue=hue%1*6
-    return
-        hue<1 and lo+(hi-lo)*hue or
-        hue<3 and hi or
-        hue<4 and lo+(hi-lo)*(4-hue) or
-        lo
-end
----Convert HSL to RGB
----@param h number Hue (0 red, 1/3 green, 2/3 blue)
----@param s number Saturation (0 grey, 1 rainbow)
----@param l number Lightness (0 black, 0.5 grey/rainbow, 1 white)
----@param a? number Alpha
----@return number, number, number, number?
----@nodiscard
-function COLOR.HSL(h,s,l,a)
-    if s<=0 then return l,l,l,a end
-
-    local q=l<.5 and l*(1+s) or l*(1-s)+s
-    local p=2*l-q
-    return
-        hue2rgb(p,q,h+1/3),
-        hue2rgb(p,q,h),
-        hue2rgb(p,q,h-1/3),
-        a
-end
-
----Convert RGB to HSL
----@param r number [0,1]
----@param g number [0,1]
----@param b number [0,1]
----@param a? number alpha
----@return number, number, number, number? #All [0,1]
----@nodiscard
-function COLOR.toHSL(r,g,b,a)
-    local M=max(r,g,b)
-    local m=min(r,g,b)
-    if M==m then return 0,0,M,a end
-
-    local l=(M+m)/2
-    local d=M-m
-    return
-        (
-            M==r and ((g-b)/d+(g<b and 6 or 0)) or
-            M==g and ((b-r)/d+2) or
-            ((r-g)/d+4)
-        )/6,
-        l>.5 and d/(2-M-m) or d/(M+m),
-        l,
-        a
-end
-
-
+COLOR.HEX=CLR.HEX
+COLOR.toHEX=CLR.toHEX
+COLOR.HSL=CLR.HSL
+COLOR.HSV=CLR.HSV
+COLOR.toHSL=CLR.toHSL
+COLOR.toHSV=CLR.toHSV
 
 ---Get Rainbow color with phase
 ---@param phase number cycle in 2pi
@@ -443,23 +323,6 @@ function COLOR.random(brightness)
 end
 COLOR.colorSets=sets
 
-
-
----Get mix value (linear) of two colors with a ratio (not clamped) in vararg
----@param c1 Zenitha.Color
----@param c2 Zenitha.Color
----@param t number
----@param a? number alpha
----@return number, number, number, number
----@nodiscard
-function COLOR.lerp(c1,c2,t,a)
-    return
-        c1[1]*(1-t)+c2[1]*t,
-        c1[2]*(1-t)+c2[2]*t,
-        c1[3]*(1-t)+c2[3]*t,
-        a or (c1[4] or 1)*(1-t)+(c2[4] or 1)*t
-end
-
-
+COLOR.lerp=CLR.lerp
 
 return COLOR
