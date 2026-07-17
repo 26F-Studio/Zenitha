@@ -333,7 +333,7 @@ do -- Zenitha Color System
         '^(r*)(.*)',
         '^(y*)(.*)',
     }
-    local lightnessPrefix={DDD=1,DD=2,D=3,ddd=4,dd=5,d=6,_=7,l=8,ll=9,lll=10,L=11,LL=12,LLL=13}
+    local lightnessPrefix={d6=1,d5=2,d4=3,d3=4,d2=5,d1=6,d0=7,l0=7,l1=8,l2=9,l3=10,l4=11,l5=12,l6=13}
     local chromaPostfix={sss=1,ss=2,s=3,_=4,S=5,SS=6,SSS=7}
 
     local lightness={}; for i=1,13 do lightness[i]=i/14 end
@@ -363,7 +363,7 @@ do -- Zenitha Color System
     ---Construct color with Zenitha Color System (ZCS), a compact color representation.
     ---
     ---How to construct the ZCS string (similar idea to HSL):
-    ---1. Lightness prefix: `DDD/DD/D/ddd/dd/d/[empty]/l/ll/lll/L/LL/LLL` for 1 to 13
+    ---1. Lightness prefix: `d6/d5/../d1/[empty]/l1/l2/../l6` for 1 to 13
     ---2. Hue: `R/Y/G/C/B/M` for standard 6 hues.
     ---3. Hue finetuning: add (up to 4) `r/y/g/c/b/m` after hue to shift slightly towards there (must be adjacent, shift 1/5 each).
     ---4. Chroma postfix: `sss/ss/s/[empty]/S/SS/SSS` for saturation 1 to 7
@@ -371,12 +371,12 @@ do -- Zenitha Color System
     ---
     ---Examples:
     ---- `"Yrr"` = Orange
-    ---- `"dGcSS"` = dark(-1) Green, vivid(+2)
-    ---- `"llMs"` = light(+2) Green, muted(-1)
-    ---- `"dd"` = dark(-2) (grey)
-    ---- `"K"` = black (special case)
-    ---- `"W"` = white (special case)
-    ---- `""` = (grey) (special case)
+    ---- `"d1GcSS"` = dark(-1) Green, vivid(+2)
+    ---- `"l2Ms"` = light(+2) Green, muted(-1)
+    ---- `"d2"` = dark(-2) (grey)
+    ---- `"K"` = black (special case) (= `"d7"`)
+    ---- `"W"` = white (special case) (= `"l7"`)
+    ---- `""` = (grey) (special case) (= `"d0"|"l0"`)
     ---@param str string
     ---@return number, number, number, number?
     ---@nodiscard
@@ -388,8 +388,9 @@ do -- Zenitha Color System
         local sec
 
         -- Lightness
-        sec,str=match(str,'^([DdlL]*)(.*)')
-        if #sec>0 then
+        sec=match(str,'^([dl][0-6]?)')
+        if sec then
+            str=sub(str,#sec+1)
             if lightnessPrefix[sec] then
                 l=lightnessPrefix[sec]
             else
