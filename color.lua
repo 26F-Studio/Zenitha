@@ -318,9 +318,9 @@ end
 
 do -- Zenitha Color System
     local errMsg={
-        lightTooLong="CLR.ZCS: Lightness prefix too long",
+        wrongLight="CLR.ZCS: Wrong lightness prefix: ",
         hueFtTooLong="CLR.ZCS: Hue postfix too long",
-        chromaTooLong="CLR.ZCS: Chroma postfix too long",
+        wrongChroma="CLR.ZCS: Chroma postfix too long",
         wrongEnd="CLR.ZCS: junk chars at the end: ",
     }
     local hueFtPat={
@@ -333,8 +333,10 @@ do -- Zenitha Color System
         '^(r*)(.*)',
         '^(y*)(.*)',
     }
+    local lightnessPrefix={DD=1,D=2,dd=3,d=4,_=5,l=6,ll=7,L=8,LL=9}
+    local chromaPostfix={sss=1,ss=2,s=3,_=4,S=5,SS=6,SSS=7}
 
-    local lightness={}; for i=1,7 do lightness[i]=.2+i/10 end
+    local lightness={}; for i=1,9 do lightness[i]=.1+i/11 end
     local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
     local hueOffset=20/360
     local chromaMax={}
@@ -358,7 +360,7 @@ do -- Zenitha Color System
     ---Construct color with Zenitha Color System (ZCS), a compact color representation.
     ---
     ---How to construct the ZCS string (similar idea to HSL):
-    ---1. Lightness prefix: `ddd/dd/d/[empty]/l/ll/lll` for 1 to 7
+    ---1. Lightness prefix: `DD/D/dd/d/[empty]/l/ll/L/LL` for 1 to 9
     ---2. Hue: `R/Y/G/C/B/M` for standard 6 hues.
     ---3. Hue finetuning: add (up to 4) `r/y/g/c/b/m` after hue to shift slightly towards there (must be adjacent, shift 1/5 each).
     ---4. Chroma postfix: `sss/ss/s/[empty]/S/SS/SSS` for saturation 1 to 7
@@ -374,24 +376,20 @@ do -- Zenitha Color System
     ---@return number, number, number, number?
     ---@nodiscard
     function CLR.ZCS(str)
-        local l=4 ---@type number  [1, 7]
+        local l=5 ---@type number  [1, 9]
         local c=4 ---@type number  [1, 7]
         local h ---@type number [0,29]
         local a
         local sec
 
         -- Lightness
-        sec,str=match(str,'^(l*)(.*)')
+        sec,str=match(str,'^([DdlL]*)(.*)')
+        print(sec,str)
         if #sec>0 then
-            if #sec>3 then error(errMsg.lightTooLong) end
-            l=l+#sec
-            str=str
-        else
-            sec,str=match(str,'^(d*)(.*)')
-            if #sec>0 then
-                if #sec>3 then error(errMsg.lightTooLong) end
-                l=l-#sec
-                str=str
+            if lightnessPrefix[sec] then
+                l=lightnessPrefix[sec]
+            else
+                error(errMsg.wrongLight..sec)
             end
         end
 
@@ -416,15 +414,12 @@ do -- Zenitha Color System
             h=((hid-1)*5+finetune)%30
 
             -- Chroma
-            sec,str=match(str,'^(s*)(.*)')
+            sec,str=match(str,'^([sS]*)(.*)')
             if #sec>0 then
-                if #sec>3 then error(errMsg.chromaTooLong) end
-                c=c-#sec
-            else
-                sec,str=match(str,'^(S*)(.*)')
-                if #sec>0 then
-                    if #sec>3 then error(errMsg.chromaTooLong) end
-                    c=c+#sec
+                if chromaPostfix[sec] then
+                    c=chromaPostfix[sec]
+                else
+                    error(errMsg.wrongChroma..sec)
                 end
             end
         end
