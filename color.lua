@@ -324,13 +324,14 @@ do -- Zenitha Color System
         wrongEnd="CLR.ZCS: junk chars at the end: ",
     }
     local hueFtPat={}; for c in string.gmatch('rygcbmry','.') do hueFtPat[#hueFtPat+1]='^('..c..'*)(.*)' end
-    local lightnessPrefix={DD=0,D=1,lD=3.2,LD=6.5,DL=9.8,dL=11.7,L=13.3,LL=13.5} -- for backward compatible only
+    local lightnessPrefix={D=1,lD=3.2,LD=6.5,DL=9.8,dL=11.7,L=13.3} -- for backward compatibility only
     for i=0,7 do
         lightnessPrefix['d'..i]=7-i
         lightnessPrefix['l'..i]=min(7+i,13.5)
     end
     local chromaPostfix={sss=1,ss=2,s=3,_=4,S=5,SS=6,SSS=7}
-    CLR.W,CLR.K={1,1,1},{0,0,0}
+    CLR.K,CLR.W={0,0,0},{1,1,1}
+    CLR.DD,CLR.LL=CLR.K,CLR.W -- backward compatibility
 
     local function lightness(l) return l/13.5 end -- not /14, to make L6 lighter
     local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
