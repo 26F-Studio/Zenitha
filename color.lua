@@ -323,20 +323,16 @@ do -- Zenitha Color System
         wrongChroma="CLR.ZCS: Chroma postfix too long",
         wrongEnd="CLR.ZCS: junk chars at the end: ",
     }
-    local hueFtPat={
-        '^(r*)(.*)',
-        '^(y*)(.*)',
-        '^(g*)(.*)',
-        '^(c*)(.*)',
-        '^(b*)(.*)',
-        '^(m*)(.*)',
-        '^(r*)(.*)',
-        '^(y*)(.*)',
-    }
-    local lightnessPrefix={d6=1,d5=2,d4=3,d3=4,d2=5,d1=6,d0=7,l0=7,l1=8,l2=9,l3=10,l4=11,l5=12,l6=13}
+    local hueFtPat={}; for c in string.gmatch('rygcbmry','.') do hueFtPat[#hueFtPat+1]='^('..c..'*)(.*)' end
+    local lightnessPrefix={DD=0,D=1,lD=3.2,LD=6.5,DL=9.8,dL=11.7,L=13.3,LL=13.5} -- for backward compatible only
+    for i=0,7 do
+        lightnessPrefix['d'..i]=7-i
+        lightnessPrefix['l'..i]=min(7+i,13.5)
+    end
     local chromaPostfix={sss=1,ss=2,s=3,_=4,S=5,SS=6,SSS=7}
+    CLR.W,CLR.K={1,1,1},{0,0,0}
 
-    local lightness={}; for i=1,13 do lightness[i]=i/14 end
+    local function lightness(l) return l/13.5 end -- not /14, to make L6 lighter
     local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
     local hueOffset=20/360
     local chromaMax={}
@@ -344,7 +340,7 @@ do -- Zenitha Color System
         local H=(h/30+hueOffset)%1
         local row={}
         for li=1,13 do
-            local L=lightness[li]
+            local L=lightness(li)
             local lo,hi=0,.5
             for _=1,20 do
                 local mid=(lo+hi)*.5
@@ -357,26 +353,25 @@ do -- Zenitha Color System
         chromaMax[h+1]=row
     end
 
-
-    CLR.W={1,1,1}
-    CLR.K={0,0,0}
     ---Construct color with Zenitha Color System (ZCS), a compact color representation.
     ---
     ---How to construct the ZCS string (similar idea to HSL):
-    ---1. Lightness prefix: `d6/d5/../d1/[empty]/l1/l2/../l6` for 1 to 13
+    ---1. Lightness prefix: `d6/d5/../d1/(d0|l0)/l1/l2/../l6` for -6 to +6
     ---2. Hue: `R/Y/G/C/B/M` for standard 6 hues.
     ---3. Hue finetuning: add (up to 4) `r/y/g/c/b/m` after hue to shift slightly towards there (must be adjacent, shift 1/5 each).
-    ---4. Chroma postfix: `sss/ss/s/[empty]/S/SS/SSS` for saturation 1 to 7
+    ---4. Chroma postfix: `sss/ss/s/[empty]/S/SS/SSS` for saturation -3 to +3
     ---5. Alpha postfix: `0/1/2/../9` for alpha 0 to 1 (or left empty)
     ---
-    ---Examples:
+    ---Colors:
     ---- `"Yrr"` = Orange
     ---- `"d1GcSS"` = dark(-1) Green, vivid(+2)
     ---- `"l2Ms"` = light(+2) Green, muted(-1)
-    ---- `"d2"` = dark(-2) (grey)
-    ---- `"K"` = black (special case) (= `"d7"`)
-    ---- `"W"` = white (special case) (= `"l7"`)
-    ---- `""` = (grey) (special case) (= `"d0"|"l0"`)
+    ---Greyscale:
+    ---- `"d2"` = dark(-2) grey
+    ---- `"l6"` = light(+6) grey
+    ---- `"d0" or "l0"` = grey
+    ---- `"K" or "d7"` = black ("d7" can also be used as prefix, but it will always be pure black)
+    ---- `"W" or "l7"` = white ("l7" is same with "d7", always pure white)
     ---@param str string
     ---@return number, number, number, number?
     ---@nodiscard
@@ -388,7 +383,7 @@ do -- Zenitha Color System
         local sec
 
         -- Lightness
-        sec=match(str,'^([dl][0-6]?)')
+        sec=match(str,'^([DdlL]+[0-7]?)')
         if sec then
             str=sub(str,#sec+1)
             if lightnessPrefix[sec] then
@@ -439,19 +434,19 @@ do -- Zenitha Color System
         -- Calculate
         if h then
             return CLR.OKLCH(
-                lightness[l],
+                lightness(l),
                 chromaRatio[c]*chromaMax[h+1][l],
                 (h/30+hueOffset)%1,
                 a
             )
         else
-            local _l=lightness[l]
+            local _l=lightness(l)
             return _l,_l,_l,a
         end
     end
     function CLR.ZCS_test(l,c,h,a)
         return CLR.OKLCH(
-            lightness[l],
+            lightness(l),
             chromaRatio[c]*chromaMax[h+1][l],
             (h/30+hueOffset)%1,
             a
