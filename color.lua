@@ -6,8 +6,8 @@ Features:
 - `CLR.HEX`, `CLR.toHEX`
 - `CLR.HSV`, `CLR.toHSV`
 - `CLR.HSL`, `CLR.toHSL`
-- `CLR.OKLCH`, `CLR.OKLAB`
-
+- `CLR.OKLCH`, `CLR.toOKLCH`
+- `CLR.OKLAB`, `CLR.toOKLAB`
 ]]
 ---@diagnostic disable-next-line
 local _hoverMouseHereToRead
@@ -21,6 +21,7 @@ Quick Palette:
 local CLR={}
 local max,min=math.max,math.min
 local sin,cos=math.sin,math.cos
+local atan2=math.atan2
 local type,tonumber=type,tonumber
 local find,match=string.find,string.match
 local sub,format=string.sub,string.format
@@ -144,31 +145,6 @@ do -- HSV & HSL
         end
     end
 
-    ---Convert RGB to HSV
-    ---@param r number [0,1]
-    ---@param g number [0,1]
-    ---@param b number [0,1]
-    ---@param a? number alpha
-    ---@return number, number, number, number? #All [0,1]
-    ---@nodiscard
-    function CLR.toHSV(r,g,b,a)
-        local M=max(r,g,b)
-        local m=min(r,g,b)
-        if M==m then return 0,0,M,a end
-
-        local d=M-m
-
-        return
-            (
-                M==r and ((g-b)/d+(g<b and 6 or 0)) or
-                M==g and ((b-r)/d+2) or
-                ((r-g)/d+4)
-            )/6,
-            M==0 and 0 or d/M,
-            M,
-            a
-    end
-
     local function hue2rgb(lo,hi,hue)
         hue=hue%1*6
         return
@@ -187,13 +163,35 @@ do -- HSV & HSL
     ---@nodiscard
     function CLR.HSL(h,s,l,a)
         if s<=0 then return l,l,l,a end
-
         local hi=l<.5 and l*(1+s) or l*(1-s)+s
         local lo=2*l-hi
         return
             hue2rgb(lo,hi,h+1/3),
             hue2rgb(lo,hi,h),
             hue2rgb(lo,hi,h-1/3),
+            a
+    end
+
+    ---Convert RGB to HSV
+    ---@param r number [0,1]
+    ---@param g number [0,1]
+    ---@param b number [0,1]
+    ---@param a? number alpha
+    ---@return number, number, number, number? #All [0,1]
+    ---@nodiscard
+    function CLR.toHSV(r,g,b,a)
+        local M=max(r,g,b)
+        local m=min(r,g,b)
+        if M==m then return 0,0,M,a end
+        local d=M-m
+        return
+            (
+                M==r and ((g-b)/d+(g<b and 6 or 0)) or
+                M==g and ((b-r)/d+2) or
+                ((r-g)/d+4)
+            )/6,
+            M==0 and 0 or d/M,
+            M,
             a
     end
 
@@ -208,7 +206,6 @@ do -- HSV & HSL
         local M=max(r,g,b)
         local m=min(r,g,b)
         if M==m then return 0,0,M,a end
-
         local l=(M+m)/2
         local d=M-m
         return
@@ -266,6 +263,55 @@ do -- OKLAB & OKLCH
             _r<=0.0031308 and 12.92*_r or 1.055*(_r^(1/2.4))-0.055,
             _g<=0.0031308 and 12.92*_g or 1.055*(_g^(1/2.4))-0.055,
             _b<=0.0031308 and 12.92*_b or 1.055*(_b^(1/2.4))-0.055,
+            alpha
+    end
+
+    ---Convert RGB to OKLCH
+    ---@param r number [0,1]
+    ---@param g number [0,1]
+    ---@param b number [0,1]
+    ---@param alpha? number
+    ---@return number, number, number, number?
+    ---@nodiscard
+    function CLR.toOKLCH(r,g,b,alpha)
+        local lr=r<=0.04045 and r/12.92 or ((r+0.055)/1.055)^2.4
+        local lg=g<=0.04045 and g/12.92 or ((g+0.055)/1.055)^2.4
+        local lb=b<=0.04045 and b/12.92 or ((b+0.055)/1.055)^2.4
+        local l3=0.4122214708*lr+0.5363325363*lg+0.0514459929*lb
+        local m3=0.2119034982*lr+0.6806995451*lg+0.1073969566*lb
+        local s3=0.0883024619*lr+0.2817188376*lg+0.6299787005*lb
+        local l1=l3>=0 and l3^(1/3) or -((-l3)^(1/3))
+        local m1=m3>=0 and m3^(1/3) or -((-m3)^(1/3))
+        local s1=s3>=0 and s3^(1/3) or -((-s3)^(1/3))
+        local _l=0.2104542553*l1+0.7936177850*m1-0.0040720468*s1
+        local _a=1.9779984951*l1-2.4285922050*m1+0.4505937099*s1
+        local _b=0.0259040371*l1+0.7827717662*m1-0.8086757660*s1
+        local C=(_a*_a+_b*_b)^.5
+        local H=C>0 and (atan2(_b,_a)/6.283185307179586)%1 or 0
+        return _l,C,H,alpha
+    end
+
+    ---Convert RGB to OKLAB
+    ---@param r number [0,1]
+    ---@param g number [0,1]
+    ---@param b number [0,1]
+    ---@param alpha? number
+    ---@return number, number, number, number?
+    ---@nodiscard
+    function CLR.toOKLAB(r,g,b,alpha)
+        local lr=r<=0.04045 and r/12.92 or ((r+0.055)/1.055)^2.4
+        local lg=g<=0.04045 and g/12.92 or ((g+0.055)/1.055)^2.4
+        local lb=b<=0.04045 and b/12.92 or ((b+0.055)/1.055)^2.4
+        local l3=0.4122214708*lr+0.5363325363*lg+0.0514459929*lb
+        local m3=0.2119034982*lr+0.6806995451*lg+0.1073969566*lb
+        local s3=0.0883024619*lr+0.2817188376*lg+0.6299787005*lb
+        local l1=l3>=0 and l3^(1/3) or -((-l3)^(1/3))
+        local m1=m3>=0 and m3^(1/3) or -((-m3)^(1/3))
+        local s1=s3>=0 and s3^(1/3) or -((-s3)^(1/3))
+        return
+            0.2104542553*l1+0.7936177850*m1-0.0040720468*s1,
+            1.9779984951*l1-2.4285922050*m1+0.4505937099*s1,
+            0.0259040371*l1+0.7827717662*m1-0.8086757660*s1,
             alpha
     end
 end
