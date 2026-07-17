@@ -396,8 +396,8 @@ do -- Zenitha Color System
         end
 
         -- Hue
-        sec,str=match(str,'^([RYGCBM])(.*)')
-        if sec then
+        sec,str=match(str,'^([RYGCBM]?)(.*)')
+        if sec and #sec>0 then
             local hid=find('RYGCBMRY',sec,2) -- 2~7
             local finetune=0
 
