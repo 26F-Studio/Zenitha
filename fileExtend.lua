@@ -86,7 +86,8 @@ function FILE.load(path,args,venv)
         if func then
             setfenv(func,venv or {})
             local res=func()
-            return assert(res,"FILE.load: Decode error")
+            assert(res,"FILE.load: Decode error")
+            return res
         else
             error("FILE.load: Decode error: "..err_mes)
         end
