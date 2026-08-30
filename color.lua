@@ -16,7 +16,7 @@ local _hoverMouseHereToRead
 Quick Palette:
 - HEX: `CLR'FF8000'` for orange (see `CLR.HEX`) (need cache)
 - RGB9: `CLR[960]` for orange (see `CLR.installNumLiteral`)
-- HEX: `CLR.llYrS` for a light orange (see `CLR.ZCS`)
+- HEX: `CLR.l2YrS` for a light orange (see `CLR.ZCS`)
 ]]
 local CLR={}
 local max,min=math.max,math.min
@@ -332,8 +332,8 @@ do -- Zenitha Color System
 
     local hueFtPat={}; for c in string.gmatch('rygcbmry','.') do hueFtPat[#hueFtPat+1]='^('..c..'*)(.*)' end
     local chromaPostfix={sss=1,ss=2,s=3,_=4,S=5,SS=6,SSS=7}
-    CLR.K,CLR.W={0,0,0},{1,1,1}
-    CLR.DD,CLR.LL=CLR.K,CLR.W -- backward compatibility
+    CLR.K={0,0,0} -- Black
+    CLR.W={1,1,1} -- White
 
     local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
     local hueOffset=20/360
