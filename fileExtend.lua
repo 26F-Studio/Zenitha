@@ -83,21 +83,20 @@ function FILE.load(path,args,venv)
     if mode=='luaon' then
         s=(s:match("^%s*{") and "return" or "")..s
         local func,err_mes=loadstring(s,path)
-        if func then
-            setfenv(func,venv or {})
-            local res=func()
-            assert(res,"FILE.load: Decode error")
-            return res
-        else
-            error("FILE.load: Decode error: "..err_mes)
-        end
+        assert(func,"FILE.load: Decode error: "..(err_mes or "<placeholer>"))
+        setfenv(func,venv or {})
+        local suc,res=pcall(func)
+        assert(suc,"FILE.load: Run error: "..tostring(res))
+        assert(res,"FILE.load: No return value")
+        return res
     elseif mode=='lua' then
         local func,err_mes=loadstring(s,path)
-        if func then return func() end
-        error("FILE.load: Compile error: "..err_mes)
+        assert(func,"FILE.load: Compile error: "..(err_mes or "<placeholer>"))
+        return func()
     elseif mode=='json' then
         local suc,res=pcall(JSON.decode,s)
-        return suc and res or error("FILE.load: Decode error")
+        assert(suc,"FILE.load: Decode error: "..tostring(res))
+        return res
     elseif mode=='string' then
         return s
     else
