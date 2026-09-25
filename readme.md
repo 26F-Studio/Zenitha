@@ -28,10 +28,35 @@ Run the project and you should see the demo scene. Explore other features yourse
 allow you custom all callback functions for each scene and easily travel between them.
 
 ```lua
-SCN.add("menu",sceneTable)
+SCN.add("menu",require'scene/example.lua')
 SCN.go("menu")
 SCN.go("setting","fastFade")
 SCN.back()
+
+---@scene/example.lua
+local scn={}
+
+function scn.load(previous, ...) ... end
+function scn.unload(target, ...) ... end
+function scn.keyDown(k)
+    if k=='escape' then SCN.back() end -- Default behavior if `.keyDown` not defined
+end
+function scn.keyUp(k) ... end
+function scn.mouseDown(x,y,k) ... end
+function scn.mouseUp(x,y,k) ... end
+function scn.mouseMove(x,y,dx,dy) ... end
+scn.touchDown=scn.mouseDown -- These 3 lines make touch events behave like mouse events for temporary convenience
+scn.touchUp=scn.mouseUp
+scn.touchMove=scn.mouseMove
+function scn.update(dt) ... end
+function scn.draw() ... end
+
+scn.widgetList={
+    {type='button',pos={1,1},x=-160,y=-60,w=300,h=100,text='QUIT',onClick=WIDGET.c_backScn()},
+    ...
+}
+
+return scn
 ```
 
 ### BGM / SFX / VOC (Music/Effect/Voice)
