@@ -624,7 +624,7 @@ function scene.load()
     outputBox:reset()
     inputBox:reset()
     WIDGET.focus(inputBox)
-    BG.set('none')
+    BG.set('dark')
 end
 
 function scene.wheelMove(_,y)

@@ -1028,7 +1028,7 @@ function love.errorhandler(msg)
 
     local sceneStack=SCN and table.concat(SCN.stack,"/") or "NULL"
     if mainLoopStarted and #errData<maxErrorCount and SCN.scenes['error'] then
-        BG.set('none')
+        BG.set('dark')
         table.insert(errData,{msg=err,scene=sceneStack})
 
         -- Write messages to log file

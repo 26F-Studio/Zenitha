@@ -22,9 +22,9 @@ local gc_clear=love.graphics.clear
 local BGs={} -- Stored backgrounds
 
 local BG={
-    default='none',
+    default='dark',
     locked=false,
-    cur='none',
+    cur='dark',
 }
 
 local fields={'init','resize','update','draw','event','discard'}
@@ -100,54 +100,49 @@ function BG._update(dt) BGs[BG.cur].update(dt) end
 function BG._draw() BGs[BG.cur].draw() end
 
 do -- Built-in: None
-    BG.add('none',{
+    BG.add('none',{})
+end
+do -- Built-in: Dark
+    BG.add('dark',{
         draw=function()
             gc_clear(.08,.08,.084)
         end,
     })
 end
-do -- Built-in: Color
-    local r,g,b=.26,.26,.26
-    BG.add('color',{
-        draw=function()
-            gc_clear(r,g,b)
-        end,
-        event=function(_r,_g,_b)
-            r,g,b=_r,_g,_b
-        end,
-    })
-end
-do -- Built-in: Image
+do -- Built-in: Image (image) (alpha)
     local gc_setColor=love.graphics.setColor
     local back={}
     local image=false
     local alpha=.26
     local mx,my,k
-    function back.init()
-        back.resize()
-    end
-    function back.resize()
-        mx,my=SCR.w*.5,SCR.h*.5
-        if image then
-            k=math.max(SCR.w/image:getWidth(),SCR.h/image:getHeight())
-        end
-    end
-    function back.draw()
-        gc_clear(.1,.1,.1)
-        if image then
-            gc_setColor(1,1,1,alpha)
-            GC.mDraw(image,mx,my,nil,k)
-        end
-    end
-    function back.event(a,img)
-        if a then alpha=a end
-        if img then image=img end
-        back.resize()
-    end
-
-    BG.add('image',back)
+    BG.add('image',{
+        init=function()
+            back.resize()
+        end,
+        resize=function()
+            mx,my=SCR.w*.5,SCR.h*.5
+            if image then
+                k=math.max(SCR.w/image:getWidth(),SCR.h/image:getHeight())
+            end
+        end,
+        draw=function()
+            gc_clear(.1,.1,.1)
+            if image then
+                gc_setColor(1,1,1,alpha)
+                GC.mDraw(image,mx,my,nil,k)
+            end
+        end,
+        event=function(p)
+            if type(p)=='number' then
+                alpha=p
+            else
+                image=p
+                back.resize()
+            end
+        end,
+    })
 end
 
-BG.set('none')
+BG.set('dark')
 
 return BG
