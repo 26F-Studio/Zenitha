@@ -115,32 +115,31 @@ do -- Built-in: Image (image) (alpha)
     local image=false
     local alpha=.26
     local mx,my,k
-    BG.add('image',{
-        init=function()
+    function back.init()
+        back.resize()
+    end
+    function back.resize()
+        mx,my=SCR.w*.5,SCR.h*.5
+        if image then
+            k=math.max(SCR.w/image:getWidth(),SCR.h/image:getHeight())
+        end
+    end
+    function back.draw()
+        gc_clear(.1,.1,.1)
+        if image then
+            gc_setColor(1,1,1,alpha)
+            GC.mDraw(image,mx,my,nil,k)
+        end
+    end
+    function back.event(p)
+        if type(p)=='number' then
+            alpha=p
+        else
+            image=p
             back.resize()
-        end,
-        resize=function()
-            mx,my=SCR.w*.5,SCR.h*.5
-            if image then
-                k=math.max(SCR.w/image:getWidth(),SCR.h/image:getHeight())
-            end
-        end,
-        draw=function()
-            gc_clear(.1,.1,.1)
-            if image then
-                gc_setColor(1,1,1,alpha)
-                GC.mDraw(image,mx,my,nil,k)
-            end
-        end,
-        event=function(p)
-            if type(p)=='number' then
-                alpha=p
-            else
-                image=p
-                back.resize()
-            end
-        end,
-    })
+        end
+    end
+    BG.add('image',back)
 end
 
 BG.set('dark')
