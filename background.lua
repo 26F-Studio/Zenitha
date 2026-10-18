@@ -10,8 +10,8 @@ end
 
 ---@class Zenitha.Background
 ---@field init? function
----@field resize? function
----@field update? function
+---@field resize? fun(w, h)
+---@field update? fun(dt)
 ---@field draw? function
 ---@field event? fun(...)
 ---@field discard? function
