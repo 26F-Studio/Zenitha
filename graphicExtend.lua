@@ -244,6 +244,76 @@ function GC.glowRectangle(p,x,y,w,h,a)
     setShader()
 end
 
+local invGlowCirc_shader_lp=gc.newShader[[
+    uniform float p;
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        float d = length(texCoord.xy - 0.5) * 2.0;
+        float a = pow(max(1.0 - pow(d, p), 0.0), 1.0 / p);
+        color.a *= 1.0 - smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+local invGlowCirc_shader_linear=gc.newShader[[
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        float d = length(texCoord.xy - 0.5) * 2.0;
+        float a = 1.0 - d;
+        color.a *= 1.0 - smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+---(Shader Implementation) Draw a glowing circle with inverted alpha
+---@param p number `1`=linear, `(1,∞)`=flat start & steep tail, `(0,1)`=steep start & flat tail
+---@param x number center x
+---@param y number center y
+---@param r number radius
+function GC.invGlowCircle(p,x,y,r)
+    if p==1 then
+        setShader(invGlowCirc_shader_linear)
+    else
+        invGlowCirc_shader_lp:send('p', p)
+        setShader(invGlowCirc_shader_lp)
+    end
+    draw(PAPER,x,y,nil,r*2,nil,.5,.5)
+    setShader()
+end
+
+local invGlowRect_shader_lp=gc.newShader[[
+    uniform float p;
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        vec2 d2 = abs(texCoord.xy - 0.5) * 2.0;
+        float d = max(d2.x, d2.y);
+        float a = pow(1.0 - pow(d, p), 1.0 / p);
+        color.a *= 1.0 - smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+local invGlowRect_shader_linear=gc.newShader[[
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        vec2 d2 = abs(texCoord.xy - 0.5) * 2.0;
+        float d = max(d2.x, d2.y);
+        float a = 1.0 - d;
+        color.a *= 1.0 - smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+---(Shader Implementation) Draw a glowing rectangle with inverted alpha
+---@param p number `1`=linear, `(1,∞)`=flat start & steep tail, `(0,1)`=steep start & flat tail
+---@param x number center x
+---@param y number center y
+---@param w number half-width
+---@param h? number half-height
+---@param a? number rotation angle
+function GC.invGlowRectangle(p,x,y,w,h,a)
+    if p==1 then
+        setShader(invGlowRect_shader_linear)
+    else
+        invGlowRect_shader_lp:send('p', p)
+        setShader(invGlowRect_shader_lp)
+    end
+    draw(PAPER,x,y,a,w*2,(h or w)*2,.5,.5)
+    setShader()
+end
+
 local rectBeam_shader_lp=gc.newShader[[
     uniform float p;
     vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
