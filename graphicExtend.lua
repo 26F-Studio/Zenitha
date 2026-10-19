@@ -172,6 +172,152 @@ function GC.rDrawLQ(obj,layer,quad,x,y,w,h)
 end
 
 --------------------------------------------------------------
+-- Shader draw
+
+local glowCirc_shader_lp=gc.newShader[[
+    uniform float p;
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        float d = length(texCoord.xy - 0.5) * 2.0;
+        float a = pow(max(1.0 - pow(d, p), 0.0), 1.0 / p);
+        color.a *= smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+local glowCirc_shader_linear=gc.newShader[[
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        float d = length(texCoord.xy - 0.5) * 2.0;
+        float a = 1.0 - d;
+        color.a *= smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+---(Shader Implementation) Draw a glowing circle
+---@param p number `1`=linear, `(1,∞)`=flat start & steep tail, `(0,1)`=steep start & flat tail
+---@param x number center x
+---@param y number center y
+---@param r number radius
+function GC.glowCircle(p,x,y,r)
+    if p==1 then
+        setShader(glowCirc_shader_linear)
+    else
+        glowCirc_shader_lp:send('p', p)
+        setShader(glowCirc_shader_lp)
+    end
+    draw(PAPER,x,y,nil,r*2,nil,.5,.5)
+    setShader()
+end
+
+local glowRect_shader_lp=gc.newShader[[
+    uniform float p;
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        vec2 d2 = abs(texCoord.xy - 0.5) * 2.0;
+        float d = max(d2.x, d2.y);
+        float a = pow(1.0 - pow(d, p), 1.0 / p);
+        color.a *= smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+local glowRect_shader_linear=gc.newShader[[
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        vec2 d2 = abs(texCoord.xy - 0.5) * 2.0;
+        float d = max(d2.x, d2.y);
+        float a = 1.0 - d;
+        color.a *= smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+---(Shader Implementation) Draw a glowing rectangle
+---@param p number `1`=linear, `(1,∞)`=flat start & steep tail, `(0,1)`=steep start & flat tail
+---@param x number center x
+---@param y number center y
+---@param w number half-width
+---@param h? number half-height
+---@param a? number rotation angle
+function GC.glowRectangle(p,x,y,w,h,a)
+    if p==1 then
+        setShader(glowRect_shader_linear)
+    else
+        glowRect_shader_lp:send('p', p)
+        setShader(glowRect_shader_lp)
+    end
+    draw(PAPER,x,y,a,w*2,(h or w)*2,.5,.5)
+    setShader()
+end
+
+local rectBeam_shader_lp=gc.newShader[[
+    uniform float p;
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        float a = pow(1.0 - pow(texCoord.x, p), 1.0 / p);
+        color.a *= smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+local rectBeam_shader_linear=gc.newShader[[
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        float a = 1.0 - texCoord.x;
+        color.a *= smoothstep(0.0, 1.0, a);
+        return color;
+    }
+]]
+---(Shader Implementation) Draw a rectangle fading beam
+---@param p number `1`=linear, `(1,∞)`=flat start & steep tail, `(0,1)`=steep start & flat tail
+---@param x number start point x
+---@param y number start point y
+---@param a number rotation angle
+---@param wid number width of the rectangle (perpendicular to a)
+---@param len number length of the rectangle (along a)
+function GC.rectBeam(p,x,y,a,wid,len)
+    if p==1 then
+        setShader(rectBeam_shader_linear)
+    else
+        rectBeam_shader_lp:send('p', p)
+        setShader(rectBeam_shader_lp)
+    end
+    draw(PAPER, x, y, a, len, wid, 0, .5)
+    setShader()
+end
+
+local circBeam_shader_lp=gc.newShader[[
+    uniform float p;
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        vec2 dist = vec2(texCoord.x - 1.0, (texCoord.y - 0.5) * 2.0);
+        float d = length(dist);
+        float aa = fwidth(d);
+        float mask = 1.0 - smoothstep(1.0 - aa, 1.0, d);
+        float a = pow(1.0 - pow(texCoord.x, p), 1.0 / p);
+        color.a *= smoothstep(0.0, 1.0, a) * mask;
+        return color;
+    }
+]]
+local circBeam_shader_linear=gc.newShader[[
+    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
+        vec2 dist = vec2(texCoord.x - 1.0, (texCoord.y - 0.5) * 2.0);
+        float d = length(dist);
+        float aa = fwidth(d);
+        float mask = 1.0 - smoothstep(1.0 - aa, 1.0, d);
+        color.a *= smoothstep(0.0, 1.0, 1.0 - texCoord.x) * mask;
+        return color;
+    }
+]]
+---(Shader Implementation) Draw a rectangle fading beam, clipped with a semicircle
+---@param p number `1`=linear, `(1,∞)`=flat start & steep tail, `(0,1)`=steep start & flat tail
+---@param x number start point x
+---@param y number start point y
+---@param a number rotation angle
+---@param wid number width of the beam at the end point (perpendicular to a, diameter of the flat edge)
+---@param len number distance from the rim to the center (along a)
+function GC.circBeam(p,x,y,a,wid,len)
+    if p==1 then
+        setShader(circBeam_shader_linear)
+    else
+        circBeam_shader_lp:send('p', p)
+        setShader(circBeam_shader_lp)
+    end
+    draw(PAPER, x, y, a, len, wid, 0, .5)
+    setShader()
+end
+
+--------------------------------------------------------------
 -- Utility
 
 ---Set current pen's alpha
@@ -364,32 +510,6 @@ function GC.regRoundPolygon(mode,x,y,rad,segments,rCorner,phase)
     else
         error("GC.regRoundPolygon(mode,...): Draw mode should be 'line' or 'fill'")
     end
-end
-
-local fillShader=gc.newShader[[
-    uniform float fill;
-    vec4 effect(vec4 color, sampler2D tex, vec2 texCoord, vec2 scrCoord) {
-        float dist = length(texCoord.xy - 0.5);
-        color.a *= smoothstep(0.5, fill, dist);
-        return color;
-    }
-]] fillShader:send('fill',.5)
----(Shader Implementation) Draw a filled circle with blurring edge
----@param solid? number `0`=light, `[1/R,0.5)`=natural (R = blur width in pixel), `[0.5, inf)`=inverted circle (more blurred on larger), `nil`=last value
----@param x number
----@param y number
----@param r number
-function GC.blurCircle(solid,x,y,r)
-    if solid then
-        fillShader:send('fill',solid)
-    end
-    -- local sd=getShader()
-    -- setShader(fillShader)
-    -- draw(PAPER,x,y,nil,r*2,nil,.5,.5)
-    -- setShader(sd)
-    setShader(fillShader)
-    draw(PAPER,x,y,nil,r*2,nil,.5,.5)
-    setShader()
 end
 
 do -- function GC.getScreenShot(table,key)
