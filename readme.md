@@ -244,50 +244,33 @@ TASK.new(function()
 end)
 ```
 
-### WS (WebSocket)
+### Maintained HTTPS/WSS transport
 
-a simple http websocket with LuaSocket.
-
-```lua
-local ws=WS.new({
-    host="localhost",
-    port="80",
-    path="/ws",
-    subPath="/res",
-    subPath="/res",
-})
-ws:connect()
-
--- Client loop
-TASK.new(function()
-    repeat coroutine.yield() until ws.state~='connecting'
-    ws:send("Hello server!")
-    repeat
-        local mes,op=ws:receive()
-        if mes then
-            print(mes,op) -- "Hello Cliend!", 1 (text type)
-        end
-    until ws.state~='running'
-    print("WS disconnected")
-end)
-```
-
-### HTTP
-
-a simple http client with LuaSocket.
+Online clients now require `Zenitha.transport` explicitly instead of using the retired `HTTP` and `WS` globals. The independently correlated native transport uses maintained reqwest/rustls and tungstenite; Web/WASM uses browser fetch/WebSocket through the existing JS bridge. Unrelated local TCP and offline utilities are unchanged.
 
 ```lua
-HTTP.setThreadCount(1)
-HTTP.setHost("127.0.0.1")
-HTTP.request{
-    pool='login',
-    path='/api/v1/userlogin',
-    body={username='MrZ_26'},
+local Transport=require 'Zenitha.transport'
+local client,err=Transport.new()
+if not client then
+    print(err.code) -- Missing packaged dependency does not prevent offline play.
+    return
+end
+local requestId,requestError=client:request{
+    url=configuredCadenceOrigin..'/health/live',
+    method='GET',
+    timeout=12, -- seconds
 }
-local res
-repeat res=HTTP.pollMsg('login') until res
-print(res.code,res.body) -- "200", "<html>Welcome, MrZ_26</html>"
+-- The business owner, not individual scenes, drains events each frame.
+local event=client:poll()
+if event and event.kind=='http' and event.id==requestId then
+    print(event.status) -- event.body contains the complete response bytes.
+end
+-- client:destroy() on application exit.
 ```
+
+HTTP bodies are bounded to 2 MiB and complete socket messages to 256 KiB. `connect`, `send`, `close`, `cancel`, `callbackBegin`, `openAuthorization` and protected session-storage operations have one consistent product adapter interface. Browser socket headers are rejected; obtain the single-use Cadence connection ticket through HTTPS first. Native refresh credentials belong in the OS store, and Web bearer credentials are never written to localStorage or IndexedDB.
+
+Linux native HTTPS/WSS, TLS-negative, fragmentation, cancellation and loopback callback probes have passed. Packaged LÖVE, browser and actual-device acceptance are separate and are not inferred from compilation or workflow definitions.
 
 ### TWEEN
 

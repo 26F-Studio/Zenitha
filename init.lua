@@ -433,8 +433,6 @@ MIDI=       require'midi'
 
 -- Love-based modules (complex, with update/draw)
 ASYNC=      require'async'
-HTTP=       require'http'
-WS=         require'websocket'
 SCN=        require'scene'
 TEXT=       require'text'
 SYSFX=      require'sysFX'
@@ -449,7 +447,7 @@ VOC=        require'voice'
 
 --------------------------------------------------------------
 
-local TASK,HTTP,SCN,SCR,TEXT,SYSFX,TWEEN,WAIT,MSG,BG,WIDGET,VOC=TASK,HTTP,SCN,SCR,TEXT,SYSFX,TWEEN,WAIT,MSG,BG,WIDGET,VOC
+local TASK,SCN,SCR,TEXT,SYSFX,TWEEN,WAIT,MSG,BG,WIDGET,VOC=TASK,SCN,SCR,TEXT,SYSFX,TWEEN,WAIT,MSG,BG,WIDGET,VOC
 local xOy=SCR.xOy
 local TP=xOy.transformPoint
 local ITP=xOy.inverseTransformPoint
@@ -1153,7 +1151,6 @@ function love.run()
             MSG._update(updateDT)
             SYSFX._update(updateDT)
             WAIT._update(updateDT)
-            HTTP._update()
             TASK._update(updateDT)
             TWEEN._update(updateDT)
             if SCN.update then SCN.update(updateDT) end
