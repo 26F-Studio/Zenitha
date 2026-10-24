@@ -366,8 +366,8 @@ do -- Zenitha Color System
     ---
     ---Colors:
     ---- `"Yrr"` = Orange
-    ---- `"d1GcSS"` = dark(-1) Green, vivid(+2)
-    ---- `"l2Ms"` = light(+2) Green, muted(-1)
+    ---- `"d1GcSS"` = dark(-1) Green (fifth towards cyan), vivid(+2)
+    ---- `"l2Ms"` = light(+2) Magenta, muted(-1)
     ---Greyscale:
     ---- `"d2"` = dark(-2) grey
     ---- `"l6"` = light(+6) grey
