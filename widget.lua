@@ -592,7 +592,7 @@ function Widgets.button:draw()
 
     -- Frame
     gc_setLineWidth(self.lineWidth)
-    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,.95)
+    gc_setColor(.2+frameC[1]*.8,.2+frameC[2]*.8,.2+frameC[3]*.8,frameC[4]*.95)
     gc_mRect('line',0,0,w,h,self.cornerR)
 
     -- Drawable
