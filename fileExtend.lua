@@ -104,7 +104,7 @@ function FILE.load(path,args,venv)
     end
 end
 
----Same with FILE.load but returns nil on any type of error
+---Same as FILE.load but returns nil on any type of error
 ---
 ---Note: in -lua mode, only first return value is returned
 ---@param path string
@@ -149,7 +149,7 @@ function FILE.save(data,path,args)
     F:close()
 end
 
----Same with FILE.save but returns error message on any type of error
+---Same as FILE.save but returns error message on any type of error
 ---@param data any
 ---@param path string
 ---@param args? string | '-json' | '-luaon' | '-expand'

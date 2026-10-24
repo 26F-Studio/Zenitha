@@ -251,7 +251,7 @@ end
 
 ---Specify a line pass (x1,y1) and (x2,y2), got the y value when x=t
 ---
----Same to the combination of MATH.iLerp and MATH.lerp
+---Same as the combination of MATH.iLerp and MATH.lerp
 ---@param x1 number
 ---@param y1 number
 ---@param x2 number
@@ -263,7 +263,7 @@ function MATH.interpolate(x1,y1,x2,y2,t)
     return y1+(t-x1)*(y2-y1)/(x2-x1)
 end
 
----Same to MATH.interpolate but clamped
+---Same as MATH.interpolate but clamped
 ---@param x1 number
 ---@param y1 number
 ---@param x2 number
