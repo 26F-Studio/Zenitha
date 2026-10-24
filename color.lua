@@ -21,7 +21,7 @@ Quick Palette:
 local CLR={}
 local max,min=math.max,math.min
 local sin,cos=math.sin,math.cos
-local atan2=math.atan2
+local abs,atan2=math.abs,math.atan2
 local type,tonumber=type,tonumber
 local find,match=string.find,string.match
 local sub,format=string.sub,string.format
@@ -231,7 +231,7 @@ do -- HSV & HSL & PSL
         local r=sin(p*6.283185307179586)
         local g=sin((p+1/3)*6.283185307179586)
         local b=-r-g
-        local k=s*(.5-math.abs(l-.5))
+        local k=s*(.5-abs(l-.5))
         return l+k*r,l+k*g,l+k*b,a
     end
 end
@@ -485,6 +485,47 @@ do -- Utils
             c1[1]*(1-t)+c2[1]*t,
             c1[2]*(1-t)+c2[2]*t,
             c1[3]*(1-t)+c2[3]*t,
+            a or (c1[4] or 1)*(1-t)+(c2[4] or 1)*t
+    end
+
+    local toHSV,toHSL=CLR.toHSV,CLR.toHSL
+    ---Same as CLR.lerp but in HSV space
+    ---
+    ---**Warning:** low performance
+    ---@param c1 Zenitha.Color
+    ---@param c2 Zenitha.Color
+    ---@param t number
+    ---@param a? number alpha
+    ---@return number, number, number, number
+    ---@nodiscard
+    function CLR.lerp_HSV(c1,c2,t,a)
+        local h1,s1,l1=toHSV(c1[1],c1[2],c1[3])
+        local h2,s2,l2=toHSV(c2[1],c2[2],c2[3])
+        local d=abs(h2-h1)
+        return
+            (h1+d*t*(d<.5 and 1 or -1))%1,
+            s1*(1-t)+s2*t,
+            l1*(1-t)+l2*t,
+            a or (c1[4] or 1)*(1-t)+(c2[4] or 1)*t
+    end
+
+    ---Same as CLR.lerp but in HSL space
+    ---
+    ---**Warning:** low performance
+    ---@param c1 Zenitha.Color
+    ---@param c2 Zenitha.Color
+    ---@param t number
+    ---@param a? number alpha
+    ---@return number, number, number, number
+    ---@nodiscard
+    function CLR.lerp_HSL(c1,c2,t,a)
+        local h1,s1,l1=toHSL(c1[1],c1[2],c1[3])
+        local h2,s2,l2=toHSL(c2[1],c2[2],c2[3])
+        local d=abs(h2-h1)
+        return
+            (h1+d*t*(d<.5 and 1 or -1))%1,
+            s1*(1-t)+s2*t,
+            l1*(1-t)+l2*t,
             a or (c1[4] or 1)*(1-t)+(c2[4] or 1)*t
     end
 end
