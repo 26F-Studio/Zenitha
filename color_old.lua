@@ -259,59 +259,10 @@ COLOR.HSV=CLR.HSV
 COLOR.toHSL=CLR.toHSL
 COLOR.toHSV=CLR.toHSV
 
----Get Rainbow color with phase
----@param phase number cycle in 2pi
----@param a? number alpha
----@return number, number, number, number?
----@nodiscard
-function COLOR.rainbow(phase,a)
-    return
-        sin(phase)*.4+.6,
-        sin(phase+2.0944)*.4+.6,
-        sin(phase-2.0944)*.4+.6,
-        a
-end
-
----Variant of COLOR.rainbow
----@param phase number cycle in 2pi
----@param a? number alpha
----@return number, number, number, number?
----@nodiscard
-function COLOR.rainbow_light(phase,a)
-    return
-        sin(phase)*.2+.7,
-        sin(phase+2.0944)*.2+.7,
-        sin(phase-2.0944)*.2+.7,
-        a
-end
-
----Variant of COLOR.rainbow
----@param phase number cycle in 2pi
----@param a? number alpha
----@return number, number, number, number?
----@nodiscard
-function COLOR.rainbow_dark(phase,a)
-    return
-        sin(phase)*.2+.4,
-        sin(phase+2.0944)*.2+.4,
-        sin(phase-2.0944)*.2+.4,
-        a
-end
-
----Variant of COLOR.rainbow
----@param phase number cycle in 2pi
----@param a? number alpha
----@return number, number, number, number?
----@nodiscard
-function COLOR.rainbow_gray(phase,a)
-    return
-        sin(phase)*.16+.5,
-        sin(phase+2.0944)*.16+.5,
-        sin(phase-2.0944)*.16+.5,
-        a
-end
-
-
+function COLOR.rainbow()       error("Deprecated, use CLR.PSL(phase, 1, .6) instead") end
+function COLOR.rainbow_light() error("Deprecated, use CLR.PSL(phase, .67, .7) instead") end
+function COLOR.rainbow_dark()  error("Deprecated, use CLR.PSL(phase, .50, .4) instead") end
+function COLOR.rainbow_gray()  error("Deprecated, use CLR.PSL(phase, .32, .5) instead") end
 
 local sets={'Reds','Flames','Oranges','Yellows','Apples','Kellys','Greens','Jungles','Cyans','Ices','Seas','Blues','Purples','Violets','Magentas','Wines'}
 ---Get a random standard color

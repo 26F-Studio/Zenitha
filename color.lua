@@ -116,7 +116,7 @@ do -- HEX
     end
 end
 
-do -- HSV & HSL
+do -- HSV & HSL & PSL
     ---Convert HSV to RGB
     ---@param h number Hue (0 red, 1/3 green, 2/3 blue)
     ---@param s number Saturation (0 grey, 1 rainbow)
@@ -217,6 +217,22 @@ do -- HSV & HSL
             l>.5 and d/(2-M-m) or d/(M+m),
             l,
             a
+    end
+
+    ---Convert PSL to RGB (HSL but using sine-phase for hue)
+    ---@param p number Hue (0 red, 1/3 green, 2/3 blue)
+    ---@param s number Saturation (0 grey, 1 rainbow)
+    ---@param l number Lightness (0 black, 1 white, 0.5 pure colour)
+    ---@param a? number Alpha
+    ---@return number, number, number, number?
+    ---@nodiscard
+    function CLR.PSL(p,s,l,a)
+        if s==0 then return l,l,l,a end
+        local r=sin(p*6.283185307179586)
+        local g=sin((p+1/3)*6.283185307179586)
+        local b=-r-g
+        local k=s*(.5-math.abs(l-.5))
+        return l+k*r,l+k*g,l+k*b,a
     end
 end
 
