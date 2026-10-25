@@ -394,10 +394,10 @@ do -- Zenitha Color System
     ---@return number, number, number, number?
     ---@nodiscard
     function CLR.ZCS(str)
-        local l=7 ---@type number  [1, 13]
-        local c=4 ---@type number  [1, 7]
+        local l=7 ---@type number [1,13]
+        local c=4 ---@type number [1,7]
         local h ---@type number [0,29]
-        local a
+        local a ---@type number [0,1]
         local sec
 
         -- Lightness
@@ -462,6 +462,10 @@ do -- Zenitha Color System
             return _l,_l,_l,a
         end
     end
+    ---@param l number Lightness [1,13]
+    ---@param c number Chroma [1,7]
+    ---@param h number Hue [0,29]
+    ---@param a number Alpha [0,1]
     function CLR.ZCS_raw(l,c,h,a)
         return CLR.OKLCH(
             lightness(l),
