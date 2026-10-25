@@ -339,42 +339,65 @@ do -- Zenitha Color System
         wrongChroma="CLR.ZCS: Chroma postfix too long",
         wrongEnd="CLR.ZCS: junk chars at the end: ",
     }
-    local lightnessPrefix={D=1,lD=3.2,LD=6.5,DL=9.8,dL=11.7,L=13.3} -- for backward compatibility only
-    for i=0,7 do
-        lightnessPrefix['d'..i]=7-i
-        lightnessPrefix['l'..i]=min(7+i,13.5)
+
+    ---<Finetuned by Deepseek>---
+    local lightnessPrefix={D=1.8,lD=5.8,LD=10.8,DL=15.2,dL=17.5,L=20} -- for backward compatibility only
+    for i=0,9 do
+        lightnessPrefix['d'..i]=10-i
+        lightnessPrefix['l'..i]=10+i
     end
-    local function lightness(l) return l/13.5 end -- use 1/13.5 instead of /14 to make L6 lighter
+    local L_MIN,L_MAX=.14,.96
+    local rangeL=19 -- d9-l9, with d0/l0 as the middle
+    local function lightness(l)
+        return l<=0 and 0 or l>=rangeL+1 and 1 or L_MIN+(L_MAX-L_MIN)*(l-1)/(rangeL-1)
+    end
 
     local hueFtPat={}; for c in string.gmatch('rygcbmry','.') do hueFtPat[#hueFtPat+1]='^('..c..'*)(.*)' end
     local chromaPostfix={sss=1,ss=2,s=3,_=4,S=5,SS=6,SSS=7}
     CLR.K={0,0,0} -- Black
     CLR.W={1,1,1} -- White
 
-    local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
     local hueOffset=20/360
-    local chromaMax={}
+    local chromaRatio={}; for i=1,7 do chromaRatio[i]=(i/7)^.62 end
+
+    -- chroma[h][l]: gamut limit for each hue/lightness, then flattened near the
+    -- ends so "SSS" feels equally saturated for every hue.
+    local chroma={}
     for h=0,29 do
         local H=(h/30+hueOffset)%1
-        local row={}
-        for li=1,13 do
-            local L=lightness(li)
+        chroma[h+1]={}
+        for li=1,rangeL do
             local lo,hi=0,.5
             for _=1,20 do
                 local mid=(lo+hi)*.5
-                local r,g,b=CLR.OKLCH(L,mid,H)
-                local m1,m2=min(r,g,b),max(r,g,b)
-                if m1>=0 and m2<=1 then lo=mid else hi=mid end
+                local r,g,b=CLR.OKLCH(lightness(li),mid,H)
+                if min(r,g,b)>=0 and max(r,g,b)<=1 then lo=mid else hi=mid end
             end
-            row[li]=lo
+            chroma[h+1][li]=lo
         end
-        chromaMax[h+1]=row
     end
+    -- Flattening per lightness level: 0 = keep raw gamut limit, higher = pull
+    -- every hue towards the 25th-percentile hue at that lightness.
+    local equalize={.6,.6,.6,.6,.44,.22,.048,0,0,0,0,0,.042,.19,.39,.59,.6,.6,.6}
+    for li=1,rangeL do
+        local beta=equalize[li]
+        if beta>0 then
+            local vals={}
+            for h=1,30 do vals[h]=chroma[h][li] end
+            table.sort(vals)
+            local ref=(vals[8]*3+vals[9])*.25 -- exact 25th percentile
+            for h=1,30 do
+                local cm=chroma[h][li]
+                chroma[h][li]=min(cm,ref^beta*cm^(1-beta))
+            end
+        end
+    end
+    ---</Finetuned by Deepseek>---
 
     ---Construct color with Zenitha Color System (ZCS), a compact color representation.
     ---
     ---How to construct the ZCS string (similar idea to HSL):
-    ---1. Lightness prefix: `d6/d5/../d1/(d0|l0)/l1/l2/../l6` for -6 to +6
+    ---1. Lightness prefix: `d9/d8/../d1/(d0|l0)/l1/l2/../l9` for -9 to +9
     ---2. Hue: `R/Y/G/C/B/M` for standard 6 hues.
     ---3. Hue finetuning: add (up to 4) `r/y/g/c/b/m` after hue to shift slightly towards there (must be adjacent, shift 1/5 each).
     ---4. Chroma postfix: `sss/ss/s/[empty]/S/SS/SSS` for saturation -3 to +3
@@ -387,21 +410,20 @@ do -- Zenitha Color System
     ---Greyscale:
     ---- `"d2"` = dark(-2) grey
     ---- `"l6"` = light(+6) grey
-    ---- `"d0" or "l0"` = grey
-    ---- `"K" or "d7"` = black ("d7" can also be used as prefix, but it will always be pure black)
-    ---- `"W" or "l7"` = white ("l7" is same with "d7", always pure white)
+    ---- `"d0" or "l0"` = middle grey
+    ---- `"K"` / `"W"` = pure black / white (edge case, not ZCS strings)
     ---@param str string
     ---@return number, number, number, number?
     ---@nodiscard
     function CLR.ZCS(str)
-        local l=7 ---@type number [1,13]
+        local l=10 ---@type number [1,19]
         local c=4 ---@type number [1,7]
         local h ---@type number [0,29]
         local a ---@type number [0,1]
         local sec
 
         -- Lightness
-        sec=match(str,'^([DdlL]+[0-7]?)')
+        sec=match(str,'^([DdlL]+[0-9]?)')
         if sec then
             str=sub(str,#sec+1)
             if lightnessPrefix[sec] then
@@ -450,26 +472,25 @@ do -- Zenitha Color System
         if #str>0 then error(errMsg.wrongEnd..str) end
 
         -- Calculate
-        if h then
+        if h and l>0 and l<rangeL+1 then
             return CLR.OKLCH(
                 lightness(l),
-                chromaRatio[c]*chromaMax[h+1][l],
+                chromaRatio[c]*chroma[h+1][l],
                 (h/30+hueOffset)%1,
                 a
             )
         else
-            local _l=lightness(l)
-            return _l,_l,_l,a
+            return CLR.OKLCH(lightness(l),0,0,a)
         end
     end
-    ---@param l number Lightness [1,13]
+    ---@param l number Lightness [1,19]
     ---@param c number Chroma [1,7]
     ---@param h number Hue [0,29]
     ---@param a number Alpha [0,1]
     function CLR.ZCS_raw(l,c,h,a)
         return CLR.OKLCH(
             lightness(l),
-            chromaRatio[c]*chromaMax[h+1][l],
+            chromaRatio[c]*chroma[h+1][l],
             (h/30+hueOffset)%1,
             a
         )
