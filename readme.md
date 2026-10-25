@@ -118,7 +118,7 @@ GC.stc_rect(0,0,800,600)
 GC.stc_stop()
 
 GC.DO{
-    {'setCL',COLOR.R},
+    {'setCL',CLR.R},
     {'fRect',0,0,800,600},
     ...
 }
@@ -305,9 +305,12 @@ TWEEN.new(function(v) Pos=200+100*v end) -- update Pos with v which goes from 0 
 
 a simple debug tool allow you start/stop profiling anytime, the result will be placed into the clipboard.
 
-### COLOR
+### CLR (COLOR)
 
-a set of common color tables which can be used with `COLOR.R` (red), `COLOR.dG` (dark green).
+a collection of color tools, including:
+- functions converting RGB <-> HEX HSV HSL OKLAB OKLCH
+- ZCS, a color representation writes like Munsell color system, with colors picked from OKLCH. e.g. `CLR.l3BcS` (Lightness+3, Blue to Cyan a bit, Saturation+1)
+- numeric literal indexing for quick access, e.g. `CLR[900]` (setup with `CLR.installNumLiteral`)
 
 ### LOG
 
