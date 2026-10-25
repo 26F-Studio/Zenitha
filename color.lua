@@ -462,7 +462,7 @@ do -- Zenitha Color System
             return _l,_l,_l,a
         end
     end
-    function CLR.ZCS_test(l,c,h,a)
+    function CLR.ZCS_raw(l,c,h,a)
         return CLR.OKLCH(
             lightness(l),
             chromaRatio[c]*chromaMax[h+1][l],
