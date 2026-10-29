@@ -584,7 +584,7 @@ do -- Utils
         } do CLR[k]=CLR[v] end
         CLR.DX={0,0,0,0}
         CLR.dX={.06,.06,.06,0}
-        CLR.X={.56,.56,.56,.56,0}
+        CLR.X={.56,.56,.56,0}
         CLR.lX={.99,.99,.99,0}
         CLR.LX={1,1,1,0}
         function CLR.rainbow(p) return CLR.PSL(p, 1, .6) end
