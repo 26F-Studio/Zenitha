@@ -560,8 +560,9 @@ do -- Utils
     ---Installs fallback color names into CLR
     ---
     ---WARNING:
-    ---- W (Wine) is replaced by E (Eosine) to avoid conflict with original W (White) in new color module
+    ---- To avoid conflicts, W (Wine) is replaced by E (Eosine), K (Kelly) is replaced by H (Honeydew)
     ---- Not exactly same colors, only the closest color in ZCS
+    ---- Single-letter colors like R, G, B conflict with ZCS color, you have to use l0R instead for ZCS basic Red
     function CLR.installFallback()
         for k,v in next,{
             DR='d7RySSS',dR='d3RySSS',R='l2RySSS',lR='l4RSSS',LR='l7RSSS',
@@ -569,7 +570,7 @@ do -- Utils
             DO='d6YrSS',dO='d2YrSSS',O='l4YrrSSS',lO='l6YrSSS',LO='l8YrSSS',
             DY='d6YgSSS',dY='d1YgSSS',Y='l6YgSSS',lY='l7YgSSS',LY='l8YgSS',
             DA='d6GySSS',dA='d1GySS',A='l6GySSS',lA='l7GySSS',LA='l8GyyS',
-            DK='d7GSSS',dK='d2GSS',K='l5GSSS',lK='l6GSSS',LK='l7Gs',
+            DH='d7GSSS',dH='d2GSS',H='l5GSSS',lH='l6GSSS',LH='l7Gs',
             DG='d7GcSSS',dG='d3GSSS',G='l4GSSS',lG='l5GcSS',LG='l7Gc',
             DJ='d6CgSSS',dJ='d2CgSSS',J='l4CgSSS',lJ='l5CgS',LJ='l7Cgss',
             DC='d6CbbSS',dC='d3CbbSS',C='l3CbbS',lC='l5Cbbs',LC='l7Cbbs',
