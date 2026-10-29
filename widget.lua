@@ -120,7 +120,7 @@ local gc_mDraw=GC.mDraw
 local kb=ZENITHA.keyboard
 local timer=ZENITHA.timer.getTime
 
-local COLOR,SCN,SCR,xOy=COLOR,SCN,SCR,SCR.xOy
+local CLR,SCN,SCR,xOy=CLR,SCN,SCR,SCR.xOy
 local setFont,getFont=FONT.set,FONT.get
 local utf8=require'utf8'
 
@@ -260,13 +260,13 @@ Widgets.base={
     keepFocus=false,
     x=0,y=0,
 
-    color='L',
-    textColor='L',
-    fillColor='L',
-    frameColor='L',
-    imageColor='LL',
-    activeColor='LY',
-    scrollBarColor='L',
+    color='l9',
+    textColor='l9',
+    fillColor='l9',
+    frameColor='l9',
+    imageColor='W',
+    activeColor='l8YgSS',
+    scrollBarColor='l9',
     pos=false,
     lineWidth=4,cornerR=3,
     textScale=1,fontSize=30,fontType=false,
@@ -318,7 +318,7 @@ function Widgets.base:reset(mode)
     assert(type(self.x)=='number',"[widget].x need number")
     assert(type(self.y)=='number',"[widget].y need number")
     for _,key in next,colorKeys do
-        if type(self[key])=='string' then self[key]=COLOR[self[key]] end
+        if type(self[key])=='string' then self[key]=CLR[self[key]] end
         assert(type(self[key])=='table',"[widget]."..key.." need table")
         if not self[key][4] then self[key][4]=1 end
     end
@@ -648,8 +648,8 @@ Widgets.hint=setmetatable({
     floatCornerR=5,
     floatLineWidth=3,
     floatFillColor={.1,.1,.1,.8},
-    floatFrameColor='DL',
-    floatTextColor='dL',
+    floatFrameColor='l5',
+    floatTextColor='l7',
 
     _floatText=false,
     _floatImage=false,
@@ -689,7 +689,7 @@ function Widgets.hint:reset(mode)
     assert(legalLabelPos.complex[self.labelPos],"[hint].labelPos need 'center', or (combination of, like 'rightTop') 'left', 'right', 'top', 'bottom'")
 
     for _,key in next,colorKeys_hint do
-        if type(self[key])=='string' then self[key]=COLOR[self[key]] end
+        if type(self[key])=='string' then self[key]=CLR[self[key]] end
         assert(type(self[key])=='table',"[hint]."..key.." need table")
         if not self[key][4] then self[key][4]=1 end
     end
@@ -948,7 +948,7 @@ Widgets.switch=setmetatable({
     type='switch',
     h=30,
 
-    fillColor='I',
+    fillColor='l2BcS',
     text=false,
     image=false,
 
@@ -1068,7 +1068,7 @@ Widgets.slider=setmetatable({
     axis={0,1},
     unit=nil,
 
-    frameColor='DL',
+    frameColor='l5',
     text=false,
     image=false,
     numFontSize=25,numFontType=false,
@@ -1246,7 +1246,7 @@ function Widgets.slider:draw()
     local cx=x+self.w*(pos-rangeL)/self._rangeWidth
     local bx,by=cx-10-HOV*2,y-16-HOV*5
     local bw,bh=20+HOV*4,32+HOV*10
-    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and COLOR.lR or fillC)
+    gc_setColor((self._pos0<rangeL or self._pos0>rangeR) and CLR.l4RSSS or fillC)
     gc_rectangle('fill',bx,by,bw,bh,self.cornerR)
 
     -- Glow

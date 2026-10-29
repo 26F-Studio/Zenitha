@@ -182,7 +182,7 @@ function TEXT:add(data)
     T._t=0 -- Timer
     T.text:setf(data.text or "Example Text",data.warplimit or T.text:getWidth(),data.textalign or 'center')
     T._ox,T._oy=T.text:getWidth()*T.align[1],T.text:getHeight()*T.align[2]
-    if type(data.color)=='string' then data.color=COLOR[data.color] end
+    if type(data.color)=='string' then data.color=CLR[data.color] end
     if data.color then T.r,T.g,T.b,T.a=data.color[1],data.color[2],data.color[3],data.color[4] end
     T.r=T.r or 1
     T.g=T.g or 1

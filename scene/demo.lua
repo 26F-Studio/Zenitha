@@ -19,7 +19,7 @@ local scene={
 
         GC.stc_reset()
         GC.stc_circ(400+100*math.cos(ZENITHA.timer.getTime()*1.26),240+100*math.sin(ZENITHA.timer.getTime()*1.26),126)
-        GC.setColor(COLOR.rainbow_light(ZENITHA.timer.getTime()))
+        GC.setColor(CLR.PSL(ZENITHA.timer.getTime(),.67,.7))
         _sceneDraw()
         GC.stc_stop()
     end,
@@ -48,7 +48,7 @@ local scene={
         {type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
         {type='listBox',     name='listBox',   x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
             FONT.set(30)
-            GC.setColor(COLOR.L)
+            GC.setColor(CLR.l9)
             GC.print(id,10,-6)
             GC.print(opt.name,70,-6)
             if sel then

@@ -20,7 +20,7 @@ function scene.gamepadDown(key)
     _push("[gamepadDown] <"..key..">")
 end
 function scene.gamepadUp(key)
-    _push{COLOR.LD,"[gamepadUp] <"..key..">"}
+    _push{CLR.l0,"[gamepadUp] <"..key..">"}
 end
 function scene.keyDown(key,isRep)
     if isRep then return end
@@ -36,7 +36,7 @@ function scene.keyDown(key,isRep)
     return true
 end
 function scene.keyUp(key)
-    _push{COLOR.LD,"[keyUp] <"..key..">"}
+    _push{CLR.l0,"[keyUp] <"..key..">"}
 end
 function scene.mouseClick(x,y)
     SYSFX.ripple(2,x,y,50)
@@ -52,7 +52,7 @@ function scene.mouseMove(x,y)
 end
 function scene.mouseUp(x,y,k)
     SYSFX.rectRipple(1,x-10,y-10,20,20)
-    _push{COLOR.LD,"[mouseUp] <"..k..">"}
+    _push{CLR.l0,"[mouseUp] <"..k..">"}
 end
 function scene.touchClick(x,y)
     SYSFX.ripple(2,x,y,50)
@@ -68,7 +68,7 @@ function scene.touchMove(x,y)
 end
 function scene.touchUp(x,y)
     SYSFX.rectRipple(1,x-10,y-10,20,20)
-    _push{COLOR.LD,"[touchUp]"}
+    _push{CLR.l0,"[touchUp]"}
 end
 function scene.wheelMove(dx,dy)
     _push(("[wheelMove] <%d, %d>"):format(dx,dy))

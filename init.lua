@@ -367,8 +367,8 @@ local globalEvent={
             FONT.set(15,'_norm')
             for i=1,#debugInfo do
                 local str=debugInfo[i]()
-                gc.setColor(COLOR.D); gc.print(str,safeX+6,-20*i+1)
-                gc.setColor(COLOR.L); gc.print(str,safeX+5,-20*i)
+                gc.setColor(CLR.d9); gc.print(str,safeX+6,-20*i+1)
+                gc.setColor(CLR.l9); gc.print(str,safeX+5,-20*i)
             end
 
             -- Cursor
@@ -383,7 +383,7 @@ local globalEvent={
             gc.line(x,0,x,SCR.h)
             gc.line(0,y,SCR.w,y)
             local xMode=mx/SCR.w0<.33 and 'left' or mx/SCR.w0>.67 and 'right' or 'center'
-            GC.strokePrint('full',1,COLOR.D,COLOR.L,floor(mx+.5)..","..floor(my+.5),x,y-26,nil,xMode)
+            GC.strokePrint('full',1,CLR.d9,CLR.l9,floor(mx+.5)..","..floor(my+.5),x,y-26,nil,xMode)
         end
     end,
     clickFX=function(x,y,_) SYSFX.tap(.26,x,y) end,
@@ -400,7 +400,6 @@ local require=simpRequire((...)..'.')
 
 -- Pure lua modules (simple)
 CLR=        require'color'
-COLOR=      require'color_old'
 AE=         require'escape'
 LOG=        require'log'
 UTIL=       require'util'

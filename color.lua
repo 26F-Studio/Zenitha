@@ -1,8 +1,6 @@
 --[[
 ## COLOR module
-
 Features:
-
 - `CLR.HEX`, `CLR.toHEX`
 - `CLR.HSV`, `CLR.toHSV`
 - `CLR.HSL`, `CLR.toHSL`
@@ -11,6 +9,13 @@ Features:
 ]]
 ---@diagnostic disable-next-line
 local _hoverMouseHereToRead
+
+---@class Zenitha.Color: table READ ONLY
+---@field [1] number Red
+---@field [2] number Green
+---@field [3] number Blue
+---@field [4]? number Alpha
+---@alias Zenitha.ColorStr string
 
 --[[
 Quick Palette:
@@ -25,37 +30,6 @@ local abs,atan2=math.abs,math.atan2
 local type,tonumber=type,tonumber
 local find,match=string.find,string.match
 local sub,format=string.sub,string.format
-
-do -- Numeric Literal
-    ---Installs numeric color literals into CLR (e.g., `CLR.installNumLiteral('RGB9')` enables `CLR[960]` for orange).
-    ---
-    ---Multiple calls overwrite previous installations.
-    ---To use multiple libs simultaneously, set 2nd param to true and store the returned table yourself.
-    ---
-    ---For backward compatibility, you need this: `RGB9=CLR.installNumLiteral('RGB9',true)`
-    ---@param mode 'RGB9' | 'RGBA9' | 'RGB5' | string could be `RGB\d` or `RGBA\d`
-    ---@param export boolean? If true, return a new table instead of installing literals inside CLR
-    function CLR.installNumLiteral(mode,export)
-        -- Wipe old literals when already installed
-        if not export then for k in next,CLR do if type(k)=='number' then CLR[k]=nil end end end
-
-        -- Parse mode
-        local m,n=string.match(mode,'(RGBA?)(%d)')
-        if not m then error("CLR.installNumLiteral(mode): Invalid mode") end
-        n=tonumber(n)
-        if n==0 then error("CLR.installNumLiteral(mode): Invalid peak value") end
-
-        -- Generate colors and install into CLR or return a new table
-        local lib=export and {} or CLR
-        if m=='RGB' then
-            for r=0,n do for g=0,n do for b=0,n do lib[100*r+10*g+b]={r/n,g/n,b/n} end end end
-        else
-            for r=0,n do for g=0,n do for b=0,n do for a=0,n do lib[1000*r+100*g+10*b+a]={r/n,g/n,b/n,a/n} end end end end
-        end
-
-        if export then return lib end
-    end
-end
 
 do -- HEX
     ---Convert hex string to color
@@ -341,7 +315,7 @@ do -- Zenitha Color System
     }
 
     ---<Finetuned by Deepseek>---
-    local lightnessPrefix={D=1.8,lD=5.8,LD=10.8,DL=15.2,dL=17.5,L=20} -- for backward compatibility only
+    local lightnessPrefix={} -- for backward compatibility only
     for i=0,9 do
         lightnessPrefix['d'..i]=10-i
         lightnessPrefix['l'..i]=10+i
@@ -399,7 +373,7 @@ do -- Zenitha Color System
     ---How to construct the ZCS string (similar idea to HSL):
     ---1. Lightness prefix: `d9/d8/../d1/(d0|l0)/l1/l2/../l9` for -9 to +9
     ---2. Hue: `R/Y/G/C/B/M` for standard 6 hues.
-    ---3. Hue finetuning: add (up to 4) `r/y/g/c/b/m` after hue to shift slightly towards there (must be adjacent, shift 1/5 each).
+    ---3. Hue finetuning: add (up to 4) `r/y/g/c/b/m` after hue to shift slightly towards there (must be adjacent, shift 1/5 each, so Ryyy = Yrr).
     ---4. Chroma postfix: `sss/ss/s/[empty]/S/SS/SSS` for saturation -3 to +3
     ---5. Alpha postfix: `0/1/2/../9` for alpha 0 to 1 (or left empty)
     ---
@@ -423,7 +397,7 @@ do -- Zenitha Color System
         local sec
 
         -- Lightness
-        sec=match(str,'^([DdlL]+[0-9]?)')
+        sec=match(str,'^([dl]+[0-9]?)')
         if sec then
             str=sub(str,#sec+1)
             if lightnessPrefix[sec] then
@@ -552,6 +526,75 @@ do -- Utils
             s1*(1-t)+s2*t,
             l1*(1-t)+l2*t,
             a or (c1[4] or 1)*(1-t)+(c2[4] or 1)*t
+    end
+
+    ---Installs numeric color literals into CLR (e.g., `CLR.installNumLiteral('RGB9')` enables `CLR[960]` for orange).
+    ---
+    ---Multiple calls overwrite previous installations.
+    ---To use multiple libs simultaneously, set 2nd param to true and store the returned table yourself.
+    ---
+    ---For backward compatibility, you need this: `RGB9=CLR.installNumLiteral('RGB9',true)`
+    ---@param mode 'RGB9' | 'RGBA9' | 'RGB5' | string could be `RGB\d` or `RGBA\d`
+    ---@param export boolean? If true, return a new table instead of installing literals inside CLR
+    function CLR.installNumLiteral(mode,export)
+        -- Wipe old literals when already installed
+        if not export then for k in next,CLR do if type(k)=='number' then CLR[k]=nil end end end
+
+        -- Parse mode
+        local m,n=string.match(mode,'(RGBA?)(%d)')
+        if not m then error("CLR.installNumLiteral(mode): Invalid mode") end
+        n=tonumber(n)
+        if n==0 then error("CLR.installNumLiteral(mode): Invalid peak value") end
+
+        -- Generate colors and install into CLR or return a new table
+        local lib=export and {} or CLR
+        if m=='RGB' then
+            for r=0,n do for g=0,n do for b=0,n do lib[100*r+10*g+b]={r/n,g/n,b/n} end end end
+        else
+            for r=0,n do for g=0,n do for b=0,n do for a=0,n do lib[1000*r+100*g+10*b+a]={r/n,g/n,b/n,a/n} end end end end
+        end
+
+        if export then return lib end
+    end
+
+    ---Installs fallback color names into CLR
+    ---
+    ---WARNING:
+    ---- W (Wine) is replaced by E (Eosine) to avoid conflict with original W (White) in new color module
+    ---- Not exactly same colors, only the closest color in ZCS
+    function CLR.installFallback()
+        for k,v in next,{
+            DR='d7RySSS',dR='d3RySSS',R='l2RySSS',lR='l4RSSS',LR='l7RSSS',
+            DF='d7RyySSS',dF='d3RyS',F='l3RySSS',lF='l4RyyS',LF='l7RyySS',
+            DO='d6YrSS',dO='d2YrSSS',O='l4YrrSSS',lO='l6YrSSS',LO='l8YrSSS',
+            DY='d6YgSSS',dY='d1YgSSS',Y='l6YgSSS',lY='l7YgSSS',LY='l8YgSS',
+            DA='d6GySSS',dA='d1GySS',A='l6GySSS',lA='l7GySSS',LA='l8GyyS',
+            DK='d7GSSS',dK='d2GSS',K='l5GSSS',lK='l6GSSS',LK='l7Gs',
+            DG='d7GcSSS',dG='d3GSSS',G='l4GSSS',lG='l5GcSS',LG='l7Gc',
+            DJ='d6CgSSS',dJ='d2CgSSS',J='l4CgSSS',lJ='l5CgS',LJ='l7Cgss',
+            DC='d6CbbSS',dC='d3CbbSS',C='l3CbbS',lC='l5Cbbs',LC='l7Cbbs',
+            DI='d7BcSS',dI='d3BcS',I='l2BcS',lI='l4Bc',LI='l6Bccss',
+            DS='d7BSSS',dS='d6BSSS',S='l1BSSS',lS='l3BcS',LS='l6Bcs',
+            DB='d7BmSSS',dB='d6BmSS',B='l0BmSSS',lB='l3BmSSS',LB='l5Bmm',
+            DP='d7BmmSSS',dP='d6BmmSSS',P='d1Bmm',lP='l2Bmm',LP='l5MbbS',
+            DV='d7MbSS',dV='d6Mb',V='l0Mb',lV='l2Mss',LV='l5Mss',
+            DM='d7MrrSSS',dM='d3MrrS',M='l2MrrS',lM='l3Mrrs',LM='l5Mrss',
+            DE='d6RSSS',dE='d3RSS',E='l2RSSS',lE='l3RmS',LE='l6Rm',
+            DD='K',dD='d9',D='d8',lD='d4',LD='l0',DL='l5',dL='l7',L='l9',lL='W',LL='W',
+        } do CLR[k]=CLR[v] end
+        CLR.DX={0,0,0,0}
+        CLR.dX={.06,.06,.06,0}
+        CLR.X={.56,.56,.56,.56,0}
+        CLR.lX={.99,.99,.99,0}
+        CLR.LX={1,1,1,0}
+        function CLR.rainbow(p) return CLR.PSL(p, 1, .6) end
+        function CLR.rainbow_light(p) return CLR.PSL(p, .67, .7) end
+        function CLR.rainbow_dark(p) return CLR.PSL(p, .50, .4) end
+        function CLR.rainbow_gray(p) return CLR.PSL(p, .32, .5) end
+        local lLv={'D','d','','l','L'}
+        local hue={'R','F','O','Y','A','K','G','J','C','I','S','B','P','V','M','E'}
+        function CLR.random(l) return CLR[lLv[l]..hue[math.random(16)]] end
+        CLR.installFallback=NULL
     end
 end
 

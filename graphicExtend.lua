@@ -467,7 +467,7 @@ function GC.strokePrint(strokeMode,d,strokeColor,textColor,str,x,y,w,align,r,sx,
     elseif align=='right' then
         x=x-w
     end
-    setColor(strokeColor or COLOR.L)
+    setColor(strokeColor or CLR.l9)
     if strokeMode~='corner' then
         printf(str,x-d,y,w,align,r,sx,sy,ox,oy,kx,ky)
         printf(str,x+d,y,w,align,r,sx,sy,ox,oy,kx,ky)
