@@ -1448,8 +1448,8 @@ end
 Widgets.slider_progress=setmetatable({
     type='slider_progress',
     w=100,h=10,
-    frameColor='LD',
-    fillColor='L',
+    frameColor='l0',
+    fillColor='l9',
 
     text=false,
     image=false,
