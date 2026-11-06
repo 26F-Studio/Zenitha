@@ -1010,7 +1010,6 @@ function GC.getRawFont(size)
     end
     return f
 end
-
 local _getRawFont=GC.getRawFont
 
 ---Set Love's default font with the given size (same as the old `FONT.rawset`)

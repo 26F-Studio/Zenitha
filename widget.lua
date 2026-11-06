@@ -116,12 +116,12 @@ local gc_stc_circ,gc_stc_rect=GC.stc_circ,GC.stc_rect
 local gc_mStr=GC.mStr
 local gc_mRect=GC.mRect
 local gc_mDraw=GC.mDraw
+local gc_setFont,gc_getFont=GC.setFont,GC.getFont
 
 local kb=ZENITHA.keyboard
 local timer=ZENITHA.timer.getTime
 
 local CLR,SCN,SCR,xOy=CLR,SCN,SCR,SCR.xOy
-local setFont,getFont=GC.setFont,GC.getFont
 local utf8=require'utf8'
 
 local legalLabelPos={
@@ -358,7 +358,7 @@ function Widgets.base:reset(mode)
             content=content()
         end
         assert(type(content)=='string' or type(content)=='table',"[widget].text need colorstring|fun():colorstring")
-        self._text=GC.newText(getFont(self.fontSize,self.fontType),content)
+        self._text=GC.newText(gc_getFont(self.fontSize,self.fontType),content)
     else
         self._text=PAPER
     end
@@ -707,7 +707,7 @@ function Widgets.hint:reset(mode)
             self._floatText=self.floatText
         end
         assert(type(self._floatText)=='string' or type(self._floatText)=='table',"[hint].floatText need colorstring|fun():colorstring")
-        self._floatText=GC.newText(getFont(self.floatFontSize,self.floatFontType),self._floatText)
+        self._floatText=GC.newText(gc_getFont(self.floatFontSize,self.floatFontType),self._floatText)
     end
     if not self.floatFontSize then self.floatFontSize=self.fontSize end
     if not self.floatFontType then self.floatFontType=self.fontType end
@@ -1258,7 +1258,7 @@ function Widgets.slider:draw()
 
     -- Float text
     if self._textShowTime>0 then
-        setFont(self.numFontSize,self.numFontType)
+        gc_setFont(self.numFontSize,self.numFontType)
         gc_setColor(fillC[1],fillC[2],fillC[3],fillC[4]*min(self._textShowTime/2,1))
         gc_mStr(self:_showFunc(),cx,by-self.numFontSize-10)
     end
@@ -1414,7 +1414,7 @@ function Widgets.slider_fill:draw()
     gc_stc_circ(x+w-r,y,r)
 
     -- Text 1
-    setFont(self.numFontSize,self.numFontType)
+    gc_setFont(self.numFontSize,self.numFontType)
     gc_setColor(1,1,1,.75+HOV*.26)
     gc_mStr(num,x+w*.5,y-self.numFontSize*.7)
     gc_rectangle('fill',x,y-r,w*rate,h)
@@ -1607,7 +1607,7 @@ function Widgets.selector:reset(mode)
     end
 
     local V=self.disp()
-    self._selText=GC.newText(getFont(self.selFontSize,self.selFontType),self.show(V))
+    self._selText=GC.newText(gc_getFont(self.selFontSize,self.selFontType),self.show(V))
     self._select=false
     for i=1,#self.list do
         if self.list[i]==V then
@@ -1855,7 +1855,7 @@ function Widgets.inputBox:draw()
             gc_rectangle('fill',x+f*.6*i,y,f*.4,f*.4)
         end
     else
-        setFont(f,self.fontType)
+        gc_setFont(f,self.fontType)
         gc_printf(self._value,x+10,y,self.w-20)
         if WIDGET.sel==self then
             gc_print(EDITING,x+10,y+12-f*1.4)
@@ -2058,14 +2058,14 @@ function Widgets.textBox:draw()
                 gc_rectangle('fill',w-40+8,8,24,3)
                 gc_rectangle('fill',w-40+11,14,18,21)
             else
-                setFont(40,'_norm')
+                gc_setFont(40,'_norm')
                 gc_mStr("?",w-40+21,-8)
             end
         end
 
         -- Texts
         gc_setColor(self.textColor)
-        setFont(self.fontSize,self.fontType)
+        gc_setFont(self.fontSize,self.fontType)
         gc_stc_reset()
         gc_stc_rect(0,0,w,h)
         gc_translate(0,-(scroll%lineH))
