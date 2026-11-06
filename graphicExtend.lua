@@ -1072,6 +1072,18 @@ function GC.loadFont(name,path)
     end
 end
 
+---Release all loaded font objects & Clear the font cache
+---
+---**Warning:** This probably won't release fonts inside Text object, you have to do it manually
+function GC.clearFontCache()
+    for _,set in next,fontCache do
+        for _,font in next,set do
+            font:release()
+        end
+        TABLE.clear(set)
+    end
+end
+
 GC._setFont=gc.setFont
 GC._getFont=gc.getFont
 GC._fontCache=fontCache
