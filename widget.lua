@@ -121,7 +121,7 @@ local kb=ZENITHA.keyboard
 local timer=ZENITHA.timer.getTime
 
 local CLR,SCN,SCR,xOy=CLR,SCN,SCR,SCR.xOy
-local setFont,getFont=FONT.set,FONT.get
+local setFont,getFont=GC.setFont,GC.getFont
 local utf8=require'utf8'
 
 local legalLabelPos={

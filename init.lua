@@ -345,7 +345,7 @@ local globalEvent={
         if appVer then
             gc_replaceTransform(SCR.xOy_d)
             gc.setColor(.9,.9,.9,.42)
-            FONT.set(15,'_norm')
+            GC.setFont(15,'_norm')
             gc.printf(appVer,-2600,-20,5200,'center')
         end
 
@@ -364,7 +364,7 @@ local globalEvent={
             end
 
             -- Texts
-            FONT.set(15,'_norm')
+            GC.setFont(15,'_norm')
             for i=1,#debugInfo do
                 local str=debugInfo[i]()
                 gc.setColor(CLR.d9); gc.print(str,safeX+6,-20*i+1)
@@ -422,7 +422,6 @@ if SYSTEM=='Web' then JS=require'js' end
 CLIPBOARD=  require'clipboard'
 VIB=        require'vibrate'
 WHEELMOV=   require'wheelToArrow'
-FONT=       require'fontExtend'
 IMG=        require'imageLoader'
 FILE=       require'fileExtend'
 SCR=        require'screen'
@@ -454,11 +453,11 @@ local TP=xOy.transformPoint
 local ITP=xOy.inverseTransformPoint
 
 -- Set default font
-FONT.load({
+GC.loadFont({
     _norm=(...)..'/norm.ttf',
     _mono=(...)..'/mono.ttf',
 })
-FONT.setDefaultFont('_norm')
+GC.setDefaultFont('_norm')
 
 --------------------------------------------------------------
 
@@ -1067,9 +1066,9 @@ function love.errorhandler(msg)
             gc.replaceTransform(SCR.origin)
             local k=min(SCR.h/720,1)
             gc.scale(k)
-            FONT.set(100,'_norm') gc.print(":(",100,0,0,1.2)
-            FONT.set(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
-            FONT.set(20,'_norm') gc.printf(err[1],100,330,SCR.w/k-200)
+            GC.setFont(100,'_norm') gc.print(":(",100,0,0,1.2)
+            GC.setFont(40,'_norm') gc.printf(errorMsg,100,160,SCR.w/k-200)
+            GC.setFont(20,'_norm') gc.printf(err[1],100,330,SCR.w/k-200)
             gc.print(SYSTEM.."-"..(appVer or "noVer").."\nScene stack:"..sceneStack,100,640)
             gc.print("TRACEBACK",100,430)
             for i=4,#err-2 do

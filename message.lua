@@ -111,7 +111,7 @@ function MSG._new(data)
         backColor=msgStyle.other.backColor
         textColor=msgStyle.other.textColor
     end
-    local text=GC.newText(FONT.get(30),data.str)
+    local text=GC.newText(GC.getFont(30),data.str)
     local w,h=text:getDimensions()
     w=math.max(w+(data.cat and 45 or 5),200)+15
     h=math.max(h+12,50)

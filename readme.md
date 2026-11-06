@@ -122,25 +122,18 @@ GC.DO{
     {'fRect',0,0,800,600},
     ...
 }
-```
 
-### FONT
-
-set font style & size easily as `GC.setColor`.
-
-```lua
-FONT.load{
+GC.loadFont{
     consolas="consola.ttf",
     pixel="codePixel-Regular.ttf"
     -- My monospaced coding font: github.com/MrZ626/codePixel
 }
-FONT.setFallback('pixel','consolas')
-FONT.setDefaultFont('pixel')
+GC.setDefaultFont('pixel')
 
-FONT.set(26)
+GC.setFont(26) -- setFont / getFont in GC are not original ones from love.graphics, there's built-in cache for it
 GC.print(...)
 
-FONT.set(20,'consolas')
+GC.setFont(20,'consolas')
 GC.print(...)
 ```
 

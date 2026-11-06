@@ -166,7 +166,7 @@ local alignModes={
 ---@param data Zenitha.TextAnimArg
 function TEXT:add(data)
     local T={
-        text=GC.newText(FONT.get(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),
+        text=GC.newText(GC.getFont(floor((data.fontSize or 40)/5)*5,data.fontType),data.text or "Example Text"),
         x=data.x or 0,y=data.y or 0,
         kx=data.k or data.kx or 1,ky=data.k or data.ky or data.kx or 1,
         align=alignModes[data.align] or data.align or alignModes.center,

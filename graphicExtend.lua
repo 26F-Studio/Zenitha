@@ -959,6 +959,124 @@ function GC.newCamera()
     return setmetatable(c,{__index=Camera})
 end
 
+
+--------------------------------------------------------------
+-- Font
+
+---@type love.File[] Font file objects, indexed by font type name
+local fontFiles={}
+
+---@type Map<Map<love.Font>> Font object cache, `_` stores Love's default font by size
+local fontCache={_={}}
+
+---@type string? Default font type, used when no font name is given in GC.getFont / GC.setFont
+local defaultFont
+
+---@type love.Font? Current font object set through GC.setFont
+local curFont=nil
+
+---@type fun(font:love.Font, size:number, name?:string)
+local onFontInit=NULL
+
+---Set default font type, used when no font name is given in GC.getFont / GC.setFont
+---@param name? string
+function GC.setDefaultFont(name)
+    defaultFont=name
+end
+
+---Set a function (nil to disable) to be called just after a new font object is created
+---
+---Useful for setting font filters, lineHeight, etc.
+---@param func? fun(font:love.Font, size:number, name?:string)
+function GC.setFontOnInit(func)
+    if func==nil then
+        onFontInit=NULL
+    else
+        assertf(type(func)=='function' or func==nil,"Need function or nil, got %s",type(func))
+        onFontInit=func
+    end
+end
+
+---Get a Love default-font object with the given size, bypassing font type names
+---@param size number
+---@return love.Font
+function GC.getRawFont(size)
+    local f=fontCache._[size]
+    if not f then
+        assertf(type(size)=='number' and size>0 and size%1==0,"Need int >=1, got %s",size)
+        f=gc.newFont(size,'normal',gc.getDPIScale()*SCR.k*2)
+        fontCache._[size]=f
+        onFontInit(f,size)
+    end
+    return f
+end
+
+local _getRawFont=GC.getRawFont
+
+---Set Love's default font with the given size (same as the old `FONT.rawset`)
+---@param size number
+function GC.setRawFont(size)
+    gc.setFont(fontCache._[size] or _getRawFont(size))
+end
+
+---Get a font object with font size, using the default font type if not given
+---
+---**Warning:** this overrides `love.graphics.getFont` in GC. Use `love.graphics.getFont`
+---directly if you need the original Love API.
+---@param size number
+---@param name? string
+---@return love.Font
+function GC.getFont(size,name)
+    if not name then name=defaultFont end
+
+    local f=fontCache[name]
+    if not f then return _getRawFont(size) end
+    f=f[size]
+
+    if not f then
+        assertf(type(size)=='number' and size>0 and size%1==0,"Need int >=1, got %s",size)
+        f=gc.newFont(fontFiles[name],size,'normal',gc.getDPIScale()*SCR.k*2)
+        fontCache[name][size]=f
+        onFontInit(f,size,name)
+    end
+    return f
+end
+local _getFont=GC.getFont
+
+---Set font with font size, using the default font type if not given
+---
+---**Warning:** this overrides `love.graphics.setFont` in GC.
+---Use `love.graphics.setFont` directly if you need the original Love API.
+---@param size number
+---@param name? string
+function GC.setFont(size,name)
+    local f=_getFont(size,name)
+    if f~=curFont then
+        curFont=f
+        gc.setFont(curFont)
+    end
+end
+
+---Load font(s) from file(s)
+---@param name string
+---@param path string
+---@overload fun(map:table<string,string>)
+function GC.loadFont(name,path)
+    if type(name)=='table' then
+        for k,v in next,name do
+            GC.loadFont(k,v)
+        end
+    else
+        assertf(love.filesystem.getInfo(path),"Font file %s(%s) not exist!",name,path)
+        fontFiles[name]=love.filesystem.newFile(path)
+        fontCache[name]={}
+    end
+end
+
+GC._setFont=gc.setFont
+GC._getFont=gc.getFont
+GC._fontCache=fontCache
+
 --------------------------------------------------------------
 -- Text wrapping
 
@@ -968,7 +1086,7 @@ do -- function GC.wrapText(font,str,width,maxGap)
     local wordBuf=""
     local _maxGap
 
-    local tempText=GC.newText(GC.getFont(),"")
+    local tempText=GC.newText(gc.getFont(),"")
     local function measureWidth(str)
         tempText:set(str)
         return tempText:getWidth()
@@ -1042,7 +1160,6 @@ do -- function GC.wrapText(font,str,width,maxGap)
     end
 end
 
-
 --------------------------------------------------------------
 -- Canvas
 
@@ -1096,8 +1213,8 @@ do -- function GC.load(L), GC.execute(t)
         setSD=    'setShader',
 
         print=    'print',
-        rawFT=    function(...) FONT.rawset(...) end,
-        setFT=    function(...) FONT.set(...) end,
+        rawFT=    function(...) GC.setRawFont(...) end,
+        setFT=    function(...) GC.setFont(...) end,
         mStr=     'mStr',
         mDraw=    'mDraw',
         mDrawQ=   'mDrawQ',

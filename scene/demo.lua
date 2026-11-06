@@ -3,11 +3,11 @@ local testVal_2={18,260,.26}
 local testVal_3={'medium','large','ex-large'}
 local testVal_4={} for i=1,9 do table.insert(testVal_4,{name='user'..i}) end
 local function _sceneDraw()
-    FONT.set(150,'_norm')
+    GC.setFont(150,'_norm')
     GC.mStr("Zenitha",400,40)
-    FONT.set(60,'_norm')
+    GC.setFont(60,'_norm')
     GC.mStr("Demo Scene",400,200)
-    FONT.set(20,'_norm')
+    GC.setFont(20,'_norm')
     GC.mStr("Powered by LÖVE",400,280)
 end
 
@@ -47,7 +47,7 @@ local scene={
         {type='inputBox',    text='inputBox',  x=100,y=650,w=300,h=100,labelPos='bottom'},
         {type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
         {type='listBox',     name='listBox',   x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
-            FONT.set(30)
+            GC.setFont(30)
             GC.setColor(CLR.l9)
             GC.print(id,10,-6)
             GC.print(opt.name,70,-6)
