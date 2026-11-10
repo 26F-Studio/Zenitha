@@ -58,7 +58,7 @@ local function clientLoop()
                 printf("[TCP_C] Error in decoding message: %s",recvPack)
             end
         elseif err=='timeout' then
-            if partial then
+            if partial and #partial>0 then
                 partialDataBuffer=partialDataBuffer..partial
             end
         elseif err=='closed' then

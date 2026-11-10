@@ -284,11 +284,10 @@ local function serverLoop()
                     recvPack.sender=id
                     S_recvCHN:push(recvPack)
                 else
-                    printf("Error in encoding data to json: %s",recvPack)
-                    return
+                    printException("Client %s sent invalid JSON: %s; payload=%q",id,tostring(recvPack),message:sub(1,256))
                 end
             elseif err=='timeout' then
-                if partial and partial[1] then
+                if partial and #partial>0 then
                     partialDataBuffer[id]=partialDataBuffer[id]..partial
                     printMsg("(p%s) %s",id,partial)
                 end
