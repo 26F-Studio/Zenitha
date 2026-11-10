@@ -33,6 +33,13 @@ local topicTemp={
     sub={},
 }
 
+---Queue data for a client. LuaSocket's send may only send a part of it.
+---@param client Zenitha.TCP.Client
+---@param dataStr string
+local function queueMessage(client,dataStr)
+    client.sendQueue=client.sendQueue..dataStr..'\n'
+end
+
 ---Send datapack with sender's ID
 ---@param pack Zenitha.TCP.MsgPack
 ---@param sender Zenitha.TCP.sendID
@@ -75,9 +82,7 @@ local function sendMessage(pack,sender)
         end
         for i=1,#topic.sub do
             local client=clients[topic.sub[i]]
-            if client then
-                client.conn:send(dataStr..'\n')
-            end
+            if client then queueMessage(client,dataStr) end
         end
     elseif pack.receiver then
         -- Send to specified ID(s)
@@ -87,13 +92,11 @@ local function sendMessage(pack,sender)
             if not clients[recvID] then
                 return printException("Client %s send to non-exist client %s",sender,recvID)
             end
-            clients[recvID].conn:send(dataStr..'\n')
+            queueMessage(clients[recvID],dataStr)
         end
     else
         -- Send to everyone
-        for _,client in next,clients do
-            client.conn:send(dataStr..'\n')
-        end
+        for _,client in next,clients do queueMessage(client,dataStr) end
     end
 end
 
@@ -241,6 +244,7 @@ local function serverLoop()
                     timestamp=os.time(),
                 }
                 c.conn:settimeout(0.01)
+                c.sendQueue=''
                 clients[c.id]=c
                 partialDataBuffer[c.id]=''
                 newClientId=newClientId+1
@@ -256,6 +260,30 @@ local function serverLoop()
         ---@type Zenitha.TCP.MsgPack?
         local pack=S_sendCHN:pop()
         if pack then sendMessage(pack) end
+
+        -- Flush pending send queues
+        for id,client in next,clients do
+            local queue=client.sendQueue
+            if queue~='' then
+                local sent,err,last=client.conn:send(queue)
+                if sent then
+                    client.sendQueue=queue:sub(sent+1)
+                elseif err=='timeout' then
+                    if last and last>0 then
+                        client.sendQueue=queue:sub(last+1)
+                    end
+                else
+                    printException("Failed to send to client %s: %s",id,tostring(err))
+                    client.conn:close()
+                    clients[id]=nil
+                    partialDataBuffer[id]=nil
+                    S_recvCHN:push{
+                        event='client.disconnect',
+                        sender=id,
+                    }
+                end
+            end
+        end
 
         -- Receive data
         for id,client in next,clients do

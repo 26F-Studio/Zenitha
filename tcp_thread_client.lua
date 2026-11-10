@@ -11,6 +11,8 @@ local C_recvCHN=love.thread.getChannel('TCP_c_receive')
 
 ---@type LuaSocket.client
 local client
+local sendBuffer=''
+local partialDataBuffer=''
 
 ---Send datapack with sender's ID
 ---@param pack Zenitha.TCP.MsgPack
@@ -20,10 +22,25 @@ local function sendMessage(pack)
         printf("Error in encoding data to json: %s",dataStr)
         return
     end
-    client:send(dataStr..'\n')
+    sendBuffer=sendBuffer..dataStr..'\n'
 end
 
-local partialDataBuffer=''
+local function flushSendBuffer()
+    if sendBuffer=='' then return true end
+    local sent,err,last=client:send(sendBuffer)
+    if sent then
+        sendBuffer=sendBuffer:sub(sent+1)
+    elseif err=='timeout' then
+        if last and last>0 then
+            sendBuffer=sendBuffer:sub(last+1)
+        end
+    else
+        printf("[TCP_C] Failed to send data: %s",tostring(err))
+        return false
+    end
+    return true
+end
+
 local function clientLoop()
     while true do
         -- Process config action
@@ -45,6 +62,7 @@ local function clientLoop()
         ---@type Zenitha.TCP.MsgPack
         local pack=C_sendCHN:pop()
         if pack then sendMessage(pack) end
+        if not flushSendBuffer() then return end
 
         -- Receive data
         local message,err,partial=client:receive('*l')
@@ -81,6 +99,8 @@ while true do
     else
         printf("[TCP_C] Connected to %s:%s",ip,port)
         client:settimeout(0.01)
+        sendBuffer=''
+        partialDataBuffer=''
         C_rspsCHN:push{success=true}
         clientLoop()
     end

@@ -34,6 +34,7 @@ end
 ---@field id string '1' | '2' | ...
 ---@field sockname string
 ---@field timestamp number
+---@field sendQueue string
 
 ---@class Zenitha.TCP.MsgPack
 ---@field event? Zenitha.TCP.MsgEvent
