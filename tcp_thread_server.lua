@@ -8,9 +8,9 @@ local JSON=require((...)..'json')
 local ins,rem=table.insert,table.remove
 local function printf(str,...) print(str:format(...)) end
 
-local printEvent=true and function(str,...) printf("[TCP_S EVNT] "..str,...) end or function()end
-local printMsg=false and function(str,...) printf("[TCP_S MESG] "..str,...) end or function()end
-local printException=true and function(str,...) printf("[TCP_S WARN] "..str,...) end or function()end
+local printEvent=true and function(str,...) printf("[TCP_S EVNT] "..str,...) end or function() end
+local printMsg=false and function(str,...) printf("[TCP_S MESG] "..str,...) end or function() end
+local printException=true and function(str,...) printf("[TCP_S WARN] "..str,...) end or function() end
 
 local S_confCHN=love.thread.getChannel('TCP_s_config')
 local S_rspsCHN=love.thread.getChannel('TCP_s_response')
@@ -138,8 +138,8 @@ local function createTopic(data)
         local topic={
             name=data.name,
             createTime=love.timer.getTime(),
-            maxAliveTime=data.maxSub or topicTemp.maxAliveTime,
-            maxSub=data.maxAliveTime or topicTemp.maxSub,
+            maxAliveTime=data.maxAliveTime or topicTemp.maxAliveTime,
+            maxSub=data.maxSub or topicTemp.maxSub,
             sub={},
         }
         topicList[data.name]=topic
