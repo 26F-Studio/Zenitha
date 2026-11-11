@@ -997,7 +997,7 @@ function GC.setFontOnInit(func)
     end
 end
 
----Get a Love default-font object with the given size, bypassing font type names
+---Get a Love default-font object with the given size
 ---@param size number
 ---@return love.Font
 function GC.getRawFont(size)
@@ -1012,16 +1012,15 @@ function GC.getRawFont(size)
 end
 local _getRawFont=GC.getRawFont
 
----Set Love's default font with the given size (same as the old `FONT.rawset`)
+---Set Love's default font with the given size
 ---@param size number
 function GC.setRawFont(size)
     gc.setFont(fontCache._[size] or _getRawFont(size))
 end
 
----Get a font object with font size, using the default font type if not given
+---Get a font object with given size (and typeface)
 ---
----**Warning:** this overrides `love.graphics.getFont` in GC. Use `love.graphics.getFont`
----directly if you need the original Love API.
+---**Warning:** Use `love.graphics.getFont` if you need the original API, this function overrides it in `GC`.
 ---@param size number
 ---@param name? string
 ---@return love.Font
@@ -1042,10 +1041,9 @@ function GC.getFont(size,name)
 end
 local _getFont=GC.getFont
 
----Set font with font size, using the default font type if not given
+---Set font with given size (and typeface)
 ---
----**Warning:** this overrides `love.graphics.setFont` in GC.
----Use `love.graphics.setFont` directly if you need the original Love API.
+---**Warning:** Use `love.graphics.setFont` if you need the original API, this function overrides it in `GC`.
 ---@param size number
 ---@param name? string
 function GC.setFont(size,name)
@@ -1056,7 +1054,7 @@ function GC.setFont(size,name)
     end
 end
 
----Load font(s) from file(s)
+---Load exterior font(s) from file(s)
 ---@param name string
 ---@param path string
 ---@overload fun(map:table<string,string>)
