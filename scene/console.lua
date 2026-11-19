@@ -1,8 +1,8 @@
 local kb=ZENITHA.keyboard
 local ins,rem=table.insert,table.remove
 
-local outputBox=WIDGET.new{name='output',type='textBox',x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25}
-local inputBox=WIDGET.new{name='input',text='',type='inputBox',x=20,y=999,w=999,h=80,fontType='_mono'}
+local outputBox=WIDGET.new{name='output',type='textBox',anchor={0,0},x=20,y=20,w=999,h=999,fontSize=25,fontType='_mono',lineHeight=25}
+local inputBox=WIDGET.new{name='input',text='',type='inputBox',anchor={0,0},x=20,y=999,w=999,h=80,fontType='_mono'}
 
 -- Console Log
 local function log(str)

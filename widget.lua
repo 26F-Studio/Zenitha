@@ -4,101 +4,92 @@
 ---@class Zenitha._WidgetArg
 ---@field name? string [All]
 ---@field pos? table [All]
----
 ---@field x? number [All]
 ---@field y? number [All]
 ---@field w? number [EXCEPT text & switch]
----@field h? number [EXCEPT text & checkBox & slider & selector]
----@field widthLimit? number [EXCEPT image & button & *Box]
+---@field h? number [EXCEPT text & checkBox & slider]
 ---
----@field color? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & *Box] fallback of other color options
+---@field anchor? number[] [All] Anchor point in the widget, from {0,0} (left/top) to {1,1} (right/bottom)
+---@field padding? number[] [button & hint & inputBox & textBox] Inner padding {x,y}
+---@field align? number[] [button & hint] Content alignment inside the padded area
+---@field placement? 'top' |'right' |'bottom' |'left' |'topRight' |'topLeft' |'rightBottom' |'rightTop' |'bottomRight' |'bottomLeft' |'leftBottom' |'leftTop' [EXCEPT text & image & button & listBox]
+---@field margin? number [EXCEPT text & image & button & listBox] Distance from the widget to its label/floating box
+---
+---@field lineWidth? number [EXCEPT text & image & selector]
+---@field cornerR? number [EXCEPT text & image & switch & slider_progress & selector] Round corner ratio
+---@field k? number [image]
+---@field r? number [image]
+---@field lineDist? number [slider_fill] Outline dist from the bat
+---@field color? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & inputBox & textBox & listBox] fallback of other color options
+---@field fillColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image & hint & selector]
+---@field frameColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image]
+---@field textColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & listBox]
+---@field imageColor? Zenitha.ColorStr | Zenitha.Color [image & button]
+---@field activeColor? Zenitha.ColorStr | Zenitha.Color [inputBox & textBox & listBox]
+---@field scrollBarColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
+---
 ---@field text? string | function [EXCEPT image & listBox]
 ---@field textScale? number [EXCEPT image & listBox]
 ---@field fontSize? number [EXCEPT image & listBox]
 ---@field fontType? string [EXCEPT image & listBox]
----@field image? string | love.Drawable [image & button] Can use slash-path to read from IMG lib
----@field quad? love.Quad [image & button] Optional
----@field alignX? 'left' | 'right' | 'center' [text & image & button]
----@field alignY? 'top' | 'bottom' | 'center' [text & image & button]
----@field marginX? number [button & hint]
----@field marginY? number [button & hint]
----@field labelPos? 'top' |'right' |'bottom' |'left' |'topRight' |'topLeft' |'rightBottom' |'rightTop' |'bottomRight' |'bottomLeft' |'leftBottom' |'leftTop' [EXCEPT text & image & button & text/listBox]
----@field labelDist? number [EXCEPT text & image & button & text/listBox]
----@field disp? function [checkBox & switch & sliders & selector] Must return the value that widget should show
----@field code? function [checkBox & switch & sliders & selector & listBox] Called 'When triggered'
----@field onPress? function [button & hint] Called 'When pressed down'
----@field onClick? function [button] Called 'When pressed and release'
----@field visibleFunc? function [All] Used to change widget's visibility when scene changed
----@field visibleTick? function [All] Used to update widget's visibility every frame
----
----@field lineWidth? number [EXCEPT text & image & selector]
----@field cornerR? number [EXCEPT text & image & slider_fill & slider_progress & switch & selector] Round corner ratio
----
----@field textColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT image & slider_progress & listBox]
----@field fillColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image & hint & selector]
----@field frameColor? Zenitha.ColorStr | Zenitha.Color [EXCEPT text & image]
----@field imageColor? Zenitha.ColorStr | Zenitha.Color [image & button]
----@field activeColor? Zenitha.ColorStr | Zenitha.Color [*Box]
----
----@field sound_press? string | false [button & checkBox & switch & selector & inputBox]
----@field sound_release? string | false [button]
----@field sound_hover? string | false [EXCEPT text & image]
----
+---@field image? string | love.Drawable [image & button & hint] Can use slash-path to read from IMG lib
+---@field quad? love.Quad [image & button & hint] Optional
 ---@field floatText? string | table | function [hint]
 ---@field floatFontSize? number [hint]
 ---@field floatFontType? string [hint]
 ---@field floatImage? string | love.Drawable [hint]
----@field floatBox? false | number[] [hint]
----@field floatCornerR? number
----@field floatLineWidth? number
----@field floatFillColor? Zenitha.ColorStr | Zenitha.Color
----@field floatFrameColor? Zenitha.ColorStr | Zenitha.Color
----@field floatTextColor? Zenitha.ColorStr | Zenitha.Color
+---@field widthLimit? number [text & checkBox & switch & sliders & selector]
 ---
----@field r? number [image]
----@field k? number [image]
----
----@field sound_on? string | false | false [checkBox & switch]
----@field sound_off? string | false | false [checkBox & switch]
----
----@field numFontSize? number [sliders]
----@field numFontType? string [sliders]
----@field axis? {minVal:number, maxVal:number, step?:number} [slider & slider_fill]
----@field unit? false | number [sliders] Unit shown on the axis (default to axis[3])
----@field valueShow? false | 'int' | 'float' | 'percent' | function [sliders] Value showing mode or function [called with widgetObj)
----@field lineDist? number [slider_fill] Outline dist from the bat
----@field soundInterval? number [sliders] Minimum interval between two sounds
----@field soundPitchRange? number [sliders] Pitch range applied to sound_drag, 12 for ±1 octave
----@field sound_drag? string | false [sliders] Drag sound
----
----@field selFontSize? number [selector]
----@field selFontType? string [selector]
+---@field axis? {minVal:number, maxVal:number, step?:number} [sliders]
+---@field unit? false | number [slider] Unit shown on the axis (default to axis[3])
+---@field valueShow? false | 'int' | 'float' | 'percent' | function [slider] Value showing mode or function (called with widgetObj)
+---@field numFontSize? number [slider & slider_fill]
+---@field numFontType? string [slider & slider_fill]
+---@field textAlwaysShow? boolean [slider]
 ---@field list? table [selector]
 ---@field show? function [selector]
----
+---@field selFontSize? number [selector]
+---@field selFontType? string [selector]
 ---@field secret? boolean [inputBox]
 ---@field regex? string [inputBox]
 ---@field maxInputLength? number [inputBox]
----@field sound_input? string | false [inputBox]
----@field sound_bksp? string | false [inputBox]
----@field sound_clear? string | false [input/textBox]
----@field sound_fail? string | false [inputBox]
----
 ---@field scrollBarPos? 'left' | 'right' [textBox & listBox]
 ---@field scrollBarWidth? number [textBox & listBox]
 ---@field scrollBarDist? number [textBox & listBox]
----@field scrollBarColor? Zenitha.ColorStr | Zenitha.Color [textBox & listBox]
 ---@field lineHeight? number [textBox & listBox]
----
 ---@field yOffset? number [textBox]
 ---@field editable? boolean [textBox]
----
 ---@field drawFunc? fun(item:any, id:integer, selected:boolean) [listBox]
 ---@field releaseDist? number [listBox]
 ---@field stencilMode? 'total' | 'single' | false [listBox]
+---@field floatBox? false | number[] [hint]
+---@field floatCornerR? number [hint]
+---@field floatLineWidth? number [hint]
+---@field floatFillColor? Zenitha.ColorStr | Zenitha.Color [hint]
+---@field floatFrameColor? Zenitha.ColorStr | Zenitha.Color [hint]
+---@field floatTextColor? Zenitha.ColorStr | Zenitha.Color [hint]
+---
+---@field sound_press? string | false [button & checkBox & switch & selector & inputBox]
+---@field sound_release? string | false [button]
+---@field sound_hover? string | false [EXCEPT text & image]
+---@field sound_on? string | false | false [checkBox & switch]
+---@field sound_off? string | false | false [checkBox & switch]
+---@field sound_drag? string | false [sliders] Drag sound
+---@field soundInterval? number [sliders] Minimum interval between two sounds
+---@field soundPitchRange? number [sliders] Pitch range applied to sound_drag, 12 for ±1 octave
+---@field sound_input? string | false [inputBox]
+---@field sound_bksp? string | false [inputBox]
+---@field sound_clear? string | false [inputBox & textBox]
+---@field sound_fail? string | false [inputBox]
 ---@field sound_click? string | false [listBox]
 ---@field sound_select? string | false [listBox]
-
+---@field disp? function [checkBox & switch & sliders & selector] Must return the value that widget should show
+---@field code? function [checkBox & switch & sliders & selector & listBox] Called 'When triggered'
+---@field onPress? function [button & hint] Called 'When pressed down'
+---@field onClick? function [button] Called 'When pressed and release'
+---
+---@field visibleFunc? function [All] Used to change widget's visibility when scene changed
+---@field visibleTick? function [All] Used to update widget's visibility every frame
 local type,assert,next,rawget=type,assert,next,rawget
 local floor,ceil=math.floor,math.ceil
 local max,min=math.max,math.min
@@ -108,14 +99,10 @@ local sub,ins,rem=string.sub,table.insert,table.remove
 local gc_translate,gc_scale=GC.translate,GC.scale
 local gc_push,gc_pop=GC.push,GC.pop
 local gc_setColor,gc_setLineWidth=GC.setColor,GC.setLineWidth
-local gc_draw,gc_line=GC.draw,GC.line
+local gc_print,gc_draw,gc_line=GC.print,GC.draw,GC.line
 local gc_rectangle,gc_circle=GC.rectangle,GC.circle
-local gc_print,gc_printf=GC.print,GC.printf
-local gc_stc_reset,gc_stc_stop=GC.stc_reset,GC.stc_stop
-local gc_stc_circ,gc_stc_rect=GC.stc_circ,GC.stc_rect
-local gc_mStr=GC.mStr
-local gc_mRect=GC.mRect
-local gc_mDraw=GC.mDraw
+local gc_stc_reset,gc_stc_stop,gc_stc_rect=GC.stc_reset,GC.stc_stop,GC.stc_rect
+local gc_mStr,gc_mRect,gc_mDraw=GC.mStr,GC.mRect,GC.mDraw
 local gc_setFont,gc_getFont=GC.setFont,GC.getFont
 
 local kb=ZENITHA.keyboard
@@ -124,7 +111,7 @@ local timer=ZENITHA.timer.getTime
 local CLR,SCN,SCR,xOy=CLR,SCN,SCR,SCR.xOy
 local utf8=require'utf8'
 
-local legalLabelPos={
+local legalPlacement={
     norm={
         left=true,
         right=true,
@@ -170,22 +157,119 @@ local function updateWheel(self,d)
         return n
     end
 end
-local function alignDraw(self,drawable,x,y,r,kx,ky)
+local function bodyPos(self,w,h)
+    return self._x-self.anchor[1]*w,self._y-self.anchor[2]*h
+end
+local function innerSize(self,w,h)
+    return max(w-self.padding[1]*2,0),max(h-self.padding[2]*2,0)
+end
+local function anchorDraw(self,drawable,x,y,r,kx,ky,ax,ay)
     local w=drawable:getWidth()
     local h=drawable:getHeight()
     if not kx then kx=min(self.widthLimit/w,1) end
-    if not ky then ky=kx or 1 end
-    local ox=self.alignX=='center' and w*.5 or self.alignX=='left' and 0 or w
-    local oy=self.alignY=='center' and h*.5 or self.alignY=='top' and 0 or h
-    gc_draw(drawable,x,y,r,kx,ky,ox,oy)
+    gc_draw(
+        drawable,x,y,r,
+        kx,
+        ky or kx or 1,
+        w*(ax or self.anchor[1]),
+        h*(ay or self.anchor[2])
+    )
 end
-local function alignDrawQ(self,texture,quad,x,y,r,kx,ky)
+local function anchorDrawQ(self,texture,quad,x,y,r,kx,ky,ax,ay)
     local _,_,w,h=quad:getViewport()
     if not kx then kx=min(self.widthLimit/w,1) end
-    if not ky then ky=kx or 1 end
-    local ox=self.alignX=='center' and w*.5 or self.alignX=='left' and 0 or w
-    local oy=self.alignY=='center' and h*.5 or self.alignY=='top' and 0 or h
-    gc_draw(texture,quad,x,y,r,kx,ky,ox,oy)
+    gc_draw(
+        texture,quad,x,y,r,
+        kx,
+        ky or kx or 1,
+        w*(ax or self.anchor[1]),
+        h*(ay or self.anchor[2])
+    )
+end
+local function areaDraw(self,drawable,x,y,w,h,r,kx,ky,ax,ay)
+    local dw,dh=drawable:getWidth(),drawable:getHeight()
+    kx=min(kx or 1,w/dw)
+    ky=min(ky or kx or 1,h/dh)
+    gc_draw(
+        drawable,
+        x+(ax or self.align[1])*(w-dw*kx),
+        y+(ay or self.align[2])*(h-dh*ky),
+        r,kx,ky
+    )
+end
+local function areaDrawQ(self,texture,quad,x,y,w,h,r,kx,ky,ax,ay)
+    local _,_,dw,dh=quad:getViewport()
+    kx=min(kx or 1,w/dw)
+    ky=min(ky or kx or 1,h/dh)
+    gc_draw(
+        texture,quad,
+        x+(ax or self.align[1])*(w-dw*kx),
+        y+(ay or self.align[2])*(h-dh*ky),
+        r,kx,ky
+    )
+end
+local function placementPivot(placement,bx,by,bw,bh,margin)
+    if placement=='left' then
+        return bx-margin,by+bh*.5,1,.5
+    elseif placement=='right' then
+        return bx+bw+margin,by+bh*.5,0,.5
+    elseif placement=='top' then
+        return bx+bw*.5,by-margin,.5,1
+    elseif placement=='bottom' then
+        return bx+bw*.5,by+bh+margin,.5,0
+    elseif placement=='topLeft' then
+        return bx,by-margin,0,1
+    elseif placement=='topRight' then
+        return bx+bw,by-margin,1,1
+    elseif placement=='rightTop' then
+        return bx+bw+margin,by,0,0
+    elseif placement=='rightBottom' then
+        return bx+bw+margin,by+bh,0,1
+    elseif placement=='bottomRight' then
+        return bx+bw,by+bh+margin,1,0
+    elseif placement=='bottomLeft' then
+        return bx,by+bh+margin,0,0
+    elseif placement=='leftBottom' then
+        return bx-margin,by+bh,1,1
+    elseif placement=='leftTop' then
+        return bx-margin,by,1,0
+    end
+    return bx+bw+margin,by+bh*.5,0,.5
+end
+local function drawLabel(self,bx,by,bw,bh)
+    if not self._text then return end
+    local x,y,ax,ay=placementPivot(self.placement,bx,by,bw,bh,self.margin)
+    anchorDraw(self,self._text,x,y,nil,nil,self.textScale,ax,ay)
+end
+local function placementBox(placement,bx,by,bw,bh,margin,w,h)
+    if placement=='center' then
+        return bx+(bw-w)*.5,by+(bh-h)*.5
+    elseif placement=='top' then
+        return bx+(bw-w)*.5,by-margin-h
+    elseif placement=='right' then
+        return bx+bw+margin,by+(bh-h)*.5
+    elseif placement=='bottom' then
+        return bx+(bw-w)*.5,by+bh+margin
+    elseif placement=='left' then
+        return bx-margin-w,by+(bh-h)*.5
+    elseif placement=='topLeft' then
+        return bx,by-margin-h
+    elseif placement=='topRight' then
+        return bx+bw-w,by-margin-h
+    elseif placement=='rightTop' then
+        return bx+bw+margin,by
+    elseif placement=='rightBottom' then
+        return bx+bw+margin,by+bh-h
+    elseif placement=='bottomRight' then
+        return bx+bw-w,by+bh+margin
+    elseif placement=='bottomLeft' then
+        return bx,by+bh+margin
+    elseif placement=='leftBottom' then
+        return bx-margin-w,by+bh-h
+    elseif placement=='leftTop' then
+        return bx-margin-w,by
+    end
+    return bx+bw+margin,by+(bh-h)*.5
 end
 local function parseImgPath(path)
     local str=STRING.split(path,'/')
@@ -213,6 +297,7 @@ local Widgets={}
 ---@field _widget true
 ---@field type string
 ---@field name string | false
+---@field anchor number[]
 ---
 ---@field color Zenitha.ColorStr | Zenitha.Color
 ---@field textColor Zenitha.ColorStr | Zenitha.Color
@@ -271,10 +356,11 @@ Widgets.base={
     lineWidth=4,cornerR=3,
     textScale=1,fontSize=30,fontType=false,
     widthLimit=1e99,
-    labelPos='left',
-    labelDist=20,
-    alignX='center',alignY='center',
-    marginX=5,marginY=0,
+    anchor={.5,.5},
+    padding={0,0},
+    align={.5,.5},
+    placement='left',
+    margin=20,
     sound_press=false,sound_hover=false,
 
     isAbove=NULL,
@@ -326,10 +412,29 @@ function Widgets.base:reset(mode)
     assert(type(self.lineWidth)=='number',"[widget].lineWidth need number")
     assert(type(self.cornerR)=='number',"[widget].cornerR need number")
 
-    assert(self.alignX=='left' or self.alignX=='right' or self.alignX=='center',"[widget].alignX need 'left', 'right' or 'center'")
-    assert(self.alignY=='top' or self.alignY=='bottom' or self.alignY=='center',"[widget].alignY need 'top', 'bottom' or 'center'")
-    assert(type(self.marginX)=='number' and type(self.marginY)=='number',"[widget].marginX/Y need number")
-    assert(type(self.labelDist)=='number',"[widget].labelDist need number")
+    assert(
+        type(self.anchor)=='table' and #self.anchor==2 and
+        type(self.anchor[1])=='number' and self.anchor[1]>=0 and self.anchor[1]<=1 and
+        type(self.anchor[2])=='number' and self.anchor[2]>=0 and self.anchor[2]<=1,
+        "[widget].anchor need {number,number} in [0,1]"
+    )
+    self.anchor={self.anchor[1],self.anchor[2]}
+    assert(
+        type(self.padding)=='table' and #self.padding==2 and
+        type(self.padding[1])=='number' and self.padding[1]>=0 and
+        type(self.padding[2])=='number' and self.padding[2]>=0,
+        "[widget].padding need {number,number} with non-negative values"
+    )
+    self.padding={self.padding[1],self.padding[2]}
+    assert(
+        type(self.align)=='table' and #self.align==2 and
+        type(self.align[1])=='number' and self.align[1]>=0 and self.align[1]<=1 and
+        type(self.align[2])=='number' and self.align[2]>=0 and self.align[2]<=1,
+        "[widget].align need {number,number} in [0,1]"
+    )
+    self.align={self.align[1],self.align[2]}
+    assert(type(self.placement)=='string',"[widget].placement need string")
+    assert(type(self.margin)=='number',"[widget].margin need number")
 
     if self.pos then
         assert(
@@ -423,18 +528,11 @@ Widgets.text=setmetatable({
     text=false,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y',
-        'alignX','alignY',
-
+        'name','pos','x','y',
+        'anchor',
         'color','textColor',
-        'text','textScale','fontSize','fontType',
-
-        'widthLimit',
-
-        'visibleFunc',
-        'visibleTick',
+        'text','textScale','fontSize','fontType','widthLimit',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.text:reset(mode)
@@ -446,7 +544,7 @@ end
 function Widgets.text:draw()
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,self._x,self._y,nil,self.textScale)
+        anchorDraw(self,self._text,self._x,self._y,nil,self.textScale)
     end
 end
 
@@ -463,18 +561,11 @@ Widgets.image=setmetatable({
     _kx=false,_ky=false,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y',
-        'k','w','h', -- k & w+h are not compatible
-        'alignX','alignY',
-
-        'r',
-        'imageColor',
+        'name','pos','x','y','w','h',
+        'anchor',
+        'k','r','imageColor',
         'image','quad',
-
-        'visibleFunc',
-        'visibleTick',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.image:reset(mode)
@@ -497,9 +588,9 @@ function Widgets.image:draw()
     if self._image then
         gc_setColor(self.imageColor)
         if self.quad then
-            alignDrawQ(self,self._image,self.quad,self._x,self._y,self.r,self._kx,self._ky)
+            anchorDrawQ(self,self._image,self.quad,self._x,self._y,self.r,self._kx,self._ky)
         else
-            alignDraw(self,self._image,self._x,self._y,self.r,self._kx,self._ky)
+            anchorDraw(self,self._image,self._x,self._y,self.r,self._kx,self._ky)
         end
     end
 end
@@ -522,21 +613,12 @@ Widgets.button=setmetatable({
     onClick=NULL,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w','h',
-        'alignX','alignY',
-        'marginX','marginY',
-        'lineWidth','cornerR',
-
-        'color','fillColor','frameColor','imageColor','textColor',
+        'name','pos','x','y','w','h',
+        'anchor','padding','align',
+        'lineWidth','cornerR','color','fillColor','frameColor','textColor','imageColor',
         'text','textScale','fontSize','fontType','image','quad',
-        'sound_release',
-        'sound_press','sound_hover',
-
-        'onPress','onClick',
-        'visibleFunc',
-        'visibleTick',
+        'sound_release','sound_press','sound_hover','onPress','onClick',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.button:reset(mode)
@@ -551,9 +633,11 @@ function Widgets.button:reset(mode)
     self.widthLimit=self.w
 end
 function Widgets.button:isAbove(x,y)
+    local ax,ay=self.anchor[1],self.anchor[2]
+    local left,top=self._x-ax*self.w,self._y-ay*self.h
     return
-        abs(x-self._x)<self.w*.5 and
-        abs(y-self._y)<self.h*.5
+        x>=left and x<=left+self.w and
+        y>=top and y<=top+self.h
 end
 function Widgets.button:press(_,_,k)
     self._pressed=true
@@ -575,13 +659,15 @@ function Widgets.button:drag(x,y)
     end
 end
 function Widgets.button:draw()
+    local w,h=self.w,self.h
+    local ax,ay=self.anchor[1],self.anchor[2]
+
     gc_push('transform')
-    gc_translate(self._x,self._y)
+    gc_translate(self._x+(.5-ax)*w,self._y+(.5-ay)*h)
 
     if self._pressTime>0 then
         gc_scale(1-self._pressTime/self._pressTimeMax*.0626)
     end
-    local w,h=self.w,self.h
 
     local fillC=self.fillColor
     local frameC=self.frameColor
@@ -596,19 +682,20 @@ function Widgets.button:draw()
     gc_mRect('line',0,0,w,h,self.cornerR)
 
     -- Drawable
-    local startX=self.alignX=='center' and 0 or self.alignX=='left' and -w*.5+self.marginX or w*.5-self.marginX
-    local startY=self.alignY=='center' and 0 or self.alignY=='top' and -h*.5+self.marginY or h*.5-self.marginY
+    local padX,padY=self.padding[1],self.padding[2]
+    local innerX,innerY=-w*.5+padX,-h*.5+padY
+    local innerW,innerH=max(w-padX*2,0),max(h-padY*2,0)
     if self._image then
         gc_setColor(self.imageColor)
         if self.quad then
-            alignDrawQ(self,self._image,self.quad,startX,startY)
+            areaDrawQ(self,self._image,self.quad,innerX,innerY,innerW,innerH)
         else
-            alignDraw(self,self._image,startX,startY)
+            areaDraw(self,self._image,innerX,innerY,innerW,innerH)
         end
     end
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,startX,startY,nil,self.textScale)
+        areaDraw(self,self._text,innerX,innerY,innerW,innerH,nil,nil,self.textScale)
     end
     gc_pop()
 end
@@ -641,10 +728,9 @@ Widgets.hint=setmetatable({
     floatFontType=false,
     floatImage=false,
     floatBox=false,
-    labelPos='top',
-    labelDist=10,
-    marginX=15,
-    marginY=10,
+    padding={10,10},
+    placement='top',
+    margin=10,
     floatCornerR=5,
     floatLineWidth=3,
     floatFillColor={.1,.1,.1,.8},
@@ -658,23 +744,13 @@ Widgets.hint=setmetatable({
     onPress=NULL,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w','h',
-        'lineWidth','cornerR',
-
-        'color','frameColor','textColor',
-        'text','textScale','fontSize','fontType','image','quad',
-        'floatImage','floatText','floatFontSize','floatFontType',
-        'floatBox','marginX','marginY',
-        'labelPos','labelDist',
-        'floatCornerR','floatLineWidth','floatFillColor','floatFrameColor','floatTextColor',
-
-        'sound_hover',
-
-        'onPress',
-        'visibleFunc',
-        'visibleTick',
+        'name','pos','x','y','w','h',
+        'anchor','padding','align','placement','margin',
+        'lineWidth','cornerR','color','frameColor','textColor',
+        'text','textScale','fontSize','fontType','image','quad','floatImage','floatText','floatFontSize','floatFontType',
+        'floatBox','floatCornerR','floatLineWidth','floatFillColor','floatFrameColor','floatTextColor',
+        'sound_hover','onPress',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 local colorKeys_hint={'floatFillColor','floatFrameColor','floatTextColor'}
@@ -686,7 +762,7 @@ function Widgets.hint:reset(mode)
     if not self.h then self.h=self.w end
     assert(self.w and type(self.w)=='number',"[hint].w need number")
     assert(self.h and type(self.h)=='number',"[hint].h need number")
-    assert(legalLabelPos.complex[self.labelPos],"[hint].labelPos need 'center', or (combination of, like 'rightTop') 'left', 'right', 'top', 'bottom'")
+    assert(legalPlacement.complex[self.placement],"[hint].placement need 'center', or (combination of, like 'rightTop') 'left', 'right', 'top', 'bottom'")
 
     for _,key in next,colorKeys_hint do
         if type(self[key])=='string' then self[key]=CLR[self[key]] end
@@ -716,97 +792,71 @@ function Widgets.hint:reset(mode)
 
     local box
     if self.floatBox then
-        assert(type(box)=='table',"[widget].floatBox need {x,y,w,h}")
+        assert(type(self.floatBox)=='table',"[widget].floatBox need {x,y,w,h}")
         box=TABLE.copy(self.floatBox)
         for i=1,4 do assert(type(box[i])=='number',"[widget].floatBox need {x,y,w,h}") end
     else
         local w,h=(self._floatImage or self._floatText or PAPER):getDimensions()
-        w,h=w+self.marginX*2,h+self.marginY*2
-        box={-w*.5,-h*.5,w,h}
+        box={0,0,w+self.padding[1]*2,h+self.padding[2]*2}
     end
-    if self.labelPos=='top' then
-        box[2]=box[2]-(self.h+box[4])*.5-self.labelDist
-    elseif self.labelPos=='right' then
-        box[1]=box[1]+(self.w+box[3])*.5+self.labelDist
-    elseif self.labelPos=='bottom' then
-        box[2]=box[2]+(self.h+box[4])*.5+self.labelDist
-    elseif self.labelPos=='left' then
-        box[1]=box[1]-(self.w+box[3])*.5-self.labelDist
-    elseif self.labelPos=='topRight' then
-        box[2]=box[2]-(self.h+box[4])*.5-self.labelDist
-        box[1]=-self.w*.5
-    elseif self.labelPos=='topLeft' then
-        box[2]=box[2]-(self.h+box[4])*.5-self.labelDist
-        box[1]=-box[3]+self.w*.5
-    elseif self.labelPos=='rightBottom' then
-        box[1]=box[1]+(self.w+box[3])*.5+self.labelDist
-        box[2]=-self.h*.5
-    elseif self.labelPos=='rightTop' then
-        box[1]=box[1]+(self.w+box[3])*.5+self.labelDist
-        box[2]=-box[4]+self.h*.5
-    elseif self.labelPos=='bottomRight' then
-        box[2]=box[2]+(self.h+box[4])*.5+self.labelDist
-        box[1]=-self.w*.5
-    elseif self.labelPos=='bottomLeft' then
-        box[2]=box[2]+(self.h+box[4])*.5+self.labelDist
-        box[1]=-box[3]+self.w*.5
-    elseif self.labelPos=='leftBottom' then
-        box[1]=box[1]-(self.w+box[3])*.5-self.labelDist
-        box[2]=-self.h*.5
-    elseif self.labelPos=='leftTop' then
-        box[1]=box[1]-(self.w+box[3])*.5-self.labelDist
-        box[2]=-box[4]+self.h*.5
+    local bx,by=bodyPos(self,self.w,self.h)
+    local boxX,boxY=placementBox(self.placement,bx,by,self.w,self.h,self.margin,box[3],box[4])
+    if self.floatBox then
+        boxX,boxY=boxX+box[1],boxY+box[2]
     end
     local biasX,biasY=SCR.x/SCR.k,SCR.y/SCR.k
-    if self._x+box[1]<-biasX then
-        box[1]=-biasX-self._x
-    elseif self._x+box[1]+box[3]>SCR.w0+biasX then
-        box[1]=SCR.w0+biasX-self._x-box[3]
+    if boxX<-biasX then
+        boxX=-biasX
+    elseif boxX+box[3]>SCR.w0+biasX then
+        boxX=SCR.w0+biasX-box[3]
     end
-    if self._y+box[2]<-biasY then
-        box[2]=-biasY-self._y
-    elseif self._y+box[2]+box[4]>SCR.h0+biasY then
-        box[2]=SCR.h0+biasY-self._y-box[4]
+    if boxY<-biasY then
+        boxY=-biasY
+    elseif boxY+box[4]>SCR.h0+biasY then
+        boxY=SCR.h0+biasY-box[4]
     end
-    self._floatBox=box
+    self._floatBox={boxX-bx,boxY-by,box[3],box[4]}
 
     assert(type(self.floatCornerR)=='number',"[widget].floatCornerR need number")
     assert(type(self.floatLineWidth)=='number',"[widget].floatLineWidth need number")
 end
 function Widgets.hint:isAbove(x,y)
-    return
-        abs(x-self._x)<self.w*.5 and
-        abs(y-self._y)<self.h*.5
+    local left,top=bodyPos(self,self.w,self.h)
+    return x>=left and x<=left+self.w and y>=top and y<=top+self.h
 end
 function Widgets.hint:press(_,_,k)
     self.onPress(k)
 end
 function Widgets.hint:draw()
-    gc_push('transform')
-    gc_translate(self._x,self._y)
-
     local w,h=self.w,self.h
+    local bx,by=bodyPos(self,w,h)
     local HOV=self._hoverTime/self._hoverTimeMax
+
+    gc_push('transform')
+    gc_translate(bx,by)
 
     local frameC=self.frameColor
 
     -- Frame
     gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.1+.1*HOV))
     gc_setLineWidth(self.lineWidth)
-    gc_mRect('line',0,0,w,h,self.cornerR)
+    gc_rectangle('line',0,0,w,h,self.cornerR)
 
     -- Drawable
+    local padX,padY=self.padding[1],self.padding[2]
+    local innerX,innerY=padX,padY
+    local innerW,innerH=max(w-padX*2,0),max(h-padY*2,0)
     if self._image then
         gc_setColor(1,1,1)
         if self.quad then
-            alignDrawQ(self,self._image,self.quad)
+            areaDrawQ(self,self._image,self.quad,innerX,innerY,innerW,innerH)
         else
-            alignDraw(self,self._image)
+            areaDraw(self,self._image,innerX,innerY,innerW,innerH)
         end
     end
     if self._text then
         gc_setColor(self.textColor)
-        gc_mDraw(self._text,nil,nil,nil,self.textScale)
+        areaDraw(self,self._text,innerX,innerY,innerW,innerH,nil,nil,self.textScale)
     end
 
     -- Hovering info
@@ -851,22 +901,12 @@ Widgets.checkBox=setmetatable({
     code=NULL,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w',
-        'lineWidth','cornerR',
-
-        'labelPos',
-        'labelDist',
-        'color','fillColor','frameColor','textColor',
-        'text','textScale','fontSize','fontType',
-        'widthLimit',
-        'sound_on','sound_off',
-        'sound_press','sound_hover',
-
-        'disp','code',
-        'visibleFunc',
-        'visibleTick',
+        'name','pos','x','y','w',
+        'anchor','placement','margin',
+        'lineWidth','cornerR','color','fillColor','frameColor','textColor',
+        'text','textScale','fontSize','fontType','widthLimit',
+        'sound_on','sound_off','sound_press','sound_hover','disp','code',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.checkBox:reset(mode)
@@ -874,19 +914,15 @@ function Widgets.checkBox:reset(mode)
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,mode)
-    assert(legalLabelPos.norm[self.labelPos],"[checkBox].labelPos need 'left', 'right', 'top', or 'bottom'")
+    assert(legalPlacement.norm[self.placement],"[checkBox].placement need 'left', 'right', 'top', or 'bottom'")
 
     assert(type(self.disp)=='function',"[checkBox].disp need function")
     assert(not self.sound_on or type(self.sound_on)=='string',"[checkBox].sound_on need string")
     assert(not self.sound_off or type(self.sound_off)=='string',"[checkBox].sound_off need string")
-
-    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
-    self.alignY=self.labelPos=='top' and 'bottom' or self.labelPos=='bottom' and 'top' or 'center'
 end
 function Widgets.checkBox:isAbove(x,y)
-    return
-        abs(x-self._x)<self.w*.5 and
-        abs(y-self._y)<self.w*.5
+    local left,top=bodyPos(self,self.w,self.w)
+    return x>=left and x<=left+self.w and y>=top and y<=top+self.w
 end
 function Widgets.checkBox:press(_,_,k)
     self.code(k)
@@ -901,9 +937,10 @@ function Widgets.checkBox:press(_,_,k)
     end
 end
 function Widgets.checkBox:draw()
-    gc_push('transform')
-    gc_translate(self._x,self._y)
     local w=self.w
+    local bx,by=bodyPos(self,w,w)
+    gc_push('transform')
+    gc_translate(bx+w*.5,by+w*.5)
     local HOV=self._hoverTime/self._hoverTimeMax
 
     local fillC=self.fillColor
@@ -924,20 +961,10 @@ function Widgets.checkBox:draw()
         gc_scale(2/w)
     end
 
-    -- Drawable
-    local x2,y2=0,0
-    if self.labelPos=='left' then
-        x2=-w*.5-self.labelDist
-    elseif self.labelPos=='right' then
-        x2=w*.5+self.labelDist
-    elseif self.labelPos=='top' then
-        y2=-w*.5-self.labelDist
-    elseif self.labelPos=='bottom' then
-        y2=w*.5+self.labelDist
-    end
+    -- Label
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,x2,y2,nil,self.textScale)
+        drawLabel(self,-w*.5,-w*.5,w,w)
     end
     gc_pop()
 end
@@ -958,21 +985,12 @@ Widgets.switch=setmetatable({
     _slideTime=0,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','h',
-
-        'labelPos',
-        'labelDist',
-        'color','fillColor','frameColor','textColor',
-        'text','textScale','fontSize','fontType',
-        'lineWidth','widthLimit',
-        'sound_on','sound_off',
-        'sound_press','sound_hover',
-
-        'disp','code',
-        'visibleFunc',
-        'visibleTick',
+        'name','pos','x','y','h',
+        'anchor','placement','margin',
+        'lineWidth','color','fillColor','frameColor','textColor',
+        'text','textScale','fontSize','fontType','widthLimit',
+        'sound_on','sound_off','sound_press','sound_hover','disp','code',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.checkBox,__metatable=true})
 function Widgets.switch:reset(mode)
@@ -980,21 +998,20 @@ function Widgets.switch:reset(mode)
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,mode)
-    assert(legalLabelPos.norm[self.labelPos],"[switch].labelPos need 'left', 'right', 'top', or 'bottom'")
+    assert(legalPlacement.norm[self.placement],"[switch].placement need 'left', 'right', 'top', or 'bottom'")
 
     assert(type(self.disp)=='function',"[switch].disp need function")
 
     if mode=='activate' then
         self._slideTime=0
     end
-    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
-    self.alignY=self.labelPos=='top' and 'bottom' or self.labelPos=='bottom' and 'top' or 'center'
 end
 function Widgets.switch:isAbove(x,y)
+    local left,top=bodyPos(self,self.h*2,self.h)
     return
         self.disp and
-        abs(x-self._x)<self.h and
-        abs(y-self._y)<self.h*.5
+        x>=left and x<=left+self.h*2 and
+        y>=top and y<=top+self.h
 end
 function Widgets.switch:update(dt)
     Widgets.base.update(self,dt)
@@ -1005,9 +1022,10 @@ function Widgets.switch:update(dt)
     end
 end
 function Widgets.switch:draw()
-    gc_push('transform')
-    gc_translate(self._x,self._y)
     local h=self.h
+    local bx,by=bodyPos(self,h*2,h)
+    gc_push('transform')
+    gc_translate(bx+h,by+h*.5)
     local HOV=self._hoverTime/self._hoverTimeMax
 
     local fillC=self.fillColor
@@ -1026,20 +1044,10 @@ function Widgets.switch:draw()
     gc_setColor(frameC[1],frameC[2],frameC[3],.8+.2*HOV)
     gc_circle('fill',h*(self._slideTime/self._hoverTimeMax),0,h*(.35+HOV*.05))
 
-    -- Drawable
-    local x2,y2=0,0
-    if self.labelPos=='left' then
-        x2=-h-self.labelDist
-    elseif self.labelPos=='right' then
-        x2=h+self.labelDist
-    elseif self.labelPos=='top' then
-        y2=-h*.5-self.labelDist
-    elseif self.labelPos=='bottom' then
-        y2=h*.5+self.labelDist
-    end
+    -- Label
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,x2,y2,nil,self.textScale)
+        drawLabel(self,-h,-h*.5,h*2,h)
     end
     gc_pop()
 end
@@ -1065,6 +1073,7 @@ end
 Widgets.slider=setmetatable({
     type='slider',
     w=100,
+    anchor={0,0},
     axis={0,1},
     unit=nil,
 
@@ -1095,27 +1104,13 @@ Widgets.slider=setmetatable({
     _lastSoundTime=0,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w',
-        'lineWidth','cornerR',
-
-        'axis','unit',
-        'labelPos',
-        'labelDist',
-        'color','fillColor','frameColor','textColor',
-        'text','textScale','fontSize','fontType',
-        'numFontSize','numFontType',
-        'widthLimit',
-        'textAlwaysShow',
-        'sound_drag','sound_hover',
-        'soundInterval',
-        'soundPitchRange',
-
-        'valueShow',
-        'disp','code',
-        'visibleFunc',
-        'visibleTick',
+        'name','pos','x','y','w',
+        'anchor','placement','margin',
+        'lineWidth','cornerR','color','fillColor','frameColor','textColor',
+        'text','textScale','fontSize','fontType','widthLimit',
+        'axis','unit','valueShow','numFontSize','numFontType','textAlwaysShow',
+        'sound_drag','sound_hover','soundInterval','soundPitchRange','disp','code',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 local sliderShowFunc={
@@ -1137,7 +1132,7 @@ function Widgets.slider:reset(mode)
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,mode)
-    assert(legalLabelPos.noTop[self.labelPos],"[slider].labelPos need 'left', 'right', or 'bottom'")
+    assert(legalPlacement.noTop[self.placement],"[slider].placement need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[slider].w need number")
     assert(type(self.numFontSize)=='number',"[slider].numFontSize need number")
@@ -1190,18 +1185,12 @@ function Widgets.slider:reset(mode)
             self._showFunc=sliderShowFunc.percent
         end
     end
-
-    assert(self.labelPos~='top',"[slider].labelPos cannot be 'top'")
-    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
-    if self.labelPos=='bottom' then
-        self.alignY='top'
-        self.labelDist=max(self.labelDist,20)
-    end
 end
 function Widgets.slider:isAbove(x,y)
+    local left=self._x-self.anchor[1]*self.w
     return
-        x>self._x-10 and
-        x<self._x+self.w+10 and
+        x>left-10 and
+        x<left+self.w+10 and
         abs(y-self._y)<25
 end
 function Widgets.slider:update(dt)
@@ -1218,7 +1207,7 @@ function Widgets.slider:update(dt)
     end
 end
 function Widgets.slider:draw()
-    local x,y=self._x,self._y
+    local x,y=self._x-self.anchor[1]*self.w,self._y
     local HOV=self._hoverTime/self._hoverTimeMax
     local x2=x+self.w
     local rangeL,rangeR=self._rangeL,self._rangeR
@@ -1263,21 +1252,16 @@ function Widgets.slider:draw()
         gc_mStr(self:_showFunc(),cx,by-self.numFontSize-10)
     end
 
-    -- Drawable
+    -- Label
     if self._text then
         gc_setColor(self.textColor)
-        if self.labelPos=='left' then
-            alignDraw(self,self._text,x-self.labelDist,y,nil,self.textScale)
-        elseif self.labelPos=='right' then
-            alignDraw(self,self._text,x+self.w+self.labelDist,y,nil,self.textScale)
-        elseif self.labelPos=='bottom' then
-            alignDraw(self,self._text,x+self.w*.5,y+self.labelDist,nil,self.textScale)
-        end
+        local lx,ly,lax,lay=placementPivot(self.placement,x,y,self.w,0,self.margin)
+        anchorDraw(self,self._text,lx,ly,nil,nil,self.textScale,lax,lay)
     end
 end
 function Widgets.slider:trigger(x,mode)
     if not x then return end
-    local pos=clamp((x-self._x)/self.w,0,1)
+    local pos=clamp((x-(self._x-self.anchor[1]*self.w))/self.w,0,1)
     local newVal=
         self._rangeUnit and self._rangeL+floor(pos*self._rangeWidth/self._rangeUnit+.5)*self._rangeUnit
         or (1-pos)*self._rangeL+pos*self._rangeR
@@ -1324,36 +1308,26 @@ Widgets.slider_fill=setmetatable({
 
     text=false,
     image=false,
+    cornerR=1e99,
     lineDist=3,
     sound_drag=false,
     soundInterval=.0626,
     soundPitchRange=0,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w','h',
-
+        'name','pos','x','y','w','h',
+        'anchor','placement','margin',
+        'lineWidth','cornerR','lineDist','color','fillColor','frameColor','textColor',
+        'text','textScale','fontSize','fontType','numFontSize','numFontType','widthLimit',
         'axis',
-        'labelPos',
-        'labelDist',
-        'lineWidth','lineDist',
-        'color','fillColor','frameColor','textColor',
-        'text','textScale','fontSize','fontType',
-        'widthLimit',
-        'sound_drag','sound_hover',
-        'soundInterval',
-        'soundPitchRange',
-
-        'disp','code',
-        'visibleFunc',
-        'visibleTick',
+        'sound_drag','sound_hover','soundInterval','soundPitchRange','disp','code',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_fill:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
     Widgets.base.reset(self,mode)
-    assert(legalLabelPos.noTop[self.labelPos],"[slider_fill].labelPos need 'left', 'right', or 'bottom'")
+    assert(legalPlacement.noTop[self.placement],"[slider_fill].placement need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[slider_fill].w need number")
     assert(self.h and type(self.h)=='number',"[slider_fill].h need number")
@@ -1371,26 +1345,27 @@ function Widgets.slider_fill:reset(mode)
     self._rangeL=self.axis[1]
     self._rangeR=self.axis[2]
     self._rangeWidth=self._rangeR-self._rangeL
-    self._pos=self._rangeL
-    self._textShowTime=3
-
-    assert(self.labelPos~='top',"[slider_fill].cannot be 'top'")
-    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
-    if self.labelPos=='bottom' then
-        self.alignY='top'
-        self.labelDist=max(self.labelDist,20)
+    if mode=='activate' then
+        self._pos0=self._rangeL
+    else
+        local suc,res=pcall(self.disp)
+        if suc then self._pos0=res end
     end
+    self._pos=self._pos0
+    self._textShowTime=3
 end
 function Widgets.slider_fill:isAbove(x,y)
+    local left=self._x-self.anchor[1]*self.w
     return
-        x>self._x and
-        x<self._x+self.w and
+        x>left and
+        x<left+self.w and
         abs(y-self._y)<self.h*.5
 end
 function Widgets.slider_fill:draw()
-    local x,y=self._x,self._y
+    local x,y=self._x-self.anchor[1]*self.w,self._y
     local w,h=self.w,self.h
-    local r=h*.5
+    local top=y-h*.5
+    local r=clamp(self.cornerR,0,h*.5)
     local HOV=self._hoverTime/self._hoverTimeMax
     local rate=(self._pos-self._rangeL)/self._rangeWidth
     local num=floor((self._pos0-self._rangeL)/self._rangeWidth*100+.5)..'%'
@@ -1398,46 +1373,37 @@ function Widgets.slider_fill:draw()
     local fillC=self.fillColor
     local frameC=self.frameColor
 
-    -- Capsule
+    -- Rounded background
     gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.6+HOV*.26))
     gc_setLineWidth(self.lineWidth+HOV)
-    gc_mRect('line',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
+    gc_mRect('line',x+w*.5,y,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     if HOV>0 then
         gc_setColor(fillC[1],fillC[2],fillC[3],fillC[4]*HOV*.12)
-        gc_mRect('fill',x+w*.5,y-r+h*.5,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
+        gc_mRect('fill',x+w*.5,y,w+2*self.lineDist,h+2*self.lineDist,r+self.lineDist)
     end
 
-    -- Stenciled capsule
+    -- Stenciled rounded area
     gc_stc_reset()
-    gc_stc_rect(x+r,y-r,w-h,h)
-    gc_stc_circ(x+r,y,r)
-    gc_stc_circ(x+w-r,y,r)
+    gc_stc_rect(x,top,w,h,r,r)
 
     -- Text 1
     gc_setFont(self.numFontSize,self.numFontType)
     gc_setColor(1,1,1,.75+HOV*.26)
     gc_mStr(num,x+w*.5,y-self.numFontSize*.7)
-    gc_rectangle('fill',x,y-r,w*rate,h)
+    gc_rectangle('fill',x,top,w*rate,h)
 
     -- Text 2
     gc_stc_reset()
-    gc_stc_rect(x,y-r,w*rate,h)
+    gc_stc_rect(x,top,w*rate,h)
     gc_setColor(0,0,0,.9)
     gc_mStr(num,x+w*.5,y-self.numFontSize*.7)
     gc_stc_stop()
 
-    -- Drawable
+    -- Label
     if self._text then
         gc_setColor(self.textColor)
-        local x2,y2
-        if self.labelPos=='left' then
-            x2,y2=x-self.labelDist,y
-        elseif self.labelPos=='right' then
-            x2,y2=x+w+self.labelDist,y
-        elseif self.labelPos=='bottom' then
-            x2,y2=x+w*.5,y-self.labelDist
-        end
-        alignDraw(self,self._text,x2,y2,nil,self.textScale)
+        local lx,ly,lax,lay=placementPivot(self.placement,x,y-self.h*.5,w,self.h,self.margin)
+        anchorDraw(self,self._text,lx,ly,nil,nil,self.textScale,lax,lay)
     end
 end
 
@@ -1459,29 +1425,20 @@ Widgets.slider_progress=setmetatable({
     soundPitchRange=0,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w','h',
-        'color','frameColor','fillColor',
-
-        'labelPos',
-        'labelDist',
-        'lineWidth',
-        'text','textScale','fontSize','fontType',
-        'widthLimit',
-        'sound_drag','sound_hover',
-        'soundInterval',
-        'soundPitchRange',
-
-        'disp','code',
-        'visibleFunc',
-        'visibleTick',
+        'name','pos','x','y','w','h',
+        'anchor','placement','margin',
+        'lineWidth','color','fillColor','frameColor','textColor',
+        'text','textScale','fontSize','fontType','widthLimit',
+        'axis',
+        'sound_drag','sound_hover','soundInterval','soundPitchRange','disp','code',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.slider,__metatable=true})
 function Widgets.slider_progress:reset(mode)
     self.fillColor=rawget(self,'fillColor') or rawget(self,'color') or self.fillColor
+    self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,mode)
-    assert(legalLabelPos.noTop[self.labelPos],"[slider_progress].labelPos need 'left', 'right', or 'bottom'")
+    assert(legalPlacement.noTop[self.placement],"[slider_progress].placement need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[slider_progress].w need number")
     assert(self.h and type(self.h)=='number',"[slider_progress].h need number")
@@ -1501,22 +1458,16 @@ function Widgets.slider_progress:reset(mode)
     self._rangeWidth=self._rangeR-self._rangeL
     self._pos=self._rangeL
     self._textShowTime=3
-
-    assert(self.labelPos~='top',"[slider_progress].labelPos cannot be 'top'")
-    self.alignX=self.labelPos=='left' and 'right' or self.labelPos=='right' and 'left' or 'center'
-    if self.labelPos=='bottom' then
-        self.alignY='top'
-        self.labelDist=max(self.labelDist,20)
-    end
 end
 function Widgets.slider_progress:isAbove(x,y)
+    local left=self._x-self.anchor[1]*self.w
     return
-        x>self._x and
-        x<self._x+self.w and
+        x>left and
+        x<left+self.w and
         abs(y-self._y)<self.h*2
 end
 function Widgets.slider_progress:draw()
-    local x,y=self._x,self._y
+    local x,y=self._x-self.anchor[1]*self.w,self._y
     local w,h=self.w,self.h
     local HOV=self._hoverTime/self._hoverTimeMax
 
@@ -1532,28 +1483,23 @@ function Widgets.slider_progress:draw()
         gc_rectangle('fill',x,y-h*.5,w*self._pos,h,h*.5)
     end
 
-    -- Drawable
+    -- Label
     if self._text then
-        local x2,y2
-        if self.labelPos=='left' then
-            x2,y2=x-self.labelDist,y
-        elseif self.labelPos=='right' then
-            x2,y2=x+w+self.labelDist,y
-        elseif self.labelPos=='bottom' then
-            x2,y2=x+w*.5,y-self.labelDist
-        end
-        alignDraw(self,self._text,x2,y2,nil,self.textScale)
+        gc_setColor(self.textColor)
+        local lx,ly,lax,lay=placementPivot(self.placement,x,y-self.h*.5,w,self.h,self.margin)
+        anchorDraw(self,self._text,lx,ly,nil,nil,self.textScale,lax,lay)
     end
 end
 
 
 ---@class Zenitha.Widget.selector: Zenitha.Widget.base
 ---@field w number
+---@field h number
 ---@field _select number | false
 ---@field _selText love.Text
 Widgets.selector=setmetatable({
     type='selector',
-    w=100,
+    w=100,h=60,
 
     list=false, -- table of items
     disp=false, -- function return a boolean
@@ -1566,45 +1512,26 @@ Widgets.selector=setmetatable({
     selFontSize=30,selFontType=false,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w',
-
+        'name','pos','x','y','w','h',
+        'anchor','placement','margin',
         'color','frameColor','textColor',
-        'text','textScale','fontSize','fontType',
-        'selFontSize','selFontType',
-        'widthLimit',
-
-        'labelPos',
-        'labelDist',
-        'sound_press','sound_hover',
-
-        'list','disp','show',
-        'code',
-        'visibleFunc',
-        'visibleTick',
+        'text','textScale','fontSize','fontType','widthLimit',
+        'list','show','selFontSize','selFontType',
+        'sound_press','sound_hover','disp','code',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.selector:reset(mode)
     self.frameColor=rawget(self,'frameColor') or rawget(self,'color') or self.frameColor
     self.textColor=rawget(self,'textColor') or rawget(self,'color') or self.textColor
     Widgets.base.reset(self,mode)
-    assert(legalLabelPos.norm[self.labelPos],"[selector].labelPos need 'left', 'right', or 'bottom'")
+    assert(legalPlacement.norm[self.placement],"[selector].placement need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[selector].w need number")
+    assert(self.h and type(self.h)=='number',"[selector].h need number")
     assert(type(self.list)=='table',"[selector].list need table")
     assert(type(self.disp)=='function',"[selector].disp need function")
     assert(type(self.show)=='function',"[selector].show need function")
-
-    if self.labelPos=='left' then
-        self.alignX='right'
-    elseif self.labelPos=='right' then
-        self.alignX='left'
-    elseif self.labelPos=='bottom' then
-        self.alignY='top'
-    elseif self.labelPos=='top' then
-        self.alignY='bottom'
-    end
 
     local V=self.disp()
     self._selText=GC.newText(gc_getFont(self.selFontSize,self.selFontType),self.show(V))
@@ -1617,14 +1544,16 @@ function Widgets.selector:reset(mode)
     end
 end
 function Widgets.selector:isAbove(x,y)
-    return
-        abs(x-self._x)<self.w*.5 and
-        abs(y-self._y)<60*.5
+    local left,top=bodyPos(self,self.w,self.h)
+    return x>=left and x<=left+self.w and y>=top and y<=top+self.h
 end
 function Widgets.selector:draw()
-    local x,y=self._x,self._y
-    local w=self.w
+    local x,y=self._x-self.anchor[1]*self.w,self._y-self.anchor[2]*self.h
+    local w,h=self.w,self.h
     local HOV=self._hoverTime/self._hoverTimeMax
+    local centerX,centerY=x+w*.5,y+h*.5
+    local arrowSize=h/3
+    local arrowK=arrowSize/20
 
     local frameC=self.frameColor
 
@@ -1633,46 +1562,37 @@ function Widgets.selector:draw()
         gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.6+HOV*.26))
         local t=(timer()%.5)^.5
         if self._select>1 then
-            gc_draw(leftAngle,x-w*.5,y-10)
+            gc_draw(leftAngle,x,centerY-arrowSize*.5,0,arrowK,arrowK)
             if HOV>0 then
                 gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*HOV*1.5*(.5-t))
-                gc_draw(leftAngle,x-w*.5-t*40,y-10)
+                gc_draw(leftAngle,x-t*arrowSize*2,centerY-arrowSize*.5,0,arrowK,arrowK)
                 gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*(.6+HOV*.26))
             end
         end
         if self._select<#self.list then
-            gc_draw(rightAngle,x+w*.5-20,y-10)
+            gc_draw(rightAngle,x+w-arrowSize,centerY-arrowSize*.5,0,arrowK,arrowK)
             if HOV>0 then
                 gc_setColor(frameC[1],frameC[2],frameC[3],frameC[4]*HOV*1.5*(.5-t))
-                gc_draw(rightAngle,x+w*.5-20+t*40,y-10)
+                gc_draw(rightAngle,x+w-arrowSize+t*arrowSize*2,centerY-arrowSize*.5,0,arrowK,arrowK)
             end
         end
     end
 
-    -- Drawable
-    local x2,y2
-    if self.labelPos=='left' then
-        x2,y2=x-w*.5-self.labelDist,y
-    elseif self.labelPos=='right' then
-        x2,y2=x+w*.5+self.labelDist,y
-    elseif self.labelPos=='top' then
-        x2,y2=x,y-self.labelDist
-    elseif self.labelPos=='bottom' then
-        x2,y2=x,y+self.labelDist
-    end
+    -- Label
     if self._text then
         gc_setColor(self.textColor)
-        alignDraw(self,self._text,x2,y2,nil,self.textScale)
+        local lx,ly,lax,lay=placementPivot(self.placement,x,y,w,h,self.margin)
+        anchorDraw(self,self._text,lx,ly,nil,nil,self.textScale,lax,lay)
     end
     if self._selText then
         gc_setColor(self.textColor)
-        gc_mDraw(self._selText,x,y)
+        gc_mDraw(self._selText,centerX,centerY)
     end
 end
 function Widgets.selector:press(x)
     if x then
         local s=self._select
-        if x<self._x then
+        if x<self._x-self.anchor[1]*self.w+self.w*.5 then
             if s>1 then
                 s=s-1
             end
@@ -1737,28 +1657,18 @@ Widgets.inputBox=setmetatable({
     _value='', -- Text contained
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w','h',
-        'lineWidth','cornerR',
-
-        'fillColor','frameColor','textColor','activeColor',
+        'name','pos','x','y','w','h',
+        'anchor','padding','placement','margin',
+        'lineWidth','cornerR','fillColor','frameColor','textColor','activeColor',
         'text','textScale','fontSize','fontType',
-        'secret',
-        'regex',
-        'labelPos',
-        'labelDist',
-        'maxInputLength',
-        'sound_input','sound_bksp','sound_clear','sound_fail',
-        'sound_press','sound_hover',
-
-        'visibleFunc',
-        'visibleTick',
+        'secret','regex','maxInputLength',
+        'sound_input','sound_bksp','sound_clear','sound_fail','sound_press','sound_hover',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.inputBox:reset(mode)
     Widgets.base.reset(self,mode)
-    assert(legalLabelPos.norm[self.labelPos],"[inputBox].labelPos need 'left', 'right', or 'bottom'")
+    assert(legalPlacement.norm[self.placement],"[inputBox].placement need 'left', 'right', or 'bottom'")
 
     assert(self.w and type(self.w)=='number',"[inputBox].w need number")
     assert(self.h and type(self.h)=='number',"[inputBox].h need number")
@@ -1766,15 +1676,6 @@ function Widgets.inputBox:reset(mode)
     assert(not self.sound_bksp or type(self.sound_bksp)=='string',"[inputBox].sound_bksp need string")
     assert(not self.sound_clear or type(self.sound_clear)=='string',"[inputBox].sound_clear need string")
     assert(not self.sound_fail or type(self.sound_fail)=='string',"[inputBox].sound_fail need string")
-    if self.labelPos=='left' then
-        self.alignX,self.alignY='right','center'
-    elseif self.labelPos=='right' then
-        self.alignX,self.alignY='left','center'
-    elseif self.labelPos=='top' then
-        self.alignX,self.alignY='center','bottom'
-    elseif self.labelPos=='bottom' then
-        self.alignX,self.alignY='center','top'
-    end
 end
 function Widgets.inputBox:_cutTooLong()
     local extra=utf8.offset(self._value,self.maxInputLength+1)
@@ -1807,14 +1708,12 @@ function Widgets.inputBox:clear()
     end
 end
 function Widgets.inputBox:isAbove(x,y)
-    return
-        x>self._x and
-        y>self._y and
-        x<self._x+self.w and
-        y<self._y+self.h
+    local left,top=bodyPos(self,self.w,self.h)
+    return x>left and y>top and x<left+self.w and y<top+self.h
 end
 function Widgets.inputBox:draw()
-    local x,y,w,h=self._x,self._y,self.w,self.h
+    local x,y=bodyPos(self,self.w,self.h)
+    local w,h=self.w,self.h
     local HOV=self._hoverTime/self._hoverTimeMax
 
     local actColor=self.activeColor
@@ -1832,39 +1731,35 @@ function Widgets.inputBox:draw()
     gc_setLineWidth(self.lineWidth)
     gc_rectangle('line',x,y,w,h,self.cornerR)
 
-    -- Drawable
+    -- Label
     if self._text then
         gc_setColor(self.textColor)
-        local x2,y2
-        if self.labelPos=='left' then
-            x2,y2=x-8,y+self.h*.5
-        elseif self.labelPos=='right' then
-            x2,y2=x+self.w+8,y+self.h*.5
-        elseif self.labelPos=='top' then
-            x2,y2=x+self.w*.5,y
-        elseif self.labelPos=='bottom' then
-            x2,y2=x+self.w*.5,y+self.h
-        end
-        alignDraw(self,self._text,x2,y2,nil,self.textScale)
+        local lx,ly,lax,lay=placementPivot(self.placement,x,y,w,h,self.margin)
+        anchorDraw(self,self._text,lx,ly,nil,nil,self.textScale,lax,lay)
     end
 
+    local padX,padY=self.padding[1],self.padding[2]
+    local innerX,innerY=x+padX,y+padY
     local f=self.fontSize
     if self.secret then
-        y=y+h*.5-f*.2
+        local dotSize=f*.4
+        local step=f*.6
         for i=1,#self._value do
-            gc_rectangle('fill',x+f*.6*i,y,f*.4,f*.4)
+            gc_rectangle('fill',innerX+step*(i-1),innerY,dotSize,dotSize)
         end
     else
         gc_setFont(f,self.fontType)
-        gc_printf(self._value,x+10,y,self.w-20)
+        gc_print(self._value,innerX,innerY)
         if WIDGET.sel==self then
-            gc_print(EDITING,x+10,y+12-f*1.4)
+            local font=gc_getFont(f,self.fontType)
+            gc_print(EDITING,innerX+font:getWidth(self._value),innerY+font:getHeight()+2)
         end
     end
 end
 function Widgets.inputBox:press()
     if MOBILE then
-        local _,y1=xOy:transformPoint(0,self.y+self.h)
+        local _,by=bodyPos(self,self.w,self.h)
+        local _,y1=xOy:transformPoint(0,by+self.h)
         kb.setTextInput(true,0,y1,1,1)
     end
 end
@@ -1918,34 +1813,30 @@ Widgets.textBox=setmetatable({
     _sure=0, -- Sure-timer for clear history
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w','h',
-        'lineWidth','cornerR',
-
-        'fillColor','frameColor','textColor','activeColor',
-        'fontSize','fontType',
-        'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
-        'lineHeight',
-        'yOffset',
-        'editable',
+        'name','pos','x','y','w','h',
+        'anchor','padding','placement','margin',
+        'lineWidth','cornerR','fillColor','frameColor','textColor','activeColor',
+        'text','textScale','fontSize','fontType',
+        'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist','lineHeight','yOffset','editable',
         'sound_clear','sound_hover',
-
-        'visibleFunc',
-        'visibleTick',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.textBox:reset(mode)
+    local hasLabel=self.text and true or false
     Widgets.base.reset(self,mode)
+    self._hasLabel=hasLabel
     assert(self.w and type(self.w)=='number',"[textBox].w need number")
     assert(self.h and type(self.h)=='number',"[textBox].h need number")
     assert(not self.sound_clear or type(self.sound_clear)=='string',"[textBox].sound_clear need string")
 
+    assert(legalPlacement.norm[self.placement],"[textBox].placement need 'left', 'right', 'top', or 'bottom'")
     assert(self.scrollBarPos=='left' or self.scrollBarPos=='right',"[textBox].scrollBarPos need 'left' or 'right'")
     assert(type(self.yOffset)=='number',"[textBox].yOffset need number")
 
     if not self._texts then self._texts={} end
-    self._capacity=ceil(self.h/self.lineHeight)
+    local _,innerH=innerSize(self,self.w,self.h)
+    self._capacity=ceil(innerH/self.lineHeight)
     self._scrollPos1=-2*self.h
 end
 function Widgets.textBox:setTextList(newList)
@@ -1960,8 +1851,9 @@ function Widgets.textBox:setTexts(t)
 end
 function Widgets.textBox:push(t)
     ins(self._texts,t)
-    if self._scrollPos==(#self._texts-1)*self.lineHeight-self.h then -- minus 1 for the new message
-        self._scrollPos=min(self._scrollPos+self.lineHeight,#self._texts*self.lineHeight-self.h)
+    local _,innerH=innerSize(self,self.w,self.h)
+    if self._scrollPos==(#self._texts-1)*self.lineHeight-innerH then -- minus 1 for the new message
+        self._scrollPos=min(self._scrollPos+self.lineHeight,#self._texts*self.lineHeight-innerH)
     end
 end
 function Widgets.textBox:clear()
@@ -1972,16 +1864,14 @@ function Widgets.textBox:clear()
     end
 end
 function Widgets.textBox:isAbove(x,y)
-    return
-        x>self._x and
-        y>self._y and
-        x<self._x+self.w and
-        y<self._y+self.h
+    local left,top=bodyPos(self,self.w,self.h)
+    return x>left and y>top and x<left+self.w and y<top+self.h
 end
 function Widgets.textBox:press(x,y)
     if not (x and y) then return end
     self:drag(0,0,0,0)
-    if self.editable and x>self._x+self.w-40 and y<self._y+40 then
+    local left,top=bodyPos(self,self.w,self.h)
+    if self.editable and x>left+self.w-40 and y<top+40 then
         if self._sure>0 then
             self:clear()
             self._sure=0
@@ -1991,15 +1881,17 @@ function Widgets.textBox:press(x,y)
     end
 end
 function Widgets.textBox:drag(_,_,_,dy)
+    local _,innerH=innerSize(self,self.w,self.h)
     self._scrollPos=clamp(
         self._scrollPos-dy,
-        0,max(#self._texts*self.lineHeight-self.h,0)
+        0,max(#self._texts*self.lineHeight-innerH,0)
     )
 end
 function Widgets.textBox:scroll(dx,dy)
+    local _,innerH=innerSize(self,self.w,self.h)
     self._scrollPos=clamp(
         self._scrollPos-(dx+dy)*self.lineHeight,
-        0,max(#self._texts*self.lineHeight-self.h,0)
+        0,max(#self._texts*self.lineHeight-innerH,0)
     )
 end
 function Widgets.textBox:arrowKey(k)
@@ -2014,11 +1906,14 @@ function Widgets.textBox:update(dt)
     end
 end
 function Widgets.textBox:draw()
-    local x,y,w,h=self._x,self._y,self.w,self.h
+    local x,y=bodyPos(self,self.w,self.h)
+    local w,h=self.w,self.h
     local list=self._texts
     local lineH=self.lineHeight
     local H=#list*lineH
     local scroll=self._scrollPos1
+    local padX,padY=self.padding[1],self.padding[2]
+    local innerW,innerH=innerSize(self,w,h)
 
     local frameC=WIDGET.sel==self and self.activeColor or self.frameColor
     ---@cast frameC Zenitha.Color
@@ -2033,6 +1928,13 @@ function Widgets.textBox:draw()
     gc_setLineWidth(lw)
     gc_rectangle('line',x-lw*.5,y-lw*.5,w+lw,h+lw,self.cornerR)
 
+    -- Label
+    if self._hasLabel and self._text then
+        gc_setColor(self.textColor)
+        local lx,ly,lax,lay=placementPivot(self.placement,x,y,w,h,self.margin)
+        anchorDraw(self,self._text,lx,ly,nil,nil,self.textScale,lax,lay)
+    end
+
     -- Texts
     gc_push('transform')
         gc_translate(x,y)
@@ -2040,11 +1942,11 @@ function Widgets.textBox:draw()
         -- Slider
         if #list>self._capacity then
             gc_setColor(self.scrollBarColor)
-            local len=h*h/H
+            local len=innerH*innerH/H
             if self.scrollBarPos=='left' then
-                gc_rectangle('fill',-self.scrollBarWidth-self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
+                gc_rectangle('fill',padX-self.scrollBarWidth-self.scrollBarDist,padY+(innerH-len)*scroll/(H-innerH),self.scrollBarWidth,len,self.cornerR)
             elseif self.scrollBarPos=='right' then
-                gc_rectangle('fill',w+self.scrollBarDist,(h-len)*scroll/(H-h),self.scrollBarWidth,len,self.cornerR)
+                gc_rectangle('fill',w-padX+self.scrollBarDist,padY+(innerH-len)*scroll/(H-innerH),self.scrollBarWidth,len,self.cornerR)
             end
         end
 
@@ -2067,13 +1969,15 @@ function Widgets.textBox:draw()
         gc_setColor(self.textColor)
         gc_setFont(self.fontSize,self.fontType)
         gc_stc_reset()
-        gc_stc_rect(0,0,w,h)
+        gc_stc_rect(padX,padY,innerW,innerH)
+        local textY=padY+self.yOffset
         gc_translate(0,-(scroll%lineH))
         local pos=floor(scroll/lineH)
         for i=1,self._capacity+1 do
             i=pos+i
             if list[i] then
-                gc_printf(list[i],10,self.yOffset,w-16)
+                -- gc_print accepts both strings and love.graphics rich-text tables.
+                gc_print(list[i],padX,textY)
             end
             gc_translate(0,lineH)
         end
@@ -2113,21 +2017,12 @@ Widgets.listBox=setmetatable({
     _pressY=false,
 
     buildArgs={
-        'name',
-        'pos',
-        'x','y','w','h',
-        'lineWidth','cornerR',
-
-        'fillColor','frameColor','activeColor',
-        'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist',
-        'lineHeight',
-        'drawFunc',
-        'releaseDist',
-        'stencilMode',
-        'sound_click','sound_select','sound_hover',
-        'code',
-        'visibleFunc',
-        'visibleTick',
+        'name','pos','x','y','w','h',
+        'anchor',
+        'lineWidth','cornerR','fillColor','frameColor','activeColor',
+        'scrollBarPos','scrollBarWidth','scrollBarColor','scrollBarDist','lineHeight','drawFunc','releaseDist','stencilMode',
+        'sound_click','sound_select','sound_hover','code',
+        'visibleFunc','visibleTick',
     },
 },{__index=Widgets.base,__metatable=true})
 function Widgets.listBox:reset(mode)
@@ -2168,11 +2063,8 @@ function Widgets.listBox:getItem()
     return self._list[self._selected]
 end
 function Widgets.listBox:isAbove(x,y)
-    return
-        x>self._x and
-        y>self._y and
-        x<self._x+self.w and
-        y<self._y+self.h
+    local left,top=bodyPos(self,self.w,self.h)
+    return x>left and y>top and x<left+self.w and y<top+self.h
 end
 function Widgets.listBox:push(t)
     ins(self._list,t)
@@ -2198,23 +2090,22 @@ function Widgets.listBox:press(x,y)
 end
 function Widgets.listBox:release(x,y)
     if not (x and y) then return end
-    if self._pressX then
-        self._pressX=false
-        self._pressY=false
-        x,y=x-self._x,y-self._y
-        if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
-        y=floor((y+self._scrollPos1)/self.lineHeight)+1
-        if self._list[y] then
-            if self._selected~=y then
-                self._selected=y
-                self:_moveScroll(0,true)
-                SFX.play(self.sound_select)
-            else
-                if self.code then
-                    self:code(self:getSelect(),self:getItem())
-                    SFX.play(self.sound_click)
-                end
-            end
+    if not self._pressX then return end
+    self._pressX=false
+    self._pressY=false
+    local left,top=bodyPos(self,self.w,self.h)
+    x,y=x-left,y-top
+    if not (x and y and x>0 and y>0 and x<=self.w and y<=self.h) then return end
+    y=floor((y+self._scrollPos1)/self.lineHeight)+1
+    if not self._list[y] then return end
+    if self._selected~=y then
+        self._selected=y
+        self:_moveScroll(0,true)
+        SFX.play(self.sound_select)
+    else
+        if self.code then
+            self:code(self:getSelect(),self:getItem())
+            SFX.play(self.sound_click)
         end
     end
 end
@@ -2257,7 +2148,8 @@ function Widgets.listBox:update(dt)
     end
 end
 function Widgets.listBox:draw()
-    local x,y,w,h=self._x,self._y,self.w,self.h
+    local x,y=bodyPos(self,self.w,self.h)
+    local w,h=self.w,self.h
     local list=self._list
     local lineH=self.lineHeight
     local H=#list*lineH
@@ -2658,7 +2550,10 @@ function WIDGET.newClass(name,parent)
     return Widgets[name]
 end
 
-WIDGET._alignDraw=alignDraw
-WIDGET._alignDrawQ=alignDrawQ
+WIDGET._anchorDraw=anchorDraw
+WIDGET._anchorDrawQ=anchorDrawQ
+WIDGET._areaDraw=areaDraw
+WIDGET._areaDrawQ=areaDrawQ
+WIDGET._drawLabel=drawLabel
 
 return WIDGET

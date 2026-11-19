@@ -24,7 +24,7 @@ local scene={
         GC.stc_stop()
     end,
     widgetList={
-        {type='hint',        text='?', x=126,y=50,floatFontSize=25,floatText="By  MrZ",labelPos='right'},
+        {type='hint',        text='?', x=126,y=50,floatFontSize=25,floatText="By  MrZ",placement='right'},
         {type='checkBox',    text='checkBox1', x=260,y=350,w=40,disp=function() return testVal_1[1] end,code=function() testVal_1[1]=not testVal_1[1] end},
         {type='checkBox',    text='checkBox2', x=260,y=400,w=40,disp=function() return testVal_1[2] end,code=function() testVal_1[2]=not testVal_1[2] end},
         {type='checkBox',    text='checkBox3', x=260,y=450,w=40,disp=function() return testVal_1[3] end,code=function() testVal_1[3]=not testVal_1[3] end},
@@ -39,14 +39,14 @@ local scene={
 
         {type='button',      text='Quit',      x=600,y=540,w=200,h=80,onClick=function() love.event.quit() end},
         {type='button',      text='Console',   x=600,y=620,w=190,h=60,onClick=WIDGET.c_goScn'_console'},
-        {type='button',      text='Text',      alignX='left', alignY='top',   x=550,y=690,w=90,h=60,onClick=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,k=2,fontSize=50} end},
-        {type='button',      text='Wait',      alignX='right',alignY='top',   x=650,y=690,w=90,h=60,onClick=function() WAIT.new{timeout=1} end},
-        {type='button',      text='Msg',       alignX='left', alignY='bottom',x=550,y=760,w=90,h=60,onClick=function() MSG(TABLE.getRandom{'info','check','warn','error','other'},"Test message",5) end},
-        {type='button',      text='Task',      alignX='right',alignY='bottom',x=650,y=760,w=90,h=60,onClick=function() TASK.new(function() for a=0,MATH.tau,MATH.tau/32 do SYSFX.ripple(1,SCR.w0/2+260*math.cos(a),SCR.h0/2+260*math.sin(a),50) TASK.yieldT(.01) end end) end},
+        {type='button',      text='Text',      anchor={0,0}, x=505,y=660,w=90,h=60,onClick=function() TEXT:add{text='Sample Text',x=SCR.w0/2,y=SCR.h0/2,k=2,fontSize=50} end},
+        {type='button',      text='Wait',      anchor={1,0}, x=695,y=660,w=90,h=60,onClick=function() WAIT.new{timeout=1} end},
+        {type='button',      text='Msg',       anchor={0,1}, x=505,y=790,w=90,h=60,onClick=function() MSG(TABLE.getRandom{'info','check','warn','error','other'},"Test message",5) end},
+        {type='button',      text='Task',      anchor={1,1}, x=695,y=790,w=90,h=60,onClick=function() TASK.new(function() for a=0,MATH.tau,MATH.tau/32 do SYSFX.ripple(1,SCR.w0/2+260*math.cos(a),SCR.h0/2+260*math.sin(a),50) TASK.yieldT(.01) end end) end},
 
-        {type='inputBox',    text='inputBox',  x=100,y=650,w=300,h=100,labelPos='bottom'},
-        {type='textBox',     name='textBox',   x=100,y=820,w=600,h=160},
-        {type='listBox',     name='listBox',   x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
+        {type='inputBox',    text='inputBox',  anchor={0,0}, x=100,y=650,w=300,h=100,placement='bottom'},
+        {type='textBox',     name='textBox',   anchor={0,0}, x=100,y=820,w=600,h=160},
+        {type='listBox',     name='listBox',   anchor={0,0}, x=100,y=1020,w=600,h=160,drawFunc=function(opt,id,sel)
             GC.setFont(30)
             GC.setColor(CLR.l9)
             GC.print(id,10,-6)
