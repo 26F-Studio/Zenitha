@@ -80,8 +80,8 @@ local function compileObj(path)
 end
 
 ---Compile all .lua files into bytecodes
----@param compileSelf? boolean default to false
----@param stripDebugInfo? boolean default to false
+---@param compileSelf? boolean default to false, normally you won't need this since this is an open-source project
+---@param stripDebugInfo? boolean default to false, normally you want detailed info when errors happen
 local function start(compileSelf,stripDebugInfo)
     if compileSelf==nil then compileSelf=false end
     if stripDebugInfo==nil then stripDebugInfo=false end

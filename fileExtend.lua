@@ -208,4 +208,24 @@ function FILE.delete(path,mode,rmSymlink)
     end
 end
 
+local function scan(path,list)
+    for _,name in next,fs.getDirectoryItems(path) do
+        local full=path..'/'..name
+        local info=fs.getInfo(full)
+        if info.type=='directory' then
+            scan(full,list)
+        else
+            table.insert(list,full)
+        end
+    end
+end
+---List all files recursively (no safety check, see FILE.isSafe)
+---@param path string (no / at the end)
+---@return string[] files
+function FILE.listAll(path)
+    local list={}
+    scan(path,list)
+    return list
+end
+
 return FILE
